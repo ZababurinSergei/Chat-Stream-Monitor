@@ -1,0 +1,52 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "lib": [
+      "ES2020",
+      "DOM"
+    ],
+    "strict": true,
+    "noImplicitAny": true,
+    "allowImportingTsExtensions": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "useUnknownInCatchVariables": true,
+    "alwaysStrict": true,
+    "skipLibCheck": true,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "paths": {
+      "@orillusion/*": ["../orillusion/packages/*"],
+      "@orillusion/core": ["../orillusion/src/index.ts"],
+      "@orillusion/ShaderReflectionInfo": ["../orillusion/src/gfx/graphics/webGpu/shader/value/ShaderReflectionInfo.ts"],
+      "@orillusion/VertexAttributeSize": ["../orillusion/src/core/geometry/VertexAttributeSize.ts"],
+      "@orillusion/VertexFormat": ["../orillusion/src/core/geometry/VertexFormat.ts"],
+    },
+    "types": [
+      "./node_modules/@types",
+      "../orillusion/types",
+      "./node_modules/@webgpu/types",
+      "node",
+      "dat.gui",
+      "gl-matrix"
+    ],
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
+  },
+  "include": [
+    "../orillusion/packages/**/*",
+    "../orillusion/src/**/*",
+    "ts/**/*"
+  ],
+  "exclude": ["node_modules", "dist"]
+}

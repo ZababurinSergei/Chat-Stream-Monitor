@@ -1,0 +1,53 @@
+[supergateway] Starting...
+[supergateway] Supergateway is supported by Supermachine (hosted MCPs) - https://supermachine.ai
+[supergateway]   - outputTransport: streamableHttp
+[supergateway] Running stateless server
+[supergateway]   - Headers: (none)
+[supergateway]   - port: 8080
+[supergateway]   - stdio: npx chrome-devtools-mcp@latest --slim --browser-url=http://127.0.0.1:9222
+[supergateway]   - streamableHttpPath: /mcp
+[supergateway]   - protocolVersion: 2024-11-05
+[supergateway]   - CORS: enabled ("*")
+[supergateway]   - Health endpoints: (none)
+[supergateway] Listening on port 8080
+[supergateway] StreamableHttp endpoint: http://localhost:8080/mcp
+[supergateway] StreamableHttp → Child: {"jsonrpc":"2.0","id":0,"method":"initialize","params":{"protocolVersion":"2025-11-25","capabilities":{},"clientInfo":{"name":"n0x-mcp-client","version":"1.0.0"}}}
+[supergateway] Tracking initialize request ID: 0
+[supergateway] Child stderr: (node:117767) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[supergateway] Child stderr: chrome-devtools-mcp exposes content of the browser instance to the MCP clients allowing them to inspect,
+debug, and modify any data in the browser or DevTools.
+Avoid sharing sensitive or personal information that you do not want to share with MCP clients.
+
+[supergateway] Child → StreamableHttp: {"result":{"protocolVersion":"2025-11-25","capabilities":{"logging":{},"tools":{"listChanged":true}},"serverInfo":{"name":"chrome_devtools","title":"Chrome DevTools MCP server","version":"0.23.0"}},"jsonrpc":"2.0","id":0}
+[supergateway] StreamableHttp → Child: {"jsonrpc":"2.0","method":"notifications/initialized"}
+[supergateway] Non-initialize message detected, sending auto-initialize request first
+[supergateway] StreamableHttp → Child (auto-initialize): {"jsonrpc":"2.0","id":"init_1777387267710_fp1hj30du","method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{"roots":{"listChanged":true},"sampling":{}},"clientInfo":{"name":"supergateway","version":"3.4.3"}}}
+[supergateway] Received GET MCP request
+[supergateway] StreamableHttp → Child: {"jsonrpc":"2.0","id":1,"method":"tools/list"}
+[supergateway] Non-initialize message detected, sending auto-initialize request first
+[supergateway] StreamableHttp → Child (auto-initialize): {"jsonrpc":"2.0","id":"init_1777387267739_gtgo3c432","method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{"roots":{"listChanged":true},"sampling":{}},"clientInfo":{"name":"supergateway","version":"3.4.3"}}}
+[supergateway] Child stderr: (node:117820) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[supergateway] Child stderr: chrome-devtools-mcp exposes content of the browser instance to the MCP clients allowing them to inspect,
+debug, and modify any data in the browser or DevTools.
+Avoid sharing sensitive or personal information that you do not want to share with MCP clients.
+
+[supergateway] Child → StreamableHttp: {"result":{"protocolVersion":"2024-11-05","capabilities":{"logging":{},"tools":{"listChanged":true}},"serverInfo":{"name":"chrome_devtools","title":"Chrome DevTools MCP server","version":"0.23.0"}},"jsonrpc":"2.0","id":"init_1777387267739_gtgo3c432"}
+[supergateway] Initialize response received
+[supergateway] StreamableHttp → Child (initialized): {"jsonrpc":"2.0","method":"notifications/initialized"}
+[supergateway] StreamableHttp → Child (original): {"jsonrpc":"2.0","id":1,"method":"tools/list"}
+[supergateway] Child stderr: (node:117828) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+[supergateway] Child → StreamableHttp: {"result":{"tools":[{"name":"evaluate","description":"Evaluates a JavaScript script","inputSchema":{"type":"object","properties":{"script":{"type":"string","description":"JS script to run on the page"}},"required":["script"],"additionalProperties":false,"$schema":"http://json-schema.org/draft-07/schema#"},"annotations":{"category":"debugging","readOnlyHint":false},"execution":{"taskSupport":"forbidden"}},{"name":"navigate","description":"Loads a URL","inputSchema":{"type":"object","properties":{"url":{"type":"string","description":"URL to navigate to"}},"required":["url"],"additionalProperties":false,"$schema":"http://json-schema.org/draft-07/schema#"},"annotations":{"category":"navigation","readOnlyHint":false},"execution":{"taskSupport":"forbidden"}},{"name":"screenshot","description":"Takes a screenshot","inputSchema":{"$schema":"http://json-schema.org/draft-07/schema#","type":"object","properties":{}},"annotations":{"category":"debugging","readOnlyHint":false},"execution":{"taskSupport":"forbidden"}}]},"jsonrpc":"2.0","id":1}
+[supergateway] Child stderr: chrome-devtools-mcp exposes content of the browser instance to the MCP clients allowing them to inspect,
+debug, and modify any data in the browser or DevTools.
+Avoid sharing sensitive or personal information that you do not want to share with MCP clients.
+
+[supergateway] Child → StreamableHttp: {"result":{"protocolVersion":"2024-11-05","capabilities":{"logging":{},"tools":{"listChanged":true}},"serverInfo":{"name":"chrome_devtools","title":"Chrome DevTools MCP server","version":"0.23.0"}},"jsonrpc":"2.0","id":"init_1777387267710_fp1hj30du"}
+[supergateway] Initialize response received
+[supergateway] StreamableHttp → Child (initialized): {"jsonrpc":"2.0","method":"notifications/initialized"}
+[supergateway] StreamableHttp → Child (original): {"jsonrpc":"2.0","method":"notifications/initialized"}

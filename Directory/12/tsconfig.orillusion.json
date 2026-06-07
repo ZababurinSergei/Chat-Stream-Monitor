@@ -1,0 +1,61 @@
+{
+  "compilerOptions": {
+    /* Основные настройки - исправляем target и lib */
+    "target": "ES2020",
+    "module": "ESNext",
+    "lib": [
+      "ES2020",
+      "DOM"
+    ],
+
+    /* Строгие проверки (оставляем) */
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "useUnknownInCatchVariables": true,
+    "alwaysStrict": true,
+    "skipLibCheck": true, // Эта опция все еще полезна
+
+    /* Настройки модулей */
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+
+    /* Куда и что компилируем */
+    "outDir": "./dist",
+    "rootDir": "./ts",
+    "baseUrl": "./",
+    "typeRoots": [
+      "./node_modules/@webgpu/types",
+      "./node_modules/@types",
+      "../orillusion/types"
+    ],
+    "paths": {
+      "@orillusion/stats": [
+        "../orillusion/packages/stats/index.ts"
+      ],
+      "@orillusion/core": [
+        "../orillusion/src/index.ts"
+      ]
+    },
+    "types": [
+      "./node_modules/@webgpu/types/dist/index.d.ts",
+      "node",
+      "dat.gui",
+      "gl-matrix"
+    ],
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true
+  },
+  "include": [
+    "ts/**/*"
+  ],
+  "exclude": ["node_modules", "dist", "ts/test", "../orillusion"]
+}
