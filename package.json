@@ -8,13 +8,21 @@
     "start": "node main.mjs",
     "scan": "node main.mjs",
     "config": "node generate-config.mjs",
+    "scan:deps": "node run-scan.js",
+    "scan:deps:interactive": "node run-scan.js --interactive",
+    "scan:deps:deepseek": "node run-scan.js --dir ./Directory/11/deepseek --entry chatMonitor.js --depth 2 --svg --add-to-config",
     "license:add": "node check-license.mjs add",
     "license:check": "node check-license.mjs check",
     "license:verify": "node check-license.mjs verify",
     "license:help": "node check-license.mjs help",
     "precommit": "npm run license:check"
   },
-  "keywords": ["scanner", "filesystem", "json", "configurable"],
+  "keywords": [
+    "scanner",
+    "filesystem",
+    "json",
+    "configurable"
+  ],
   "author": "Забабурин Сергей <zababurins@vk.com>",
   "license": "CSL-1.0",
   "private": true,
@@ -26,7 +34,10 @@
   "bugs": {
     "url": "https://github.com/ваш-username/file-system-scanner/issues"
   },
-  "dependencies": {},
+  "dependencies": {
+    "glob": "^13.0.6",
+    "madge": "^8.0.0"
+  },
   "engines": {
     "node": ">=14.0.0"
   }

@@ -13,6 +13,7 @@ pids
 *.seed
 .idea
 *.ssh
+madge
 *.ppk
 v8-compile-cache-0/
 Thumbs.db
