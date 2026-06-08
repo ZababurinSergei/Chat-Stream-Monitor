@@ -32,15 +32,22 @@ const defaultConfig = {
             "excluded": false
         }
     ],
+    "excludePatterns": {
+        "directories": [
+            "cache", ".github", ".idea", "node_modules", ".git",
+            "dist", "build", "coverage", ".nyc_output", "__pycache__", ".cache", "logs"
+        ],
+        "files": [
+            "README.md", "LICENSE.md", "package-lock.json", "yarn.lock",
+            "pnpm-lock.yaml", ".DS_Store", "Thumbs.db", "*.log", "*.tmp", "*.swp"
+        ]
+    },
     "scanOptions": {
         "recursive": true,
         "followSymlinks": false,
         "maxDepth": 100,
-        "excludeExcludedDirs": true
-    },
-    "excludePatterns": {
-        "directories": ["node_modules", ".git", "dist", "build", "coverage", ".nyc_output"],
-        "files": ["README.md", "package-lock.json", "*.log", "*.tmp"]
+        "excludeExcludedDirs": true,
+        "respectExcludePatterns": true
     },
     "output": {
         "fileName": "./fs/fs.json",
@@ -56,22 +63,98 @@ const defaultConfig = {
         "language": "russian"
     },
     "supportedExtensions": [
-        ".css", ".vue", ".src", ".app", ".args", ".erl", ".config",
-        ".jsx", ".xml", ".iml", ".java", ".fodt", ".tsx", ".owl",
-        ".txt", ".include", ".py", ".mmd", ".coffee", ".wasm", ".map",
-        ".gitmodules", ".mod", ".yaml", ".sh", ".sql", ".go", ".c",
-        ".h", ".js", ".mjs", ".md", ".json", ".proto", ".ts", ".options"
+        ".js", ".mjs", ".cjs", ".ts", ".tsx", ".jsx", ".vue", ".json",
+        ".css", ".html", ".md", ".txt", ".py", ".java", ".go", ".c", ".h"
     ],
-    "specialFiles": ["Dockerfile", "Makefile", ".gitmodules", ".env"],
-    "descriptions": {
-        "10": "Пользовательская документация: проектные описания, инструкции, чек-листы",
-        "11": "Пользовательские функции: скрипты, расширения, пользовательские утилиты",
-        "12": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные"
-    },
-    "descriptions_en": {
-        "10": "User documentation: project descriptions, instructions, checklists",
-        "11": "User functions: scripts, extensions, user utilities",
-        "12": "User files: sources, templates, projects, user data"
+    "specialFiles": [
+        "Dockerfile", "Makefile", ".gitmodules", ".env"
+    ],
+    "madge": {
+        "description": "Конфигурация для сканера зависимостей madge",
+        "defaults": {
+            "targetDir": "./Directory/11/deepseek",
+            "entryFile": "chatMonitor.js",
+            "depth": "all",
+            "outputJsonDir": "./fs",
+            "svgOutputDir": "./fs/svg",
+            "outputFileName": "dependencies_{{name}}_{{timestamp}}{{suffix}}.json",
+            "svgFileName": "graph_{{name}}_{{timestamp}}.svg"
+        },
+        "presets": {
+            "deps-only": {
+                "description": "Только анализ зависимостей (без визуализации)",
+                "args": {
+                    "--svg": false,
+                    "--depth": "all"
+                }
+            },
+            "svg-only": {
+                "description": "Только генерация SVG графа зависимостей",
+                "args": {
+                    "--svg": true,
+                    "--depth": "2"
+                }
+            },
+            "quick": {
+                "description": "Быстрое сканирование (глубина 1, без npm)",
+                "args": {
+                    "--depth": "1",
+                    "--include-npm": false,
+                    "--svg": false
+                }
+            },
+            "deep": {
+                "description": "Глубокое сканирование с визуализацией",
+                "args": {
+                    "--depth": "all",
+                    "--include-npm": true,
+                    "--svg": true
+                }
+            },
+            "with-npm": {
+                "description": "Сканирование с включением npm зависимостей",
+                "args": {
+                    "--include-npm": true,
+                    "--depth": "3"
+                }
+            },
+            "circular-only": {
+                "description": "Только поиск циклических зависимостей",
+                "args": {
+                    "--circular-only": true,
+                    "--svg": false,
+                    "--depth": "all"
+                }
+            },
+            "visualize": {
+                "description": "Полная визуализация (SVG + граф)",
+                "args": {
+                    "--svg": true,
+                    "--depth": "3",
+                    "--include-npm": false
+                }
+            },
+            "minimal": {
+                "description": "Минимальное сканирование (быстрое, без лишнего)",
+                "args": {
+                    "--depth": "1",
+                    "--svg": false,
+                    "--include-npm": false
+                }
+            },
+            "full": {
+                "description": "Полное сканирование (всё включено)",
+                "args": {
+                    "--depth": "all",
+                    "--include-npm": true,
+                    "--svg": true
+                }
+            }
+        },
+        "cli": {
+            "defaultPreset": "deps-only",
+            "mergeStrategy": "override"
+        }
     }
 };
 

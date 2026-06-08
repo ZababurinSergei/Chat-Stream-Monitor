@@ -1,4 +1,4 @@
-// scan-dependencies.js (исправленная версия)
+// scan-dependencies.js (полная версия с поддержкой шаблонов имени файла)
 import madge from 'madge';
 import fs from 'fs/promises';
 import path from 'path';
@@ -13,9 +13,12 @@ const __dirname = path.dirname(__filename);
 /**
  * Проверка наличия Graphviz
  */
-async function checkGraphviz() {
+async function checkGraphviz(config) {
+    const graphVizPath = config.graphVizPath || null;
+    const cmd = graphVizPath ? path.join(graphVizPath, 'dot') : 'dot';
+
     try {
-        await execAsync('dot -V');
+        await execAsync(`${cmd} -V`);
         return true;
     } catch {
         return false;
@@ -23,171 +26,36 @@ async function checkGraphviz() {
 }
 
 /**
- * Основная функция сканирования зависимостей
+ * Форматирует дату
  */
-export async function scanDependencies(config) {
-    const {
-        targetDir,
-        entryFile,
-        depth = 'all',
-        includeNpm = false,
-        generateSvg = false,
-        outputJsonDir = './fs',
-        configPath = './Directory/10/config.json',
-        addToConfig = false
-    } = config;
+function formatDate(date, format) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const seconds = String(date.getSeconds()).padStart(2, '0');
 
-    // РАСЧЕТ ПУТЕЙ
-    const currentDir = process.cwd();
-    const resolvedTargetDir = path.resolve(currentDir, targetDir);
-    const resolvedEntryFile = path.resolve(resolvedTargetDir, entryFile);
-    const resolvedOutputDir = path.resolve(currentDir, outputJsonDir);
-    const resolvedConfigPath = path.resolve(currentDir, configPath);
+    return format
+        .replace(/YYYY/, year)
+        .replace(/MM/, month)
+        .replace(/DD/, day)
+        .replace(/HH/, hours)
+        .replace(/mm/, minutes)
+        .replace(/ss/, seconds);
+}
 
-    console.log('\n🔍 ЗАПУСК СКАНЕРА ЗАВИСИМОСТЕЙ (madge)');
-    console.log('========================================\n');
-    console.log(`📁 Текущая директория: ${currentDir}`);
-    console.log(`📁 Директория: ${resolvedTargetDir}`);
-    console.log(`📄 Входной файл: ${resolvedEntryFile}`);
-    console.log(`📏 Глубина: ${depth === 'all' ? 'все' : `${depth} уровень(я/ей)`}`);
-    console.log(`📦 Включить npm: ${includeNpm ? 'да' : 'нет'}`);
-    console.log(`🎨 SVG визуализация: ${generateSvg ? 'да' : 'нет'}`);
+/**
+ * Генерирует имя файла по шаблону
+ */
+function generateFileName(template, variables) {
+    let result = template;
 
-    // Проверка Graphviz если нужен SVG
-    let hasGraphviz = false;
-    if (generateSvg) {
-        hasGraphviz = await checkGraphviz();
-        if (!hasGraphviz) {
-            console.warn('\n⚠️ Graphviz не установлен!');
-            console.warn('   Установите Graphviz:');
-            console.warn('   sudo apt-get install graphviz');
-            console.warn('   Или: brew install graphviz');
-            console.warn('\n   SVG визуализация будет пропущена.\n');
-        } else {
-            console.log('✅ Graphviz найден');
-        }
+    for (const [key, value] of Object.entries(variables)) {
+        result = result.replace(new RegExp(`{{${key}}}`, 'g'), value);
     }
 
-    // Проверяем существование входного файла
-    try {
-        await fs.access(resolvedEntryFile);
-        console.log(`✅ Файл найден`);
-    } catch (error) {
-        throw new Error(`Входной файл не найден: ${resolvedEntryFile}`);
-    }
-
-    // Настройки madge
-    const madgeConfig = {
-        baseDir: resolvedTargetDir,
-        includeNpm: includeNpm,
-        fileExtensions: ['js', 'mjs', 'cjs', 'ts', 'tsx', 'jsx', 'vue', 'json']
-    };
-
-    // Получаем дерево зависимостей
-    console.log('\n📊 Построение дерева зависимостей...');
-    const result = await madge(resolvedEntryFile, madgeConfig);
-    let fullTree = result.obj();
-
-    // Ограничиваем глубину
-    if (depth !== 'all') {
-        const maxDepth = parseInt(depth, 10);
-        if (!isNaN(maxDepth)) {
-            console.log(`✂️ Ограничение глубины до ${maxDepth}...`);
-            fullTree = limitTreeDepth(fullTree, resolvedEntryFile, resolvedTargetDir, maxDepth);
-        }
-    }
-
-    // Статистика
-    const modules = Object.keys(fullTree);
-    console.log(`\n📦 Найдено модулей: ${modules.length}`);
-    const stats = collectStats(fullTree);
-    const circular = result.circular();
-
-    // Формируем результат
-    const resultData = {
-        scanInfo: {
-            timestamp: new Date().toISOString(),
-            currentDir: currentDir,
-            targetDir: resolvedTargetDir,
-            entryFile: resolvedEntryFile,
-            entryFileName: path.basename(entryFile),
-            depth: depth === 'all' ? 'all' : parseInt(depth, 10),
-            includeNpm: includeNpm,
-            totalModules: modules.length
-        },
-        stats: stats,
-        tree: fullTree,
-        circular: circular,
-        circularCount: circular.length
-    };
-
-    // Сохраняем JSON
-    await ensureDirectory(resolvedOutputDir);
-    const timestamp = Date.now();
-    const baseName = path.basename(entryFile, path.extname(entryFile));
-    const outputFileName = `dependencies_${baseName}_${timestamp}.json`;
-    const outputPath = path.join(resolvedOutputDir, outputFileName);
-    await fs.writeFile(outputPath, JSON.stringify(resultData, null, 2), 'utf-8');
-    console.log(`\n💾 JSON сохранен: ${outputPath}`);
-
-    // Генерируем SVG если нужно и Graphviz установлен
-    let svgPath = null;
-    if (generateSvg && hasGraphviz) {
-        const svgDir = path.join(resolvedOutputDir, 'svg');
-        await ensureDirectory(svgDir);
-        svgPath = path.join(svgDir, `dependencies_${baseName}_${timestamp}.svg`);
-
-        try {
-            console.log('\n🎨 Генерация SVG...');
-
-            // Получаем DOT формат
-            const dotOutput = await result.dot();
-
-            // Сохраняем DOT файл для отладки
-            const dotPath = path.join(svgDir, `dependencies_${baseName}_${timestamp}.dot`);
-            await fs.writeFile(dotPath, dotOutput);
-            console.log(`   DOT файл сохранен: ${dotPath}`);
-
-            // Конвертируем DOT в SVG через Graphviz
-            await execAsync(`dot -Tsvg "${dotPath}" -o "${svgPath}"`);
-
-            // Проверяем, создался ли файл
-            await fs.access(svgPath);
-            const svgStats = await fs.stat(svgPath);
-            console.log(`✅ SVG создан: ${svgPath} (${(svgStats.size / 1024).toFixed(2)} KB)`);
-
-            resultData.svgPath = svgPath;
-
-        } catch (error) {
-            console.error(`❌ Ошибка создания SVG: ${error.message}`);
-            console.warn('   Попробуйте сгенерировать вручную:');
-            console.warn(`   cat > graph.dot << 'EOF'`);
-            console.warn(`   ${dotOutput.substring(0, 200)}...`);
-            console.warn(`   EOF`);
-            console.warn(`   dot -Tsvg graph.dot -o output.svg`);
-        }
-    } else if (generateSvg && !hasGraphviz) {
-        console.log('\n⚠️ SVG не создан: Graphviz не установлен');
-    }
-
-    // Добавляем в config.json
-    if (addToConfig) {
-        await addToConfigFile(resolvedConfigPath, {
-            targetDir: resolvedTargetDir,
-            relativeTargetDir: targetDir,
-            entryFile: resolvedEntryFile,
-            relativeEntryFile: entryFile,
-            dependenciesFile: outputPath,
-            modulesCount: modules.length,
-            circularCount: circular.length,
-            timestamp: new Date().toISOString()
-        });
-    }
-
-    // Выводим отчет
-    printReport(resultData, svgPath);
-
-    return resultData;
+    return result;
 }
 
 /**
@@ -312,7 +180,8 @@ async function addToConfigFile(configPath, depsInfo) {
             dependenciesFile: path.relative(path.dirname(configPath), depsInfo.dependenciesFile),
             modulesCount: depsInfo.modulesCount,
             circularCount: depsInfo.circularCount,
-            scannedAt: depsInfo.timestamp
+            scannedAt: depsInfo.timestamp,
+            svgPath: depsInfo.svgPath ? path.relative(path.dirname(configPath), depsInfo.svgPath) : null
         };
 
         if (directoryConfig) {
@@ -395,11 +264,362 @@ function printReport(data, svgPath) {
     }
 
     console.log(`\n${separator}`);
-    console.log(`📄 JSON: ${data.scanInfo.entryFileName}_*.json`);
+    console.log(`📄 JSON: ${path.basename(data.outputPath)}`);
     if (svgPath) {
         console.log(`🎨 SVG: ${path.basename(svgPath)}`);
     }
     console.log(separator);
+}
+
+/**
+ * Основная функция сканирования зависимостей
+ */
+export async function scanDependencies(config) {
+    const {
+        targetDir,
+        entryFile,
+        depth = 'all',
+        includeNpm = false,
+        generateSvg = false,
+        outputJsonDir = './fs',
+        configPath = './config.json',
+        addToConfig = false,
+        svgOutputDir = './fs/svg',
+        circularOnly = false,
+        outputFileName = 'dependencies_{{name}}_{{timestamp}}{{suffix}}.json',
+        svgFileName = 'graph_{{name}}_{{timestamp}}.svg',
+        excludePatterns = { directories: [], files: [] },
+        supportedExtensions = ['.js', '.mjs', '.cjs', '.ts', '.tsx', '.jsx', '.vue', '.json'],
+        scanOptions = {}
+    } = config;
+
+    // РАСЧЕТ ПУТЕЙ
+    const currentDir = process.cwd();
+    const resolvedTargetDir = path.resolve(currentDir, targetDir);
+    const resolvedEntryFile = path.resolve(resolvedTargetDir, entryFile);
+    const resolvedOutputDir = path.resolve(currentDir, outputJsonDir);
+    const resolvedSvgDir = path.resolve(currentDir, svgOutputDir);
+    const resolvedConfigPath = path.resolve(currentDir, configPath);
+
+    console.log('\n🔍 ЗАПУСК СКАНЕРА ЗАВИСИМОСТЕЙ (madge)');
+    console.log('========================================\n');
+    console.log(`📁 Текущая директория: ${currentDir}`);
+    console.log(`📁 Директория: ${resolvedTargetDir}`);
+    console.log(`📄 Входной файл: ${resolvedEntryFile}`);
+    console.log(`📏 Глубина: ${depth === 'all' ? 'все' : `${depth} уровень(я/ей)`}`);
+    console.log(`📦 Включить npm: ${includeNpm ? 'да' : 'нет'}`);
+    console.log(`🎨 SVG визуализация: ${generateSvg ? 'да' : 'нет'}`);
+    console.log(`🔄 Только циклические: ${circularOnly ? 'да' : 'нет'}`);
+    console.log(`📝 Шаблон имени JSON: ${outputFileName}`);
+    console.log(`🎨 Шаблон имени SVG: ${svgFileName}`);
+    console.log(`🚫 Исключаемые директории: ${excludePatterns.directories.join(', ') || 'нет'}`);
+    console.log(`🚫 Исключаемые файлы: ${excludePatterns.files.join(', ') || 'нет'}`);
+
+    // Проверка Graphviz если нужен SVG
+    let hasGraphviz = false;
+    if (generateSvg) {
+        hasGraphviz = await checkGraphviz(config);
+        if (!hasGraphviz) {
+            console.warn('\n⚠️ Graphviz не установлен!');
+            console.warn('   Установите Graphviz:');
+            console.warn('   sudo apt-get install graphviz');
+            console.warn('   Или: brew install graphviz');
+            console.warn('\n   SVG визуализация будет пропущена.\n');
+        } else {
+            console.log('✅ Graphviz найден');
+        }
+    }
+
+    // Проверяем существование входного файла
+    try {
+        await fs.access(resolvedEntryFile);
+        console.log(`✅ Файл найден`);
+    } catch (error) {
+        throw new Error(`Входной файл не найден: ${resolvedEntryFile}`);
+    }
+
+    // Формируем excludeRegExp из конфига
+    const excludeRegExp = [];
+    if (excludePatterns.directories && excludePatterns.directories.length > 0) {
+        excludePatterns.directories.forEach(dir => {
+            excludeRegExp.push(`${dir}/`);
+            excludeRegExp.push(`/${dir}/`);
+            excludeRegExp.push(`${dir}$`);
+        });
+    }
+    if (excludePatterns.files && excludePatterns.files.length > 0) {
+        excludePatterns.files.forEach(file => {
+            if (file.includes('*')) {
+                const pattern = file.replace(/\./g, '\\.').replace(/\*/g, '.*');
+                excludeRegExp.push(pattern);
+            } else {
+                excludeRegExp.push(file);
+            }
+        });
+    }
+
+    // Настройки madge
+    const madgeConfig = {
+        baseDir: resolvedTargetDir,
+        includeNpm: includeNpm,
+        fileExtensions: supportedExtensions.map(ext => ext.replace('.', '')),
+        excludeRegExp: excludeRegExp.length > 0 ? excludeRegExp : undefined
+    };
+
+    // Получаем дерево зависимостей
+    console.log('\n📊 Построение дерева зависимостей...');
+    const result = await madge(resolvedEntryFile, madgeConfig);
+    let fullTree = result.obj();
+
+    // Если нужны только циклические зависимости - фильтруем дерево
+    if (circularOnly) {
+        console.log('🔄 Фильтрация: оставляем только циклические зависимости...');
+        const circularModules = new Set();
+        const circular = result.circular();
+        circular.forEach(cycle => {
+            cycle.forEach(module => circularModules.add(module));
+        });
+
+        const filteredTree = {};
+        for (const [module, deps] of Object.entries(fullTree)) {
+            if (circularModules.has(module)) {
+                filteredTree[module] = deps.filter(dep => circularModules.has(dep));
+            }
+        }
+        fullTree = filteredTree;
+
+        if (Object.keys(fullTree).length === 0) {
+            console.log('✅ Циклических зависимостей не найдено');
+        } else {
+            console.log(`⚠️ Найдено ${circular.length} циклических зависимостей, участвует ${Object.keys(fullTree).length} модулей`);
+        }
+    }
+
+    // Ограничиваем глубину
+    if (depth !== 'all' && !(circularOnly && depth === 'all')) {
+        const maxDepth = parseInt(depth, 10);
+        if (!isNaN(maxDepth)) {
+            console.log(`✂️ Ограничение глубины до ${maxDepth}...`);
+            fullTree = limitTreeDepth(fullTree, resolvedEntryFile, resolvedTargetDir, maxDepth);
+        }
+    }
+
+    // Статистика
+    const modules = Object.keys(fullTree);
+    console.log(`\n📦 Найдено модулей: ${modules.length}`);
+    const stats = collectStats(fullTree);
+    const circular = result.circular();
+
+    // Генерация имен файлов по шаблону
+    const now = new Date();
+    const timestamp = Date.now();
+    const baseName = path.basename(entryFile, path.extname(entryFile));
+    const suffix = circularOnly ? '_circular' : '';
+
+    // Переменные для шаблонов
+    const templateVariables = {
+        name: baseName,
+        timestamp: timestamp,
+        date: formatDate(now, 'YYYY-MM-DD'),
+        time: formatDate(now, 'HH-mm-ss'),
+        datetime: formatDate(now, 'YYYY-MM-DD_HH-mm-ss'),
+        suffix: suffix,
+        entry: path.basename(entryFile),
+        dir: path.basename(resolvedTargetDir),
+        depth: depth === 'all' ? 'full' : depth,
+        npm: includeNpm ? 'with-npm' : 'no-npm'
+    };
+
+    // Генерируем имена файлов
+    const jsonFileName = generateFileName(outputFileName, templateVariables);
+    const outputPath = path.join(resolvedOutputDir, jsonFileName);
+
+    let svgFileNameActual = null;
+    let svgPath = null;
+    if (generateSvg && !circularOnly) {
+        svgFileNameActual = generateFileName(svgFileName, templateVariables);
+        svgPath = path.join(resolvedSvgDir, svgFileNameActual);
+    }
+
+    // Формируем результат
+    const resultData = {
+        scanInfo: {
+            timestamp: now.toISOString(),
+            currentDir: currentDir,
+            targetDir: resolvedTargetDir,
+            entryFile: resolvedEntryFile,
+            entryFileName: path.basename(entryFile),
+            depth: depth === 'all' ? 'all' : parseInt(depth, 10),
+            includeNpm: includeNpm,
+            circularOnly: circularOnly,
+            totalModules: modules.length,
+            configUsed: configPath,
+            outputFileName: jsonFileName,
+            outputPath: outputPath
+        },
+        stats: stats,
+        tree: fullTree,
+        circular: circular,
+        circularCount: circular.length,
+        outputPath: outputPath
+    };
+
+    // Сохраняем JSON
+    await ensureDirectory(resolvedOutputDir);
+    await fs.writeFile(outputPath, JSON.stringify(resultData, null, 2), 'utf-8');
+    console.log(`\n💾 JSON сохранен: ${outputPath}`);
+    console.log(`   Размер: ${(JSON.stringify(resultData, null, 2).length / 1024).toFixed(2)} KB`);
+
+    // Генерируем SVG если нужно
+    if (generateSvg && hasGraphviz && !circularOnly) {
+        await ensureDirectory(resolvedSvgDir);
+
+        try {
+            console.log('\n🎨 Генерация SVG...');
+
+            const dotOutput = await result.dot();
+            const dotPath = path.join(resolvedSvgDir, jsonFileName.replace('.json', '.dot'));
+            await fs.writeFile(dotPath, dotOutput);
+            console.log(`   DOT файл сохранен: ${dotPath}`);
+
+            await execAsync(`dot -Tsvg "${dotPath}" -o "${svgPath}"`);
+
+            await fs.access(svgPath);
+            const svgStats = await fs.stat(svgPath);
+            console.log(`✅ SVG создан: ${svgPath} (${(svgStats.size / 1024).toFixed(2)} KB)`);
+
+            resultData.svgPath = svgPath;
+
+        } catch (error) {
+            console.error(`❌ Ошибка создания SVG: ${error.message}`);
+        }
+    } else if (generateSvg && !hasGraphviz) {
+        console.log('\n⚠️ SVG не создан: Graphviz не установлен');
+    } else if (generateSvg && circularOnly) {
+        console.log('\n⚠️ SVG не создан: режим circular-only не поддерживает визуализацию');
+    }
+
+    // Добавляем в config.json
+    if (addToConfig) {
+        await addToConfigFile(resolvedConfigPath, {
+            targetDir: resolvedTargetDir,
+            relativeTargetDir: targetDir,
+            entryFile: resolvedEntryFile,
+            relativeEntryFile: entryFile,
+            dependenciesFile: outputPath,
+            modulesCount: modules.length,
+            circularCount: circular.length,
+            timestamp: now.toISOString(),
+            svgPath: svgPath
+        });
+    }
+
+    // Выводим отчет
+    printReport(resultData, svgPath);
+
+    return resultData;
+}
+
+/**
+ * Сканирование нескольких файлов
+ */
+export async function scanMultipleFiles(baseConfig, files) {
+    console.log('\n📚 СКАНИРОВАНИЕ НЕСКОЛЬКИХ ФАЙЛОВ');
+    console.log('====================================\n');
+
+    const results = [];
+    for (const file of files) {
+        console.log(`\n--- Сканирование: ${file} ---`);
+        try {
+            const result = await scanDependencies({
+                ...baseConfig,
+                entryFile: file
+            });
+            results.push(result);
+        } catch (error) {
+            console.error(`❌ Ошибка при сканировании ${file}: ${error.message}`);
+        }
+    }
+
+    console.log(`\n✅ Отсканировано файлов: ${results.length}/${files.length}`);
+    return results;
+}
+
+/**
+ * Сканирование всей директории
+ */
+export async function scanDirectory(baseConfig) {
+    console.log('\n📁 СКАНИРОВАНИЕ ВСЕЙ ДИРЕКТОРИИ');
+    console.log('================================\n');
+
+    const { targetDir, supportedExtensions = ['.js', '.mjs', '.cjs', '.ts', '.tsx', '.jsx'] } = baseConfig;
+    const resolvedTargetDir = path.resolve(process.cwd(), targetDir);
+
+    const entryPoints = [];
+    const extensions = supportedExtensions.map(ext => ext.replace('.', ''));
+
+    async function findEntryPoints(dir, depth = 0) {
+        if (depth > 3) return;
+
+        try {
+            const items = await fs.readdir(dir, { withFileTypes: true });
+
+            for (const item of items) {
+                const fullPath = path.join(dir, item.name);
+
+                if (item.isDirectory()) {
+                    if (!item.name.startsWith('.') && item.name !== 'node_modules') {
+                        await findEntryPoints(fullPath, depth + 1);
+                    }
+                } else if (item.isFile()) {
+                    const ext = path.extname(item.name).replace('.', '');
+                    if (extensions.includes(ext)) {
+                        const isEntryCandidate =
+                            item.name.includes('main') ||
+                            item.name.includes('index') ||
+                            item.name.includes('app') ||
+                            item.name.includes('cli') ||
+                            depth === 0;
+
+                        if (isEntryCandidate) {
+                            entryPoints.push(path.relative(resolvedTargetDir, fullPath));
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.warn(`⚠️ Не удалось прочитать ${dir}: ${error.message}`);
+        }
+    }
+
+    await findEntryPoints(resolvedTargetDir);
+
+    if (entryPoints.length === 0) {
+        console.log('❌ Не найдено файлов-кандидатов для сканирования');
+        return [];
+    }
+
+    console.log(`📋 Найдено ${entryPoints.length} файлов-кандидатов:\n`);
+    entryPoints.forEach((ep, idx) => {
+        console.log(`   ${idx + 1}. ${ep}`);
+    });
+
+    const results = [];
+    for (const entryPoint of entryPoints.slice(0, 10)) {
+        console.log(`\n--- Сканирование: ${entryPoint} ---`);
+        try {
+            const result = await scanDependencies({
+                ...baseConfig,
+                entryFile: entryPoint
+            });
+            results.push(result);
+        } catch (error) {
+            console.error(`❌ Ошибка при сканировании ${entryPoint}: ${error.message}`);
+        }
+    }
+
+    console.log(`\n✅ Отсканировано entry points: ${results.length}/${Math.min(entryPoints.length, 10)}`);
+    return results;
 }
 
 // CLI поддержка
@@ -414,35 +634,21 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         const hasArg = (name) => args.includes(name);
 
         if (hasArg('--help') || hasArg('-h')) {
-            console.log(`
-Использование: node scan-dependencies.js [опции]
-
-Опции:
-  --dir <path>         Директория для сканирования
-  --entry <file>       Входной файл
-  --depth <n|all>      Глубина сканирования
-  --include-npm        Включить node_modules
-  --svg                Создать SVG визуализацию
-  --output <dir>       Каталог для JSON вывода
-  --config <file>      Путь к config.json
-  --add-to-config      Добавить в config.json
-  --help, -h           Показать справку
-
-Примеры:
-  node scan-dependencies.js --dir ./Directory/13/madge --entry lib/api.js --depth all --svg
-  node scan-dependencies.js --dir ./Directory/13/madge --entry lib/api.js --depth 2 --svg
-            `);
+            console.log(`\nИспользование: node scan-dependencies.js [опции]\n\nОпции:\n  --dir <path>         Директория для сканирования\n  --entry <file>       Входной файл\n  --depth <n|all>      Глубина сканирования\n  --include-npm        Включить node_modules\n  --svg                Создать SVG визуализацию\n  --circular-only      Только циклические зависимости\n  --output <dir>       Каталог для JSON вывода\n  --output-name <name> Шаблон имени JSON файла\n  --svg-name <name>    Шаблон имени SVG файла\n  --config <file>      Путь к config.json\n  --add-to-config      Добавить в config.json\n  --help, -h           Показать справку\n\nШаблоны имени файла:\n  {{name}}       - имя входного файла без расширения\n  {{timestamp}}  - временная метка (Unix timestamp)\n  {{date}}       - дата (YYYY-MM-DD)\n  {{time}}       - время (HH-mm-ss)\n  {{datetime}}   - дата и время (YYYY-MM-DD_HH-mm-ss)\n  {{suffix}}     - суффикс (_circular для режима circular-only)\n  {{entry}}      - полное имя входного файла\n  {{dir}}        - имя директории\n  {{depth}}      - глубина (full или число)\n  {{npm}}        - with-npm или no-npm\n\nПримеры:\n  node scan-dependencies.js --dir ./src --entry index.js --depth 2 --svg\n  node scan-dependencies.js --dir ./src --entry index.js --circular-only\n  node scan-dependencies.js --dir ./src --entry index.js --output-name "deps_{{name}}_{{date}}.json"\n            `);
             return;
         }
 
         const config = {
-            targetDir: getArg('--dir') || './Directory/13/madge',
-            entryFile: getArg('--entry') || 'lib/api.js',
+            targetDir: getArg('--dir') || './src',
+            entryFile: getArg('--entry') || 'index.js',
             depth: getArg('--depth') || 'all',
             includeNpm: hasArg('--include-npm'),
             generateSvg: hasArg('--svg'),
+            circularOnly: hasArg('--circular-only'),
             outputJsonDir: getArg('--output') || './fs',
-            configPath: getArg('--config') || './Directory/10/config.json',
+            outputFileName: getArg('--output-name') || 'dependencies_{{name}}_{{timestamp}}{{suffix}}.json',
+            svgFileName: getArg('--svg-name') || 'graph_{{name}}_{{timestamp}}.svg',
+            configPath: getArg('--config') || './config.json',
             addToConfig: hasArg('--add-to-config')
         };
 
@@ -458,5 +664,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 }
 
 export default {
-    scanDependencies
+    scanDependencies,
+    scanMultipleFiles,
+    scanDirectory
 };
