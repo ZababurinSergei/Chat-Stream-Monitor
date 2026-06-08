@@ -790,16 +790,58 @@ class DeepSeekChatMonitor {
         this._log('operator', `🤖 Автоматические нажатия ${enabled ? 'ВКЛЮЧЕНЫ' : 'ОТКЛЮЧЕНЫ'}`);
     }
 
-    /**
-     * Выполняет фактический клик по кнопке
-     * @param {Element} element - Элемент кнопки
-     */
-    _performContinueClick(element) {
+    // В классе DeepSeekChatMonitor, замените метод _performContinueClick на:
+
+    async _performContinueClick(element) {
         if (!element) return;
 
-        console.log('########## element ############', element)
         this._continueClickCount++;
 
+        // Получаем координаты элемента
+        const rect = element.getBoundingClientRect();
+        const x = rect.left + rect.width / 2;
+        const y = rect.top + rect.height / 2;
+
+        this._log('continue', '🖱️ Отправка запроса на доверенный клик через background...');
+
+        // Отправляем сообщение в background.js для выполнения доверенного клика
+        try {
+            const response = await new Promise((resolve, reject) => {
+                chrome.runtime.sendMessage({
+                    action: "performTrustedClickAtCoordinates",
+                    x: x,
+                    y: y
+                }, (response) => {
+                    if (chrome.runtime.lastError) {
+                        reject(new Error(chrome.runtime.lastError.message));
+                    } else {
+                        resolve(response);
+                    }
+                });
+            });
+
+            if (response && response.success) {
+                this._log('continue', '✅ Кнопка нажата через debugger API (isTrusted: true)');
+
+                this._lastResponseText = '';
+                this._lastResponseHtml = '';
+                this._lastMutationTime = Date.now();
+                this.resetMutationIdleTimer();
+            } else {
+                this._log('continue', `❌ Ошибка при доверенном клике: ${response?.error || 'Unknown error'}`);
+                // Fallback на обычный клик
+                this._performFallbackClick(element);
+            }
+        } catch (e) {
+            this._log('continue', `❌ Ошибка при отправке сообщения: ${e.message}`);
+            // Fallback на обычный клик
+            this._performFallbackClick(element);
+        }
+    }
+
+// Fallback метод на случай ошибки
+    _performFallbackClick(element) {
+        this._log('continue', '🔄 Выполнение fallback клика...');
         try {
             element.click();
 
@@ -811,24 +853,9 @@ class DeepSeekChatMonitor {
             });
             element.dispatchEvent(clickEvent);
 
-            const pointerEvent = new PointerEvent('click', {
-                view: window,
-                bubbles: true,
-                cancelable: true,
-                button: 0,
-                pointerType: 'mouse'
-            });
-            element.dispatchEvent(pointerEvent);
-
-            this._log('continue', '✅ Кнопка "Continue" успешно нажата');
-
-            this._lastResponseText = '';
-            this._lastResponseHtml = '';
-            this._lastMutationTime = Date.now();
-            this.resetMutationIdleTimer();
-
+            this._log('continue', '✅ Fallback клик выполнен');
         } catch (e) {
-            this._log('continue', `❌ Ошибка при нажатии: ${e.message}`);
+            this._log('continue', `❌ Fallback клик не удался: ${e.message}`);
         }
     }
 

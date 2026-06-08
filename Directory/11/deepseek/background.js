@@ -33,8 +33,150 @@ function applyIframeRules() {
     }
 }
 
+// Хранилище активных отладчиков
+const activeDebuggers = new Map();
+
+// Функция для прикрепления отладчика
+async function attachDebugger(tabId) {
+    // Проверяем, есть ли уже активный отладчик
+    if (activeDebuggers.has(tabId)) {
+        console.log(`[Background] Debugger already attached to tab ${tabId}`);
+        return true;
+    }
+
+    try {
+        await new Promise((res, rej) => {
+            chrome.debugger.attach({ tabId: tabId }, "1.3", () => {
+                if (chrome.runtime.lastError) {
+                    rej(new Error(chrome.runtime.lastError.message));
+                } else {
+                    res();
+                }
+            });
+        });
+
+        activeDebuggers.set(tabId, true);
+        console.log(`[Background] 🔗 Debugger attached to tab ${tabId}`);
+        return true;
+    } catch (error) {
+        console.error(`[Background] Failed to attach debugger to tab ${tabId}:`, error);
+        throw error;
+    }
+}
+
+// Функция для открепления отладчика
+async function detachDebugger(tabId) {
+    if (!activeDebuggers.has(tabId)) {
+        return;
+    }
+
+    try {
+        await new Promise((res, rej) => {
+            chrome.debugger.detach({ tabId: tabId }, () => {
+                if (chrome.runtime.lastError) {
+                    // Игнорируем ошибку, если отладчик уже отсоединен
+                    if (!chrome.runtime.lastError.message.includes("not attached")) {
+                        rej(new Error(chrome.runtime.lastError.message));
+                    } else {
+                        res();
+                    }
+                } else {
+                    res();
+                }
+            });
+        });
+
+        activeDebuggers.delete(tabId);
+        console.log(`[Background] 🔌 Debugger detached from tab ${tabId}`);
+    } catch (error) {
+        console.warn(`[Background] Could not detach debugger from tab ${tabId}:`, error);
+        activeDebuggers.delete(tabId);
+    }
+}
+
+// Функция для выполнения клика через debugger API (по координатам)
+async function performTrustedClickAtCoordinates(tabId, x, y) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            // Убеждаемся, что отладчик прикреплен
+            await attachDebugger(tabId);
+
+            // Включаем события мыши
+            await new Promise((res, rej) => {
+                chrome.debugger.sendCommand({ tabId: tabId }, "Input.setIgnoreInputEvents", {
+                    ignore: false
+                }, () => {
+                    if (chrome.runtime.lastError) {
+                        rej(new Error(chrome.runtime.lastError.message));
+                    } else {
+                        res();
+                    }
+                });
+            });
+
+            // Небольшая задержка перед кликом
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            // Отправляем mousePressed (нажатие)
+            await new Promise((res, rej) => {
+                chrome.debugger.sendCommand({ tabId: tabId }, "Input.dispatchMouseEvent", {
+                    type: "mousePressed",
+                    x: Math.round(x),
+                    y: Math.round(y),
+                    button: "left",
+                    clickCount: 1,
+                    modifiers: 0
+                }, () => {
+                    if (chrome.runtime.lastError) {
+                        rej(new Error(chrome.runtime.lastError.message));
+                    } else {
+                        res();
+                    }
+                });
+            });
+
+            // Небольшая задержка между нажатием и отпусканием
+            await new Promise(resolve => setTimeout(resolve, 50));
+
+            // Отправляем mouseReleased (отпускание)
+            await new Promise((res, rej) => {
+                chrome.debugger.sendCommand({ tabId: tabId }, "Input.dispatchMouseEvent", {
+                    type: "mouseReleased",
+                    x: Math.round(x),
+                    y: Math.round(y),
+                    button: "left",
+                    clickCount: 1,
+                    modifiers: 0
+                }, () => {
+                    if (chrome.runtime.lastError) {
+                        rej(new Error(chrome.runtime.lastError.message));
+                    } else {
+                        res();
+                    }
+                });
+            });
+
+            console.log(`[Background] ✅ Trusted click at (${Math.round(x)}, ${Math.round(y)})`);
+            resolve({ success: true, x: Math.round(x), y: Math.round(y) });
+
+        } catch (error) {
+            console.error("[Background] ❌ Trusted click failed:", error);
+            reject(error);
+        }
+    });
+}
+
 function initiate() {
     console.log("[Background] Initializing DeepSeek Sidebar extension");
+
+    // Слушаем отсоединение отладчика
+    chrome.debugger.onDetach.addListener((source, reason) => {
+        const tabId = source.tabId;
+        if (activeDebuggers.has(tabId)) {
+            activeDebuggers.delete(tabId);
+            console.log(`[Background] Debugger detached from tab ${tabId}, reason: ${reason}`);
+        }
+    });
 
     // Check if chrome.sidePanel is available
     if (chrome.sidePanel) {
@@ -221,6 +363,65 @@ function initiate() {
             return true;
         }
 
+        // Обработка запроса на доверенный клик по координатам
+        if (request.action === "performTrustedClickAtCoordinates") {
+            const tabId = sender.tab?.id;
+
+            if (!tabId) {
+                sendResponse({ success: false, error: "No tab ID available" });
+                return true;
+            }
+
+            const { x, y } = request;
+
+            // Выполняем клик
+            performTrustedClickAtCoordinates(tabId, x, y)
+                .then(result => {
+                    sendResponse({ success: true, ...result });
+                    // Не открепляем отладчик сразу - оставляем для следующих кликов
+                    // Открепим через 2 секунды бездействия
+                    setTimeout(() => detachDebugger(tabId), 2000);
+                })
+                .catch(error => {
+                    sendResponse({ success: false, error: error.message });
+                    setTimeout(() => detachDebugger(tabId), 2000);
+                });
+
+            return true;
+        }
+
+        // Обработка запроса на прикрепление отладчика
+        if (request.action === "attachDebugger") {
+            const tabId = sender.tab?.id;
+
+            if (!tabId) {
+                sendResponse({ success: false, error: "No tab ID available" });
+                return true;
+            }
+
+            attachDebugger(tabId)
+                .then(() => sendResponse({ success: true }))
+                .catch(error => sendResponse({ success: false, error: error.message }));
+
+            return true;
+        }
+
+        // Обработка запроса на открепление отладчика
+        if (request.action === "detachDebugger") {
+            const tabId = sender.tab?.id;
+
+            if (!tabId) {
+                sendResponse({ success: false, error: "No tab ID available" });
+                return true;
+            }
+
+            detachDebugger(tabId)
+                .then(() => sendResponse({ success: true }))
+                .catch(error => sendResponse({ success: false, error: error.message }));
+
+            return true;
+        }
+
         return false;
     });
 
@@ -289,5 +490,5 @@ safeInitiate();
 
 // Export for debugging (not actually used, but helpful)
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { applyIframeRules, initiate };
+    module.exports = { applyIframeRules, initiate, performTrustedClickAtCoordinates, attachDebugger, detachDebugger };
 }
