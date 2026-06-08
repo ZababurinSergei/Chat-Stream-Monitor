@@ -18,6 +18,8 @@ v8-compile-cache-0/
 Thumbs.db
 ./__Directory
 Directory
+Directory/**
+**/Directory/**
 fs
 # node-waf configuration
 .lock-wscript
