@@ -2,7 +2,7 @@
 import path from 'path';
 import { parseFile, resolveFilePath, isExternalModule } from '../core/ast-parser.js';
 import { IGNORE_NODE_MODULES } from '../config.js';
-
+import { walk } from 'estree-walker';
 /**
  * Строит граф зависимостей проекта от точки входа
  * @param entryPoint Точка входа (файл или директория)
@@ -34,7 +34,6 @@ export function buildProjectGraph(
     const rawImports: string[] = [];
 
     // Обходим AST для сбора импортов
-    const { walk } = require('estree-walker');
     walk(ast, {
       enter(node: any) {
         // Статический импорт

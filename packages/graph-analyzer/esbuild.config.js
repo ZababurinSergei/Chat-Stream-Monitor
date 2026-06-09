@@ -45,7 +45,7 @@ const buildOptions = {
   platform: 'node',
   target: 'node18',
   format: 'esm',
-  sourcemap: isProduction ? false : true,
+  sourcemap: !isProduction,
   minify: isProduction,
   keepNames: true,
   treeShaking: true,

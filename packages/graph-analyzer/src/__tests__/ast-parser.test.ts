@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseFile, isExternalModule, resolveFilePath } from '../core/ast-parser.js';
+import { parseFile, isExternalModule } from '../core/ast-parser.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import fs from 'fs';

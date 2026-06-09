@@ -5,10 +5,10 @@
 // ==========================================
 
 export interface AnalyzerConfig {
-    ignoreNodeModules: boolean;
-    supportedExtensions: string[];
-    defaultExcludePatterns: string[];
-    vueScriptPattern: RegExp;
+  ignoreNodeModules: boolean;
+  supportedExtensions: string[];
+  defaultExcludePatterns: string[];
+  vueScriptPattern: RegExp;
 }
 
 // ==========================================
@@ -16,115 +16,115 @@ export interface AnalyzerConfig {
 // ==========================================
 
 export interface Location {
-    start: {
-        line: number;
-        column: number;
-    };
-    end: {
-        line: number;
-        column: number;
-    };
+  start: {
+    line: number;
+    column: number;
+  };
+  end: {
+    line: number;
+    column: number;
+  };
 }
 
 export interface ImportSpecifier {
-    local: string;
-    imported: string;
-    type: string;
+  local: string;
+  imported: string;
+  type: string;
 }
 
 export interface ImportInfo {
-    source: string;
-    specifiers: ImportSpecifier[];
-    loc: Location | null;
+  source: string;
+  specifiers: ImportSpecifier[];
+  loc: Location | null;
 }
 
 export interface ExportInfo {
-    name: string;
-    type: 'function' | 'class' | 'constant' | 'value';
-    isDefault?: boolean;
-    loc: Location | null;
-    params?: string[];
-    async?: boolean;
-    startLine?: number;
-    endLine?: number;
+  name: string;
+  type: 'function' | 'class' | 'constant' | 'value';
+  isDefault?: boolean;
+  loc: Location | null;
+  params?: string[];
+  async?: boolean;
+  startLine?: number;
+  endLine?: number;
 }
 
 export interface FunctionInfo {
-    name: string;
-    type: 'function';
-    exported: boolean;
-    loc: Location | null;
-    params: string[];
-    async: boolean;
-    startLine: number;
-    endLine: number;
-    callCount?: number;
+  name: string;
+  type: 'function';
+  exported: boolean;
+  loc: Location | null;
+  params: string[];
+  async: boolean;
+  startLine: number;
+  endLine: number;
+  callCount?: number;
 }
 
 export interface ClassMethodInfo {
-    name: string;
-    kind: 'method' | 'get' | 'set' | 'constructor';
-    static: boolean;
-    loc: Location | null;
+  name: string;
+  kind: 'method' | 'get' | 'set' | 'constructor';
+  static: boolean;
+  loc: Location | null;
 }
 
 export interface ClassInfo {
-    name: string;
-    exported: boolean;
-    loc: Location | null;
-    methods: ClassMethodInfo[];
-    startLine: number;
-    endLine: number;
+  name: string;
+  exported: boolean;
+  loc: Location | null;
+  methods: ClassMethodInfo[];
+  startLine: number;
+  endLine: number;
 }
 
 export interface ConstantInfo {
-    name: string;
-    type: 'constant';
-    loc: Location | null;
-    startLine: number;
-    endLine: number;
+  name: string;
+  type: 'constant';
+  loc: Location | null;
+  startLine: number;
+  endLine: number;
 }
 
 export interface InterfaceInfo {
-    name: string;
-    exported: boolean;
-    loc: Location | null;
-    members: number;
-    startLine: number;
-    endLine: number;
+  name: string;
+  exported: boolean;
+  loc: Location | null;
+  members: number;
+  startLine: number;
+  endLine: number;
 }
 
 export interface TypeInfo {
-    name: string;
-    exported: boolean;
-    loc: Location | null;
+  name: string;
+  exported: boolean;
+  loc: Location | null;
 }
 
 export interface AnalysisStats {
-    totalLines: number;
-    totalExports: number;
-    totalFunctions: number;
-    totalClasses: number;
-    totalConstants: number;
-    totalInterfaces: number;
-    totalTypes: number;
-    totalImports: number;
+  totalLines: number;
+  totalExports: number;
+  totalFunctions: number;
+  totalClasses: number;
+  totalConstants: number;
+  totalInterfaces: number;
+  totalTypes: number;
+  totalImports: number;
 }
 
 export interface AnalysisResult {
-    filePath: string;
-    fileName: string;
-    stats: AnalysisStats;
-    imports: ImportInfo[];
-    exports: ExportInfo[];
-    functions: FunctionInfo[];
-    classes: ClassInfo[];
-    constants: ConstantInfo[];
-    interfaces: InterfaceInfo[];
-    types: TypeInfo[];
-    callGraph: Record<string, string[]>;
-    fullCode: string;
-    lines: string[];
+  filePath: string;
+  fileName: string;
+  stats: AnalysisStats;
+  imports: ImportInfo[];
+  exports: ExportInfo[];
+  functions: FunctionInfo[];
+  classes: ClassInfo[];
+  constants: ConstantInfo[];
+  interfaces: InterfaceInfo[];
+  types: TypeInfo[];
+  callGraph: Record<string, string[]>;
+  fullCode: string;
+  lines: string[];
 }
 
 // ==========================================
@@ -132,32 +132,32 @@ export interface AnalysisResult {
 // ==========================================
 
 export interface GraphData {
-    rootKey: string;
-    graph: Record<string, string[]>;
-    hasCycles?: boolean;
-    cyclicEdges?: string[];
+  rootKey: string;
+  graph: Record<string, string[]>;
+  hasCycles?: boolean;
+  cyclicEdges?: string[];
 }
 
 export interface FileInternalGraph {
-    rootKey: string;
-    graph: Record<string, string[]>;
+  rootKey: string;
+  graph: Record<string, string[]>;
 }
 
 export interface Cluster {
-    name: string;
-    functions: string[];
-    isExported: boolean;
-    dependencies: string[];
-    importers: string[];
-    cohesionScore: number;
-    type: 'core' | 'helper';
-    size: number;
-    recommendation: string;
+  name: string;
+  functions: string[];
+  isExported: boolean;
+  dependencies: string[];
+  importers: string[];
+  cohesionScore: number;
+  type: 'core' | 'helper';
+  size: number;
+  recommendation: string;
 }
 
 export interface ClusterOptions {
-    targetClusterSize?: number;
-    maxClusterSize?: number;
+  targetClusterSize?: number;
+  maxClusterSize?: number;
 }
 
 // ==========================================
@@ -166,94 +166,94 @@ export interface ClusterOptions {
 
 // Split Module Mode
 export interface SplitModuleOptions {
-    outputFile?: string;
-    includeFullCode?: boolean;
-    includeMinified?: boolean;
-    includeGraph?: boolean;
-    includeStats?: boolean;
-    includeSuggestions?: boolean;
-    targetClusterSize?: number;
-    maxClusterSize?: number;
-    maxDepth?: number;
-    excludePatterns?: string[];
-    prefix?: string;
+  outputFile?: string;
+  includeFullCode?: boolean;
+  includeMinified?: boolean;
+  includeGraph?: boolean;
+  includeStats?: boolean;
+  includeSuggestions?: boolean;
+  targetClusterSize?: number;
+  maxClusterSize?: number;
+  maxDepth?: number;
+  excludePatterns?: string[];
+  prefix?: string;
 }
 
 export interface SplitModuleResult {
-    markdown: string;
-    analysis: AnalysisResult;
-    outputFiles: {
-        prompt: string;
-        context: string;
-        graph: string;
-        analysis: string;
-    };
+  markdown: string;
+  analysis: AnalysisResult;
+  outputFiles: {
+    prompt: string;
+    context: string;
+    graph: string;
+    analysis: string;
+  };
 }
 
 // Minify Folder Mode
 export interface MinifyFolderOptions {
-    outputFile?: string;
-    extensions?: string[];
-    excludePatterns?: string[];
-    maxDepth?: number;
-    showStructure?: boolean;
-    addTableOfContents?: boolean;
-    sortByType?: boolean;
+  outputFile?: string;
+  extensions?: string[];
+  excludePatterns?: string[];
+  maxDepth?: number;
+  showStructure?: boolean;
+  addTableOfContents?: boolean;
+  sortByType?: boolean;
 }
 
 export interface MinifyFolderResult {
-    markdown: string;
-    filesProcessed: number;
-    totalOriginalSize: number;
-    totalMinifiedSize: number;
+  markdown: string;
+  filesProcessed: number;
+  totalOriginalSize: number;
+  totalMinifiedSize: number;
 }
 
 // Prompt Pack Mode
 export interface PromptPackOptions {
-    maxDepth?: number;
-    includeTargetFile?: boolean;
-    includeDependencies?: boolean;
+  maxDepth?: number;
+  includeTargetFile?: boolean;
+  includeDependencies?: boolean;
 }
 
 // Impact Analysis Mode
 export interface ImpactUsage {
-    file: string;
-    usages: string[];
+  file: string;
+  usages: string[];
 }
 
 export interface ImpactReport {
-    targetFile: string;
-    entityName: string;
-    impacts: ImpactUsage[];
-    isSafe: boolean;
+  targetFile: string;
+  entityName: string;
+  impacts: ImpactUsage[];
+  isSafe: boolean;
 }
 
 export interface ImpactOptions {
-    targetFile: string;
-    entityName: string;
+  targetFile: string;
+  entityName: string;
 }
 
 // Dead Code Mode
 export interface DeadCodeReport {
-    targetFile: string;
-    deadLocals: string[];
-    deadExports: string[];
-    hasDeadCode: boolean;
+  targetFile: string;
+  deadLocals: string[];
+  deadExports: string[];
+  hasDeadCode: boolean;
 }
 
 export interface DeadCodeOptions {
-    targetFile: string;
+  targetFile: string;
 }
 
 // Project Graph Mode
 export interface ProjectGraphOptions {
-    maxDepth?: number;
-    entryPoint: string;
+  maxDepth?: number;
+  entryPoint: string;
 }
 
 // File Graph Mode
 export interface FileGraphOptions {
-    maxDepth?: number;
+  maxDepth?: number;
 }
 
 // ==========================================
@@ -261,11 +261,11 @@ export interface FileGraphOptions {
 // ==========================================
 
 export interface HTMLReportOptions {
-    svgContent: string;
-    dotContent: string;
-    jsonContent: string;
-    title: string;
-    hasCycles: boolean;
+  svgContent: string;
+  dotContent: string;
+  jsonContent: string;
+  title: string;
+  hasCycles: boolean;
 }
 
 // ==========================================
@@ -273,96 +273,96 @@ export interface HTMLReportOptions {
 // ==========================================
 
 export type CLIMode =
-    | 'project'
-    | 'file'
-    | 'minify'
-    | 'minify-folder'
-    | 'prompt-pack'
-    | 'split-module'
-    | 'split'
-    | 'impact'
-    | 'dead-code';
+  | 'project'
+  | 'file'
+  | 'minify'
+  | 'minify-folder'
+  | 'prompt-pack'
+  | 'split-module'
+  | 'split'
+  | 'impact'
+  | 'dead-code';
 
 export interface ProjectCLIArgs {
-    mode: 'project';
-    targetPath: string;
-    extraArg?: string; // depth
+  mode: 'project';
+  targetPath: string;
+  extraArg?: string; // depth
 }
 
 export interface FileCLIArgs {
-    mode: 'file';
-    targetPath: string;
+  mode: 'file';
+  targetPath: string;
 }
 
 export interface MinifyCLIArgs {
-    mode: 'minify';
-    targetPath: string;
+  mode: 'minify';
+  targetPath: string;
 }
 
 export interface MinifyFolderCLIArgs {
-    mode: 'minify-folder';
-    targetPath: string;
-    options?: MinifyFolderOptions;
+  mode: 'minify-folder';
+  targetPath: string;
+  options?: MinifyFolderOptions;
 }
 
 export interface PromptPackCLIArgs {
-    mode: 'prompt-pack';
-    targetPath: string;
-    extraArg?: string; // depth
+  mode: 'prompt-pack';
+  targetPath: string;
+  extraArg?: string; // depth
 }
 
 export interface SplitModuleCLIArgs {
-    mode: 'split-module' | 'split';
-    targetPath: string;
-    options?: SplitModuleOptions;
+  mode: 'split-module' | 'split';
+  targetPath: string;
+  options?: SplitModuleOptions;
 }
 
 export interface ImpactCLIArgs {
-    mode: 'impact';
-    targetPath: string;
-    extraArg: string; // entityName
+  mode: 'impact';
+  targetPath: string;
+  extraArg: string; // entityName
 }
 
 export interface DeadCodeCLIArgs {
-    mode: 'dead-code';
-    targetPath: string;
+  mode: 'dead-code';
+  targetPath: string;
 }
 
 export type CLIArgs =
-    | ProjectCLIArgs
-    | FileCLIArgs
-    | MinifyCLIArgs
-    | MinifyFolderCLIArgs
-    | PromptPackCLIArgs
-    | SplitModuleCLIArgs
-    | ImpactCLIArgs
-    | DeadCodeCLIArgs
-    | null;
+  | ProjectCLIArgs
+  | FileCLIArgs
+  | MinifyCLIArgs
+  | MinifyFolderCLIArgs
+  | PromptPackCLIArgs
+  | SplitModuleCLIArgs
+  | ImpactCLIArgs
+  | DeadCodeCLIArgs
+  | null;
 
 // ==========================================
 // ТИПЫ ДЛЯ ВНУТРЕННЕГО ИСПОЛЬЗОВАНИЯ
 // ==========================================
 
 export interface CallEdge {
-    from: string;
-    to: string;
+  from: string;
+  to: string;
 }
 
 export interface CodeCut {
-    start: number;
-    end: number;
-    replaceWith: string;
+  start: number;
+  end: number;
+  replaceWith: string;
 }
 
 export interface DirectoryTree {
-    [key: string]: DirectoryTree | null;
+  [key: string]: DirectoryTree | null;
 }
 
 export interface FileInfo {
-    path: string;
-    relativePath: string;
-    ext: string;
-    size: number;
+  path: string;
+  relativePath: string;
+  ext: string;
+  size: number;
 }
 
 // ==========================================
@@ -370,15 +370,15 @@ export interface FileInfo {
 // ==========================================
 
 export interface ParseError {
-    filePath: string;
-    message: string;
-    stack?: string;
+  filePath: string;
+  message: string;
+  stack?: string;
 }
 
 export interface AnalysisWarning {
-    type: 'parse' | 'resolve' | 'readdir' | 'vue-script';
-    filePath: string;
-    message: string;
+  type: 'parse' | 'resolve' | 'readdir' | 'vue-script';
+  filePath: string;
+  message: string;
 }
 
 // ==========================================
@@ -386,15 +386,15 @@ export interface AnalysisWarning {
 // ==========================================
 
 export interface ASTNode {
-    type: string;
-    loc?: Location | null;
-    range?: [number, number];
-    [key: string]: any;
+  type: string;
+  loc?: Location | null;
+  range?: [number, number];
+  [key: string]: any;
 }
 
 export interface WalkerOptions {
-    enter?: (node: ASTNode, parent?: ASTNode) => void;
-    leave?: (node: ASTNode, parent?: ASTNode) => void;
+  enter?: (node: ASTNode, parent?: ASTNode) => void;
+  leave?: (node: ASTNode, parent?: ASTNode) => void;
 }
 
 // ==========================================
@@ -402,19 +402,19 @@ export interface WalkerOptions {
 // ==========================================
 
 export interface MarkdownSection {
-    title: string;
-    level: number;
-    content: string;
+  title: string;
+  level: number;
+  content: string;
 }
 
 export interface TableRow {
-    [key: string]: string | number;
+  [key: string]: string | number;
 }
 
 export interface TableOptions {
-    headers: string[];
-    rows: TableRow[];
-    alignment?: ('left' | 'center' | 'right')[];
+  headers: string[];
+  rows: TableRow[];
+  alignment?: ('left' | 'center' | 'right')[];
 }
 
 // ==========================================
@@ -422,17 +422,17 @@ export interface TableOptions {
 // ==========================================
 
 export interface ValidationResult {
-    isValid: boolean;
-    errors: string[];
-    warnings: string[];
+  isValid: boolean;
+  errors: string[];
+  warnings: string[];
 }
 
 export interface FileValidationOptions {
-    checkExists?: boolean;
-    checkExtension?: boolean;
-    checkSize?: boolean;
-    maxSizeBytes?: number;
-    allowedExtensions?: string[];
+  checkExists?: boolean;
+  checkExtension?: boolean;
+  checkSize?: boolean;
+  maxSizeBytes?: number;
+  allowedExtensions?: string[];
 }
 
 // ==========================================
@@ -440,19 +440,19 @@ export interface FileValidationOptions {
 // ==========================================
 
 export interface MethodInfo {
-    name: string;
-    kind: string;
-    static: boolean;
-    loc: Location | null;
+  name: string;
+  kind: string;
+  static: boolean;
+  loc: Location | null;
 }
 
 export type CallGraph = Record<string, string[]>;
 
 export interface Config {
-    directories?: any[];
-    excludePatterns?: any;
-    scanOptions?: any;
-    report?: any;
-    supportedExtensions?: string[];
-    specialFiles?: string[];
+  directories?: any[];
+  excludePatterns?: any;
+  scanOptions?: any;
+  report?: any;
+  supportedExtensions?: string[];
+  specialFiles?: string[];
 }

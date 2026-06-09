@@ -7,10 +7,7 @@ import path from 'path';
  * @returns Экранированная строка
  */
 export function escapeHtml(str: string): string {
-    return str
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 /**
@@ -23,17 +20,17 @@ export function escapeHtml(str: string): string {
  * @returns Полный HTML документ
  */
 export function generateHTMLReport(
-    svgContent: string,
-    dotContent: string,
-    jsonContent: string,
-    title: string,
-    hasCycles: boolean
+  svgContent: string,
+  dotContent: string,
+  jsonContent: string,
+  title: string,
+  hasCycles: boolean
 ): string {
-    const banner = hasCycles
-        ? `<div class="banner error">⚠️ Обнаружены циклические зависимости!</div>`
-        : `<div class="banner success">✅ Циклических зависимостей нет</div>`;
+  const banner = hasCycles
+    ? `<div class="banner error">⚠️ Обнаружены циклические зависимости!</div>`
+    : `<div class="banner success">✅ Циклических зависимостей нет</div>`;
 
-    return `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">

@@ -270,7 +270,7 @@ function identifyClusters(
 
   // Подсчет частоты вызовов
   const callFrequency: Record<string, number> = {};
-  for (const [_caller, callees] of Object.entries(callGraph)) {
+  for (const [, callees] of Object.entries(callGraph)) {
     for (const callee of callees) {
       callFrequency[callee] = (callFrequency[callee] || 0) + 1;
     }

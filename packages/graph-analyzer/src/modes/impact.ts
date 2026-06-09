@@ -13,7 +13,7 @@ export function runImpactAnalysis(targetFile: string, entityName: string): strin
   const targetAbsPath = path.resolve(targetFile);
   const targetRelKey = path.relative(process.cwd(), targetAbsPath);
 
-  console.log(`🔍 Поиск использований \"${entityName}\" из \"${targetRelKey}\"...`);
+  console.log(`🔍 Поиск использований "${entityName}" из "${targetRelKey}"...`);
 
   const allFiles = getAllProjectFiles(process.cwd(), [], DEFAULT_EXCLUDE_PATTERNS);
   const impacts: Array<{ file: string; usages: string[] }> = [];
