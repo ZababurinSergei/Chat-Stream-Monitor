@@ -1,7 +1,8 @@
 {
-  "name": "file-system-scanner",
+  "name": "@newkind/chat-stream-monitor",
   "version": "2.0.0",
   "type": "module",
+  "private": true,
   "description": "Инструмент для сканирования файловой системы с поддержкой конфигурации",
   "main": "main.mjs",
   "scripts": {
@@ -19,6 +20,7 @@
     "scan:deps:with-npm": "node run-scan.js --preset with-npm",
     "scan:deps:full": "node run-scan.js --preset full",
     "scan:deps:minimal": "node run-scan.js --preset minimal",
+    "scan:deps:shallow": "node run-scan.js --preset shallow",
     "scan:deps:deepseek": "node run-scan.js --preset deep --dir ./Directory/11/extension/deepseek --entry background.js",
     "scan:deps:qwen": "node run-scan.js --preset deep --dir ./Directory/11/extension/qwen --entry background.js",
     "scan:deps:madge": "node run-scan.js --preset deep --dir ./Directory/13/madge --entry lib/api.js",
@@ -36,16 +38,18 @@
   ],
   "author": "Забабурин Сергей <zababurins@vk.com>",
   "license": "CSL-1.0",
-  "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/ваш-username/file-system-scanner"
+    "url": "https://github.com/ZababurinSergei/Chat-Stream-Monitor"
   },
-  "homepage": "https://github.com/ваш-username/file-system-scanner#readme",
+  "homepage": "https://github.com/ZababurinSergei/Chat-Stream-Monitor#readme",
   "bugs": {
-    "url": "https://github.com/ваш-username/file-system-scanner/issues"
+    "url": "https://github.com/ZababurinSergei/Chat-Stream-Monitor/issues"
   },
   "dependencies": {
+    "@hpcc-js/wasm-graphviz": "^1.22.0",
+    "@typescript-eslint/parser": "^8.61.0",
+    "estree-walker": "^3.0.3",
     "glob": "^13.0.6",
     "madge": "^8.0.0"
   },

@@ -1,5 +1,5 @@
-// scan-dependencies.js (полная версия с поддержкой шаблонов имени файла)
-import madge from 'madge';
+// scan-dependencies.js (полная версия с поддержкой фиксированных имен файлов)
+import madge from './packages/madge/lib/api.js';
 import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -46,43 +46,89 @@ function formatDate(date, format) {
 }
 
 /**
- * Генерирует имя файла по шаблону
+ * Проверяет, является ли имя файла шаблоном
+ */
+function isTemplateFileName(fileName) {
+    return fileName.includes('{{');
+}
+
+/**
+ * Генерирует имя файла по шаблону или возвращает фиксированное имя
  */
 function generateFileName(template, variables) {
-    let result = template;
-
-    for (const [key, value] of Object.entries(variables)) {
-        result = result.replace(new RegExp(`{{${key}}}`, 'g'), value);
+    // Если не шаблон - возвращаем как есть
+    if (!isTemplateFileName(template)) {
+        return template;
     }
 
+    let result = template;
+    for (const [key, value] of Object.entries(variables)) {
+        result = result.replace(new RegExp(`{{${key}}}`, 'g'), String(value));
+    }
     return result;
 }
 
 /**
- * Ограничение глубины дерева
+ * Ограничение глубины дерева (улучшенная версия)
+ * @param {Object} tree - дерево зависимостей
+ * @param {string} entryFile - путь к входному файлу
+ * @param {string} baseDir - базовая директория
+ * @param {number} maxDepth - максимальная глубина
+ * @returns {Object} ограниченное дерево
  */
 function limitTreeDepth(tree, entryFile, baseDir, maxDepth) {
+    if (maxDepth === 'all' || maxDepth === Infinity || maxDepth === null) {
+        return tree;
+    }
+
+    const depthLimit = typeof maxDepth === 'number' ? maxDepth : parseInt(maxDepth, 10);
+    if (isNaN(depthLimit) || depthLimit <= 0) {
+        return tree;
+    }
+
     const limited = {};
-    const visited = new Set();
+    const visited = new Map(); // Храним глубину для каждого узла
+
+    // Находим ключ входного файла
+    let entryKey = null;
+    const entryBaseName = path.basename(entryFile);
     const entryRelative = path.relative(baseDir, entryFile);
 
-    let entryKey = Object.keys(tree).find(key =>
-        key === entryRelative ||
-        key === path.basename(entryFile) ||
-        key.endsWith(path.basename(entryFile))
-    );
+    for (const key of Object.keys(tree)) {
+        if (key === entryRelative ||
+            key === entryBaseName ||
+            key.endsWith(entryBaseName) ||
+            path.basename(key) === entryBaseName) {
+            entryKey = key;
+            break;
+        }
+    }
 
+    // Если не нашли, берем первый ключ
     if (!entryKey && Object.keys(tree).length > 0) {
         entryKey = Object.keys(tree)[0];
     }
 
-    if (!entryKey) return tree;
+    if (!entryKey) {
+        return tree;
+    }
 
     function traverse(node, currentDepth) {
-        if (currentDepth > maxDepth) return;
-        if (visited.has(node)) return;
+        // Проверка глубины
+        if (currentDepth > depthLimit) {
+            return;
+        }
 
-        visited.add(node);
+        // Проверка на циклические зависимости с учетом глубины
+        const existingDepth = visited.get(node);
+        if (existingDepth !== undefined) {
+            // Если уже посещали на меньшей или равной глубине, не обрабатываем заново
+            if (existingDepth <= currentDepth) {
+                return;
+            }
+        }
+
+        visited.set(node, currentDepth);
 
         if (!limited[node]) {
             limited[node] = [];
@@ -91,16 +137,30 @@ function limitTreeDepth(tree, entryFile, baseDir, maxDepth) {
         const dependencies = tree[node] || [];
 
         for (const dep of dependencies) {
+            // Добавляем зависимость
             if (!limited[node].includes(dep)) {
                 limited[node].push(dep);
             }
-            if (currentDepth < maxDepth) {
-                traverse(dep, currentDepth + 1);
+
+            // Рекурсивно обрабатываем зависимость, если позволяет глубина
+            if (currentDepth < depthLimit) {
+                const depDepth = visited.get(dep);
+                if (depDepth === undefined || depDepth > currentDepth + 1) {
+                    traverse(dep, currentDepth + 1);
+                }
             }
         }
     }
 
     traverse(entryKey, 1);
+
+    // Логируем результат ограничения
+    const originalCount = Object.keys(tree).length;
+    const limitedCount = Object.keys(limited).length;
+    if (originalCount > limitedCount) {
+        console.log(`   📊 Ограничение глубины: ${originalCount} → ${limitedCount} модулей (ограничено ${depthLimit} ур.)`);
+    }
+
     return limited;
 }
 
@@ -278,7 +338,7 @@ export async function scanDependencies(config) {
     const {
         targetDir,
         entryFile,
-        depth = 'all',
+        maxDepth = 'all',
         includeNpm = false,
         generateSvg = false,
         outputJsonDir = './fs',
@@ -306,12 +366,14 @@ export async function scanDependencies(config) {
     console.log(`📁 Текущая директория: ${currentDir}`);
     console.log(`📁 Директория: ${resolvedTargetDir}`);
     console.log(`📄 Входной файл: ${resolvedEntryFile}`);
-    console.log(`📏 Глубина: ${depth === 'all' ? 'все' : `${depth} уровень(я/ей)`}`);
+    console.log(`📏 Максимальная глубина: ${maxDepth === 'all' ? 'все' : `${maxDepth} уровень(я/ей)`}`);
     console.log(`📦 Включить npm: ${includeNpm ? 'да' : 'нет'}`);
     console.log(`🎨 SVG визуализация: ${generateSvg ? 'да' : 'нет'}`);
     console.log(`🔄 Только циклические: ${circularOnly ? 'да' : 'нет'}`);
-    console.log(`📝 Шаблон имени JSON: ${outputFileName}`);
-    console.log(`🎨 Шаблон имени SVG: ${svgFileName}`);
+    console.log(`📝 Тип имени JSON: ${isTemplateFileName(outputFileName) ? 'шаблон' : 'фиксированное'}`);
+    console.log(`📝 Имя JSON файла: ${outputFileName}`);
+    console.log(`🎨 Тип имени SVG: ${isTemplateFileName(svgFileName) ? 'шаблон' : 'фиксированное'}`);
+    console.log(`🎨 Имя SVG файла: ${svgFileName}`);
     console.log(`🚫 Исключаемые директории: ${excludePatterns.directories.join(', ') || 'нет'}`);
     console.log(`🚫 Исключаемые файлы: ${excludePatterns.files.join(', ') || 'нет'}`);
 
@@ -358,18 +420,42 @@ export async function scanDependencies(config) {
         });
     }
 
-    // Настройки madge
+    // Нормализуем maxDepth для передачи в madge
+    let normalizedMaxDepth;
+    if (maxDepth === 'all' || maxDepth === Infinity || maxDepth === null) {
+        normalizedMaxDepth = Infinity;
+    } else {
+        const depth = parseInt(maxDepth, 10);
+        normalizedMaxDepth = isNaN(depth) ? Infinity : depth;
+    }
+
+    // Настройки madge с поддержкой ES modules и maxDepth
     const madgeConfig = {
         baseDir: resolvedTargetDir,
         includeNpm: includeNpm,
         fileExtensions: supportedExtensions.map(ext => ext.replace('.', '')),
-        excludeRegExp: excludeRegExp.length > 0 ? excludeRegExp : undefined
+        excludeRegExp: excludeRegExp.length > 0 ? excludeRegExp : undefined,
+        maxDepth: normalizedMaxDepth,
+        // Поддержка ES modules (import/export)
+        detectiveOptions: {
+            es6: {
+                mixedImports: true,      // Поддержка import/export
+                skipLazyImports: false   // Не пропускать lazy imports
+            },
+            cjs: {
+                mixedImports: true       // Поддержка require
+            }
+        }
     };
+
+    console.log(`\n📏 MaxDepth для madge: ${normalizedMaxDepth === Infinity ? 'без ограничений' : normalizedMaxDepth}`);
 
     // Получаем дерево зависимостей
     console.log('\n📊 Построение дерева зависимостей...');
     const result = await madge(resolvedEntryFile, madgeConfig);
     let fullTree = result.obj();
+
+    console.log(`\n🔍 Найдено модулей в дереве: ${Object.keys(fullTree).length}`);
 
     // Если нужны только циклические зависимости - фильтруем дерево
     if (circularOnly) {
@@ -395,22 +481,13 @@ export async function scanDependencies(config) {
         }
     }
 
-    // Ограничиваем глубину
-    if (depth !== 'all' && !(circularOnly && depth === 'all')) {
-        const maxDepth = parseInt(depth, 10);
-        if (!isNaN(maxDepth)) {
-            console.log(`✂️ Ограничение глубины до ${maxDepth}...`);
-            fullTree = limitTreeDepth(fullTree, resolvedEntryFile, resolvedTargetDir, maxDepth);
-        }
-    }
-
     // Статистика
     const modules = Object.keys(fullTree);
-    console.log(`\n📦 Найдено модулей: ${modules.length}`);
+    console.log(`\n📦 Итоговое количество модулей: ${modules.length}`);
     const stats = collectStats(fullTree);
     const circular = result.circular();
 
-    // Генерация имен файлов по шаблону
+    // Генерация имен файлов по шаблону или фиксированных имен
     const now = new Date();
     const timestamp = Date.now();
     const baseName = path.basename(entryFile, path.extname(entryFile));
@@ -426,16 +503,16 @@ export async function scanDependencies(config) {
         suffix: suffix,
         entry: path.basename(entryFile),
         dir: path.basename(resolvedTargetDir),
-        depth: depth === 'all' ? 'full' : depth,
+        depth: maxDepth === 'all' ? 'full' : String(maxDepth),
         npm: includeNpm ? 'with-npm' : 'no-npm'
     };
 
-    // Генерируем имена файлов
+    // Генерируем имена файлов (если шаблон - подставляем, если нет - оставляем)
     const jsonFileName = generateFileName(outputFileName, templateVariables);
     const outputPath = path.join(resolvedOutputDir, jsonFileName);
 
-    let svgFileNameActual = null;
     let svgPath = null;
+    let svgFileNameActual = null;
     if (generateSvg && !circularOnly) {
         svgFileNameActual = generateFileName(svgFileName, templateVariables);
         svgPath = path.join(resolvedSvgDir, svgFileNameActual);
@@ -449,13 +526,14 @@ export async function scanDependencies(config) {
             targetDir: resolvedTargetDir,
             entryFile: resolvedEntryFile,
             entryFileName: path.basename(entryFile),
-            depth: depth === 'all' ? 'all' : parseInt(depth, 10),
+            maxDepth: maxDepth === 'all' ? 'all' : parseInt(maxDepth, 10),
             includeNpm: includeNpm,
             circularOnly: circularOnly,
             totalModules: modules.length,
             configUsed: configPath,
             outputFileName: jsonFileName,
-            outputPath: outputPath
+            outputPath: outputPath,
+            isTemplateFileName: isTemplateFileName(outputFileName)
         },
         stats: stats,
         tree: fullTree,
@@ -467,8 +545,11 @@ export async function scanDependencies(config) {
     // Сохраняем JSON
     await ensureDirectory(resolvedOutputDir);
     await fs.writeFile(outputPath, JSON.stringify(resultData, null, 2), 'utf-8');
+
+    const fileSize = (JSON.stringify(resultData, null, 2).length / 1024).toFixed(2);
     console.log(`\n💾 JSON сохранен: ${outputPath}`);
-    console.log(`   Размер: ${(JSON.stringify(resultData, null, 2).length / 1024).toFixed(2)} KB`);
+    console.log(`   Размер: ${fileSize} KB`);
+    console.log(`   Тип имени: ${isTemplateFileName(outputFileName) ? 'шаблонный' : 'фиксированный'}`);
 
     // Генерируем SVG если нужно
     if (generateSvg && hasGraphviz && !circularOnly) {
@@ -487,6 +568,7 @@ export async function scanDependencies(config) {
             await fs.access(svgPath);
             const svgStats = await fs.stat(svgPath);
             console.log(`✅ SVG создан: ${svgPath} (${(svgStats.size / 1024).toFixed(2)} KB)`);
+            console.log(`   Тип имени: ${isTemplateFileName(svgFileName) ? 'шаблонный' : 'фиксированный'}`);
 
             resultData.svgPath = svgPath;
 
@@ -634,14 +716,14 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         const hasArg = (name) => args.includes(name);
 
         if (hasArg('--help') || hasArg('-h')) {
-            console.log(`\nИспользование: node scan-dependencies.js [опции]\n\nОпции:\n  --dir <path>         Директория для сканирования\n  --entry <file>       Входной файл\n  --depth <n|all>      Глубина сканирования\n  --include-npm        Включить node_modules\n  --svg                Создать SVG визуализацию\n  --circular-only      Только циклические зависимости\n  --output <dir>       Каталог для JSON вывода\n  --output-name <name> Шаблон имени JSON файла\n  --svg-name <name>    Шаблон имени SVG файла\n  --config <file>      Путь к config.json\n  --add-to-config      Добавить в config.json\n  --help, -h           Показать справку\n\nШаблоны имени файла:\n  {{name}}       - имя входного файла без расширения\n  {{timestamp}}  - временная метка (Unix timestamp)\n  {{date}}       - дата (YYYY-MM-DD)\n  {{time}}       - время (HH-mm-ss)\n  {{datetime}}   - дата и время (YYYY-MM-DD_HH-mm-ss)\n  {{suffix}}     - суффикс (_circular для режима circular-only)\n  {{entry}}      - полное имя входного файла\n  {{dir}}        - имя директории\n  {{depth}}      - глубина (full или число)\n  {{npm}}        - with-npm или no-npm\n\nПримеры:\n  node scan-dependencies.js --dir ./src --entry index.js --depth 2 --svg\n  node scan-dependencies.js --dir ./src --entry index.js --circular-only\n  node scan-dependencies.js --dir ./src --entry index.js --output-name "deps_{{name}}_{{date}}.json"\n            `);
+            console.log(`\nИспользование: node scan-dependencies.js [опции]\n\nОпции:\n  --dir <path>         Директория для сканирования\n  --entry <file>       Входной файл\n  --max-depth <n|all>  Максимальная глубина сканирования\n  --include-npm        Включить node_modules\n  --svg                Создать SVG визуализацию\n  --circular-only      Только циклические зависимости\n  --output <dir>       Каталог для JSON вывода\n  --output-name <name> Имя JSON файла (фиксированное или шаблон)\n  --svg-name <name>    Имя SVG файла (фиксированное или шаблон)\n  --config <file>      Путь к config.json\n  --add-to-config      Добавить в config.json\n  --help, -h           Показать справку\n\nШаблоны имени файла (если имя содержит {{...}}):\n  {{name}}       - имя входного файла без расширения\n  {{timestamp}}  - временная метка (Unix timestamp)\n  {{date}}       - дата (YYYY-MM-DD)\n  {{time}}       - время (HH-mm-ss)\n  {{datetime}}   - дата и время (YYYY-MM-DD_HH-mm-ss)\n  {{suffix}}     - суффикс (_circular для режима circular-only)\n  {{entry}}      - полное имя входного файла\n  {{dir}}        - имя директории\n  {{depth}}      - глубина (full или число)\n  {{npm}}        - with-npm или no-npm\n\nПримеры:\n  # Фиксированные имена\n  node scan-dependencies.js --dir ./src --entry index.js --output-name "deps.json"\n  node scan-dependencies.js --dir ./src --entry index.js --svg-name "graph.svg"\n  \n  # Шаблонные имена\n  node scan-dependencies.js --dir ./src --entry index.js --output-name "deps_{{name}}_{{timestamp}}.json"\n  node scan-dependencies.js --dir ./src --entry index.js --output-name "report_{{date}}_{{time}}.json"\n  \n  # С разными типами имен для JSON и SVG\n  node scan-dependencies.js --dir ./src --entry index.js --output-name "deps.json" --svg-name "graph_{{timestamp}}.svg"\n            `);
             return;
         }
 
         const config = {
             targetDir: getArg('--dir') || './src',
             entryFile: getArg('--entry') || 'index.js',
-            depth: getArg('--depth') || 'all',
+            maxDepth: getArg('--max-depth') || 'all',
             includeNpm: hasArg('--include-npm'),
             generateSvg: hasArg('--svg'),
             circularOnly: hasArg('--circular-only'),

@@ -21,7 +21,7 @@ const defaultConfig = {
             "description": "Пользовательские функции: скрипты, расширения, пользовательские утилиты",
             "description_en": "User functions: scripts, extensions, user utilities",
             "required": false,
-            "excluded": false
+            "excluded": true
         },
         {
             "id": "12",
@@ -29,7 +29,7 @@ const defaultConfig = {
             "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
             "description_en": "User files: sources, templates, projects, user data",
             "required": false,
-            "excluded": false
+            "excluded": true
         }
     ],
     "excludePatterns": {
@@ -76,78 +76,91 @@ const defaultConfig = {
             "entryFile": "chatMonitor.js",
             "depth": "all",
             "outputJsonDir": "./fs",
-            "svgOutputDir": "./fs/svg",
-            "outputFileName": "dependencies_{{name}}_{{timestamp}}{{suffix}}.json",
-            "svgFileName": "graph_{{name}}_{{timestamp}}.svg"
+            "svgOutputDir": "./fs",
+            "outputFileName": "dependency.json",
+            "svgFileName": "dependency.svg"
         },
         "presets": {
             "deps-only": {
                 "description": "Только анализ зависимостей (без визуализации)",
                 "args": {
-                    "--svg": false,
-                    "--depth": "all"
+                    "svg": false,
+                    "depth": "all",
+                    "output-name": "dependency.json"
                 }
             },
             "svg-only": {
                 "description": "Только генерация SVG графа зависимостей",
                 "args": {
-                    "--svg": true,
-                    "--depth": "2"
+                    "svg": true,
+                    "depth": "2",
+                    "output-name": "dependency.json",
+                    "svg-name": "dependency.svg"
                 }
             },
             "quick": {
                 "description": "Быстрое сканирование (глубина 1, без npm)",
                 "args": {
-                    "--depth": "1",
-                    "--include-npm": false,
-                    "--svg": false
+                    "depth": "1",
+                    "include-npm": false,
+                    "svg": false,
+                    "output-name": "dependency.json"
                 }
             },
             "deep": {
                 "description": "Глубокое сканирование с визуализацией",
                 "args": {
-                    "--depth": "all",
-                    "--include-npm": true,
-                    "--svg": true
+                    "depth": "all",
+                    "include-npm": true,
+                    "svg": true,
+                    "output-name": "dependency.json",
+                    "svg-name": "dependency.svg"
                 }
             },
             "with-npm": {
                 "description": "Сканирование с включением npm зависимостей",
                 "args": {
-                    "--include-npm": true,
-                    "--depth": "3"
+                    "include-npm": true,
+                    "depth": "3",
+                    "output-name": "dependency.json"
                 }
             },
             "circular-only": {
                 "description": "Только поиск циклических зависимостей",
                 "args": {
-                    "--circular-only": true,
-                    "--svg": false,
-                    "--depth": "all"
+                    "circular-only": true,
+                    "svg": false,
+                    "depth": "all",
+                    "output-name": "circular_dependencies.json"
                 }
             },
             "visualize": {
                 "description": "Полная визуализация (SVG + граф)",
                 "args": {
-                    "--svg": true,
-                    "--depth": "3",
-                    "--include-npm": false
+                    "svg": true,
+                    "depth": "3",
+                    "include-npm": false,
+                    "output-name": "dependency.json",
+                    "svg-name": "dependency.svg"
                 }
             },
             "minimal": {
                 "description": "Минимальное сканирование (быстрое, без лишнего)",
                 "args": {
-                    "--depth": "1",
-                    "--svg": false,
-                    "--include-npm": false
+                    "depth": "1",
+                    "svg": false,
+                    "include-npm": false,
+                    "output-name": "dependency.json"
                 }
             },
             "full": {
                 "description": "Полное сканирование (всё включено)",
                 "args": {
-                    "--depth": "all",
-                    "--include-npm": true,
-                    "--svg": true
+                    "depth": "all",
+                    "include-npm": true,
+                    "svg": true,
+                    "output-name": "dependency.json",
+                    "svg-name": "dependency.svg"
                 }
             }
         },
