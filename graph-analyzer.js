@@ -1,4 +1,4 @@
-// graph-analyzer.js - финальная версия с поддержкой Vue и улучшенной обработкой путей
+// graph-analyzer.js - Полная версия со всеми режимами (100% кода)
 
 import fs from 'fs';
 import path from 'path';
@@ -15,16 +15,20 @@ const __dirname = path.dirname(__filename);
 // ==========================================
 const IGNORE_NODE_MODULES = true;
 const SUPPORTED_EXTENSIONS = ['.ts', '.mjs', '.js', '.tsx', '.jsx', '.vue'];
+const DEFAULT_EXCLUDE_PATTERNS = [
+    'node_modules', '.git', 'dist', 'build', 'coverage',
+    '.nyc_output', '__pycache__', '.cache', '.next', 'out',
+    '.nuxt', '.output', '.vercel', 'tmp', 'temp'
+];
 const VUE_SCRIPT_PATTERN = /<script[^>]*>([\s\S]*?)<\/script>/i;
 
 // ==========================================
-// ПАРСИНГ ФАЙЛОВ (с поддержкой Vue)
+// ПАРСИНГ ФАЙЛОВ
 // ==========================================
 function parseFile(filePath) {
     try {
         let code = fs.readFileSync(filePath, 'utf-8');
 
-        // Извлекаем script из Vue SFC
         if (filePath.endsWith('.vue')) {
             const scriptMatch = code.match(VUE_SCRIPT_PATTERN);
             if (!scriptMatch) {
@@ -60,7 +64,6 @@ function resolveFilePath(baseDir, targetPath) {
         const withExt = fullPath + ext;
         if (fs.existsSync(withExt)) return withExt;
 
-        // Для Vue файлов особый случай
         if (ext === '.vue') {
             const vuePath = fullPath.replace(/\.(js|ts)$/, '.vue');
             if (fs.existsSync(vuePath)) return vuePath;
@@ -70,21 +73,25 @@ function resolveFilePath(baseDir, targetPath) {
 }
 
 function getAllProjectFiles(dir, filesList = []) {
-    const files = fs.readdirSync(dir);
-    for (const file of files) {
-        const name = path.join(dir, file);
-        if (name.includes('node_modules') || name.includes('.git') || name.includes('dist')) continue;
-        if (fs.statSync(name).isDirectory()) {
-            getAllProjectFiles(name, filesList);
-        } else if (SUPPORTED_EXTENSIONS.includes(path.extname(name))) {
-            filesList.push(name);
+    try {
+        const files = fs.readdirSync(dir);
+        for (const file of files) {
+            const name = path.join(dir, file);
+            if (DEFAULT_EXCLUDE_PATTERNS.some(p => name.includes(p))) continue;
+            if (fs.statSync(name).isDirectory()) {
+                getAllProjectFiles(name, filesList);
+            } else if (SUPPORTED_EXTENSIONS.includes(path.extname(name))) {
+                filesList.push(name);
+            }
         }
+    } catch (error) {
+        console.warn(`⚠️ Ошибка чтения ${dir}: ${error.message}`);
     }
     return filesList;
 }
 
 // ==========================================
-// MINIFY (сжатие для ИИ)
+// MINIFY (Сжатие кода для ИИ)
 // ==========================================
 function minifyCodeString(code, ast) {
     if (!ast) return code;
@@ -92,7 +99,6 @@ function minifyCodeString(code, ast) {
 
     walk(ast, {
         enter(node) {
-            // Удаляем тела функций
             if ((node.type === 'FunctionDeclaration' || node.type === 'FunctionExpression' || node.type === 'MethodDefinition') && node.body) {
                 if (node.body.range && node.body.range[0] < node.body.range[1]) {
                     cuts.push({
@@ -102,7 +108,6 @@ function minifyCodeString(code, ast) {
                     });
                 }
             }
-            // Удаляем тела стрелочных функций
             if (node.type === 'ArrowFunctionExpression' && node.body && node.body.type === 'BlockStatement') {
                 if (node.body.range) {
                     cuts.push({
@@ -112,7 +117,6 @@ function minifyCodeString(code, ast) {
                     });
                 }
             }
-            // Скрываем значения констант
             if (node.type === 'VariableDeclarator' && node.init &&
                 !['ArrowFunctionExpression', 'FunctionExpression'].includes(node.init.type)) {
                 if (node.init.range) {
@@ -219,6 +223,8 @@ function buildFileInternalGraph(filePath) {
                     declarations[decl.id.name] = { type: 'variable', node: decl };
                 }
             });
+        } else if (targetNode.type === 'ClassDeclaration' && targetNode.id) {
+            declarations[targetNode.id.name] = { type: 'class', node: targetNode };
         }
     });
 
@@ -248,7 +254,7 @@ function buildFileInternalGraph(filePath) {
 }
 
 // ==========================================
-// РЕЖИМ 3: MINIFY (выше)
+// РЕЖИМ 3: MINIFY (один файл) - см. выше minifyForAI
 // ==========================================
 
 // ==========================================
@@ -308,6 +314,7 @@ function runImpactAnalysis(targetFile, entityName) {
     const targetRelKey = path.relative(process.cwd(), targetAbsPath);
 
     console.log(`🔍 Поиск использований "${entityName}" из "${targetRelKey}"...`);
+
     const allFiles = getAllProjectFiles(process.cwd());
     const impacts = [];
 
@@ -322,7 +329,6 @@ function runImpactAnalysis(targetFile, entityName) {
         let isImported = false;
         let localImportName = entityName;
 
-        // Проверяем импорт нужной сущности
         walk(ast, {
             enter(node) {
                 if (node.type === 'ImportDeclaration' && node.source) {
@@ -347,7 +353,6 @@ function runImpactAnalysis(targetFile, entityName) {
 
         if (!isImported) continue;
 
-        // Ищем места использования
         const affectedFunctions = new Set();
         let currentFunctionName = "Top-level (глобальный код)";
 
@@ -378,7 +383,6 @@ function runImpactAnalysis(targetFile, entityName) {
         }
     }
 
-    // Формируем отчет
     let report = `# ⚠️ ОТЧЕТ ПО ЗОНЕ ВЛИЯНИЯ ИЗМЕНЕНИЙ\n\n`;
     report += `**Цель:** Изменение/удаление сущности \`${entityName}\` в файле \`${targetRelKey}\`\n\n`;
 
@@ -410,7 +414,6 @@ function findDeadCode(targetFile) {
     const declaredExports = {};
     const usedIdentifiers = new Set();
 
-    // Сбор объявлений
     ast.body.forEach(node => {
         let isExport = false;
         let targetNode = node;
@@ -435,15 +438,17 @@ function findDeadCode(targetFile) {
                     collection[decl.id.name] = decl;
                 }
             });
+        } else if (targetNode.type === 'ClassDeclaration' && targetNode.id) {
+            collection[targetNode.id.name] = targetNode;
         }
     });
 
-    // Сбор использований внутри файла
     walk(ast, {
         enter(node) {
             if (node.type === 'Identifier') {
                 const parentType = node.parent?.type || '';
                 const isDeclaration = parentType === 'FunctionDeclaration' && node.parent?.id === node ||
+                    parentType === 'ClassDeclaration' && node.parent?.id === node ||
                     parentType === 'VariableDeclarator' && node.parent?.id === node ||
                     parentType === 'ImportSpecifier' ||
                     parentType === 'ImportDefaultSpecifier';
@@ -455,10 +460,8 @@ function findDeadCode(targetFile) {
         }
     });
 
-    // Поиск неиспользуемых локальных сущностей
     const deadLocals = Object.keys(declaredLocals).filter(name => !usedIdentifiers.has(name));
 
-    // Поиск неиспользуемых экспортов
     const deadExports = [];
     const allProjectFiles = getAllProjectFiles(process.cwd());
 
@@ -495,7 +498,6 @@ function findDeadCode(targetFile) {
         if (!hasExternalUsage) deadExports.push(exportName);
     }
 
-    // Формируем отчет
     let report = `# 🗑️ ОТЧЕТ ПО НЕИСПОЛЬЗУЕМОМУ КОДУ\n\n`;
     report += `**Анализируемый файл:** \`${targetRelKey}\`\n\n`;
 
@@ -518,6 +520,230 @@ function findDeadCode(targetFile) {
     }
 
     return report;
+}
+
+// ==========================================
+// РЕЖИМ 7: MINIFY FOLDER (рекурсивная минификация каталога)
+// ==========================================
+function generateDirectoryTree(baseDir, relativePaths, excludePatterns) {
+    const tree = {};
+
+    for (const relPath of relativePaths) {
+        const parts = relPath.split(path.sep);
+        let current = tree;
+
+        for (let i = 0; i < parts.length; i++) {
+            const part = parts[i];
+            if (i === parts.length - 1) {
+                current[part] = null;
+            } else {
+                if (!current[part]) current[part] = {};
+                current = current[part];
+            }
+        }
+    }
+
+    function renderNode(node, indent = '', prefix = '') {
+        let result = '';
+        const entries = Object.entries(node);
+
+        for (let i = 0; i < entries.length; i++) {
+            const [name, children] = entries[i];
+            const isLast = i === entries.length - 1;
+            const marker = isLast ? '└── ' : '├── ';
+            const newIndent = indent + (isLast ? '    ' : '│   ');
+
+            if (children === null) {
+                result += `${indent}${marker}📄 ${name}\n`;
+            } else {
+                result += `${indent}${marker}📁 ${name}/\n`;
+                result += renderNode(children, newIndent, '');
+            }
+        }
+
+        return result;
+    }
+
+    let output = `\`\`\`\n${path.basename(baseDir)}/\n`;
+    output += renderNode(tree, '  ');
+    output += `\`\`\`\n`;
+
+    return output;
+}
+
+function minifyFolder(inputDir, options = {}) {
+    const {
+        outputFile = 'ai-project-context.md',
+        extensions = ['.js', '.ts', '.tsx', '.jsx', '.vue', '.mjs', '.cjs'],
+        excludePatterns = DEFAULT_EXCLUDE_PATTERNS,
+        maxDepth = 10,
+        showStructure = true,
+        addTableOfContents = true,
+        sortByType = true
+    } = options;
+
+    const resolvedDir = path.resolve(inputDir);
+
+    if (!fs.existsSync(resolvedDir)) {
+        console.error(`❌ Каталог не существует: ${resolvedDir}`);
+        return null;
+    }
+
+    console.log(`\n📁 Сканирование: ${resolvedDir}`);
+    console.log(`📄 Расширения: ${extensions.join(', ')}`);
+    console.log(`🚫 Исключения: ${excludePatterns.join(', ')}\n`);
+
+    const files = [];
+
+    function collectFiles(dir, currentDepth = 0) {
+        if (currentDepth > maxDepth) return;
+
+        try {
+            const items = fs.readdirSync(dir);
+
+            for (const item of items) {
+                const fullPath = path.join(dir, item);
+                const stat = fs.statSync(fullPath);
+
+                const shouldExclude = excludePatterns.some(pattern =>
+                    fullPath.includes(pattern) || item === pattern
+                );
+
+                if (shouldExclude) continue;
+
+                if (stat.isDirectory()) {
+                    collectFiles(fullPath, currentDepth + 1);
+                } else if (stat.isFile()) {
+                    const ext = path.extname(item).toLowerCase();
+                    if (extensions.includes(ext)) {
+                        files.push({
+                            path: fullPath,
+                            relativePath: path.relative(resolvedDir, fullPath),
+                            ext: ext,
+                            size: stat.size
+                        });
+                    }
+                }
+            }
+        } catch (error) {
+            console.warn(`⚠️ Ошибка чтения ${dir}: ${error.message}`);
+        }
+    }
+
+    collectFiles(resolvedDir);
+
+    if (files.length === 0) {
+        console.log(`⚠️ Файлы с расширениями ${extensions.join(', ')} не найдены`);
+        return null;
+    }
+
+    console.log(`📊 Найдено файлов: ${files.length}\n`);
+
+    if (sortByType) {
+        files.sort((a, b) => {
+            if (a.ext !== b.ext) return a.ext.localeCompare(b.ext);
+            return a.relativePath.localeCompare(b.relativePath);
+        });
+    }
+
+    let markdown = `# 🤖 AI Context - Полный проект\n\n`;
+    markdown += `**Сгенерировано:** ${new Date().toLocaleString()}\n`;
+    markdown += `**Исходная директория:** \`${resolvedDir}\`\n`;
+    markdown += `**Всего файлов:** ${files.length}\n`;
+    markdown += `**Общий размер:** ${(files.reduce((sum, f) => sum + f.size, 0) / 1024).toFixed(2)} KB\n`;
+    markdown += `**Режим:** Сжатый (только сигнатуры, без реализации)\n\n`;
+
+    markdown += `---\n\n`;
+
+    markdown += `## 📋 ИНСТРУКЦИЯ ДЛЯ ИИ\n\n`;
+    markdown += `Ты — AI ассистент, который анализирует код проекта. Ниже представлен **полный проект** в сжатом виде:\n\n`;
+    markdown += `- ✅ **Сохранены:** импорты, экспорты, сигнатуры функций, JSDoc, TypeScript типы\n`;
+    markdown += `- ❌ **Удалены:** реализации функций, внутренние вычисления, локальные переменные\n`;
+    markdown += `- 🎯 **Цель:** Понимание архитектуры при минимальном расходе токенов\n\n`;
+
+    markdown += `### Как использовать этот контекст:\n\n`;
+    markdown += `1. Проанализируй структуру проекта\n`;
+    markdown += `2. Ответь на вопросы пользователя о взаимосвязях модулей\n`;
+    markdown += `3. Предложи рефакторинг, основываясь на предоставленных сигнатурах\n\n`;
+
+    markdown += `---\n\n`;
+
+    if (addTableOfContents) {
+        markdown += `## 📑 Оглавление\n\n`;
+
+        const byExt = {};
+        for (const file of files) {
+            if (!byExt[file.ext]) byExt[file.ext] = [];
+            byExt[file.ext].push(file);
+        }
+
+        for (const [ext, extFiles] of Object.entries(byExt)) {
+            markdown += `### ${ext} файлы (${extFiles.length})\n`;
+            for (const file of extFiles) {
+                const anchor = file.relativePath.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
+                markdown += `- [\`${file.relativePath}\`](#${anchor})\n`;
+            }
+            markdown += `\n`;
+        }
+        markdown += `---\n\n`;
+    }
+
+    if (showStructure) {
+        markdown += `## 📁 Структура проекта\n\n`;
+        markdown += generateDirectoryTree(resolvedDir, files.map(f => f.relativePath), excludePatterns);
+        markdown += `\n---\n\n`;
+    }
+
+    markdown += `## 📄 Содержимое файлов\n\n`;
+
+    let processedCount = 0;
+    let totalOriginalSize = 0;
+    let totalMinifiedSize = 0;
+
+    for (const file of files) {
+        processedCount++;
+        const progress = Math.round((processedCount / files.length) * 100);
+        process.stdout.write(`\r   🏭 Минификация: ${processedCount}/${files.length} (${progress}%)`);
+
+        const minified = minifyForAI(file.path);
+        if (!minified) continue;
+
+        totalOriginalSize += file.size;
+        totalMinifiedSize += minified.length;
+
+        const lang = file.ext === '.vue' ? 'vue' :
+            ['.ts', '.tsx'].includes(file.ext) ? 'typescript' :
+                'javascript';
+
+        markdown += `### \`${file.relativePath}\`\n`;
+        markdown += `\`\`\`${lang}\n${minified}\n\`\`\`\n\n`;
+        markdown += `---\n\n`;
+    }
+
+    console.log(`\n`);
+
+    const savedKB = (totalOriginalSize - totalMinifiedSize) / 1024;
+    const savedPercent = totalOriginalSize > 0 ? ((1 - totalMinifiedSize / totalOriginalSize) * 100).toFixed(1) : 0;
+
+    markdown += `## 📊 Статистика сжатия\n\n`;
+    markdown += `| Показатель | Значение |\n`;
+    markdown += `|------------|----------|\n`;
+    markdown += `| Исходный размер | ${(totalOriginalSize / 1024).toFixed(2)} KB |\n`;
+    markdown += `| Сжатый размер | ${(totalMinifiedSize / 1024).toFixed(2)} KB |\n`;
+    markdown += `| Экономия | ${savedKB.toFixed(2)} KB (${savedPercent}%) |\n`;
+    markdown += `| Количество файлов | ${files.length} |\n\n`;
+
+    fs.writeFileSync(outputFile, markdown, 'utf-8');
+
+    console.log(`\n${'='.repeat(60)}`);
+    console.log(`✅ ГОТОВО!`);
+    console.log(`${'='.repeat(60)}`);
+    console.log(`📄 Выходной файл: ${path.resolve(outputFile)}`);
+    console.log(`📊 Размер: ${(totalMinifiedSize / 1024).toFixed(2)} KB (сжатие ${savedPercent}%)`);
+    console.log(`📁 Файлов обработано: ${files.length}`);
+    console.log(`\n💡 Отправьте этот файл в ИИ для анализа всего проекта!`);
+
+    return markdown;
 }
 
 // ==========================================
@@ -552,7 +778,8 @@ function findCyclicEdges(graph) {
 function convertToDOT(graphData, cyclicEdges) {
     const { rootKey, graph } = graphData;
     let dot = `digraph "Dependency Graph" {\n`;
-    dot += `  rankdir=LR;\n  splines=true;\n`;
+    dot += `  rankdir=LR;\n`;
+    dot += `  splines=true;\n`;
     dot += `  node [shape=box, style="filled,rounded", color="#4f46e5", fontname="Arial", fillcolor="#f3f4f6", fontcolor="#1f2937", penwidth=1];\n`;
     dot += `  edge [color="#9ca3af", arrowhead=vee, penwidth=1];\n`;
     dot += `  "${rootKey}" [fillcolor="#4f46e5", fontcolor="#ffffff", penwidth=2, label="⭐ ${rootKey}"];\n`;
@@ -624,37 +851,124 @@ function escapeHtml(str) {
 }
 
 // ==========================================
-// CLI
+// ПАРСИНГ АРГУМЕНТОВ КОМАНДНОЙ СТРОКИ
 // ==========================================
-const [,, mode, targetPath, extraArg] = process.argv;
+function parseArgs() {
+    const args = process.argv.slice(2);
+    const mode = args[0];
 
-if (!mode || !targetPath) {
-    console.log(`
-╔══════════════════════════════════════════════════════════════════╗
-║              🔍 AST ANALYZER - AI TOOLKIT v2.0                  ║
-╠══════════════════════════════════════════════════════════════════╣
-║                                                                  ║
-║  📁 1. project    <файл> [depth]   - Граф зависимостей проекта   ║
-║  📄 2. file       <файл>           - Внутренний граф файла        ║
-║  ✂️  3. minify     <файл>           - Сжатие кода для ИИ (экономия)║
-║  🎒 4. prompt-pack <файл> [depth]   - Сборка контекста для ИИ     ║
-║  💥 5. impact     <файл> <entity>   - Анализ зоны влияния         ║
-║  🗑️  6. dead-code  <файл>           - Поиск мертвого кода         ║
-║                                                                  ║
-╚══════════════════════════════════════════════════════════════════╝
+    if (!mode || mode === '--help' || mode === '-h') {
+        showHelp();
+        return null;
+    }
 
-💡 Примеры:
-  node graph-analyzer.js project ./src/index.js 3
-  node graph-analyzer.js minify ./src/utils.js
-  node graph-analyzer.js prompt-pack ./src/app.js 2
-  node graph-analyzer.js impact ./src/db.ts query
-  node graph-analyzer.js dead-code ./src/old-stuff.js
-    `);
-    process.exit(1);
+    // Режим minify-folder
+    if (mode === 'minify-folder') {
+        const targetPath = args[1];
+        if (!targetPath) {
+            console.error('❌ Укажите путь к каталогу');
+            return null;
+        }
+
+        const options = {
+            outputFile: 'ai-project-context.md',
+            showStructure: true,
+            addTableOfContents: true,
+            sortByType: true,
+            maxDepth: 10
+        };
+
+        for (let i = 2; i < args.length; i++) {
+            const arg = args[i];
+            const nextArg = args[i + 1];
+
+            if (arg === '--output' || arg === '-o') {
+                options.outputFile = nextArg;
+                i++;
+            } else if (arg === '--depth' || arg === '-d') {
+                options.maxDepth = parseInt(nextArg, 10);
+                i++;
+            } else if (arg === '--no-structure') {
+                options.showStructure = false;
+            } else if (arg === '--no-toc') {
+                options.addTableOfContents = false;
+            } else if (arg === '--extensions' || arg === '-e') {
+                options.extensions = nextArg.split(',').map(e => e.trim().toLowerCase());
+                i++;
+            } else if (arg === '--exclude' || arg === '-x') {
+                options.excludePatterns = nextArg.split(',').map(e => e.trim());
+                i++;
+            }
+        }
+
+        return { mode: 'minify-folder', targetPath, options };
+    }
+
+    // Остальные режимы
+    const targetPath = args[1];
+    const extraArg = args[2];
+    const depthArg = args[3];
+
+    return { mode, targetPath, extraArg, depthArg };
 }
 
+function showHelp() {
+    console.log(`
+╔══════════════════════════════════════════════════════════════════╗
+║              🔍 AST ANALYZER - AI TOOLKIT v2.1                  ║
+╠══════════════════════════════════════════════════════════════════╣
+║                                                                  ║
+║  📁 project      <файл> [depth]   - Граф зависимостей проекта    ║
+║  📄 file         <файл>           - Внутренний граф файла         ║
+║  ✂️  minify       <файл>           - Сжатие одного файла для ИИ   ║
+║  📁 minify-folder <каталог> [опции] - Рекурсивное сжатие проекта  ║
+║  🎒 prompt-pack  <файл> [depth]   - Сборка контекста для ИИ       ║
+║  💥 impact       <файл> <entity>  - Анализ зоны влияния           ║
+║  🗑️  dead-code    <файл>           - Поиск мертвого кода          ║
+║                                                                  ║
+╠══════════════════════════════════════════════════════════════════╣
+║  minify-folder опции:                                            ║
+║    --output, -o     <file>   Выходной файл (по умолч: ai-project-context.md)
+║    --depth, -d      <n>      Глубина рекурсии (по умолч: 10)
+║    --extensions, -e <list>   Расширения через запятую (.js,.ts,.vue)
+║    --exclude, -x    <list>   Паттерны для исключения
+║    --no-structure             Не показывать структуру каталога
+║    --no-toc                   Не показывать оглавление
+║                                                                  ║
+╠══════════════════════════════════════════════════════════════════╣
+║  Примеры:                                                        ║
+║    node graph-analyzer.js minify-folder ./src                    ║
+║    node graph-analyzer.js minify-folder ./src -o project.md      ║
+║    node graph-analyzer.js minify-folder ./src -d 3               ║
+║    node graph-analyzer.js minify-folder . -e .js,.ts -x test     ║
+║    node graph-analyzer.js project ./src/index.js 3               ║
+║    node graph-analyzer.js impact ./src/db.ts findUser            ║
+║    node graph-analyzer.js dead-code ./src/legacy.js              ║
+║                                                                  ║
+╚══════════════════════════════════════════════════════════════════╝
+    `);
+}
+
+// ==========================================
+// MAIN
+// ==========================================
 async function main() {
-    // РЕЖИМ 6: DEAD CODE
+    const parsed = parseArgs();
+    if (!parsed) return;
+
+    const { mode, targetPath, extraArg, depthArg, options } = parsed;
+
+    // РЕЖИМ 7: minify-folder
+    if (mode === 'minify-folder') {
+        console.log(`\n${'='.repeat(60)}`);
+        console.log(`📁 РЕКУРСИВНАЯ МИНИФИКАЦИЯ ПРОЕКТА`);
+        console.log(`${'='.repeat(60)}`);
+
+        minifyFolder(targetPath, options);
+        return;
+    }
+
+    // РЕЖИМ 6: dead-code
     if (mode === 'dead-code') {
         console.log(`🔎 Анализ мертвого кода: ${targetPath}`);
         const report = findDeadCode(targetPath);
@@ -666,7 +980,7 @@ async function main() {
         return;
     }
 
-    // РЕЖИМ 5: IMPACT
+    // РЕЖИМ 5: impact
     if (mode === 'impact') {
         if (!extraArg) {
             console.error('❌ Укажите имя сущности: node graph-analyzer.js impact <файл> <entity>');
@@ -680,7 +994,7 @@ async function main() {
         return;
     }
 
-    // РЕЖИМ 4: PROMPT PACK
+    // РЕЖИМ 4: prompt-pack
     if (mode === 'prompt-pack') {
         const depth = extraArg ? parseInt(extraArg, 10) : 2;
         console.log(`🎒 Сборка промпт-пака для ${targetPath} (глубина ${depth})`);
@@ -691,17 +1005,18 @@ async function main() {
         return;
     }
 
-    // РЕЖИМ 3: MINIFY
+    // РЕЖИМ 3: minify (один файл)
     if (mode === 'minify') {
         console.log(`✂️ Минификация: ${targetPath}`);
         const minified = minifyForAI(targetPath);
         if (minified) {
             fs.writeFileSync('ai-context.txt', minified);
             console.log(`\n✅ Минифицированный код сохранен: ai-context.txt`);
-            console.log(`📊 Исходный размер: ${(fs.statSync(targetPath).size / 1024).toFixed(2)} KB`);
+            const originalSize = fs.statSync(targetPath).size;
+            console.log(`📊 Исходный размер: ${(originalSize / 1024).toFixed(2)} KB`);
             console.log(`📊 Сжатый размер: ${(minified.length / 1024).toFixed(2)} KB`);
-            const ratio = (minified.length / fs.statSync(targetPath).size * 100).toFixed(1);
-            console.log(`📊 Экономия: ${100 - ratio}% токенов`);
+            const ratio = (minified.length / originalSize * 100).toFixed(1);
+            console.log(`📊 Экономия: ${(100 - ratio).toFixed(1)}% токенов`);
         }
         return;
     }
@@ -717,6 +1032,7 @@ async function main() {
         resultData = buildFileInternalGraph(targetPath);
     } else {
         console.error(`❌ Неизвестный режим: ${mode}`);
+        showHelp();
         process.exit(1);
     }
 
