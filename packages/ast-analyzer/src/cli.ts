@@ -6,6 +6,7 @@
  */
 
 import fs from 'fs';
+import path from 'path';
 import { Graphviz } from '@hpcc-js/wasm-graphviz';
 
 // Core modules
@@ -39,6 +40,7 @@ interface ParsedArgs {
   targetPath: string;
   extraArg?: string;
   depthArg?: string;
+  outputDir?: string;
   options?: SplitModuleOptions | MinifyFolderOptions;
 }
 
@@ -53,16 +55,39 @@ function parseArgs(): ParsedArgs | null {
   const args = process.argv.slice(2);
   const mode = args[0];
 
+  let outputDir: string | undefined;
+  const cleanArgs: string[] = [];
+
+  // Извлекаем -o/--output из аргументов
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === '-o' || arg === '--output') {
+      if (arg && args[i + 1]) {
+        outputDir = args[i + 1];
+        i++; // пропускаем значение
+      }
+    } else if (arg) {
+      cleanArgs.push(arg);
+    }
+  }
+
+  // Временно заменяем argv для существующего парсинга
+  const originalArgv = [...process.argv];
+  const newArgv = [originalArgv[0] || 'node', originalArgv[1] || 'cli.js', ...cleanArgs];
+  process.argv = newArgv;
+
   if (!mode || mode === '--help' || mode === '-h') {
     showHelp();
+    process.argv = originalArgv;
     return null;
   }
 
   // Mode: split-module
   if (mode === 'split-module' || mode === 'split') {
-    const targetPath = args[1];
+    const targetPath = cleanArgs[1];
     if (!targetPath) {
       console.error('❌ Укажите путь к файлу');
+      process.argv = originalArgv;
       return null;
     }
 
@@ -80,9 +105,9 @@ function parseArgs(): ParsedArgs | null {
       prefix: '',
     };
 
-    for (let i = 2; i < args.length; i++) {
-      const arg = args[i];
-      const nextArg = args[i + 1];
+    for (let i = 2; i < cleanArgs.length; i++) {
+      const arg = cleanArgs[i];
+      const nextArg = cleanArgs[i + 1];
 
       switch (arg) {
         case '--output':
@@ -145,14 +170,16 @@ function parseArgs(): ParsedArgs | null {
       }
     }
 
-    return { mode: 'split-module', targetPath, options };
+    process.argv = originalArgv;
+    return { mode: 'split-module', targetPath, options, outputDir };
   }
 
   // Mode: minify-folder
   if (mode === 'minify-folder') {
-    const targetPath = args[1];
+    const targetPath = cleanArgs[1];
     if (!targetPath) {
       console.error('❌ Укажите путь к каталогу');
+      process.argv = originalArgv;
       return null;
     }
 
@@ -166,9 +193,9 @@ function parseArgs(): ParsedArgs | null {
       excludePatterns: [...DEFAULT_EXCLUDE_PATTERNS],
     };
 
-    for (let i = 2; i < args.length; i++) {
-      const arg = args[i];
-      const nextArg = args[i + 1];
+    for (let i = 2; i < cleanArgs.length; i++) {
+      const arg = cleanArgs[i];
+      const nextArg = cleanArgs[i + 1];
 
       switch (arg) {
         case '--output':
@@ -208,74 +235,88 @@ function parseArgs(): ParsedArgs | null {
       }
     }
 
-    return { mode: 'minify-folder', targetPath, options };
+    process.argv = originalArgv;
+    return { mode: 'minify-folder', targetPath, options, outputDir };
   }
 
   // Mode: dead-code
   if (mode === 'dead-code') {
-    const targetPath = args[1];
+    const targetPath = cleanArgs[1];
     if (!targetPath) {
       console.error('❌ Укажите путь к файлу');
+      process.argv = originalArgv;
       return null;
     }
-    return { mode: 'dead-code', targetPath, extraArg: '', depthArg: '' };
+    process.argv = originalArgv;
+    return { mode: 'dead-code', targetPath, extraArg: '', depthArg: '', outputDir };
   }
 
   // Mode: impact
   if (mode === 'impact') {
-    const targetPath = args[1];
-    const entityName = args[2];
+    const targetPath = cleanArgs[1];
+    const entityName = cleanArgs[2];
     if (!targetPath || !entityName) {
       console.error('❌ Укажите файл и сущность: impact <файл> <entity>');
+      process.argv = originalArgv;
       return null;
     }
-    return { mode: 'impact', targetPath, extraArg: entityName, depthArg: '' };
+    process.argv = originalArgv;
+    return { mode: 'impact', targetPath, extraArg: entityName, depthArg: '', outputDir };
   }
 
   // Mode: prompt-pack
   if (mode === 'prompt-pack') {
-    const targetPath = args[1];
-    const depth = args[2];
+    const targetPath = cleanArgs[1];
+    const depth = cleanArgs[2];
     if (!targetPath) {
       console.error('❌ Укажите путь к файлу');
+      process.argv = originalArgv;
       return null;
     }
-    return { mode: 'prompt-pack', targetPath, extraArg: depth, depthArg: '' };
+    process.argv = originalArgv;
+    return { mode: 'prompt-pack', targetPath, extraArg: depth, depthArg: '', outputDir };
   }
 
   // Mode: minify (single file)
   if (mode === 'minify') {
-    const targetPath = args[1];
+    const targetPath = cleanArgs[1];
     if (!targetPath) {
       console.error('❌ Укажите путь к файлу');
+      process.argv = originalArgv;
       return null;
     }
-    return { mode: 'minify', targetPath, extraArg: '', depthArg: '' };
+    process.argv = originalArgv;
+    return { mode: 'minify', targetPath, extraArg: '', depthArg: '', outputDir };
   }
 
   // Mode: project (graph)
   if (mode === 'project') {
-    const targetPath = args[1];
-    const maxDepth = args[2];
+    const targetPath = cleanArgs[1];
+    const maxDepth = cleanArgs[2];
     if (!targetPath) {
       console.error('❌ Укажите путь к файлу');
+      process.argv = originalArgv;
       return null;
     }
-    return { mode: 'project', targetPath, extraArg: maxDepth, depthArg: '' };
+    process.argv = originalArgv;
+    return { mode: 'project', targetPath, extraArg: maxDepth, depthArg: '', outputDir };
   }
 
   // Mode: file (internal graph)
   if (mode === 'file') {
-    const targetPath = args[1];
+    const targetPath = cleanArgs[1];
     if (!targetPath) {
       console.error('❌ Укажите путь к файлу');
+      process.argv = originalArgv;
       return null;
     }
-    return { mode: 'file', targetPath, extraArg: '', depthArg: '' };
+    process.argv = originalArgv;
+    return { mode: 'file', targetPath, extraArg: '', depthArg: '', outputDir };
   }
 
   console.error(`❌ Неизвестный режим: ${mode}`);
   showHelp();
+  process.argv = originalArgv;
   return null;
 }
 
@@ -287,7 +328,39 @@ export async function runCLI(): Promise<void> {
   const parsed = parseArgs();
   if (!parsed) return;
 
-  const { mode, targetPath, extraArg, options } = parsed;
+  let { mode, targetPath, extraArg, options, outputDir } = parsed;
+
+  // Обработка outputDir - смена рабочей директории
+  const originalCwd = process.cwd();
+  let outputDirChanged = false;
+  let originalTargetPath = targetPath;
+
+  if (outputDir) {
+    // Создаем директорию если её нет
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
+      console.log(`📁 Создана выходная директория: ${outputDir}`);
+    }
+
+    // Преобразуем targetPath в абсолютный путь относительно исходной директории
+    if (!path.isAbsolute(targetPath)) {
+      targetPath = path.resolve(originalCwd, targetPath);
+      console.log(`📄 Преобразован относительный путь в абсолютный:`);
+      console.log(`   Было: ${originalTargetPath}`);
+      console.log(`   Стало: ${targetPath}`);
+    }
+
+    // Проверяем существование файла
+    if (!fs.existsSync(targetPath)) {
+      console.error(`❌ Файл не найден: ${targetPath}`);
+      process.exit(1);
+    }
+
+    // Меняем рабочую директорию
+    process.chdir(outputDir);
+    outputDirChanged = true;
+    console.log(`📂 Выходная директория: ${process.cwd()}\n`);
+  }
 
   try {
     // Mode: split-module
@@ -465,6 +538,12 @@ export async function runCLI(): Promise<void> {
   } catch (error) {
     console.error('❌ Ошибка:', error);
     process.exit(1);
+  } finally {
+    // Возвращаемся в исходную директорию
+    if (outputDirChanged) {
+      process.chdir(originalCwd);
+      console.log(`\n📂 Возврат в исходную директорию: ${originalCwd}`);
+    }
   }
 }
 
