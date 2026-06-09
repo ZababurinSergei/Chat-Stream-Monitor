@@ -7,6 +7,7 @@ logs
 _sandbox
 /_sandbox_1
 npm-debug.log*
+coverage
 # Runtime data
 pids
 *.pid
