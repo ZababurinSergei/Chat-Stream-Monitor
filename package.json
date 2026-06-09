@@ -9,21 +9,6 @@
     "start": "node main.mjs",
     "scan": "node main.mjs",
     "config": "node generate-config.mjs",
-    "scan:deps": "node run-scan.js",
-    "scan:deps:interactive": "node run-scan.js --interactive",
-    "scan:deps:quick": "node run-scan.js --preset quick",
-    "scan:deps:deep": "node run-scan.js --preset deep",
-    "scan:deps:svg": "node run-scan.js --preset svg-only",
-    "scan:deps:deps-only": "node run-scan.js --preset deps-only",
-    "scan:deps:circular": "node run-scan.js --preset circular-only",
-    "scan:deps:visualize": "node run-scan.js --preset visualize",
-    "scan:deps:with-npm": "node run-scan.js --preset with-npm",
-    "scan:deps:full": "node run-scan.js --preset full",
-    "scan:deps:minimal": "node run-scan.js --preset minimal",
-    "scan:deps:shallow": "node run-scan.js --preset shallow",
-    "scan:deps:deepseek": "node run-scan.js --preset deep --dir ./Directory/11/extension/deepseek --entry background.js",
-    "scan:deps:qwen": "node run-scan.js --preset deep --dir ./Directory/11/extension/qwen --entry background.js",
-    "scan:deps:madge": "node run-scan.js --preset deep --dir ./Directory/13/madge --entry lib/api.js",
     "license:add": "node check-license.mjs add",
     "license:check": "node check-license.mjs check",
     "license:verify": "node check-license.mjs verify",
@@ -50,8 +35,7 @@
     "@hpcc-js/wasm-graphviz": "^1.22.0",
     "@typescript-eslint/parser": "^8.61.0",
     "estree-walker": "^3.0.3",
-    "glob": "^13.0.6",
-    "madge": "^8.0.0"
+    "glob": "^13.0.6"
   },
   "engines": {
     "node": ">=14.0.0"

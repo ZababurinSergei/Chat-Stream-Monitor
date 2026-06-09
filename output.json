@@ -1,42 +1,69 @@
 {
-  "rootKey": "Directory/11/backend/server.js",
+  "rootKey": "graph-analyzer_work.js",
   "graph": {
-    "Directory/11/backend/server.js": [
-      "Directory/11/backend/config/index.js",
-      "Directory/11/backend/routes/tasks.js",
-      "Directory/11/backend/routes/pending.js",
-      "Directory/11/backend/services/analyzerService.js",
-      "Directory/11/backend/database/db.js"
+    "__filename": [],
+    "__dirname": [
+      "__filename"
     ],
-    "Directory/11/backend/config/index.js": [
-      "Directory/11/backend/config/index.js"
+    "IGNORE_NODE_MODULES": [],
+    "SUPPORTED_EXTENSIONS": [],
+    "VUE_SCRIPT_PATTERN": [],
+    "parseFile": [
+      "VUE_SCRIPT_PATTERN"
     ],
-    "Directory/11/backend/routes/tasks.js": [
-      "Directory/11/backend/controllers/taskController.js"
+    "isExternalModule": [],
+    "resolveFilePath": [
+      "SUPPORTED_EXTENSIONS"
     ],
-    "Directory/11/backend/routes/pending.js": [
-      "Directory/11/backend/controllers/pendingController.js"
+    "getAllProjectFiles": [
+      "SUPPORTED_EXTENSIONS"
     ],
-    "Directory/11/backend/services/analyzerService.js": [
-      "Directory/11/backend/models/Task.js",
-      "Directory/11/backend/models/PendingAction.js",
-      "Directory/11/backend/database/db.js"
+    "minifyCodeString": [],
+    "minifyForAI": [
+      "parseFile",
+      "minifyCodeString"
     ],
-    "Directory/11/backend/database/db.js": [
-      "Directory/11/backend/config/index.js"
+    "buildProjectGraph": [
+      "parseFile",
+      "IGNORE_NODE_MODULES",
+      "isExternalModule",
+      "resolveFilePath"
+    ],
+    "buildFileInternalGraph": [
+      "parseFile"
+    ],
+    "buildAiPromptPack": [
+      "buildProjectGraph",
+      "minifyForAI"
+    ],
+    "runImpactAnalysis": [
+      "getAllProjectFiles",
+      "parseFile",
+      "resolveFilePath"
+    ],
+    "findDeadCode": [
+      "parseFile",
+      "getAllProjectFiles",
+      "resolveFilePath"
+    ],
+    "findCyclicEdges": [],
+    "convertToDOT": [],
+    "generateHTMLReport": [
+      "escapeHtml"
+    ],
+    "escapeHtml": [],
+    "main": [
+      "findDeadCode",
+      "runImpactAnalysis",
+      "buildAiPromptPack",
+      "minifyForAI",
+      "buildFileInternalGraph",
+      "buildProjectGraph",
+      "findCyclicEdges",
+      "convertToDOT",
+      "generateHTMLReport"
     ]
   },
-  "entryFile": "/home/sergei/Desktop/system/Directory/11/backend/server.js",
-  "cycleInfo": {
-    "hasCycles": true,
-    "cycleCount": 1,
-    "cycles": [
-      [
-        "Directory/11/backend/config/index.js"
-      ]
-    ],
-    "affectedNodes": [
-      "Directory/11/backend/config/index.js"
-    ]
-  }
+  "hasCycles": false,
+  "cyclicEdges": []
 }
