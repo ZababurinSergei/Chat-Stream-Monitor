@@ -1,0 +1,76 @@
+{
+  "name": "graph-analyzer",
+  "version": "2.2.0",
+  "description": "AST Analyzer - AI Toolkit for code analysis, graph visualization, and refactoring",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "graph-analyzer": "dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./cli": {
+      "import": "./dist/cli.js",
+      "types": "./dist/cli.d.ts"
+    }
+  },
+  "scripts": {
+    "clean": "rm -rf dist",
+    "build": "npm run clean && npm run build:types && npm run build:esbuild",
+    "build:types": "tsc --emitDeclarationOnly --declaration --declarationMap --outDir dist",
+    "build:esbuild": "node esbuild.config.js",
+    "build:prod": "NODE_ENV=production npm run build",
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "tsc --noEmit --watch",
+    "start": "node dist/cli.js",
+    "dev": "tsx src/graph-analyzer/cli.ts",
+    "prepublishOnly": "npm run build",
+    "test": "vitest",
+    "test:coverage": "vitest --coverage",
+    "lint": "eslint src --ext .ts",
+    "lint:fix": "eslint src --ext .ts --fix",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\""
+  },
+  "keywords": [
+    "ast",
+    "analyzer",
+    "graph",
+    "visualization",
+    "refactoring",
+    "ai",
+    "code-analysis",
+    "dependency-graph",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@hpcc-js/wasm-graphviz": "^1.22.0",
+    "@typescript-eslint/parser": "^8.61.0",
+    "estree-walker": "^3.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.2",
+    "@typescript-eslint/eslint-plugin": "^8.61.0",
+    "@typescript-eslint/parser": "^8.61.0",
+    "esbuild": "^0.28.0",
+    "eslint": "^10.4.1",
+    "prettier": "^3.8.4",
+    "tsx": "^4.22.4",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.8"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ]
+}

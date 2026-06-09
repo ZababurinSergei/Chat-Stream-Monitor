@@ -1,3 +1,284 @@
+# 🔪 РАЗБИЕНИЕ ФАЙЛА НА МОДУЛИ
+
+**Сгенерировано:** 6/9/2026, 7:48:34 PM
+**Целевой файл:** `./graph-analyzer.js`
+**Размер файла:** 76.11 KB
+**Количество строк:** 1779
+**Параметры анализа:**
+- Целевой размер кластера: 3
+- Максимальный размер кластера: 10
+- Глубина анализа: 5
+- Паттерны исключения: `node_modules, .git, dist, build, coverage, .nyc_output, __pycache__, .cache, .next, out, .nuxt, .output, .vercel, tmp, temp`
+
+---
+
+## 📋 ИНСТРУКЦИЯ ДЛЯ ИИ
+
+Ты — эксперт по рефакторингу кода. Твоя задача — **разбить монолитный файл на логически связанные модули**.
+
+### Критерии выделения модуля:
+
+1. **Связность (Cohesion)** — функции/классы, которые часто вызывают друг друга
+2. **Ответственность (Responsibility)** — общая тема/домен (например, валидация, API, UI)
+3. **Переиспользование (Reusability)** — сущности, которые могут быть полезны отдельно
+4. **Тестируемость (Testability)** — можно тестировать независимо
+5. **Размер модуля** — рекомендуется 50-200 строк на модуль
+
+### Анти-паттерны, которых следует избегать:
+
+- ❌ Циклические зависимости между модулями
+- ❌ Один модуль знает слишком много о других
+- ❌ "Мусорный" модуль (Utils) со всем подряд
+- ❌ Слишком мелкие модули (1-2 функции)
+- ❌ Слишком крупные модули (>300 строк)
+
+---
+
+## 📊 СТАТИСТИКА ФАЙЛА
+
+| Показатель | Значение |
+|------------|----------|
+| Всего строк | 1779 |
+| Экспортируемых сущностей | 0 |
+| Функций | 27 |
+| Классов | 0 |
+| Констант | 0 |
+| Интерфейсов/Типов | 0 |
+| Импортов | 6 |
+
+---
+
+## 📥 ИМПОРТЫ
+
+```typescript
+import { default as fs } from 'fs';
+import { default as path } from 'path';
+import { fileURLToPath } from 'url';
+import { default as parser } from '@typescript-eslint/parser';
+import { walk } from 'estree-walker';
+import { Graphviz } from '@hpcc-js/wasm-graphviz';
+```
+
+---
+
+## 🔍 ВЫЯВЛЕННЫЕ КЛАСТЕРЫ (КАНДИДАТЫ В МОДУЛИ)
+
+На основе анализа вызовов функций (call graph) выявлены следующие кластеры:
+
+### 1. Кластер: `buildFileInternalGraphCluster`
+- **Тип:** 🔶 Вспомогательный (внутренний)
+- **Размер:** 2 сущностей
+- **Связность:** 50.0%
+- **Рекомендация:** ⚠️ Слишком маленький кластер. Рассмотрите объединение с другим.
+- **Функции:** `buildFileInternalGraph`, `parseFile`
+- **Зависимости:** `parseFile`, `walk`
+
+### 2. Кластер: `analyzeModuleStructureCluster`
+- **Тип:** 🔶 Вспомогательный (внутренний)
+- **Размер:** 2 сущностей
+- **Связность:** 50.0%
+- **Рекомендация:** ⚠️ Слишком маленький кластер. Рассмотрите объединение с другим.
+- **Функции:** `analyzeModuleStructure`, `parseFile`
+- **Зависимости:** `parseFile`, `walk`
+
+### 3. Кластер: `generateHTMLReportCluster`
+- **Тип:** 🔶 Вспомогательный (внутренний)
+- **Размер:** 2 сущностей
+- **Связность:** 50.0%
+- **Рекомендация:** ⚠️ Слишком маленький кластер. Рассмотрите объединение с другим.
+- **Функции:** `generateHTMLReport`, `escapeHtml`
+- **Зависимости:** `escapeHtml`
+
+### 4. Кластер: `parseArgsCluster`
+- **Тип:** 🔶 Вспомогательный (внутренний)
+- **Размер:** 2 сущностей
+- **Связность:** 50.0%
+- **Рекомендация:** ⚠️ Слишком маленький кластер. Рассмотрите объединение с другим.
+- **Функции:** `parseArgs`, `showHelp`
+- **Зависимости:** `showHelp`, `parseInt`
+
+### 5. Кластер: `scanCluster`
+- **Тип:** 🔶 Вспомогательный (внутренний)
+- **Размер:** 4 сущностей
+- **Связность:** 33.3%
+- **Рекомендация:** ✅ Оптимальный размер для модуля.
+- **Функции:** `scan`, `parseFile`, `isExternalModule`, `resolveFilePath`
+- **Зависимости:** `parseFile`, `walk`, `isExternalModule`, `resolveFilePath`, `scan`
+
+### 6. Кластер: `runImpactAnalysisCluster`
+- **Тип:** 🔶 Вспомогательный (внутренний)
+- **Размер:** 4 сущностей
+- **Связность:** 33.3%
+- **Рекомендация:** ✅ Оптимальный размер для модуля.
+- **Функции:** `runImpactAnalysis`, `getAllProjectFiles`, `parseFile`, `resolveFilePath`
+- **Зависимости:** `getAllProjectFiles`, `parseFile`, `walk`, `resolveFilePath`, `getAllProjectFiles`
+
+### 7. Кластер: `findDeadCodeCluster`
+- **Тип:** 🔶 Вспомогательный (внутренний)
+- **Размер:** 4 сущностей
+- **Связность:** 33.3%
+- **Рекомендация:** ✅ Оптимальный размер для модуля.
+- **Функции:** `findDeadCode`, `parseFile`, `getAllProjectFiles`, `resolveFilePath`
+- **Зависимости:** `parseFile`, `walk`, `getAllProjectFiles`, `resolveFilePath`, `getAllProjectFiles`
+
+### 8. Кластер: `minifyForAICluster`
+- **Тип:** 🔶 Вспомогательный (внутренний)
+- **Размер:** 3 сущностей
+- **Связность:** 33.3%
+- **Рекомендация:** ✅ Оптимальный размер для модуля.
+- **Функции:** `minifyForAI`, `parseFile`, `minifyCodeString`
+- **Зависимости:** `parseFile`, `minifyCodeString`, `walk`
+
+### 9. Кластер: `buildAiPromptPackCluster`
+- **Тип:** 🔶 Вспомогательный (внутренний)
+- **Размер:** 3 сущностей
+- **Связность:** 33.3%
+- **Рекомендация:** ✅ Оптимальный размер для модуля.
+- **Функции:** `buildAiPromptPack`, `buildProjectGraph`, `minifyForAI`
+- **Зависимости:** `buildProjectGraph`, `minifyForAI`, `parseFile`, `minifyCodeString`
+
+### 10. Кластер: `buildSplitModulePromptCluster`
+- **Тип:** 🔶 Вспомогательный (внутренний)
+- **Размер:** 6 сущностей
+- **Связность:** 16.7%
+- **Рекомендация:** ✅ Оптимальный размер для модуля.
+- **Функции:** `buildSplitModulePrompt`, `analyzeModuleStructure`, `buildFileInternalGraph`, `findCyclicEdges`, `identifyClusters`, `minifyForAI`
+- **Зависимости:** `analyzeModuleStructure`, `buildFileInternalGraph`, `findCyclicEdges`, `identifyClusters`, `minifyForAI`, `parseFile`, `walk`, `parseFile`, `walk`, `parseFile`, `minifyCodeString`
+
+### 11. Кластер: `mainCluster`
+- **Тип:** 🔶 Вспомогательный (внутренний)
+- **Размер:** 14 сущностей
+- **Связность:** 10.4%
+- **Рекомендация:** ⚠️ Слишком большой кластер. Рекомендуется разбить дальше.
+- **Функции:** `main`, `parseArgs`, `buildSplitModulePrompt`, `minifyFolder`, `findDeadCode`, `runImpactAnalysis`, `buildAiPromptPack`, `minifyForAI`, `showHelp`, `buildFileInternalGraph`, `buildProjectGraph`, `findCyclicEdges`, `convertToDOT`, `generateHTMLReport`
+- **Зависимости:** `parseArgs`, `buildSplitModulePrompt`, `minifyFolder`, `findDeadCode`, `runImpactAnalysis`, `parseInt`, `buildAiPromptPack`, `minifyForAI`, `showHelp`, `buildFileInternalGraph`, `buildProjectGraph`, `findCyclicEdges`, `convertToDOT`, `generateHTMLReport`, `showHelp`, `parseInt`, `analyzeModuleStructure`, `buildFileInternalGraph`, `findCyclicEdges`, `identifyClusters`, `minifyForAI`, `parseFile`, `walk`, `getAllProjectFiles`, `resolveFilePath`, `getAllProjectFiles`, `parseFile`, `walk`, `resolveFilePath`, `buildProjectGraph`, `minifyForAI`, `parseFile`, `minifyCodeString`, `parseFile`, `walk`, `escapeHtml`
+
+### 12. Кластер: `parseFileCluster`
+- **Тип:** 🔶 Вспомогательный (внутренний)
+- **Размер:** 1 сущностей
+- **Связность:** 0.0%
+- **Рекомендация:** ⚠️ Слишком маленький кластер. Рассмотрите объединение с другим.
+- **Функции:** `parseFile`
+
+### 13. Кластер: `resolveFilePathCluster`
+- **Тип:** 🔶 Вспомогательный (внутренний)
+- **Размер:** 1 сущностей
+- **Связность:** 0.0%
+- **Рекомендация:** ⚠️ Слишком маленький кластер. Рассмотрите объединение с другим.
+- **Функции:** `resolveFilePath`
+
+### 14. Кластер: `getAllProjectFilesCluster`
+- **Тип:** 🔶 Вспомогательный (внутренний)
+- **Размер:** 1 сущностей
+- **Связность:** 0.0%
+- **Рекомендация:** ⚠️ Слишком маленький кластер. Рассмотрите объединение с другим.
+- **Функции:** `getAllProjectFiles`
+- **Зависимости:** `getAllProjectFiles`
+
+### 15. Кластер: `buildProjectGraphCluster`
+- **Тип:** 🔶 Вспомогательный (внутренний)
+- **Размер:** 1 сущностей
+- **Связность:** 0.0%
+- **Рекомендация:** ⚠️ Слишком маленький кластер. Рассмотрите объединение с другим.
+- **Функции:** `buildProjectGraph`
+
+### 16. Кластер: `findCyclicEdgesCluster`
+- **Тип:** 🔶 Вспомогательный (внутренний)
+- **Размер:** 1 сущностей
+- **Связность:** 0.0%
+- **Рекомендация:** ⚠️ Слишком маленький кластер. Рассмотрите объединение с другим.
+- **Функции:** `findCyclicEdges`
+
+### 17. Кластер: `showHelpCluster`
+- **Тип:** 🔶 Вспомогательный (внутренний)
+- **Размер:** 1 сущностей
+- **Связность:** 0.0%
+- **Рекомендация:** ⚠️ Слишком маленький кластер. Рассмотрите объединение с другим.
+- **Функции:** `showHelp`
+
+### 18. Кластер: `isExternalModuleCluster`
+- **Тип:** 🔶 Вспомогательный (внутренний)
+- **Размер:** 1 сущностей
+- **Связность:** 0.0%
+- **Рекомендация:** ⚠️ Слишком маленький кластер. Рассмотрите объединение с другим.
+- **Функции:** `isExternalModule`
+
+### 19. Кластер: `identifyClustersCluster`
+- **Тип:** 🔶 Вспомогательный (внутренний)
+- **Размер:** 1 сущностей
+- **Связность:** 0.0%
+- **Рекомендация:** ⚠️ Слишком маленький кластер. Рассмотрите объединение с другим.
+- **Функции:** `identifyClusters`
+
+### 20. Кластер: `renderNodeCluster`
+- **Тип:** 🔶 Вспомогательный (внутренний)
+- **Размер:** 1 сущностей
+- **Связность:** 0.0%
+- **Рекомендация:** ⚠️ Слишком маленький кластер. Рассмотрите объединение с другим.
+- **Функции:** `renderNode`
+- **Зависимости:** `renderNode`
+
+### 21. Кластер: `minifyFolderCluster`
+- **Тип:** 🔶 Вспомогательный (внутренний)
+- **Размер:** 1 сущностей
+- **Связность:** 0.0%
+- **Рекомендация:** ⚠️ Слишком маленький кластер. Рассмотрите объединение с другим.
+- **Функции:** `minifyFolder`
+
+### 22. Кластер: `collectFilesCluster`
+- **Тип:** 🔶 Вспомогательный (внутренний)
+- **Размер:** 1 сущностей
+- **Связность:** 0.0%
+- **Рекомендация:** ⚠️ Слишком маленький кластер. Рассмотрите объединение с другим.
+- **Функции:** `collectFiles`
+- **Зависимости:** `collectFiles`
+
+### 23. Кластер: `dfsCluster`
+- **Тип:** 🔶 Вспомогательный (внутренний)
+- **Размер:** 1 сущностей
+- **Связность:** 0.0%
+- **Рекомендация:** ⚠️ Слишком маленький кластер. Рассмотрите объединение с другим.
+- **Функции:** `dfs`
+- **Зависимости:** `dfs`
+
+### 24. Кластер: `convertToDOTCluster`
+- **Тип:** 🔶 Вспомогательный (внутренний)
+- **Размер:** 1 сущностей
+- **Связность:** 0.0%
+- **Рекомендация:** ⚠️ Слишком маленький кластер. Рассмотрите объединение с другим.
+- **Функции:** `convertToDOT`
+
+### 25. Кластер: `generateDirectoryTreeCluster`
+- **Тип:** 🔶 Вспомогательный (внутренний)
+- **Размер:** 1 сущностей
+- **Связность:** 0.0%
+- **Рекомендация:** ⚠️ Слишком маленький кластер. Рассмотрите объединение с другим.
+- **Функции:** `generateDirectoryTree`
+
+---
+
+## 🎯 ПРЕДЛАГАЕМАЯ СТРУКТУРА МОДУЛЕЙ
+
+На основе анализа предлагается следующая структура:
+
+```
+./
+├── index.ts                 # Точка входа (реэкспорт)
+├── types.ts                 # Общие интерфейсы и типы
+├── buildfileinternalgraph.ts          # buildFileInternalGraph, parseFile
+├── analyzemodulestructure.ts          # analyzeModuleStructure, parseFile
+├── generatehtmlreport.ts          # generateHTMLReport, escapeHtml
+├── parseargs.ts          # parseArgs, showHelp
+├── scan.ts          # scan, parseFile, isExternalModule...
+└── utils.ts                 # Общие утилиты
+```
+
+---
+
+## 📄 ПОЛНЫЙ КОД ФАЙЛА
+
+### `graph-analyzer.js`
+```javascript
 // graph-analyzer.js - Полная версия со всеми режимами и исправленными переменными
 
 import fs from 'fs';
@@ -1777,3 +2058,99 @@ async function main() {
 }
 
 main().catch(console.error);
+```
+
+---
+
+## ✂️ СЖАТАЯ ВЕРСИЯ (только сигнатуры)
+
+```typescript
+// graph-analyzer.js - Полная версия со всеми режимами и исправленными переменными
+
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import parser from '@typescript-eslint/parser';
+import { walk } from 'estree-walker';
+import { Graphviz } from '@hpcc-js/wasm-graphviz';
+
+// ==========================================
+// ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
+// ==========================================
+const __filename = /* значение скрыто */;
+const __dirname = /* значение скрыто */;
+
+// ==========================================
+// КОНФИГУРАЦИЯ
+// ==========================================
+const IGNORE_NODE_MODULES = /* значение скрыто */;
+const SUPPORTED_EXTENSIONS = /* значение скрыто */;
+const DEFAULT_EXCLUDE_PATTERNS = /* значение скрыто */;
+const VUE_SCRIPT_PATTERN = /* значение скрыто */;
+
+// ==========================================
+// ПАРСИНГ ФАЙЛОВ
+// ==========================================
+function parseFile(filePath) { /* реализация скрыта */ Module(importTarget) { /* реализация скрыта */ }
+
+function resolveFilePath(baseDir, targetPath) { /* реализация скрыта */ ectFiles(dir, filesList = [], excludePatterns = DEFAULT_EXCLUDE_PATTERNS) { /* реализация скрыта */ t;
+}
+
+// ==========================================
+// MINIFY (Сжатие кода для ИИ)
+// ==========================================
+function minifyCodeString(code, ast) { /* реализация скрыта */ 
+```
+
+---
+
+## 🕸️ ГРАФ ВЫЗОВОВ (Call Graph)
+
+```
+getAllProjectFiles → getAllProjectFiles
+minifyCodeString → walk
+minifyForAI → parseFile, minifyCodeString
+analyzeModuleStructure → parseFile, walk
+scan → parseFile, walk, isExternalModule, resolveFilePath, scan
+buildFileInternalGraph → parseFile, walk
+buildAiPromptPack → buildProjectGraph, minifyForAI
+buildSplitModulePrompt → analyzeModuleStructure, buildFileInternalGraph, findCyclicEdges, identifyClusters, minifyForAI
+renderNode → renderNode
+collectFiles → collectFiles
+runImpactAnalysis → getAllProjectFiles, parseFile, walk, resolveFilePath
+findDeadCode → parseFile, walk, getAllProjectFiles, resolveFilePath
+dfs → dfs
+generateHTMLReport → escapeHtml
+parseArgs → showHelp, parseInt
+main → parseArgs, buildSplitModulePrompt, minifyFolder, findDeadCode, runImpactAnalysis, parseInt, buildAiPromptPack, minifyForAI, showHelp, buildFileInternalGraph, buildProjectGraph, findCyclicEdges, convertToDOT, generateHTMLReport
+```
+
+---
+
+## 📤 ОЖИДАЕМЫЙ ФОРМАТ ОТВЕТА
+
+### 1. Анализ текущей структуры (2-3 предложения)
+
+### 2. Предлагаемая структура модулей
+
+```
+./
+├── modules/
+│   ├── module-a.ts
+│   ├── module-b.ts
+│   └── module-c.ts
+├── types.ts
+└── index.ts
+```
+
+### 3. Код каждого нового модуля
+
+Для каждого модуля укажи:
+- Полный код файла
+- Какие функции/классы переносятся
+- Новые импорты/экспорты
+
+### 4. Обновленный корневой файл (index.ts)
+
+### 5. План миграции (пошагово)
+

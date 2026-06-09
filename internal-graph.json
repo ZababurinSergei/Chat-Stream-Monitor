@@ -1,5 +1,5 @@
 {
-  "rootKey": "graph-analyzer_work.js",
+  "rootKey": "graph-analyzer.js",
   "graph": {
     "__filename": [],
     "__dirname": [
@@ -7,6 +7,7 @@
     ],
     "IGNORE_NODE_MODULES": [],
     "SUPPORTED_EXTENSIONS": [],
+    "DEFAULT_EXCLUDE_PATTERNS": [],
     "VUE_SCRIPT_PATTERN": [],
     "parseFile": [
       "VUE_SCRIPT_PATTERN"
@@ -16,13 +17,19 @@
       "SUPPORTED_EXTENSIONS"
     ],
     "getAllProjectFiles": [
-      "SUPPORTED_EXTENSIONS"
+      "SUPPORTED_EXTENSIONS",
+      "DEFAULT_EXCLUDE_PATTERNS"
     ],
     "minifyCodeString": [],
     "minifyForAI": [
       "parseFile",
       "minifyCodeString"
     ],
+    "analyzeModuleStructure": [
+      "DEFAULT_EXCLUDE_PATTERNS",
+      "parseFile"
+    ],
+    "identifyClusters": [],
     "buildProjectGraph": [
       "parseFile",
       "IGNORE_NODE_MODULES",
@@ -36,13 +43,31 @@
       "buildProjectGraph",
       "minifyForAI"
     ],
+    "buildSplitModulePrompt": [
+      "DEFAULT_EXCLUDE_PATTERNS",
+      "analyzeModuleStructure",
+      "buildFileInternalGraph",
+      "findCyclicEdges",
+      "identifyClusters",
+      "minifyForAI",
+      "toLocaleString"
+    ],
+    "generateDirectoryTree": [],
+    "minifyFolder": [
+      "DEFAULT_EXCLUDE_PATTERNS",
+      "toLocaleString",
+      "generateDirectoryTree",
+      "minifyForAI"
+    ],
     "runImpactAnalysis": [
+      "DEFAULT_EXCLUDE_PATTERNS",
       "getAllProjectFiles",
       "parseFile",
       "resolveFilePath"
     ],
     "findDeadCode": [
       "parseFile",
+      "DEFAULT_EXCLUDE_PATTERNS",
       "getAllProjectFiles",
       "resolveFilePath"
     ],
@@ -52,18 +77,25 @@
       "escapeHtml"
     ],
     "escapeHtml": [],
+    "parseArgs": [
+      "showHelp",
+      "DEFAULT_EXCLUDE_PATTERNS"
+    ],
+    "showHelp": [],
     "main": [
+      "parseArgs",
+      "buildSplitModulePrompt",
+      "minifyFolder",
       "findDeadCode",
       "runImpactAnalysis",
       "buildAiPromptPack",
       "minifyForAI",
+      "showHelp",
       "buildFileInternalGraph",
       "buildProjectGraph",
       "findCyclicEdges",
       "convertToDOT",
       "generateHTMLReport"
     ]
-  },
-  "hasCycles": false,
-  "cyclicEdges": []
+  }
 }

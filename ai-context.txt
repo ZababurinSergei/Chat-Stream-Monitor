@@ -1,4 +1,4 @@
-// graph-analyzer.js - финальная версия с поддержкой Vue и улучшенной обработкой путей
+// graph-analyzer.js - Полная версия со всеми режимами и исправленными переменными
 
 import fs from 'fs';
 import path from 'path';
@@ -7,6 +7,9 @@ import parser from '@typescript-eslint/parser';
 import { walk } from 'estree-walker';
 import { Graphviz } from '@hpcc-js/wasm-graphviz';
 
+// ==========================================
+// ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ
+// ==========================================
 const __filename = /* значение скрыто */;
 const __dirname = /* значение скрыто */;
 
@@ -15,17 +18,18 @@ const __dirname = /* значение скрыто */;
 // ==========================================
 const IGNORE_NODE_MODULES = /* значение скрыто */;
 const SUPPORTED_EXTENSIONS = /* значение скрыто */;
+const DEFAULT_EXCLUDE_PATTERNS = /* значение скрыто */;
 const VUE_SCRIPT_PATTERN = /* значение скрыто */;
 
 // ==========================================
-// ПАРСИНГ ФАЙЛОВ (с поддержкой Vue)
+// ПАРСИНГ ФАЙЛОВ
 // ==========================================
 function parseFile(filePath) { /* реализация скрыта */ Module(importTarget) { /* реализация скрыта */ }
 
-function resolveFilePath(baseDir, targetPath) { /* реализация скрыта */ ectFiles(dir, filesList = []) { /* реализация скрыта */ t;
+function resolveFilePath(baseDir, targetPath) { /* реализация скрыта */ ectFiles(dir, filesList = [], excludePatterns = DEFAULT_EXCLUDE_PATTERNS) { /* реализация скрыта */ t;
 }
 
 // ==========================================
-// MINIFY (сжатие для ИИ)
+// MINIFY (Сжатие кода для ИИ)
 // ==========================================
 function minifyCodeString(code, ast) { /* реализация скрыта */ 
