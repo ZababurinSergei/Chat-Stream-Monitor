@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import parser from '@typescript-eslint/parser';
 import { walk } from 'estree-walker';
+import { loadTsConfig, resolveAliasPath, TsConfig } from './tsconfig-resolver.js';
 
 // ==========================================
 // КОНФИГУРАЦИЯ
@@ -26,6 +27,21 @@ const DEFAULT_EXCLUDE_PATTERNS = [
   'temp',
 ];
 const VUE_SCRIPT_PATTERN = /<script[^>]*>([\s\S]*?)<\/script>/i;
+
+// Кэш для tsconfig
+let tsConfigCache: TsConfig | null = null;
+let tsConfigBaseDir: string | null = null;
+
+function getTsConfigForFile(filePath: string): TsConfig | null {
+  const dir = path.dirname(filePath);
+  if (tsConfigCache && tsConfigBaseDir === dir) {
+    return tsConfigCache;
+  }
+
+  tsConfigBaseDir = dir;
+  tsConfigCache = loadTsConfig(dir);
+  return tsConfigCache;
+}
 
 // ==========================================
 // ПАРСИНГ ФАЙЛОВ
@@ -72,18 +88,34 @@ export function isExternalModule(importTarget: string): boolean {
 }
 
 export function resolveFilePath(baseDir: string, targetPath: string): string | null {
+  // 1. Сначала проверяем алиасы из tsconfig
+  const tsConfig = getTsConfigForFile(baseDir);
+  const aliasedPath = resolveAliasPath(targetPath, baseDir, tsConfig);
+
+  if (aliasedPath && fs.existsSync(aliasedPath)) {
+    // console.log(`   🔗 Алиас: ${targetPath} → ${aliasedPath}`); // можно раскомментировать для отладки
+    return aliasedPath;
+  }
+
+  // 2. Обычный резолвинг
   const fullPath = path.resolve(baseDir, targetPath);
   if (fs.existsSync(fullPath) && fs.statSync(fullPath).isFile()) return fullPath;
 
+  // 3. Проверяем с расширениями
   for (const ext of SUPPORTED_EXTENSIONS) {
     const withExt = fullPath + ext;
     if (fs.existsSync(withExt)) return withExt;
+
+    // Проверяем index файлы
+    const indexPath = path.join(fullPath, `index${ext}`);
+    if (fs.existsSync(indexPath)) return indexPath;
 
     if (ext === '.vue') {
       const vuePath = fullPath.replace(/\.(js|ts)$/, '.vue');
       if (fs.existsSync(vuePath)) return vuePath;
     }
   }
+
   return null;
 }
 

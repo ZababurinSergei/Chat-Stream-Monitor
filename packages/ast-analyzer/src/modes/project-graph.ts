@@ -1,8 +1,60 @@
 // modes/project-graph.ts
 import path from 'path';
+import fs from 'fs';
 import { parseFile, resolveFilePath, isExternalModule } from '../core/ast-parser.js';
 import { IGNORE_NODE_MODULES } from '../config.js';
 import { walk } from 'estree-walker';
+
+/**
+ * Рекурсивно резолвит реэкспорты (export {...} from '...')
+ * @param filePath - путь к файлу, который может быть реэкспортом
+ * @param importTarget - целевой импорт (то, что после 'from')
+ * @returns разрешенный путь к файлу или null
+ */
+function resolveExports(filePath: string, importTarget: string): string | null {
+  const dir = path.dirname(filePath);
+  const resolved = resolveFilePath(dir, importTarget);
+
+  if (!resolved) return null;
+
+  try {
+    // Проверяем, не является ли файл реэкспортом (index.ts или подобный)
+    const content = fs.readFileSync(resolved, 'utf-8');
+
+    // Ищем реэкспорты вида: export { something } from './module'
+    const reexportPattern = /export\s+{\s*[\w\s,]*\s*}\s+from\s+['"]([^'"]+)['"]/g;
+    let match;
+
+    while ((match = reexportPattern.exec(content)) !== null) {
+      if (match[1]) {
+        // Рекурсивно резолвим вложенный реэкспорт
+        const nestedResolved = resolveExports(resolved, match[1]);
+        if (nestedResolved) return nestedResolved;
+      }
+    }
+
+    // Ищем реэкспорт по умолчанию: export { default } from './module'
+    const defaultReexportPattern = /export\s+{\s*default\s*}\s+from\s+['"]([^'"]+)['"]/;
+    const defaultMatch = content.match(defaultReexportPattern);
+    if (defaultMatch && defaultMatch[1]) {
+      const nestedResolved = resolveExports(resolved, defaultMatch[1]);
+      if (nestedResolved) return nestedResolved;
+    }
+
+    // Ищем export * from './module'
+    const starReexportPattern = /export\s+\*\s+from\s+['"]([^'"]+)['"]/;
+    const starMatch = content.match(starReexportPattern);
+    if (starMatch && starMatch[1]) {
+      const nestedResolved = resolveExports(resolved, starMatch[1]);
+      if (nestedResolved) return nestedResolved;
+    }
+  } catch (error) {
+    // Файл не читается - пропускаем
+  }
+
+  return resolved;
+}
+
 /**
  * Строит граф зависимостей проекта от точки входа
  * @param entryPoint Точка входа (файл или директория)
@@ -58,7 +110,14 @@ export function buildProjectGraph(
       if (IGNORE_NODE_MODULES && isExternalModule(target)) return;
 
       if (!isExternalModule(target)) {
-        const resolvedAbs = resolveFilePath(currentDir, target);
+        // Сначала пытаемся резолвить через реэкспорты
+        let resolvedAbs = resolveExports(absolutePath, target);
+
+        // Если не нашли через реэкспорты, пробуем обычный резолвинг
+        if (!resolvedAbs) {
+          resolvedAbs = resolveFilePath(currentDir, target);
+        }
+
         if (resolvedAbs) {
           const depRelativeKey = path.relative(process.cwd(), resolvedAbs);
           const currentGraph = graph[relativeKey];

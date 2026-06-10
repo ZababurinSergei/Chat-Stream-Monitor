@@ -12,6 +12,7 @@ import { Graphviz } from '@hpcc-js/wasm-graphviz';
 // Core modules
 import { minifyForAI } from './core/minifier.js';
 import { findCyclicEdges, convertToDOT } from './core/graph-utils.js';
+import { setTsConfigPath } from './core/tsconfig-resolver.js';
 
 // Mode modules
 import { buildProjectGraph } from './modes/project-graph.js';
@@ -41,6 +42,7 @@ interface ParsedArgs {
   extraArg?: string;
   depthArg?: string;
   outputDir?: string;
+  tsconfigPath?: string;
   options?: SplitModuleOptions | MinifyFolderOptions;
 }
 
@@ -56,15 +58,21 @@ function parseArgs(): ParsedArgs | null {
   const mode = args[0];
 
   let outputDir: string | undefined;
+  let tsconfigPath: string | undefined;
   const cleanArgs: string[] = [];
 
-  // Извлекаем -o/--output из аргументов
+  // Извлекаем -o/--output и --tsconfig из аргументов
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
     if (arg === '-o' || arg === '--output') {
       if (arg && args[i + 1]) {
         outputDir = args[i + 1];
         i++; // пропускаем значение
+      }
+    } else if (arg === '--tsconfig') {
+      if (args[i + 1]) {
+        tsconfigPath = args[i + 1];
+        i++;
       }
     } else if (arg) {
       cleanArgs.push(arg);
@@ -171,7 +179,7 @@ function parseArgs(): ParsedArgs | null {
     }
 
     process.argv = originalArgv;
-    return { mode: 'split-module', targetPath, options, outputDir };
+    return { mode: 'split-module', targetPath, options, outputDir, tsconfigPath };
   }
 
   // Mode: minify-folder
@@ -236,7 +244,7 @@ function parseArgs(): ParsedArgs | null {
     }
 
     process.argv = originalArgv;
-    return { mode: 'minify-folder', targetPath, options, outputDir };
+    return { mode: 'minify-folder', targetPath, options, outputDir, tsconfigPath };
   }
 
   // Mode: dead-code
@@ -248,7 +256,7 @@ function parseArgs(): ParsedArgs | null {
       return null;
     }
     process.argv = originalArgv;
-    return { mode: 'dead-code', targetPath, extraArg: '', depthArg: '', outputDir };
+    return { mode: 'dead-code', targetPath, extraArg: '', depthArg: '', outputDir, tsconfigPath };
   }
 
   // Mode: impact
@@ -261,7 +269,14 @@ function parseArgs(): ParsedArgs | null {
       return null;
     }
     process.argv = originalArgv;
-    return { mode: 'impact', targetPath, extraArg: entityName, depthArg: '', outputDir };
+    return {
+      mode: 'impact',
+      targetPath,
+      extraArg: entityName,
+      depthArg: '',
+      outputDir,
+      tsconfigPath,
+    };
   }
 
   // Mode: prompt-pack
@@ -274,7 +289,14 @@ function parseArgs(): ParsedArgs | null {
       return null;
     }
     process.argv = originalArgv;
-    return { mode: 'prompt-pack', targetPath, extraArg: depth, depthArg: '', outputDir };
+    return {
+      mode: 'prompt-pack',
+      targetPath,
+      extraArg: depth,
+      depthArg: '',
+      outputDir,
+      tsconfigPath,
+    };
   }
 
   // Mode: minify (single file)
@@ -286,7 +308,7 @@ function parseArgs(): ParsedArgs | null {
       return null;
     }
     process.argv = originalArgv;
-    return { mode: 'minify', targetPath, extraArg: '', depthArg: '', outputDir };
+    return { mode: 'minify', targetPath, extraArg: '', depthArg: '', outputDir, tsconfigPath };
   }
 
   // Mode: project (graph)
@@ -299,7 +321,14 @@ function parseArgs(): ParsedArgs | null {
       return null;
     }
     process.argv = originalArgv;
-    return { mode: 'project', targetPath, extraArg: maxDepth, depthArg: '', outputDir };
+    return {
+      mode: 'project',
+      targetPath,
+      extraArg: maxDepth,
+      depthArg: '',
+      outputDir,
+      tsconfigPath,
+    };
   }
 
   // Mode: file (internal graph)
@@ -311,7 +340,7 @@ function parseArgs(): ParsedArgs | null {
       return null;
     }
     process.argv = originalArgv;
-    return { mode: 'file', targetPath, extraArg: '', depthArg: '', outputDir };
+    return { mode: 'file', targetPath, extraArg: '', depthArg: '', outputDir, tsconfigPath };
   }
 
   console.error(`❌ Неизвестный режим: ${mode}`);
@@ -328,18 +357,36 @@ export async function runCLI(): Promise<void> {
   const parsed = parseArgs();
   if (!parsed) return;
 
-  let { mode, targetPath, extraArg, options, outputDir } = parsed;
+  let { mode, targetPath, extraArg, options, outputDir, tsconfigPath } = parsed;
 
-  // Обработка outputDir - смена рабочей директории
+  // Сохраняем исходную директорию СРАЗУ
   const originalCwd = process.cwd();
+
+  // 1. СНАЧАЛА обрабатываем tsconfig (до смены директории)
+  if (tsconfigPath) {
+    const resolvedTsconfig = path.isAbsolute(tsconfigPath)
+      ? tsconfigPath
+      : path.resolve(originalCwd, tsconfigPath);
+
+    if (fs.existsSync(resolvedTsconfig)) {
+      setTsConfigPath(resolvedTsconfig);
+      console.log(`📄 TsConfig: ${resolvedTsconfig}`);
+    } else {
+      console.warn(`⚠️ TsConfig не найден: ${resolvedTsconfig}`);
+      console.warn(`   Искали: ${resolvedTsconfig}`);
+    }
+  }
+
+  // 2. ПОТОМ обрабатываем outputDir и меняем директорию
   let outputDirChanged = false;
   let originalTargetPath = targetPath;
 
   if (outputDir) {
-    // Создаем директорию если её нет
-    if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir, { recursive: true });
-      console.log(`📁 Создана выходная директория: ${outputDir}`);
+    // Создаем директорию если её нет (относительно originalCwd)
+    const absoluteOutputDir = path.resolve(originalCwd, outputDir);
+    if (!fs.existsSync(absoluteOutputDir)) {
+      fs.mkdirSync(absoluteOutputDir, { recursive: true });
+      console.log(`📁 Создана выходная директория: ${absoluteOutputDir}`);
     }
 
     // Преобразуем targetPath в абсолютный путь относительно исходной директории
@@ -357,7 +404,7 @@ export async function runCLI(): Promise<void> {
     }
 
     // Меняем рабочую директорию
-    process.chdir(outputDir);
+    process.chdir(absoluteOutputDir);
     outputDirChanged = true;
     console.log(`📂 Выходная директория: ${process.cwd()}\n`);
   }

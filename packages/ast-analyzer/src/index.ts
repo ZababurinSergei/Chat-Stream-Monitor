@@ -20,6 +20,9 @@ export { minifyCodeString, minifyForAI } from './core/minifier.js';
 // Утилиты для работы с графами
 export { findCyclicEdges, convertToDOT, dfs } from './core/graph-utils.js';
 
+// Работа с tsconfig (алиасы)
+export { setTsConfigPath, loadTsConfig, resolveAliasPath } from './core/tsconfig-resolver.js';
+
 // ==========================================
 // ЭКСПОРТ РЕЖИМОВ (MODES)
 // ==========================================
@@ -133,4 +136,4 @@ export { runCLI } from './cli.js';
 // ==========================================
 
 export const VERSION = '2.2.0';
-export const NAME = 'graph-analyzer';
+export const NAME = 'ast-analyzer';
