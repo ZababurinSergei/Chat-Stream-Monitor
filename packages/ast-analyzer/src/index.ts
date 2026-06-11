@@ -56,6 +56,20 @@ export { runImpactAnalysis } from './modes/impact.js';
 export { findDeadCode } from './modes/dead-code.js';
 
 // ==========================================
+// ЭКСПОРТ VUE АНАЛИЗАТОРА (NEW!)
+// ==========================================
+
+// Vue SFC парсер и анализатор
+export {
+  parseVueFile,
+  analyzeVueComponent,
+  generateVueComponentReport,
+  enhanceWithVueAnalysis,
+  type VueComponentAnalysis,
+  type AnalysisOptions,
+} from './modes/vue-analyzer.js';
+
+// ==========================================
 // ЭКСПОРТ РЕПОРТЕРОВ
 // ==========================================
 

@@ -15,9 +15,13 @@ export interface AliasMapping {
 
 // Глобальная переменная для явного пути к tsconfig
 let explicitTsConfigPath: string | null = null;
+let cachedTsConfig: TsConfig | null = null;
+let cachedTsConfigDir: string | null = null;
 
 export function setTsConfigPath(configPath: string) {
   explicitTsConfigPath = configPath;
+  cachedTsConfig = null;
+  cachedTsConfigDir = null;
 }
 
 export function loadTsConfig(startDir: string = process.cwd()): TsConfig | null {
@@ -28,7 +32,9 @@ export function loadTsConfig(startDir: string = process.cwd()): TsConfig | null 
       try {
         const content = fs.readFileSync(resolvedPath, 'utf-8');
         console.log(`📄 Загружен tsconfig: ${resolvedPath}`);
-        return JSON.parse(content) as TsConfig;
+        cachedTsConfig = JSON.parse(content) as TsConfig;
+        cachedTsConfigDir = path.dirname(resolvedPath);
+        return cachedTsConfig;
       } catch (error) {
         console.warn(`⚠️ Ошибка парсинга ${resolvedPath}:`, error);
       }
@@ -44,7 +50,10 @@ export function loadTsConfig(startDir: string = process.cwd()): TsConfig | null 
     if (fs.existsSync(tsConfigPath)) {
       try {
         const content = fs.readFileSync(tsConfigPath, 'utf-8');
-        return JSON.parse(content) as TsConfig;
+        cachedTsConfig = JSON.parse(content) as TsConfig;
+        cachedTsConfigDir = path.dirname(tsConfigPath);
+        console.log(`📄 Автоматически загружен tsconfig: ${tsConfigPath}`);
+        return cachedTsConfig;
       } catch (error) {
         console.warn(`⚠️ Ошибка парсинга ${tsConfigPath}:`, error);
       }
@@ -55,6 +64,19 @@ export function loadTsConfig(startDir: string = process.cwd()): TsConfig | null 
   return null;
 }
 
+/**
+ * Получить директорию, в которой находится tsconfig.json
+ */
+export function getTsConfigDir(): string | null {
+  return cachedTsConfigDir;
+}
+
+/**
+ * Резолвит путь с учётом алиасов из tsconfig
+ * @param importPath - путь из import (например, '@/components/Button')
+ * @param baseDir - директория для резолвинга baseUrl (обычно директория tsconfig)
+ * @param tsConfig - загруженный tsconfig
+ */
 export function resolveAliasPath(
   importPath: string,
   baseDir: string,
@@ -65,15 +87,20 @@ export function resolveAliasPath(
   }
 
   const { paths, baseUrl = '.' } = tsConfig.compilerOptions;
+  // Используем переданную директорию для резолвинга baseUrl
+  const baseUrlPath = path.resolve(baseDir, baseUrl);
 
   for (const [alias, targets] of Object.entries(paths)) {
+    if (!targets || targets.length === 0) continue;
+
     // Преобразуем паттерн алиаса в регулярное выражение
-    const pattern = alias.replace(/\*/g, '(.*)');
+    const escapedAlias = alias.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const pattern = escapedAlias.replace(/\\\*/g, '(.*)');
     const regex = new RegExp(`^${pattern}$`);
     const match = importPath.match(regex);
 
-    if (match && targets && targets.length > 0) {
-      // Берем первый целевой путь
+    if (match) {
+      // Берём первый целевой путь
       let targetPath = targets[0];
       if (!targetPath) continue;
 
@@ -86,8 +113,21 @@ export function resolveAliasPath(
       }
 
       // Резолвим относительно baseUrl
-      const baseUrlPath = path.resolve(baseDir, baseUrl);
       const resolvedPath = path.resolve(baseUrlPath, targetPath);
+
+      // Проверяем существование файла с разными расширениями
+      const extensions = ['.ts', '.tsx', '.js', '.jsx', '.vue', '.mjs', '.cjs', ''];
+      for (const ext of extensions) {
+        const testPath = resolvedPath + ext;
+        if (fs.existsSync(testPath)) {
+          return testPath;
+        }
+        // Проверка на index файл
+        const indexPath = path.join(resolvedPath, `index${ext}`);
+        if (ext && fs.existsSync(indexPath)) {
+          return indexPath;
+        }
+      }
 
       return resolvedPath;
     }

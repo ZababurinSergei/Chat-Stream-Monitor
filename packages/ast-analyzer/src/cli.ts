@@ -12,7 +12,7 @@ import { Graphviz } from '@hpcc-js/wasm-graphviz';
 // Core modules
 import { minifyForAI } from './core/minifier.js';
 import { findCyclicEdges, convertToDOT } from './core/graph-utils.js';
-import { setTsConfigPath } from './core/tsconfig-resolver.js';
+import { setTsConfigPath, loadTsConfig } from './core/tsconfig-resolver.js';
 
 // Mode modules
 import { buildProjectGraph } from './modes/project-graph.js';
@@ -22,6 +22,9 @@ import { buildSplitModulePrompt } from './modes/split-module.js';
 import { runImpactAnalysis } from './modes/impact.js';
 import { findDeadCode } from './modes/dead-code.js';
 import { minifyFolder } from './modes/minify-folder.js';
+
+// Vue analysis
+import { analyzeVueComponent, generateVueComponentReport } from './modes/vue-analyzer.js';
 
 // Reporters
 import { generateHTMLReport } from './reporters/html-reporter.js';
@@ -43,7 +46,7 @@ interface ParsedArgs {
   depthArg?: string;
   outputDir?: string;
   tsconfigPath?: string;
-  options?: SplitModuleOptions | MinifyFolderOptions;
+  options?: SplitModuleOptions | MinifyFolderOptions | any;
 }
 
 interface GraphResult {
@@ -88,6 +91,46 @@ function parseArgs(): ParsedArgs | null {
     showHelp();
     process.argv = originalArgv;
     return null;
+  }
+
+  // Mode: vue-analyze (НОВЫЙ РЕЖИМ!)
+  if (mode === 'vue-analyze' || mode === 'vue') {
+    const targetPath = cleanArgs[1];
+    if (!targetPath) {
+      console.error('❌ Укажите путь к Vue файлу');
+      process.argv = originalArgv;
+      return null;
+    }
+
+    if (!targetPath.endsWith('.vue')) {
+      console.error('❌ Файл должен иметь расширение .vue');
+      process.argv = originalArgv;
+      return null;
+    }
+
+    const options = {
+      includeTemplateAST: true,
+      includeScriptAST: true,
+      extractComposableCalls: true,
+    };
+
+    for (let i = 2; i < cleanArgs.length; i++) {
+      const arg = cleanArgs[i];
+      switch (arg) {
+        case '--no-template-ast':
+          options.includeTemplateAST = false;
+          break;
+        case '--no-script-ast':
+          options.includeScriptAST = false;
+          break;
+        case '--no-composables':
+          options.extractComposableCalls = false;
+          break;
+      }
+    }
+
+    process.argv = originalArgv;
+    return { mode: 'vue-analyze', targetPath, options: options as any, outputDir, tsconfigPath };
   }
 
   // Mode: split-module
@@ -371,6 +414,15 @@ export async function runCLI(): Promise<void> {
     if (fs.existsSync(resolvedTsconfig)) {
       setTsConfigPath(resolvedTsconfig);
       console.log(`📄 TsConfig: ${resolvedTsconfig}`);
+
+      // Дополнительно загружаем и показываем алиасы
+      const tsConfig = loadTsConfig(path.dirname(resolvedTsconfig));
+      if (tsConfig?.compilerOptions?.paths) {
+        console.log(`🔗 Найдены алиасы в tsconfig:`);
+        Object.entries(tsConfig.compilerOptions.paths).forEach(([alias, targets]) => {
+          console.log(`   ${alias} → ${targets[0]}`);
+        });
+      }
     } else {
       console.warn(`⚠️ TsConfig не найден: ${resolvedTsconfig}`);
       console.warn(`   Искали: ${resolvedTsconfig}`);
@@ -410,6 +462,48 @@ export async function runCLI(): Promise<void> {
   }
 
   try {
+    // НОВЫЙ РЕЖИМ: vue-analyze
+    if (mode === 'vue-analyze' || mode === 'vue') {
+      console.log(`\n${'='.repeat(60)}`);
+      console.log(`🎯 АНАЛИЗ VUE КОМПОНЕНТА`);
+      console.log(`${'='.repeat(60)}\n`);
+
+      const analysis = analyzeVueComponent(targetPath, options as any);
+      if (!analysis) {
+        console.error('❌ Не удалось проанализировать Vue компонент');
+        process.exit(1);
+      }
+
+      // Сохраняем JSON отчет
+      const jsonOutput = {
+        ...analysis,
+        timestamp: new Date().toISOString(),
+      };
+      fs.writeFileSync('vue-analysis.json', JSON.stringify(jsonOutput, null, 2));
+      console.log(`✅ JSON анализ сохранен: vue-analysis.json`);
+
+      // Сохраняем Markdown отчет
+      const markdownReport = generateVueComponentReport(analysis);
+      fs.writeFileSync('vue-analysis.md', markdownReport);
+      console.log(`✅ Markdown отчет сохранен: vue-analysis.md`);
+
+      // Выводим краткую информацию
+      console.log(`\n📊 КРАТКАЯ ИНФОРМАЦИЯ:`);
+      console.log(`   🏷️  Компонент: ${analysis.componentName}`);
+      console.log(`   📥 Props: ${analysis.props.names.length}`);
+      console.log(`   📤 Events: ${analysis.emits.names.length}`);
+      console.log(`   🎭 Slots: ${analysis.slots.length}`);
+      console.log(`   🧩 Composables: ${analysis.composables.length}`);
+      console.log(`   📝 Скрипт: ${analysis.stats.scriptLines} строк`);
+      console.log(`   🎨 Шаблон: ${analysis.stats.templateLines} строк`);
+      console.log(`   🎭 Стили: ${analysis.stats.styleCount} блоков`);
+      console.log(`   💻 TypeScript: ${analysis.script.isTS ? '✅' : '❌'}`);
+      console.log(`   📦 Setup: ${analysis.script.isSetup ? '✅' : '❌'}`);
+
+      console.log(`\n✨ Анализ Vue компонента завершен!`);
+      return;
+    }
+
     // Mode: split-module
     if (mode === 'split-module' || mode === 'split') {
       console.log(`\n${'='.repeat(60)}`);

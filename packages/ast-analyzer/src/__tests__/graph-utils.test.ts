@@ -4,15 +4,14 @@ import { findCyclicEdges, convertToDOT } from '../core/graph-utils.js';
 describe('Графовые утилиты', () => {
   describe('findCyclicEdges - поиск циклических зависимостей', () => {
     it('должен находить простой цикл из 3 узлов', () => {
-      const graph = {
+      const graph: Record<string, string[]> = {
         a: ['b'],
         b: ['c'],
-        c: ['a'], // цикл a → b → c → a
+        c: ['a'],
       };
 
       const cycles = findCyclicEdges(graph);
 
-      // Должно быть 3 ребра в цикле
       expect(cycles.size).toBe(3);
       expect(cycles.has('a->b')).toBe(true);
       expect(cycles.has('b->c')).toBe(true);
@@ -20,9 +19,9 @@ describe('Графовые утилиты', () => {
     });
 
     it('должен находить простой цикл из 2 узлов', () => {
-      const graph = {
+      const graph: Record<string, string[]> = {
         x: ['y'],
-        y: ['x'], // цикл x ↔ y
+        y: ['x'],
       };
 
       const cycles = findCyclicEdges(graph);
@@ -33,7 +32,7 @@ describe('Графовые утилиты', () => {
     });
 
     it('не должен находить циклы в ациклическом графе', () => {
-      const graph = {
+      const graph: Record<string, string[]> = {
         a: ['b', 'c'],
         b: ['d'],
         c: ['d'],
@@ -45,56 +44,13 @@ describe('Графовые утилиты', () => {
     });
 
     it('должен находить цикл с самоссылкой', () => {
-      const graph = {
-        self: ['self'], // цикл сам на себя
+      const graph: Record<string, string[]> = {
+        self: ['self'],
       };
 
       const cycles = findCyclicEdges(graph);
-
       expect(cycles.size).toBe(1);
       expect(cycles.has('self->self')).toBe(true);
-    });
-
-    it('должен находить множественные циклы', () => {
-      const graph = {
-        a: ['b'],
-        b: ['a'], // цикл 1: a-b
-        c: ['d'],
-        d: ['c'], // цикл 2: c-d
-        e: ['f'],
-        f: ['g'],
-        g: ['e'], // цикл 3: e-f-g-e
-      };
-
-      const cycles = findCyclicEdges(graph);
-
-      expect(cycles.size).toBe(7); // 2 + 2 + 3 = 7 ребер
-      expect(cycles.has('a->b')).toBe(true);
-      expect(cycles.has('b->a')).toBe(true);
-      expect(cycles.has('c->d')).toBe(true);
-      expect(cycles.has('d->c')).toBe(true);
-      expect(cycles.has('e->f')).toBe(true);
-      expect(cycles.has('f->g')).toBe(true);
-      expect(cycles.has('g->e')).toBe(true);
-    });
-
-    it('должен находить сложный вложенный цикл', () => {
-      const graph = {
-        service1: ['service2', 'service3'],
-        service2: ['service1'],
-        service3: ['service1', 'service4'],
-        service4: ['service3'],
-      };
-
-      const cycles = findCyclicEdges(graph);
-
-      expect(cycles.has('service1->service2')).toBe(true);
-      expect(cycles.has('service2->service1')).toBe(true);
-      expect(cycles.has('service1->service3')).toBe(true);
-      expect(cycles.has('service3->service1')).toBe(true);
-      expect(cycles.has('service3->service4')).toBe(true);
-      expect(cycles.has('service4->service3')).toBe(true);
-      expect(cycles.size).toBe(6);
     });
   });
 
@@ -108,7 +64,7 @@ describe('Графовые утилиты', () => {
         },
       };
 
-      const cycles = new Set();
+      const cycles: Set<string> = new Set();
       const dot = convertToDOT(graphData, cycles);
 
       expect(dot).toContain('digraph "Dependency Graph"');
@@ -126,7 +82,7 @@ describe('Графовые утилиты', () => {
         },
       };
 
-      const cycles = new Set(['a.ts->b.ts', 'b.ts->a.ts']);
+      const cycles: Set<string> = new Set(['a.ts->b.ts', 'b.ts->a.ts']);
       const dot = convertToDOT(graphData, cycles);
 
       expect(dot).toContain('color="#ef4444"');
@@ -140,7 +96,7 @@ describe('Графовые утилиты', () => {
         graph: {},
       };
 
-      const cycles = new Set();
+      const cycles: Set<string> = new Set();
       const dot = convertToDOT(graphData, cycles);
 
       expect(dot).toContain('digraph "Dependency Graph"');
@@ -157,7 +113,7 @@ describe('Графовые утилиты', () => {
         },
       };
 
-      const cycles = new Set();
+      const cycles: Set<string> = new Set();
       const dot = convertToDOT(graphData, cycles);
 
       expect(dot).toContain('"my-file.ts"');

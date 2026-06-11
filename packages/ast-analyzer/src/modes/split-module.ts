@@ -6,6 +6,7 @@ import { minifyForAI } from '../core/minifier.js';
 import { buildFileInternalGraph } from './file-graph.js';
 import { findCyclicEdges } from '../core/graph-utils.js';
 import { DEFAULT_EXCLUDE_PATTERNS } from '../config.js';
+import { analyzeVueComponent, generateVueComponentReport } from './vue-analyzer.js';
 
 // ==========================================
 // ВНУТРЕННИЕ ФУНКЦИИ
@@ -378,6 +379,7 @@ export function buildSplitModulePrompt(targetFile: string, options: any = {}) {
     includeGraph = true,
     includeStats = true,
     includeSuggestions = true,
+    includeVueAnalysis = true,
     targetClusterSize = 3,
     maxClusterSize = 10,
     maxDepth = 5,
@@ -391,6 +393,25 @@ export function buildSplitModulePrompt(targetFile: string, options: any = {}) {
   console.log(`🔍 Глубина анализа: ${maxDepth}`);
   console.log(`🚫 Паттерны исключения: ${excludePatterns.join(', ')}`);
   if (prefix) console.log(`📛 Префикс файлов: ${prefix}`);
+
+  // Vue специфичный анализ
+  let vueAnalysis = null;
+  if (targetFile.endsWith('.vue') && includeVueAnalysis) {
+    vueAnalysis = analyzeVueComponent(targetFile, {
+      includeTemplateAST: true,
+      includeScriptAST: true,
+      extractComposableCalls: true,
+    });
+
+    if (vueAnalysis) {
+      console.log(`\n🎯 Vue компонент обнаружен:`);
+      console.log(`   📥 Props: ${vueAnalysis.props.names.length}`);
+      console.log(`   📤 Events: ${vueAnalysis.emits.names.length}`);
+      console.log(`   🎭 Slots: ${vueAnalysis.slots.length}`);
+      console.log(`   🧩 Composables: ${vueAnalysis.composables.length}`);
+      console.log(`   🏗️ Template сложность: ${vueAnalysis.template.complexity}`);
+    }
+  }
 
   // Анализ структуры
   const analysis = analyzeModuleStructure(targetFile, { maxDepth, excludePatterns });
@@ -420,6 +441,7 @@ export function buildSplitModulePrompt(targetFile: string, options: any = {}) {
     context: prefix ? `${prefix}-ai-context.txt` : 'ai-context.txt',
     graph: prefix ? `${prefix}-internal-graph.json` : 'internal-graph.json',
     analysis: prefix ? `${prefix}-module-analysis.json` : 'module-analysis.json',
+    vue: prefix && vueAnalysis ? `${prefix}-vue-analysis.json` : 'vue-analysis.json',
   };
 
   console.log(`\n📊 Статистика файла:`);
@@ -474,6 +496,13 @@ export function buildSplitModulePrompt(targetFile: string, options: any = {}) {
   markdown += `- ❌ Слишком крупные модули (>300 строк)\n\n`;
 
   markdown += `---\n\n`;
+
+  // Vue компонент - специальный анализ
+  if (targetFile.endsWith('.vue') && vueAnalysis) {
+    markdown += `## 🎯 VUE КОМПОНЕНТ - СПЕЦИАЛЬНЫЙ АНАЛИЗ\n\n`;
+    markdown += generateVueComponentReport(vueAnalysis);
+    markdown += `---\n\n`;
+  }
 
   // Статистика
   if (includeStats) {
@@ -619,6 +648,9 @@ export function buildSplitModulePrompt(targetFile: string, options: any = {}) {
   if (includeGraph && internalGraph) {
     fs.writeFileSync(outputFiles.graph, JSON.stringify(internalGraph, null, 2), 'utf-8');
   }
+  if (vueAnalysis) {
+    fs.writeFileSync(outputFiles.vue, JSON.stringify(vueAnalysis, null, 2), 'utf-8');
+  }
   fs.writeFileSync(
     outputFiles.analysis,
     JSON.stringify(
@@ -645,6 +677,15 @@ export function buildSplitModulePrompt(targetFile: string, options: any = {}) {
           recommendation: c.recommendation,
           functions: c.functions,
         })),
+        vue: vueAnalysis
+          ? {
+              props: vueAnalysis.props,
+              emits: vueAnalysis.emits,
+              slots: vueAnalysis.slots,
+              composables: vueAnalysis.composables,
+              templateComplexity: vueAnalysis.template.complexity,
+            }
+          : undefined,
       },
       null,
       2
@@ -659,10 +700,11 @@ export function buildSplitModulePrompt(targetFile: string, options: any = {}) {
   console.log(`   ├─ ${outputFiles.prompt}`);
   if (includeMinified && minified) console.log(`   ├─ ${outputFiles.context}`);
   if (includeGraph && internalGraph) console.log(`   ├─ ${outputFiles.graph}`);
+  if (vueAnalysis) console.log(`   ├─ ${outputFiles.vue}`);
   console.log(`   └─ ${outputFiles.analysis}`);
   console.log(`\n📊 Размер промпта: ${(markdown.length / 1024).toFixed(2)} KB`);
 
-  return { markdown, analysis, outputFiles };
+  return { markdown, analysis, outputFiles, vueAnalysis };
 }
 
 // ==========================================

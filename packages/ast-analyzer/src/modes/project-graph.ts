@@ -6,60 +6,153 @@ import { IGNORE_NODE_MODULES } from '../config.js';
 import { walk } from 'estree-walker';
 
 /**
- * Рекурсивно резолвит реэкспорты (export {...} from '...')
- * @param filePath - путь к файлу, который может быть реэкспортом
- * @param importTarget - целевой импорт (то, что после 'from')
- * @returns разрешенный путь к файлу или null
+ * Рекурсивно собирает импорты из AST
  */
-function resolveExports(filePath: string, importTarget: string): string | null {
-  const dir = path.dirname(filePath);
-  const resolved = resolveFilePath(dir, importTarget);
+function collectImports(ast: any): string[] {
+  const imports: string[] = [];
+  if (!ast) return imports;
 
-  if (!resolved) return null;
-
-  try {
-    // Проверяем, не является ли файл реэкспортом (index.ts или подобный)
-    const content = fs.readFileSync(resolved, 'utf-8');
-
-    // Ищем реэкспорты вида: export { something } from './module'
-    const reexportPattern = /export\s+{\s*[\w\s,]*\s*}\s+from\s+['"]([^'"]+)['"]/g;
-    let match;
-
-    while ((match = reexportPattern.exec(content)) !== null) {
-      if (match[1]) {
-        // Рекурсивно резолвим вложенный реэкспорт
-        const nestedResolved = resolveExports(resolved, match[1]);
-        if (nestedResolved) return nestedResolved;
+  walk(ast, {
+    enter(node: any) {
+      // Статический импорт
+      if (
+        (node.type === 'ImportDeclaration' ||
+          node.type === 'ExportNamedDeclaration' ||
+          node.type === 'ExportAllDeclaration') &&
+        node.source
+      ) {
+        imports.push(node.source.value);
       }
-    }
+      // Динамический импорт
+      if (node.type === 'ImportExpression' && node.source && node.source.type === 'Literal') {
+        imports.push(node.source.value);
+      }
+      // require() вызовы
+      if (
+        node.type === 'CallExpression' &&
+        node.callee &&
+        node.callee.name === 'require' &&
+        node.arguments[0] &&
+        node.arguments[0].type === 'Literal'
+      ) {
+        imports.push(node.arguments[0].value);
+      }
+    },
+  });
 
-    // Ищем реэкспорт по умолчанию: export { default } from './module'
-    const defaultReexportPattern = /export\s+{\s*default\s*}\s+from\s+['"]([^'"]+)['"]/;
-    const defaultMatch = content.match(defaultReexportPattern);
-    if (defaultMatch && defaultMatch[1]) {
-      const nestedResolved = resolveExports(resolved, defaultMatch[1]);
-      if (nestedResolved) return nestedResolved;
-    }
+  return imports;
+}
 
-    // Ищем export * from './module'
-    const starReexportPattern = /export\s+\*\s+from\s+['"]([^'"]+)['"]/;
-    const starMatch = content.match(starReexportPattern);
-    if (starMatch && starMatch[1]) {
-      const nestedResolved = resolveExports(resolved, starMatch[1]);
-      if (nestedResolved) return nestedResolved;
+/**
+ * Собирает реэкспорты из AST (export ... from)
+ */
+function collectReExports(ast: any): string[] {
+  const reExports: string[] = [];
+  if (!ast) return reExports;
+
+  walk(ast, {
+    enter(node: any) {
+      // export { something } from './file'
+      if (
+        node.type === 'ExportNamedDeclaration' &&
+        node.source &&
+        node.specifiers &&
+        node.specifiers.length > 0
+      ) {
+        reExports.push(node.source.value);
+      }
+      // export * from './file'
+      if (node.type === 'ExportAllDeclaration' && node.source) {
+        reExports.push(node.source.value);
+      }
+      // export { default } from './file'
+      if (node.type === 'ExportDefaultDeclaration' && node.source) {
+        reExports.push(node.source.value);
+      }
+    },
+  });
+
+  return reExports;
+}
+
+/**
+ * Собирает все именованные экспорты из файла (для раскрытия export *)
+ */
+function collectNamedExports(ast: any): string[] {
+  const exports: string[] = [];
+  if (!ast) return exports;
+
+  walk(ast, {
+    enter(node: any) {
+      // export const x = ...
+      if (node.type === 'ExportNamedDeclaration' && node.declaration) {
+        const decl = node.declaration;
+        if (decl.type === 'FunctionDeclaration' && decl.id) {
+          exports.push(decl.id.name);
+        } else if (decl.type === 'ClassDeclaration' && decl.id) {
+          exports.push(decl.id.name);
+        } else if (decl.type === 'VariableDeclaration') {
+          decl.declarations.forEach((d: any) => {
+            if (d.id && d.id.name) exports.push(d.id.name);
+          });
+        }
+      }
+      // export { x, y }
+      if (node.type === 'ExportNamedDeclaration' && node.specifiers && !node.source) {
+        node.specifiers.forEach((spec: any) => {
+          if (spec.exported) exports.push(spec.exported.name);
+        });
+      }
+      // export default
+      if (node.type === 'ExportDefaultDeclaration') {
+        exports.push('default');
+      }
+    },
+  });
+
+  return exports;
+}
+
+/**
+ * Раскрывает реэкспорт папки: находит index.ts и возвращает пути ко всем экспортируемым файлам
+ */
+function expandFolderReExport(folderPath: string, _baseDir: string): string[] {
+  const resolvedFiles: string[] = [];
+
+  // Ищем index файл в папке
+  for (const ext of ['.ts', '.js', '.mjs', '.cjs']) {
+    const indexPath = path.join(folderPath, `index${ext}`);
+    if (fs.existsSync(indexPath)) {
+      console.log(`   📂 Раскрываем папку: ${path.basename(folderPath)} → index${ext}`);
+
+      // Парсим index файл
+      const ast = parseFile(indexPath);
+      if (ast) {
+        // Собираем все экспорты из index файла
+        const exports = collectNamedExports(ast);
+        // Также собираем реэкспорты
+        const reExports = collectReExports(ast);
+
+        console.log(`      Найдено экспортов: ${exports.length}, реэкспортов: ${reExports.length}`);
+
+        // Для каждого реэкспорта из index файла резолвим путь
+        for (const re of reExports) {
+          const resolved = resolveFilePath(path.dirname(indexPath), re);
+          if (resolved) {
+            resolvedFiles.push(resolved);
+            console.log(`      → ${re} → ${path.basename(resolved)}`);
+          }
+        }
+      }
+      break;
     }
-  } catch (error) {
-    // Файл не читается - пропускаем
   }
 
-  return resolved;
+  return resolvedFiles;
 }
 
 /**
  * Строит граф зависимостей проекта от точки входа
- * @param entryPoint Точка входа (файл или директория)
- * @param maxDepth Максимальная глубина анализа (по умолчанию Infinity)
- * @returns Объект с корневым ключом и графом зависимостей
  */
 export function buildProjectGraph(
   entryPoint: string,
@@ -68,74 +161,105 @@ export function buildProjectGraph(
   const graph: Record<string, string[]> = {};
   const visited = new Set<string>();
   const rootAbsPath = path.resolve(entryPoint);
+  const queue: Array<{ path: string; depth: number; isRoot: boolean }> = [];
 
-  function scan(filePath: string, currentDepth: number): void {
-    if (currentDepth > maxDepth) return;
+  queue.push({ path: rootAbsPath, depth: 1, isRoot: true });
 
-    const absolutePath = path.resolve(filePath);
-    if (visited.has(absolutePath)) return;
-    visited.add(absolutePath);
+  while (queue.length > 0) {
+    const { path: currentPath, depth, isRoot } = queue.shift()!;
 
-    const relativeKey = path.relative(process.cwd(), absolutePath) || absolutePath;
-    graph[relativeKey] = [];
+    if (depth > maxDepth) continue;
+    if (visited.has(currentPath)) continue;
+    visited.add(currentPath);
 
-    const ast = parseFile(absolutePath);
-    if (!ast) return;
+    const relativeKey = path.relative(process.cwd(), currentPath) || currentPath;
+    if (!graph[relativeKey]) {
+      graph[relativeKey] = [];
+    }
 
-    const currentDir = path.dirname(absolutePath);
-    const rawImports: string[] = [];
+    const ast = parseFile(currentPath);
+    if (!ast) {
+      console.log(`   ⚠️ Не удалось получить AST для: ${path.basename(currentPath)}`);
+      continue;
+    }
 
-    // Обходим AST для сбора импортов
-    walk(ast, {
-      enter(node: any) {
-        // Статический импорт
-        if (
-          (node.type === 'ImportDeclaration' ||
-            node.type === 'ExportNamedDeclaration' ||
-            node.type === 'ExportAllDeclaration') &&
-          node.source
-        ) {
-          rawImports.push(node.source.value);
-        }
-        // Динамический импорт
-        if (node.type === 'ImportExpression' && node.source && node.source.type === 'Literal') {
-          rawImports.push(node.source.value);
-        }
-      },
-    });
+    const currentDir = path.dirname(currentPath);
 
-    // Обрабатываем каждый импорт
-    rawImports.forEach(target => {
-      // Пропускаем внешние модули, если нужно
-      if (IGNORE_NODE_MODULES && isExternalModule(target)) return;
+    // Собираем импорты
+    const imports = collectImports(ast);
 
-      if (!isExternalModule(target)) {
-        // Сначала пытаемся резолвить через реэкспорты
-        let resolvedAbs = resolveExports(absolutePath, target);
+    // Для корневого файла собираем реэкспорты
+    let reExports: string[] = [];
+    if (isRoot) {
+      reExports = collectReExports(ast);
+      if (reExports.length > 0) {
+        console.log(`   📤 Корневой файл: найдено реэкспортов: ${reExports.length}`);
+        reExports.forEach(re => console.log(`      - ${re}`));
+      }
+    }
 
-        // Если не нашли через реэкспорты, пробуем обычный резолвинг
-        if (!resolvedAbs) {
-          resolvedAbs = resolveFilePath(currentDir, target);
-        }
+    // Объединяем все зависимости
+    let allDeps = [...imports, ...reExports];
+    allDeps = [...new Set(allDeps)];
 
-        if (resolvedAbs) {
-          const depRelativeKey = path.relative(process.cwd(), resolvedAbs);
-          const currentGraph = graph[relativeKey];
-          if (currentGraph && !currentGraph.includes(depRelativeKey)) {
-            currentGraph.push(depRelativeKey);
-          }
-          scan(resolvedAbs, currentDepth + 1);
-        } else {
-          const currentGraph = graph[relativeKey];
-          if (currentGraph && !currentGraph.includes(target)) {
-            // Если не удалось разрешить путь, добавляем как есть
-            currentGraph.push(target);
-          }
+    if (allDeps.length > 0) {
+      console.log(`   📦 ${path.basename(currentPath)}: ${allDeps.length} зависимостей`);
+    }
+
+    // Обрабатываем каждую зависимость
+    for (const target of allDeps) {
+      // Проверяем, не является ли это алиасом (нужно разрешить)
+      const isAlias = target.startsWith('@') || target.startsWith('#') || target.startsWith('~');
+
+      // Пропускаем только настоящие внешние npm-пакеты
+      if (!isAlias && IGNORE_NODE_MODULES && isExternalModule(target)) {
+        console.log(`      ⏭️ Пропуск внешнего: ${target}`);
+        continue;
+      }
+
+      // Пытаемся разрешить путь
+      let resolvedPath = resolveFilePath(currentDir, target);
+
+      // Если не разрешился, пробуем как директорию
+      if (!resolvedPath) {
+        const asDirectory = path.resolve(currentDir, target);
+        if (fs.existsSync(asDirectory) && fs.statSync(asDirectory).isDirectory()) {
+          console.log(`   📁 Директория (не разрешена): ${target} → ${path.basename(asDirectory)}`);
+          resolvedPath = asDirectory;
         }
       }
-    });
+
+      if (resolvedPath) {
+        // Проверяем, является ли это директорией
+        if (fs.existsSync(resolvedPath) && fs.statSync(resolvedPath).isDirectory()) {
+          console.log(`   📁 Раскрываем директорию: ${target}`);
+          const expanded = expandFolderReExport(resolvedPath, currentDir);
+          for (const exp of expanded) {
+            const depKey = path.relative(process.cwd(), exp);
+            console.log(`      ✅ Добавлен: ${path.basename(exp)}`);
+            if (!graph[relativeKey].includes(depKey)) {
+              graph[relativeKey].push(depKey);
+            }
+            queue.push({ path: exp, depth: depth + 1, isRoot: false });
+          }
+        } else {
+          const depKey = path.relative(process.cwd(), resolvedPath);
+          console.log(`      ✅ Разрешён: ${target} → ${path.basename(resolvedPath)}`);
+
+          if (!graph[relativeKey].includes(depKey)) {
+            graph[relativeKey].push(depKey);
+          }
+
+          queue.push({ path: resolvedPath, depth: depth + 1, isRoot: false });
+        }
+      } else {
+        console.log(`      ❌ Не удалось разрешить: ${target}`);
+        if (!graph[relativeKey].includes(target)) {
+          graph[relativeKey].push(target);
+        }
+      }
+    }
   }
 
-  scan(rootAbsPath, 1);
   return { rootKey: path.relative(process.cwd(), rootAbsPath) || rootAbsPath, graph };
 }
