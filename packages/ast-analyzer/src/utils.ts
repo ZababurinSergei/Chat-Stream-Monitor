@@ -6,7 +6,8 @@ export function escapeHtml(str: string): string {
 }
 
 export function showHelp(): void {
-  console.log(`\n╔══════════════════════════════════════════════════════════════════╗
+  console.log(`
+╔══════════════════════════════════════════════════════════════════╗
 ║              🔍 AST ANALYZER - AI TOOLKIT v2.2                  ║
 ╠══════════════════════════════════════════════════════════════════╣
 ║                                                                  ║
@@ -18,6 +19,13 @@ export function showHelp(): void {
 ║  🔪 split-module <файл> [опции]   - Разбиение файла на модули     ║
 ║  💥 impact       <файл> <entity>  - Анализ зоны влияния           ║
 ║  🗑️  dead-code    <файл>           - Поиск мертвого кода          ║
+║  🎯 vue-analyze  <файл> [опции]   - Анализ Vue компонента         ║
+║                                                                  ║
+╠══════════════════════════════════════════════════════════════════╣
+║  Использование:                                                  ║
+║    npx @newkind/ast-analyzer <режим> [аргументы]                 ║
+║    или                                                           ║
+║    npm run dev -- <режим> [аргументы]    # для разработки        ║
 ║                                                                  ║
 ╠══════════════════════════════════════════════════════════════════╣
 ║  split-module опции:                                             ║
@@ -43,23 +51,32 @@ export function showHelp(): void {
 ║    --no-toc                   Не показывать оглавление
 ║                                                                  ║
 ╠══════════════════════════════════════════════════════════════════╣
+║  vue-analyze опции:                                              ║
+║    --no-template-ast             Не включать AST шаблона          ║
+║    --no-script-ast               Не включать AST скрипта          ║
+║    --no-composables              Не искать вызовы композаблов     ║
+║                                                                  ║
+╠══════════════════════════════════════════════════════════════════╣
 ║  Примеры:                                                        ║
 ║    # Разбиение файла на модули                                   ║
-║    node graph-analyzer.js split-module ./src/monolith.js         ║
-║    node graph-analyzer.js split-module ./src/app.ts -t 4 -m 8    ║
-║    node graph-analyzer.js split-module ./src/comp.jsx -p auth    ║
+║    npx @newkind/ast-analyzer split-module ./src/monolith.js      ║
+║    npx @newkind/ast-analyzer split-module ./src/app.ts -t 4 -m 8 ║
 ║                                                                  ║
 ║    # Рекурсивное сжатие проекта                                  ║
-║    node graph-analyzer.js minify-folder ./src -d 2               ║
-║    node graph-analyzer.js minify-folder ./src -e .js,.ts         ║
+║    npx @newkind/ast-analyzer minify-folder ./src -d 2            ║
+║    npx @newkind/ast-analyzer minify-folder ./src -e .js,.ts      ║
+║                                                                  ║
+║    # Анализ Vue компонента                                       ║
+║    npx @newkind/ast-analyzer vue-analyze ./src/App.vue           ║
+║    npx @newkind/ast-analyzer vue ./src/components/Button.vue     ║
 ║                                                                  ║
 ║    # Другие режимы                                               ║
-║    node graph-analyzer.js project ./src/index.js 3               ║
-║    node graph-analyzer.js impact ./src/db.ts findUser            ║
-║    node graph-analyzer.js dead-code ./src/legacy.js              ║
+║    npx @newkind/ast-analyzer project ./src/index.js 3            ║
+║    npx @newkind/ast-analyzer impact ./src/db.ts findUser         ║
+║    npx @newkind/ast-analyzer dead-code ./src/legacy.js           ║
 ║                                                                  ║
 ╚══════════════════════════════════════════════════════════════════╝
-    `);
+  `);
 }
 
 export const DEFAULT_EXCLUDE_PATTERNS = [

@@ -1,9 +1,9 @@
-# 🤖 AST Analyzer - AI Toolkit
+# AST Analyzer - AI Toolkit for Code Analysis
 
 <div align="center">
 
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0-brightgreen)](https://nodejs.org/)
-[![License](https://img.shields.io/badge/license-CSL--1.0-blue)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6)](https://www.typescriptlang.org/)
 [![Vue](https://img.shields.io/badge/Vue-3.0+-42b883)](https://vuejs.org/)
 
@@ -29,6 +29,7 @@
   - [6. split-module - Разбиение файла на модули](#6-split-module---разбиение-файла-на-модули)
   - [7. impact - Анализ зоны влияния](#7-impact---анализ-зоны-влияния)
   - [8. dead-code - Поиск мертвого кода](#8-dead-code---поиск-мертвого-кода)
+  - [9. vue-analyze - Анализ Vue компонентов](#9-vue-analyze---анализ-vue-компонентов)
 - [Примеры использования](#-примеры-использования)
 - [Промпты для ИИ](#-промпты-для-ии)
 - [Структура выходных файлов](#-структура-выходных-файлов)
@@ -53,12 +54,13 @@
 | 💥 **Impact Analysis** | Оценка последствий изменений | время анализа |
 | 🗑️ **Dead Code** | Поиск неиспользуемого кода | чистота кода |
 | 📊 **Визуализация** | Интерактивные графы зависимостей | понимание архитектуры |
+| 🎯 **Vue Analysis** | Глубокий анализ Vue компонентов | оптимизация Vue-проектов |
 
 ### Поддерживаемые форматы
 
 - ✅ **JavaScript** (.js, .mjs, .cjs)
 - ✅ **TypeScript** (.ts, .tsx)
-- ✅ **Vue.js** (.vue) - извлекает script блоки
+- ✅ **Vue.js** (.vue) - полный анализ SFC
 - ✅ **JSX** (.jsx)
 
 ---
@@ -82,28 +84,30 @@ sudo apt-get install graphviz
 # Скачайте с https://graphviz.org/download/
 ```
 
-### Установка пакетов
+### Установка пакета
 
 ```bash
-# Клонирование репозитория
-git clone https://github.com/your-username/ast-analyzer.git
-cd ast-analyzer
+# Локальная установка в проект
+npm install @newkind/ast-analyzer
 
-# Установка зависимостей
-npm install
+# Глобальная установка
+npm install -g @newkind/ast-analyzer
 
-# Проверка работы
-node graph-analyzer.js --help
+# Или использование без установки через npx
+npx @newkind/ast-analyzer --help
 ```
 
-### Зависимости
+### Проверка работы
 
-```json
-{
-  "@typescript-eslint/parser": "^8.61.0",
-  "estree-walker": "^3.0.0",
-  "@hpcc-js/wasm-graphviz": "^1.0.0"
-}
+```bash
+# Локальная установка
+npx @newkind/ast-analyzer --help
+
+# Глобальная установка
+ast-analyzer --help
+
+# Режим разработки (из исходников)
+npm run dev -- --help
 ```
 
 ---
@@ -111,26 +115,29 @@ node graph-analyzer.js --help
 ## 🚀 Быстрый старт
 
 ```bash
-# 1. Разбить монолитный файл на модули (НОВЫЙ РЕЖИМ!)
-node graph-analyzer.js split-module ./src/monolith.js
+# 1. Разбить монолитный файл на модули
+npx @newkind/ast-analyzer split-module ./src/monolith.js
 
 # 2. Сжать весь проект для отправки ИИ
-node graph-analyzer.js minify-folder ./src
+npx @newkind/ast-analyzer minify-folder ./src
 
 # 3. Сжать один файл
-node graph-analyzer.js minify ./src/component.js
+npx @newkind/ast-analyzer minify ./src/component.js
 
 # 4. Собрать контекст для задачи
-node graph-analyzer.js prompt-pack ./src/main.js 2
+npx @newkind/ast-analyzer prompt-pack ./src/main.js 2
 
 # 5. Проверить влияние изменений
-node graph-analyzer.js impact ./src/utils.js calculateTotal
+npx @newkind/ast-analyzer impact ./src/utils.js calculateTotal
 
 # 6. Найти мертвый код
-node graph-analyzer.js dead-code ./src/legacy.js
+npx @newkind/ast-analyzer dead-code ./src/legacy.js
 
-# 7. Визуализировать архитектуру
-node graph-analyzer.js project ./src/index.js 3
+# 7. Проанализировать Vue компонент
+npx @newkind/ast-analyzer vue-analyze ./src/components/App.vue
+
+# 8. Визуализировать архитектуру
+npx @newkind/ast-analyzer project ./src/index.js 3
 # Открыть report.html в браузере
 ```
 
@@ -160,16 +167,19 @@ node graph-analyzer.js project ./src/index.js 3
 
 **Команда:**
 ```bash
-node graph-analyzer.js project <путь_к_файлу> [глубина]
+npx @newkind/ast-analyzer project <путь_к_файлу> [глубина]
 ```
 
 **Примеры:**
 ```bash
 # Полный граф (все зависимости)
-node graph-analyzer.js project ./src/index.js
+npx @newkind/ast-analyzer project ./src/index.js
 
 # Ограничение глубиной 2 уровня
-node graph-analyzer.js project ./src/index.js 2
+npx @newkind/ast-analyzer project ./src/index.js 2
+
+# С указанием tsconfig для алиасов
+npx @newkind/ast-analyzer project ./src/index.ts --tsconfig ./tsconfig.json
 ```
 
 ---
@@ -187,12 +197,12 @@ node graph-analyzer.js project ./src/index.js 2
 
 **Команда:**
 ```bash
-node graph-analyzer.js file <путь_к_файлу>
+npx @newkind/ast-analyzer file <путь_к_файлу>
 ```
 
 **Пример:**
 ```bash
-node graph-analyzer.js file ./src/services/api.js
+npx @newkind/ast-analyzer file ./src/services/api.js
 ```
 
 ---
@@ -213,24 +223,16 @@ node graph-analyzer.js file ./src/services/api.js
 - ✅ JSDoc комментарии
 - ✅ TypeScript интерфейсы
 
-**Последовательность шагов:**
-1. Парсит файл в AST
-2. Обходит AST и находит все блоки реализации (тела функций, методов)
-3. Вырезает внутренности блоков, заменяя на комментарий
-4. Скрывает значения простых переменных
-5. Очищает лишние пустые строки
-6. Сохраняет результат в файл
-
 **Команда:**
 ```bash
-node graph-analyzer.js minify <путь_к_файлу>
+npx @newkind/ast-analyzer minify <путь_к_файлу>
 ```
 
 **Выход:** `ai-context.txt`
 
 **Пример:**
 ```bash
-node graph-analyzer.js minify ./src/components/UserProfile.tsx
+npx @newkind/ast-analyzer minify ./src/components/UserProfile.tsx
 ```
 
 ---
@@ -246,16 +248,16 @@ node graph-analyzer.js minify ./src/components/UserProfile.tsx
 4. Для каждого найденного файла выполняет минификацию
 5. Собирает статистику по исходному и сжатому размеру
 6. Генерирует Markdown-отчет с:
-  - Системным промптом для ИИ
-  - Оглавлением со ссылками на файлы
-  - Древовидной структурой каталогов
-  - Сжатым содержимым каждого файла
-  - Таблицей статистики сжатия
+- Системным промптом для ИИ
+- Оглавлением со ссылками на файлы
+- Древовидной структурой каталогов
+- Сжатым содержимым каждого файла
+- Таблицей статистики сжатия
 7. Сохраняет результат в выходной файл
 
 **Команда:**
 ```bash
-node graph-analyzer.js minify-folder <путь_к_каталогу> [опции]
+npx @newkind/ast-analyzer minify-folder <путь_к_каталогу> [опции]
 ```
 
 **Опции:**
@@ -272,16 +274,16 @@ node graph-analyzer.js minify-folder <путь_к_каталогу> [опции]
 **Примеры:**
 ```bash
 # Базовое использование
-node graph-analyzer.js minify-folder ./src
+npx @newkind/ast-analyzer minify-folder ./src
 
 # С кастомным выходным файлом
-node graph-analyzer.js minify-folder ./src -o docs/project-context.md
+npx @newkind/ast-analyzer minify-folder ./src -o docs/project-context.md
 
 # Ограничение глубины
-node graph-analyzer.js minify-folder ./src -d 2
+npx @newkind/ast-analyzer minify-folder ./src -d 2
 
 # Только JS и TS файлы
-node graph-analyzer.js minify-folder ./src -e .js,.ts
+npx @newkind/ast-analyzer minify-folder ./src -e .js,.ts
 ```
 
 ---
@@ -301,65 +303,65 @@ node graph-analyzer.js minify-folder ./src -e .js,.ts
 
 **Команда:**
 ```bash
-node graph-analyzer.js prompt-pack <путь_к_файлу> [глубина]
+npx @newkind/ast-analyzer prompt-pack <путь_к_файлу> [глубина]
 ```
 
 **Выход:** `ai-prompt-bundle.md`
 
 **Пример:**
 ```bash
-node graph-analyzer.js prompt-pack ./src/checkout/OrderService.ts 2
+npx @newkind/ast-analyzer prompt-pack ./src/checkout/OrderService.ts 2
 ```
 
 ---
 
-### 6. split-module - Разбиение файла на модули ⭐ НОВЫЙ
+### 6. split-module - Разбиение файла на модули ⭐
 
 **Назначение:** Глубокий анализ файла для подготовки к разбиению на логически связанные модули. Идеально для рефакторинга монолитных файлов.
 
 **Последовательность шагов:**
 
 1. **Парсинг и анализ AST**
-  - Разбирает файл в абстрактное синтаксическое дерево
-  - Извлекает все импорты с их спецификаторами
-  - Собирает все экспорты (named, default)
-  - Находит функции, классы, константы, интерфейсы, типы
+- Разбирает файл в абстрактное синтаксическое дерево
+- Извлекает все импорты с их спецификаторами
+- Собирает все экспорты (named, default)
+- Находит функции, классы, константы, интерфейсы, типы
 
 2. **Построение графа вызовов (Call Graph)**
-  - Отслеживает контекст текущей функции
-  - Анализирует все вызовы функций внутри каждой функции
-  - Строит карту: функция → [вызываемые функции]
+- Отслеживает контекст текущей функции
+- Анализирует все вызовы функций внутри каждой функции
+- Строит карту: функция → [вызываемые функции]
 
 3. **Идентификация кластеров**
-  - Выполняет поиск сильно связанных компонентов
-  - Группирует функции, которые часто вызывают друг друга
-  - Определяет тип каждого кластера (core/helper)
-  - Вычисляет размер и зависимости кластеров
+- Выполняет поиск сильно связанных компонентов
+- Группирует функции, которые часто вызывают друг друга
+- Определяет тип каждого кластера (core/helper)
+- Вычисляет размер и зависимости кластеров
 
 4. **Статистический анализ**
-  - Подсчитывает общее количество строк
-  - Собирает статистику по экспортам, функциям, классам
-  - Анализирует интерфейсы и типы
+- Подсчитывает общее количество строк
+- Собирает статистику по экспортам, функциям, классам
+- Анализирует интерфейсы и типы
 
 5. **Поиск циклических зависимостей**
-  - Строит граф внутренних зависимостей
-  - Выполняет поиск циклов алгоритмом DFS
-  - Отмечает проблемные связи
+- Строит граф внутренних зависимостей
+- Выполняет поиск циклов алгоритмом DFS
+- Отмечает проблемные связи
 
 6. **Генерация предложений по структуре**
-  - На основе кластеров предлагает имена модулей
-  - Формирует рекомендуемую структуру каталогов
-  - Определяет, какие сущности в какой модуль перенести
+- На основе кластеров предлагает имена модулей
+- Формирует рекомендуемую структуру каталогов
+- Определяет, какие сущности в какой модуль перенести
 
 7. **Создание выходных данных**
-  - Генерирует основной промпт для ИИ (Markdown)
-  - Сохраняет сжатую версию файла
-  - Экспортирует граф вызовов в JSON
-  - Сохраняет структурный анализ в JSON
+- Генерирует основной промпт для ИИ (Markdown)
+- Сохраняет сжатую версию файла
+- Экспортирует граф вызовов в JSON
+- Сохраняет структурный анализ в JSON
 
 **Команда:**
 ```bash
-node graph-analyzer.js split-module <путь_к_файлу> [опции]
+npx @newkind/ast-analyzer split-module <путь_к_файлу> [опции]
 ```
 
 **Опции:**
@@ -367,6 +369,11 @@ node graph-analyzer.js split-module <путь_к_файлу> [опции]
 | Опция | Описание | По умолчанию |
 |-------|----------|--------------|
 | `--output, -o` | Выходной файл промпта | `ai-split-module-prompt.md` |
+| `--target-cluster-size, -t` | Желаемый размер кластера | `3` |
+| `--max-cluster-size, -m` | Максимальный размер кластера | `10` |
+| `--max-depth, -d` | Глубина анализа | `5` |
+| `--exclude, -x` | Паттерны исключения | `node_modules,.git,...` |
+| `--prefix, -p` | Префикс для выходных файлов | `''` |
 | `--no-full-code` | Не включать полный код файла | `false` |
 | `--no-minified` | Не включать сжатую версию | `false` |
 | `--no-graph` | Не включать граф вызовов | `false` |
@@ -376,13 +383,16 @@ node graph-analyzer.js split-module <путь_к_файлу> [опции]
 **Примеры:**
 ```bash
 # Полный анализ для разбиения
-node graph-analyzer.js split-module ./src/monolith.js
+npx @newkind/ast-analyzer split-module ./src/monolith.js
 
 # С кастомным выходным файлом
-node graph-analyzer.js split-module ./src/app.ts -o split-prompt.md
+npx @newkind/ast-analyzer split-module ./src/app.ts -o split-prompt.md
 
 # Минимальный анализ (только статистика и предложения)
-node graph-analyzer.js split-module ./src/component.jsx --no-full-code --no-minified --no-graph
+npx @newkind/ast-analyzer split-module ./src/component.jsx --no-full-code --no-minified --no-graph
+
+# С указанием tsconfig для алиасов
+npx @newkind/ast-analyzer split-module ./src/app.ts --tsconfig ./tsconfig.json
 ```
 
 **Выходные файлы:**
@@ -393,18 +403,6 @@ node graph-analyzer.js split-module ./src/component.jsx --no-full-code --no-mini
 | `ai-context.txt` | Сжатая версия файла (только сигнатуры) |
 | `internal-graph.json` | Граф вызовов между функциями |
 | `module-analysis.json` | Структурный анализ (кластеры, экспорты, функции) |
-
-**Что входит в промпт:**
-- 📊 Статистика файла (строки, экспорты, функции, классы)
-- 📤 Список всех экспортируемых сущностей
-- 📥 Список всех импортов
-- 🔍 Выявленные кластеры (кандидаты в модули)
-- ⚠️ Циклические зависимости (если есть)
-- 🎯 Предлагаемая структура модулей
-- 📄 Полный код файла
-- ✂️ Сжатая версия (только сигнатуры)
-- 🕸️ Граф вызовов в текстовом виде
-- 📤 Ожидаемый формат ответа от ИИ
 
 ---
 
@@ -424,14 +422,14 @@ node graph-analyzer.js split-module ./src/component.jsx --no-full-code --no-mini
 
 **Команда:**
 ```bash
-node graph-analyzer.js impact <путь_к_файлу> <имя_сущности>
+npx @newkind/ast-analyzer impact <путь_к_файлу> <имя_сущности>
 ```
 
 **Выход:** `ai-impact-report.md`
 
 **Пример:**
 ```bash
-node graph-analyzer.js impact ./src/database/queries.ts findUserById
+npx @newkind/ast-analyzer impact ./src/database/queries.ts findUserById
 ```
 
 ---
@@ -456,25 +454,111 @@ node graph-analyzer.js impact ./src/database/queries.ts findUserById
 
 **Команда:**
 ```bash
-node graph-analyzer.js dead-code <путь_к_файлу>
+npx @newkind/ast-analyzer dead-code <путь_к_файлу>
 ```
 
 **Выход:** `ai-dead-code-report.md`
 
 **Пример:**
 ```bash
-node graph-analyzer.js dead-code ./src/legacy/utils.ts
+npx @newkind/ast-analyzer dead-code ./src/legacy/utils.ts
+```
+
+---
+
+### 9. vue-analyze - Анализ Vue компонентов 🎯 НОВЫЙ РЕЖИМ
+
+**Назначение:** Глубокий анализ Vue Single-File Components (SFC) для понимания структуры, связей и возможностей рефакторинга.
+
+**Анализируемые данные:**
+- 📥 **Props** - имена, типы, обязательность, значения по умолчанию
+- 📤 **Events (emits)** - имена событий и их типы
+- 🎭 **Slots** - именованные слоты
+- 🧩 **Composables** - вызовы use* функций
+- 📦 **Imports** - внешние и внутренние зависимости
+- 🏗️ **Template** - сложность, корневые элементы, директивы, события
+- 🔓 **Exposed API** - публичные методы через defineExpose
+- 📊 **Статистика** - количество строк в script/template, блоки стилей
+
+**Команда:**
+```bash
+npx @newkind/ast-analyzer vue-analyze <путь_к_vue_файлу> [опции]
+# или короткая форма
+npx @newkind/ast-analyzer vue <путь_к_vue_файлу> [опции]
+```
+
+**Опции:**
+
+| Опция | Описание | По умолчанию |
+|-------|----------|--------------|
+| `--no-template-ast` | Не анализировать AST шаблона | `false` |
+| `--no-script-ast` | Не анализировать AST скрипта | `false` |
+| `--no-composables` | Не искать вызовы композаблов | `false` |
+
+**Выходные файлы:**
+- `vue-analysis.json` - полные данные анализа в JSON
+- `vue-analysis.md` - читаемый Markdown отчет
+
+**Примеры:**
+```bash
+# Базовый анализ компонента
+npx @newkind/ast-analyzer vue-analyze ./src/components/UserProfile.vue
+
+# Анализ с отключением анализа шаблона (быстрее)
+npx @newkind/ast-analyzer vue ./src/components/DataTable.vue --no-template-ast
+
+# Короткая форма
+npx @newkind/ast-analyzer vue ./src/App.vue
+
+# С указанием tsconfig для алиасов
+npx @newkind/ast-analyzer vue-analyze ./src/components/Form.vue --tsconfig ./tsconfig.json
+```
+
+**Пример отчета:**
+```markdown
+# 🎯 Анализ Vue компонента: UserProfile
+
+## 📊 Статистика
+- **Размер файла:** 12.34 KB
+- **Скрипт:** 156 строк (setup)
+- **Шаблон:** 45 строк
+- **Стили:** 2 блоков
+- **TypeScript:** ✅
+
+## 📥 Props (3)
+| Имя | Тип | Обязательный | По умолчанию |
+|-----|-----|--------------|--------------|
+| `userId` | `number` | ✅ | - |
+| `title` | `string` | ✅ | - |
+| `showAvatar` | `boolean` | ❌ | true |
+
+## 📤 Events (2)
+- **update** : `value`
+- **close**
+
+## 🧩 Composables (2)
+- `useAuth` → переменная `auth`
+- `useFetch` → переменная `data`
+
+## 🏗️ Шаблон
+- **Сложность:** 24 элементов
+- **Корневые элементы:** div
+- **Директивы:** v-if, v-for
+- **События:** click, change
+
+## 💡 Рекомендации
+⚠️ **Скрипт слишком большой** (156 строк). Разбейте на несколько composables.
 ```
 
 ---
 
 ## 💡 Примеры использования
 
-### Сценарий 1: Разбиение монолитного файла (НОВЫЙ РЕЖИМ!)
+### Сценарий 1: Разбиение монолитного файла
 
 ```bash
 # 1. Анализируем файл
-node graph-analyzer.js split-module ./src/monolith.js
+npx @newkind/ast-analyzer split-module ./src/monolith.js
 
 # 2. Открываем ai-split-module-prompt.md
 #    Видим: статистику, кластеры функций, граф вызовов
@@ -489,7 +573,7 @@ node graph-analyzer.js split-module ./src/monolith.js
 
 ```bash
 # Минифицируем весь проект
-node graph-analyzer.js minify-folder ./src -o ai-full-context.md
+npx @newkind/ast-analyzer minify-folder ./src -o ai-full-context.md
 
 # Отправляем ai-full-context.md в ИИ
 # ИИ получает полную картину архитектуры за 15% от исходного размера!
@@ -499,7 +583,7 @@ node graph-analyzer.js minify-folder ./src -o ai-full-context.md
 
 ```bash
 # Сжать один файл
-node graph-analyzer.js minify ./src/complex/Component.jsx
+npx @newkind/ast-analyzer minify ./src/complex/Component.jsx
 
 # Отправить ai-context.txt в ИИ с вопросом
 ```
@@ -508,7 +592,7 @@ node graph-analyzer.js minify ./src/complex/Component.jsx
 
 ```bash
 # Собрать контекст для файла, который нужно изменить
-node graph-analyzer.js prompt-pack ./src/features/payment.js 2
+npx @newkind/ast-analyzer prompt-pack ./src/features/payment.js 2
 
 # Загрузить ai-prompt-bundle.md в ChatGPT/Claude
 ```
@@ -517,7 +601,7 @@ node graph-analyzer.js prompt-pack ./src/features/payment.js 2
 
 ```bash
 # Перед удалением функции проверить влияние
-node graph-analyzer.js impact ./src/old/api.js deprecatedMethod
+npx @newkind/ast-analyzer impact ./src/old/api.js deprecatedMethod
 
 # Если отчет пуст - можно удалять
 ```
@@ -526,7 +610,7 @@ node graph-analyzer.js impact ./src/old/api.js deprecatedMethod
 
 ```bash
 # Найти мертвый код
-node graph-analyzer.js dead-code ./src/legacy/module.js
+npx @newkind/ast-analyzer dead-code ./src/legacy/module.js
 
 # Почистить по отчету
 ```
@@ -535,17 +619,27 @@ node graph-analyzer.js dead-code ./src/legacy/module.js
 
 ```bash
 # Построить граф зависимостей
-node graph-analyzer.js project ./src/main.js 2
+npx @newkind/ast-analyzer project ./src/main.js 2
 
 # Открыть report.html в браузере
 # Изучить визуализацию связей
+```
+
+### Сценарий 8: Анализ Vue компонента
+
+```bash
+# Глубокий анализ Vue компонента
+npx @newkind/ast-analyzer vue-analyze ./src/components/Dashboard.vue
+
+# Получаем JSON и MD отчеты
+# Понимаем структуру props, events, composables
 ```
 
 ---
 
 ## 🤖 Промпты для ИИ
 
-### Для режима split-module (НОВЫЙ!)
+### Для режима split-module
 
 ```markdown
 ## 📋 Инструкция для ИИ
@@ -576,31 +670,27 @@ node graph-analyzer.js project ./src/main.js 2
 4. План миграции
 ```
 
-### Для режима minify-folder
+### Для режима vue-analyze
 
 ```markdown
 ## 📋 Инструкция для ИИ
 
-Я загружаю сжатый контекст всего проекта.
+Я загружаю анализ Vue компонента.
 
 **Данные содержат:**
-- Полная структура каталогов
-- Все экспортируемые функции с сигнатурами
-- TypeScript интерфейсы и типы
+- Все props с типами и значениями по умолчанию
+- Все events (emits)
+- Используемые composables
+- Импорты и зависимости
+- Структуру шаблона
 
-**Задача:** Проанализируй архитектуру проекта и предложи улучшения.
-```
+**Задача:** Проанализируй компонент и предложи улучшения.
 
-### Для режима impact
-
-```markdown
-## 📋 Инструкция для ИИ
-
-Я планирую изменить функцию `[entity-name]`.
-
-**Отчет о влиянии:** [вставьте ai-impact-report.md]
-
-**Задача:** Для каждого файла из отчета опиши необходимые правки.
+**Вопросы для анализа:**
+1. Нет ли избыточной сложности в шаблоне?
+2. Можно ли вынести часть логики в composables?
+3. Правильно ли типизированы props и events?
+4. Нет ли проблем с производительностью?
 ```
 
 ---
@@ -609,8 +699,6 @@ node graph-analyzer.js project ./src/main.js 2
 
 ```
 project/
-├── graph-analyzer.js                    # Главный скрипт
-│
 ├── Визуализация (project/file):
 ├── report.html                          # Интерактивный граф
 ├── output.svg                           # Векторный граф
@@ -626,10 +714,14 @@ project/
 ├── Контекст (prompt-pack):
 ├── ai-prompt-bundle.md                  # Контекст для ИИ
 │
-├── Разбиение модулей (split-module): ⭐ НОВЫЙ
+├── Разбиение модулей (split-module):
 ├── ai-split-module-prompt.md            # Главный промпт для ИИ
 ├── internal-graph.json                  # Граф вызовов
 ├── module-analysis.json                 # Структурный анализ
+│
+├── Vue анализ (vue-analyze):
+├── vue-analysis.json                    # Полные данные анализа
+├── vue-analysis.md                      # Markdown отчет
 │
 ├── Анализ (impact):
 ├── ai-impact-report.md                  # Отчет о влиянии
@@ -650,6 +742,7 @@ project/
 | `minify-folder` | Весь проект | 80-90% | MD | Полный анализ архитектуры |
 | `prompt-pack` | Файл + зависимости | 60-80% | MD | Изменение конкретного файла |
 | `split-module` | 1 (глубокий анализ) | - | MD + JSON | **Разбиение на модули** ⭐ |
+| `vue-analyze` | 1 (Vue SFC) | - | MD + JSON | **Анализ Vue компонентов** 🎯 |
 | `impact` | Весь проект | - | MD | Оценка влияния изменений |
 | `dead-code` | 1 + проект | - | MD | Поиск неиспользуемого кода |
 
@@ -661,7 +754,7 @@ project/
 
 ```bash
 # 1. Запустите анализ
-node graph-analyzer.js split-module ./src/monolith.js
+npx @newkind/ast-analyzer split-module ./src/monolith.js
 
 # 2. Изучите выявленные кластеры в module-analysis.json
 # 3. Отправьте ai-split-module-prompt.md в ИИ
@@ -669,28 +762,39 @@ node graph-analyzer.js split-module ./src/monolith.js
 # 5. Внедряйте изменения по плану миграции
 ```
 
-### 2. Экономия токенов
+### 2. Для анализа Vue проектов
+
+```bash
+# 1. Проанализируйте корневой компонент
+npx @newkind/ast-analyzer vue-analyze ./src/App.vue
+
+# 2. Изучите отчет vue-analysis.md
+# 3. Выявите проблемные места
+# 4. Оптимизируйте компоненты
+```
+
+### 3. Экономия токенов
 
 ```bash
 # Вместо отправки 50MB папки
 du -sh ./src  # 50MB
 
 # Получаем 5MB сжатого контекста
-node graph-analyzer.js minify-folder ./src -o context.md
+npx @newkind/ast-analyzer minify-folder ./src -o context.md
 ls -lh context.md  # 5MB (экономия 90%!)
 ```
 
-### 3. Выбор глубины
+### 4. Выбор глубины
 
 ```bash
 # Глубина 2 - основные модули (быстро)
-node graph-analyzer.js minify-folder ./src -d 2
+npx @newkind/ast-analyzer minify-folder ./src -d 2
 
 # Глубина 5 - большинство файлов (баланс)
-node graph-analyzer.js minify-folder ./src -d 5
+npx @newkind/ast-analyzer minify-folder ./src -d 5
 ```
 
-### 4. Интеграция в CI/CD
+### 5. Интеграция в CI/CD
 
 ```yaml
 # .github/workflows/analyze.yml
@@ -702,15 +806,25 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: npm install
-      - run: node graph-analyzer.js impact ./src/changed.ts functionName
+      - run: npx @newkind/ast-analyzer impact ./src/changed.ts functionName
       - run: cat ai-impact-report.md >> $GITHUB_STEP_SUMMARY
 ```
 
-### 5. Лучшие практики
+### 6. Работа с TypeScript и алиасами
+
+```bash
+# Укажите путь к tsconfig.json для корректного разрешения алиасов
+npx @newkind/ast-analyzer project ./src/index.ts --tsconfig ./tsconfig.json
+npx @newkind/ast-analyzer split-module ./src/app.ts --tsconfig ./tsconfig.json
+npx @newkind/ast-analyzer vue-analyze ./src/App.vue --tsconfig ./tsconfig.json
+```
+
+### 7. Лучшие практики
 
 - ✅ **Для рефакторинга монолита** используйте `split-module`
 - ✅ **Для архитектурных вопросов** используйте `minify-folder`
 - ✅ **Для точечных правок** используйте `prompt-pack`
+- ✅ **Для Vue компонентов** используйте `vue-analyze`
 - ✅ **Для быстрых вопросов** используйте `minify`
 - ✅ **Перед удалением кода** всегда запускайте `impact`
 - ✅ **Периодически** запускайте `dead-code` для чистоты
@@ -719,23 +833,89 @@ jobs:
 
 ---
 
+## 🛠️ API Reference
+
+### Основные экспорты
+
+```typescript
+// Core
+export { parseFile, isExternalModule, resolveFilePath, getAllProjectFiles, walk }
+export { minifyCodeString, minifyForAI }
+export { findCyclicEdges, convertToDOT, dfs }
+export { setTsConfigPath, loadTsConfig, resolveAliasPath }
+
+// Modes
+export { buildProjectGraph } from './modes/project-graph.js'
+export { buildFileInternalGraph } from './modes/file-graph.js'
+export { minifyFile } from './modes/minify-file.js'
+export { minifyFolder, generateDirectoryTree, collectFiles } from './modes/minify-folder.js'
+export { buildAiPromptPack } from './modes/prompt-pack.js'
+export { buildSplitModulePrompt, analyzeModuleStructure, identifyClusters } from './modes/split-module.js'
+export { runImpactAnalysis } from './modes/impact.js'
+export { findDeadCode } from './modes/dead-code.js'
+
+// Vue analysis (NEW!)
+export { parseVueFile, analyzeVueComponent, generateVueComponentReport, enhanceWithVueAnalysis }
+
+// Reporters
+export { generateHTMLReport, escapeHtml }
+
+// Utils
+export { showHelp, renderNode }
+```
+
+### Использование в коде
+
+```typescript
+import { buildProjectGraph, minifyForAI, analyzeVueComponent } from '@newkind/ast-analyzer';
+
+// Построение графа зависимостей
+const graph = buildProjectGraph('./src/index.ts', 3);
+console.log(graph.graph);
+
+// Минификация файла
+const minified = minifyForAI('./src/component.ts');
+console.log(minified);
+
+// Анализ Vue компонента
+const vueAnalysis = analyzeVueComponent('./src/App.vue');
+console.log(vueAnalysis.props.names);
+```
+
+---
+
 ## 📄 Лицензия
 
-**CSL-1.0 (Custom Source License)**
+**MIT License**
 
-- ✅ Использование разрешено в **некоммерческих целях**
-- 🔒 Коммерческое использование **ТОЛЬКО** с письменного разрешения автора
-- 🔄 Изменение файлов запрещено - только через Pull Request
+Copyright (c) 2026
 
-Полный текст лицензии: см. файл [LICENSE](LICENSE)
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 ---
 
 ## 👤 Контакты
 
-**Автор:** Забабурин Сергей  
-**Email:** zababurins@vk.com  
+**Автор:** Забабурин Сергей
+**Email:** zababurins@vk.com
 **GitHub:** [ZababurinSergei/ast-analyzer](https://github.com/ZababurinSergei/ast-analyzer)
+**npm:** [@newkind/ast-analyzer](https://www.npmjs.com/package/@newkind/ast-analyzer)
 
 ---
 
@@ -743,7 +923,6 @@ jobs:
 
 **⭐ Если этот инструмент помог вам в работе с ИИ, поставьте звезду на GitHub!**
 
-[← Наверх](#-ast-analyzer---ai-toolkit)
+[← Наверх](#-ast-analyzer---ai-toolkit-for-code-analysis)
 
 </div>
-```

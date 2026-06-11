@@ -8,7 +8,7 @@
 **Что даёт:** Понимает, какие функции/переменные внутри файла связаны между собой.
 
 ```bash
-node graph-analyzer.js file ./src/huge-component.js
+npx @newkind/ast-analyzer file ./src/huge-component.js
 ```
 
 **Что покажет граф:**
@@ -26,7 +26,7 @@ renderUI()        → calculateTotal() → formatCurrency()
 **Что даёт:** Убирает детали реализации, оставляя только "скелет" файла.
 
 ```bash
-node graph-analyzer.js minify ./src/huge-component.js
+npx @newkind/ast-analyzer minify ./src/huge-component.js
 ```
 
 **Результат:**
@@ -41,7 +41,7 @@ node graph-analyzer.js minify ./src/huge-component.js
 **Что даёт:** Собирает контекст для ИИ с инструкцией по разбиению.
 
 ```bash
-node graph-analyzer.js prompt-pack ./src/huge-component.js 0
+npx @newkind/ast-analyzer prompt-pack ./src/huge-component.js 0
 # Глубина 0 - только сам файл, без зависимостей
 ```
 
@@ -51,15 +51,15 @@ node graph-analyzer.js prompt-pack ./src/huge-component.js 0
 
 ```bash
 # Шаг 1: Визуализируй внутренние связи
-node graph-analyzer.js file ./src/huge-file.js
+npx @newkind/ast-analyzer file ./src/huge-file.js
 # Открой report.html - увидишь кластеры функций
 
 # Шаг 2: Сгенерируй сжатый скелет
-node graph-analyzer.js minify ./src/huge-file.js
+npx @newkind/ast-analyzer minify ./src/huge-file.js
 # Получишь ai-context.txt для быстрого анализа
 
 # Шаг 3: Собери контекст для ИИ
-node graph-analyzer.js prompt-pack ./src/huge-file.js 0
+npx @newkind/ast-analyzer prompt-pack ./src/huge-file.js 0
 # Получишь ai-prompt-bundle.md с инструкцией
 ```
 
@@ -210,7 +210,7 @@ function updateTotalDisplay() { ... }
 function showError(message: string) { ... }
 ```
 
-### Граф зависимостей (`node graph-analyzer.js file checkout.ts`)
+### Граф зависимостей (`npx @newkind/ast-analyzer file checkout.ts`)
 
 ```
 addToCart() → calculateSubtotal()
@@ -251,11 +251,11 @@ src/checkout/
 
 ## 🔧 Утилита для автоматического анализа кластеров
 
-Можно расширить `graph-analyzer.js` новым режимом:
+Можно расширить `@newkind/ast-analyzer` новым режимом:
 
 ```bash
 # Режим 7: cluster - выделение модулей
-node graph-analyzer.js cluster ./src/huge-file.ts
+npx @newkind/ast-analyzer cluster ./src/huge-file.ts
 ```
 
 **Что делает:**
@@ -272,15 +272,15 @@ node graph-analyzer.js cluster ./src/huge-file.ts
 
 ```bash
 # 1. Визуализация связей (понять структуру)
-node graph-analyzer.js file ./graph-analyzer_work.js
+npx @newkind/ast-analyzer file ./graph-analyzer_work.js
 open report.html
 
 # 2. Сжатие для анализа (быстрое понимание)
-node graph-analyzer.js minify ./graph-analyzer_work.js
+npx @newkind/ast-analyzer minify ./graph-analyzer_work.js
 cat ai-context.txt
 
 # 3. Сборка контекста для ИИ
-node graph-analyzer.js prompt-pack ./graph-analyzer_work.js 0
+npx @newkind/ast-analyzer prompt-pack ./graph-analyzer_work.js 0
 # Отправь ai-prompt-bundle.md + промпт из этого README
 ```
 
