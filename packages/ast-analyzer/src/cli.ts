@@ -408,8 +408,8 @@ export async function runCLI(): Promise<void> {
   // 1. СНАЧАЛА обрабатываем tsconfig (до смены директории)
   if (tsconfigPath) {
     const resolvedTsconfig = path.isAbsolute(tsconfigPath)
-      ? tsconfigPath
-      : path.resolve(originalCwd, tsconfigPath);
+        ? tsconfigPath
+        : path.resolve(originalCwd, tsconfigPath);
 
     if (fs.existsSync(resolvedTsconfig)) {
       setTsConfigPath(resolvedTsconfig);
@@ -588,7 +588,7 @@ export async function runCLI(): Promise<void> {
     if (mode === 'project') {
       const maxDepth = extraArg ? parseInt(extraArg, 10) : Infinity;
       console.log(
-        `📁 Построение графа проекта от ${targetPath} (глубина ${maxDepth === Infinity ? '∞' : maxDepth})`
+          `📁 Построение графа проекта от ${targetPath} (глубина ${maxDepth === Infinity ? '∞' : maxDepth})`
       );
 
       const resultData = buildProjectGraph(targetPath, maxDepth) as GraphResult;
@@ -616,19 +616,47 @@ export async function runCLI(): Promise<void> {
       console.log(`   ✅ output.svg`);
 
       const htmlContent = generateHTMLReport(
-        svgContent,
-        dotContent,
-        JSON.stringify(resultData, null, 2),
-        targetPath,
-        hasCycles
+          svgContent,
+          dotContent,
+          JSON.stringify(resultData, null, 2),
+          targetPath,
+          hasCycles
       );
       fs.writeFileSync('report.html', htmlContent);
       console.log(`   ✅ report.html`);
 
       console.log(`\n🎉 Готово! Откройте report.html в браузере`);
+
       if (hasCycles) {
-        console.log(`⚠️ Обнаружено ${cyclicEdges.size} циклических зависимостей`);
+        console.log(`\n⚠️ Обнаружено ${cyclicEdges.size} циклических зависимостей:`);
+        console.log('='.repeat(60));
+
+        // Группируем по исходному файлу
+        const cyclesByFile = new Map<string, Set<string>>();
+        for (const edge of cyclicEdges) {
+          const parts = edge.split('->');
+          const from = parts[0];
+          const to = parts[1];
+          if (from && to) {
+            if (!cyclesByFile.has(from)) cyclesByFile.set(from, new Set());
+            cyclesByFile.get(from)!.add(to);
+          }
+        }
+
+        // Выводим в читаемом формате
+        for (const [from, toSet] of cyclesByFile) {
+          // Сокращаем длинные пути для читаемости
+          const shortFrom = from.length > 80 ? '...' + from.slice(-77) : from;
+          console.log(`\n📄 ${shortFrom}`);
+          for (const to of toSet) {
+            const shortTo = to.length > 80 ? '...' + to.slice(-77) : to;
+            console.log(`   └─ 🔄 зависит от: ${shortTo}`);
+          }
+        }
+
+        console.log('\n💡 Подробная визуализация (с подсветкой циклов красным) доступна в report.html');
       }
+
       return;
     }
 
@@ -661,19 +689,44 @@ export async function runCLI(): Promise<void> {
       console.log(`   ✅ output.svg`);
 
       const htmlContent = generateHTMLReport(
-        svgContent,
-        dotContent,
-        JSON.stringify(resultData, null, 2),
-        targetPath,
-        hasCycles
+          svgContent,
+          dotContent,
+          JSON.stringify(resultData, null, 2),
+          targetPath,
+          hasCycles
       );
       fs.writeFileSync('report.html', htmlContent);
       console.log(`   ✅ report.html`);
 
       console.log(`\n🎉 Готово! Откройте report.html в браузере`);
+
       if (hasCycles) {
-        console.log(`⚠️ Обнаружено ${cyclicEdges.size} циклических зависимостей`);
+        console.log(`\n⚠️ Обнаружено ${cyclicEdges.size} циклических зависимостей во внутреннем графе файла:`);
+        console.log('='.repeat(60));
+
+        // Группируем по исходной функции/сущности
+        const cyclesByEntity = new Map<string, Set<string>>();
+        for (const edge of cyclicEdges) {
+          const parts = edge.split('->');
+          const from = parts[0];
+          const to = parts[1];
+          if (from && to) {
+            if (!cyclesByEntity.has(from)) cyclesByEntity.set(from, new Set());
+            cyclesByEntity.get(from)!.add(to);
+          }
+        }
+
+        // Выводим в читаемом формате
+        for (const [from, toSet] of cyclesByEntity) {
+          console.log(`\n📄 ${from}`);
+          for (const to of toSet) {
+            console.log(`   └─ 🔄 вызывает: ${to} (цикл)`);
+          }
+        }
+
+        console.log('\n💡 Подробная визуализация (с подсветкой циклов красным) доступна в report.html');
       }
+
       return;
     }
   } catch (error) {
