@@ -23,6 +23,14 @@
       "description_en": "User files: sources, templates, projects, user data",
       "required": false,
       "excluded": true
+    },
+    {
+      "id": "13",
+      "name": "Directory/typescript-sdk",
+      "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
+      "description_en": "User files: sources, templates, projects, user data",
+      "required": false,
+      "excluded": true
     }
   ],
   "excludePatterns": {
