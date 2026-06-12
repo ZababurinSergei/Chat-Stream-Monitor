@@ -1,0 +1,134 @@
+{
+  "rootKey": "injectDeepSeek.js",
+  "graph": {
+    "pageContext": [],
+    "AUTH_TEXT_PATTERNS": [],
+    "READY_SELECTORS": [],
+    "lastPageState": [],
+    "lastParentFrameState": [],
+    "syncScheduled": [],
+    "EnhancedPageObserver": [
+      "constructor",
+      "syncPageState",
+      "isAuthPage",
+      "findChatInputElement",
+      "pathname",
+      "bodyText",
+      "hasPasswordField",
+      "hasEmailField",
+      "elements",
+      "visibleElement",
+      "isVisible",
+      "READY_SELECTORS",
+      "rect",
+      "style"
+    ],
+    "ChatStreamMonitor": [
+      "constructor",
+      "elements",
+      "originalFetch",
+      "originalXHROpen",
+      "pattern",
+      "isVisible",
+      "state",
+      "rect",
+      "style"
+    ],
+    "canUseRuntimeMessaging": [],
+    "isVisible": [
+      "rect",
+      "style"
+    ],
+    "rect": [],
+    "style": [],
+    "hasVisibleActionLabel": [
+      "pattern",
+      "isVisible"
+    ],
+    "pattern": [],
+    "isAuthPage": [
+      "pathname",
+      "bodyText",
+      "hasLoginCta",
+      "hasVisibleActionLabel",
+      "hasPasswordField",
+      "hasEmailField",
+      "hasSocialAuthButton",
+      "matchedPatterns",
+      "pattern",
+      "AUTH_TEXT_PATTERNS"
+    ],
+    "pathname": [],
+    "bodyText": [],
+    "hasLoginCta": [
+      "hasVisibleActionLabel"
+    ],
+    "hasPasswordField": [],
+    "hasEmailField": [],
+    "hasSocialAuthButton": [],
+    "matchedPatterns": [
+      "bodyText",
+      "pattern",
+      "AUTH_TEXT_PATTERNS"
+    ],
+    "findChatInputElement": [
+      "elements",
+      "visibleElement",
+      "isVisible",
+      "READY_SELECTORS"
+    ],
+    "elements": [],
+    "visibleElement": [
+      "isVisible",
+      "elements"
+    ],
+    "detectPageState": [
+      "isAuthPage",
+      "findChatInputElement"
+    ],
+    "notifyPageState": [
+      "canUseRuntimeMessaging",
+      "state",
+      "lastPageState",
+      "pageContext"
+    ],
+    "notifyParentFrameState": [
+      "state",
+      "lastParentFrameState"
+    ],
+    "syncPageState": [
+      "state",
+      "detectPageState",
+      "notifyPageState",
+      "notifyParentFrameState"
+    ],
+    "state": [
+      "detectPageState"
+    ],
+    "schedulePageStateSync": [
+      "syncScheduled",
+      "syncPageState"
+    ],
+    "setupMessageHandlers": [
+      "rect",
+      "style"
+    ],
+    "ensureEventBusAndInit": [
+      "setupMessageHandlers",
+      "enhancedObserver",
+      "EnhancedPageObserver",
+      "chatMonitor",
+      "ChatStreamMonitor"
+    ],
+    "enhancedObserver": [
+      "EnhancedPageObserver"
+    ],
+    "chatMonitor": [
+      "ChatStreamMonitor"
+    ],
+    "originalFetch": [],
+    "originalXHROpen": []
+  },
+  "hasCycles": false,
+  "cyclicEdges": []
+}
