@@ -34,6 +34,7 @@
   "notypeof": true,
   "quotmark": false,
   "laxbreak": true,
+  "-W079": false,
   "predef": [
     "__filename",
     "__dirname",

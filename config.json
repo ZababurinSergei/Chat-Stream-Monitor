@@ -113,7 +113,9 @@
     "Dockerfile",
     "Makefile",
     ".gitmodules",
-    ".env"
+    ".env",
+    ".jshintrc",
+    ".jshintignore"
   ],
   "madge": {
     "description": "Конфигурация для сканера зависимостей madge",
