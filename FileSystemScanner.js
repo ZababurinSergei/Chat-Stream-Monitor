@@ -684,9 +684,7 @@ export function createFileSystemJSON(configPath = './config.json') {
                 "children": {}
             };
 
-            console.log(lang === 'english'
-                ? `🚫 Excluded from scan: ${dirConfig.name} - ${getLocalizedDescription(dirConfig)}`
-                : `🚫 Исключена из сканирования: ${dirConfig.name} - ${getLocalizedDescription(dirConfig)}`);
+            console.log(lang === 'english' ? `🚫 Excluded from scan: ${dirConfig.name} - ${getLocalizedDescription(dirConfig)}` : `🚫 Исключена из сканирования: ${dirConfig.name} - ${getLocalizedDescription(dirConfig)}`);
             continue;
         }
 
@@ -787,10 +785,3 @@ export function saveFileSystemJSON(outputPath, fileSystem, prettyPrint = true) {
         console.error('❌ Error saving JSON:', error);
     }
 }
-
-// Экспорт для обратной совместимости
-export const directoryMap = {
-    "10": { type: "Directory", realPath: path.join(__dirname, "Directory/10") },
-    "11": { type: "Directory", realPath: path.join(__dirname, "Directory/11") },
-    "12": { type: "Directory", realPath: path.join(__dirname, "Directory/12") }
-};

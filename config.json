@@ -6,7 +6,7 @@
       "description": "Пользовательская документация: проектные описания, инструкции, чек-листы",
       "description_en": "User documentation: project descriptions, instructions, checklists",
       "required": false,
-      "excluded": true
+      "excluded": false
     },
     {
       "id": "11",

@@ -1,3 +1,17 @@
+# 🧠 КОНТЕКСТ ДЛЯ ИИ АССИСТЕНТА
+
+## 📋 ИНСТРУКЦИЯ ДЛЯ ИИ:
+Ты — ведущий инженер-разработчик. Ниже предоставлен полный контекст задачи.
+- **Целевой файл** (который нужно изменить/проанализировать) дан ПОЛНОСТЬЮ
+- **Зависимости** проекта даны в СЖАТОМ виде (только сигнатуры, без реализации)
+- Используй сигнатуры зависимостей для генерации корректного кода
+
+---
+
+## 🎯 ЦЕЛЕВОЙ ФАЙЛ
+
+### `../Directory/11/deepseek/injectDeepSeek.js`
+```javascript
 // injectDeepSeek.js - Полная версия с интегрированным чат-монитором и событийной шиной (100% кода)
 
 if (!window.__deepseekExtensionInjected) {
@@ -992,33 +1006,242 @@ if (!window.__deepseekExtensionInjected) {
 
     // ========== HELPER FUNCTIONS ==========
 
-    function canUseRuntimeMessaging() { /* реализация скрыта */ }
+    function canUseRuntimeMessaging() {
+        return typeof chrome !== "undefined" &&
+            Boolean(chrome.runtime?.id) &&
+            typeof chrome.runtime.sendMessage === "function";
+    }
 
-    function isVisible(element) { /* реализация скрыта */ }
+    function isVisible(element) {
+        if (!(element instanceof HTMLElement)) return false;
+        const rect = element.getBoundingClientRect();
+        const style = window.getComputedStyle(element);
+        return rect.width > 0 && rect.height > 0 &&
+            style.display !== 'none' && style.visibility !== 'hidden' && style.opacity !== '0';
+    }
 
-    function hasVisibleActionLabel(label) { /* реализация скрыта */ }
+    function hasVisibleActionLabel(label) {
+        const pattern = new RegExp(`^\\s*${label}\\s*$`, "i");
+        return Array.from(document.querySelectorAll("button, a, [role='button']"))
+            .some((element) => isVisible(element) && pattern.test(element.textContent || ""));
+    }
 
-    function isAuthPage() { /* реализация скрыта */ }
+    function isAuthPage() {
+        const pathname = window.location.pathname || "";
+        const bodyText = document.body?.innerText || "";
 
-    function findChatInputElement() { /* реализация скрыта */ }
+        const hasLoginCta = hasVisibleActionLabel("Log in") ||
+            hasVisibleActionLabel("Login") ||
+            hasVisibleActionLabel("Sign up") ||
+            hasVisibleActionLabel("Sign in");
 
-    function detectPageState() { /* реализация скрыта */ }
+        const hasPasswordField = Boolean(document.querySelector('input[type="password"]'));
+        const hasEmailField = Boolean(
+            document.querySelector('input[type="email"]') ||
+            document.querySelector('input[placeholder*="Email" i]') ||
+            document.querySelector('input[placeholder*="Mail" i]')
+        );
 
-    function notifyPageState(state) { /* реализация скрыта */ }
+        const hasSocialAuthButton = Array
+            .from(document.querySelectorAll("button, a, [role='button']"))
+            .some((element) => {
+                if (!(element instanceof HTMLElement)) return false;
+                const text = element.textContent || "";
+                return /continue with google|continue with github/i.test(text);
+            });
 
-    function notifyParentFrameState(state) { /* реализация скрыта */ }
+        const matchedPatterns = AUTH_TEXT_PATTERNS.filter((pattern) => pattern.test(bodyText)).length;
 
-    function syncPageState() { /* реализация скрыта */ }
+        if (pathname === "/auth" || pathname.startsWith("/auth/") || pathname === "/login") return true;
+        if (hasPasswordField && (hasEmailField || hasSocialAuthButton || matchedPatterns >= 1)) return true;
+        if (matchedPatterns >= 2) return true;
+        return hasLoginCta;
+    }
 
-    function schedulePageStateSync() { /* реализация скрыта */ }
+    function findChatInputElement() {
+        for (const selector of READY_SELECTORS) {
+            const elements = Array.from(document.querySelectorAll(selector));
+            const visibleElement = elements.find((element) => isVisible(element));
+            if (visibleElement) return visibleElement;
+        }
+        return null;
+    }
+
+    function detectPageState() {
+        if (isAuthPage()) return "auth-required";
+        if (findChatInputElement()) return "ready";
+        return "loading";
+    }
+
+    function notifyPageState(state) {
+        if (!canUseRuntimeMessaging() || state === lastPageState) return;
+        lastPageState = state;
+
+        // Отправляем через chrome.runtime
+        chrome.runtime.sendMessage(
+            {
+                type: "DEEPSEEK_PAGE_STATE",
+                state,
+                pageContext,
+                timestamp: Date.now()
+            },
+            () => { void chrome.runtime.lastError; }
+        );
+
+        // Отправляем через EventBus
+        if (window.__deepseekEventBus) {
+            window.__deepseekEventBus.emit('page:state-changed-external', {
+                state: state,
+                pageContext: pageContext,
+                timestamp: Date.now()
+            }, { source: 'injectDeepSeek' });
+        }
+    }
+
+    function notifyParentFrameState(state) {
+        if (window.parent === window || state === lastParentFrameState) return;
+        lastParentFrameState = state;
+        try {
+            window.parent.postMessage(
+                {
+                    type: "DEEPSEEK_EMBEDDED_PAGE_STATE",
+                    state,
+                    timestamp: Date.now()
+                },
+                "*"
+            );
+        } catch (e) {}
+    }
+
+    function syncPageState() {
+        const state = detectPageState();
+        notifyPageState(state);
+        notifyParentFrameState(state);
+    }
+
+    function schedulePageStateSync() {
+        if (syncScheduled) return;
+        syncScheduled = true;
+        window.requestAnimationFrame(() => {
+            syncScheduled = false;
+            syncPageState();
+        });
+    }
 
     // ========== ОБРАБОТЧИК ДЛЯ ПОЛУЧЕНИЯ КООРДИНАТ ЭЛЕМЕНТА ==========
 
-    function setupMessageHandlers() { /* реализация скрыта */ }
+    function setupMessageHandlers() {
+        if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
+            chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+                if (request.action === "getElementCoordinates") {
+                    const { selector } = request;
+
+                    try {
+                        const element = document.querySelector(selector);
+
+                        if (!element) {
+                            sendResponse({ success: false, error: "Element not found" });
+                            return true;
+                        }
+
+                        const rect = element.getBoundingClientRect();
+                        const style = window.getComputedStyle(element);
+
+                        if (rect.width === 0 || rect.height === 0 ||
+                            style.display === 'none' ||
+                            style.visibility === 'hidden') {
+                            sendResponse({ success: false, error: "Element not visible" });
+                            return true;
+                        }
+
+                        const isInViewport = rect.top >= 0 &&
+                            rect.bottom <= window.innerHeight &&
+                            rect.left >= 0 &&
+                            rect.right <= window.innerWidth;
+
+                        if (!isInViewport) {
+                            element.scrollIntoView({ behavior: 'instant', block: 'center' });
+                            sendResponse({
+                                success: true,
+                                coordinates: { scrolled: true, selector: selector }
+                            });
+                            return true;
+                        }
+
+                        sendResponse({
+                            success: true,
+                            coordinates: {
+                                x: Math.round(rect.left + rect.width / 2),
+                                y: Math.round(rect.top + rect.height / 2),
+                                width: rect.width,
+                                height: rect.height
+                            }
+                        });
+
+                    } catch (error) {
+                        sendResponse({ success: false, error: error.message });
+                    }
+
+                    return true;
+                }
+
+                return false;
+            });
+        }
+    }
 
     // ========== ФУНКЦИЯ ОЖИДАНИЯ EVENTBUS И ИНИЦИАЛИЗАЦИИ ==========
 
-    function ensureEventBusAndInit() { /* реализация скрыта */ }
+    function ensureEventBusAndInit() {
+        // Ждем EventBus
+        if (!window.__deepseekEventBus) {
+            console.log('[DeepSeek] Ожидание EventBus...');
+            setTimeout(ensureEventBusAndInit, 100);
+            return;
+        }
+
+        console.log('[DeepSeek] EventBus найден, инициализация компонентов');
+
+        // Настраиваем обработчики сообщений
+        setupMessageHandlers();
+
+        // Создаем экземпляры наблюдателей
+        const enhancedObserver = new EnhancedPageObserver();
+        const chatMonitor = new ChatStreamMonitor();
+
+        // Сохраняем в глобальном доступе
+        window.__deepseek = {
+            enhancedObserver: enhancedObserver,
+            chatMonitor: chatMonitor,
+            eventBus: window.__deepseekEventBus,
+            version: '2.0'
+        };
+
+        // Создаем DeepSeekChatMonitor и подключаем к EventBus
+        if (typeof DeepSeekChatMonitor !== 'undefined') {
+            window.deepSeekChatMonitor = new DeepSeekChatMonitor({
+                autoClickEnabled: true,
+                useEventBus: true,
+                logging: true,
+                showDebug: true
+            });
+        }
+
+        // Запускаем наблюдатели
+        enhancedObserver.start();
+
+        // Публикуем событие о завершении инициализации
+        window.__deepseekEventBus.emit('extension:initialized', {
+            version: '2.0',
+            components: ['EnhancedPageObserver', 'ChatStreamMonitor', 'EventBus', 'DeepSeekChatMonitor'],
+            timestamp: Date.now()
+        }, { source: 'injectDeepSeek' });
+
+        console.log('[DeepSeek] Extension fully initialized with EventBus support');
+        console.log('[DeepSeek] EventBus available:', !!window.__deepseekEventBus);
+        console.log('[DeepSeek] EnhancedPageObserver active:', enhancedObserver.isActive());
+        console.log('[DeepSeek] Message handlers for getElementCoordinates registered');
+    }
 
     // ========== INITIALIZATION ==========
 
@@ -1059,3 +1282,11 @@ if (!window.__deepseekExtensionInjected) {
 
     console.log('[DeepSeek] Extension script loaded, waiting for EventBus...');
 }
+```
+
+---
+
+## 🔗 ЗАВИСИМОСТИ ПРОЕКТА (сжатые)
+
+*⚠️ У этого файла нет локальных зависимостей в рамках указанной глубины.*
+
