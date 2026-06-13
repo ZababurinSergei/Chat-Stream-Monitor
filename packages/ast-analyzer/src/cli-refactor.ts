@@ -5,6 +5,8 @@
  *
  * Использование:
  *   npx ast-refactor refactor <file> [options]
+ *   npx ast-refactor analyze <file> [options]
+ *   npx ast-refactor validate <file> [options]
  *   npx ast-refactor help
  */
 
@@ -17,51 +19,100 @@ const program = new Command();
 
 program
   .name('ast-refactor')
-  .description('🔧 Автоматический рефакторинг файлов с выделением связных модулей')
-  .version('1.0.0');
+  .description('🔧 Автоматический рефакторинг файлов с полным pipeline валидации')
+  .version('2.0.0');
 
 program
   .command('refactor <file>')
-  .description('Рефакторинг файла с автоматическим выделением модулей')
+  .description('Рефакторинг файла с полным pipeline (семантика + валидация + исправление)')
+
+  // Основные опции
   .option('-o, --out-dir <dir>', 'Директория для сохранения модулей', 'modules')
   .option('-t, --target-size <number>', 'Целевой размер кластера (количество функций)', '3')
   .option('-m, --max-size <number>', 'Максимальный размер кластера', '10')
   .option('-c, --min-cohesion <number>', 'Минимальная связность кластера (%)', '60')
-  .option('--no-vue', 'Не обновлять template для Vue файлов (только script)')
   .option('-d, --dry-run', 'Пробный запуск без фактических изменений', false)
   .option('--no-backup', 'Не создавать резервную копию файла', false)
   .option('-v, --verbose', 'Подробный вывод процесса', false)
+  .option('--no-vue', 'Не обновлять template для Vue файлов (только script)', false)
+
+  // Опции для ОТКЛЮЧЕНИЯ (по умолчанию все включено)
+  .option('--no-semantic', 'Отключить семантический анализ', false)
+  .option('--no-formal', 'Отключить формальную верификацию Z3', false)
+  .option('--no-jsx', 'Отключить анализ JSX/TSX', false)
+  .option('--no-vue-analysis', 'Отключить анализ Vue компонентов', false)
+  .option('--no-eslint', 'Отключить ESLint проверку', false)
+  .option('--no-eslint-fix', 'Отключить ESLint автоисправление', false)
+  .option('--no-typescript', 'Отключить TypeScript проверку', false)
+  .option('--no-code-validation', 'Отключить Code Validation', false)
+  .option('--no-auto-fix', 'Отключить автоисправление', false)
+  .option('--no-fix-imports', 'Отключить исправление импортов', false)
+  .option('--no-optimize-imports', 'Отключить оптимизацию импортов', false)
+  .option('--no-extract-isolated', 'Не выделять изолированные функции', false)
+
+  // Семантический анализ
+  .option('--critical <functions>', 'Критические функции для верификации (через запятую)')
+  .option('--max-depth <number>', 'Максимальная глубина анализа', '10')
+
+  // Валидация и исправление
+  .option('--iterations <number>', 'Максимум итераций исправления', '5')
+
   .action(async (file, options) => {
     const startTime = Date.now();
 
     console.log('\n' + '='.repeat(60));
-    console.log('🔧 АВТОМАТИЧЕСКИЙ РЕФАКТОРИНГ ФАЙЛОВ');
+    console.log('🔧 АВТОМАТИЧЕСКИЙ РЕФАКТОРИНГ С ПОЛНЫМ PIPELINE');
     console.log('='.repeat(60));
     console.log(`\n📄 Целевой файл: ${file}`);
     console.log(`📁 Выходная директория: ${options.outDir}`);
-    console.log(
-      `🎯 Параметры: размер кластера=${options.targetSize}, связность=${options.minCohesion}%`
-    );
+    console.log(`🎯 Параметры: размер=${options.targetSize}, связность=${options.minCohesion}%`);
 
     if (options.dryRun) {
-      console.log('\n⚠️  РЕЖИМ DRY RUN: изменения не будут применены к файлам\n');
+      console.log('\n⚠️ РЕЖИМ DRY RUN: изменения не будут применены к файлам\n');
     }
 
-    // Проверяем существование файла
     const absolutePath = path.resolve(file);
     if (!fs.existsSync(absolutePath)) {
-      console.error(`\n❌ Ошибка: Файл не найден: ${absolutePath}`);
+      console.error(`\n❌ Файл не найден: ${absolutePath}`);
       process.exit(1);
     }
 
-    // Проверяем расширение
     const isVue = absolutePath.endsWith('.vue');
     if (isVue) {
-      console.log(`📦 Обнаружен Vue компонент, будет обновлён template`);
+      console.log(`📦 Обнаружен Vue компонент`);
     }
 
+    // Вывод статуса компонентов
+    console.log('\n📊 СТАТУС КОМПОНЕНТОВ:');
+    console.log(
+      `   🧠 Семантический анализ: ${options.semantic !== false ? 'ВКЛЮЧЕН' : 'ВЫКЛЮЧЕН'}`
+    );
+    if (options.semantic !== false) {
+      console.log(
+        `      🔬 Формальная верификация: ${options.formal !== false ? 'ВКЛЮЧЕНА' : 'ВЫКЛЮЧЕНА'}`
+      );
+      console.log(`      ⚛️ JSX/TSX анализ: ${options.jsx !== false ? 'ВКЛЮЧЕН' : 'ВЫКЛЮЧЕН'}`);
+      console.log(`      🎯 Vue анализ: ${options.vueAnalysis !== false ? 'ВКЛЮЧЕН' : 'ВЫКЛЮЧЕН'}`);
+    }
+    console.log(
+      `   📝 ESLint: ${options.eslint !== false ? 'ВКЛЮЧЕН' : 'ВЫКЛЮЧЕН'}${options.eslintFix !== false && options.eslint !== false ? ' (с автоисправлением)' : ''}`
+    );
+    console.log(`   🔷 TypeScript: ${options.typescript !== false ? 'ВКЛЮЧЕН' : 'ВЫКЛЮЧЕН'}`);
+    console.log(
+      `   🔍 Code Validation: ${options.codeValidation !== false ? 'ВКЛЮЧЕН' : 'ВЫКЛЮЧЕН'}`
+    );
+    console.log(`   🔧 Автоисправление: ${options.autoFix !== false ? 'ВКЛЮЧЕНО' : 'ВЫКЛЮЧЕНО'}`);
+    console.log(
+      `   🧹 Исправление импортов: ${options.fixImports !== false ? 'ВКЛЮЧЕНО' : 'ВЫКЛЮЧЕНО'}`
+    );
+    console.log(
+      `   📋 Оптимизация импортов: ${options.optimizeImports !== false ? 'ВКЛЮЧЕНА' : 'ВЫКЛЮЧЕНА'}`
+    );
+    console.log(
+      `   ⚡ Выделение изолированных функций: ${options.extractIsolated !== false ? 'ВКЛЮЧЕНО' : 'ВЫКЛЮЧЕНО'}`
+    );
+
     try {
-      // Создаём экземпляр рефакторинга
       const refactor = new AutoRefactor({
         modulesDir: options.outDir,
         targetClusterSize: parseInt(options.targetSize),
@@ -71,10 +122,38 @@ program
         dryRun: options.dryRun,
         createBackup: options.backup !== false,
         verbose: options.verbose,
+
+        // Семантический анализ
+        semanticAnalysis: options.semantic !== false,
+        formalVerification: options.formal !== false,
+        jsxAnalysis: options.jsx !== false,
+        vueAnalysis: options.vueAnalysis !== false,
+        criticalFunctions: options.critical ? options.critical.split(',') : [],
+        maxCallDepth: parseInt(options.maxDepth),
+
+        // Валидация и исправление
+        eslintCheck: options.eslint !== false,
+        eslintFix: options.eslintFix !== false,
+        typeCheck: options.typescript !== false,
+        codeValidation: options.codeValidation !== false,
+        autoFix: options.autoFix !== false,
+        maxIterations: parseInt(options.iterations),
+
+        // Импорты
+        fixUnusedImports: options.fixImports !== false,
+        optimizeImports: options.optimizeImports !== false,
+        fixUnusedVariables: options.fixImports !== false,
+        addMissingTypes: options.fixImports !== false,
+
+        // Кластеризация
+        minClusterSize: 2,
+        extractIsolatedFunctions: options.extractIsolated !== false,
+        groupByCallGraph: true,
       });
 
-      // Запускаем рефакторинг
+      await refactor.initialize();
       const result = await refactor.refactor(absolutePath);
+      await refactor.dispose();
 
       const duration = ((Date.now() - startTime) / 1000).toFixed(2);
 
@@ -82,26 +161,70 @@ program
         console.log('\n' + '='.repeat(60));
         console.log('✨ РЕФАКТОРИНГ УСПЕШНО ЗАВЕРШЁН!');
         console.log('='.repeat(60));
+        console.log(`⏱️  Время выполнения: ${duration} сек`);
 
         if (result.modules.length > 0) {
-          console.log('\n📊 СТАТИСТИКА:');
-          console.log(`   ⏱️  Время выполнения: ${duration} сек`);
-          console.log(`   📦 Создано модулей: ${result.modules.length}`);
-          console.log(
-            `   🔗 Экспортов перенесено: ${result.modules.reduce((sum, m) => sum + m.exports.length, 0)}`
-          );
-
+          console.log(`\n📦 Создано модулей: ${result.modules.length}`);
           console.log('\n📁 СОЗДАННЫЕ МОДУЛИ:');
           for (const module of result.modules) {
             const relativePath = path.relative(process.cwd(), module.path);
             console.log(`   ✅ ${relativePath} (${module.exports.length} экспортов)`);
           }
-        } else {
-          console.log('\nℹ️  Не найдено кандидатов для выделения в модули');
+        }
+
+        // Вывод метрик
+        if (result.metrics) {
+          console.log('\n📊 МЕТРИКИ:');
+          console.log(`   • Цикломатическая сложность: ${result.metrics.cyclomaticComplexity}`);
+          console.log(`   • Всего функций: ${result.metrics.totalFunctions}`);
+          console.log(`   • Неиспользуемых функций: ${result.metrics.unusedFunctionsCount}`);
+          console.log(`   • Ошибок типов: ${result.metrics.typeErrorsCount}`);
+          console.log(`   • Верифицировано: ${result.metrics.verifiedFunctionsCount}`);
+          console.log(`   • ESLint исправлений: ${result.metrics.eslintFixesCount}`);
+          console.log(`   • TypeScript исправлений: ${result.metrics.tsFixesCount}`);
+          console.log(`   • Code исправлений: ${result.metrics.codeFixesCount}`);
         }
 
         if (result.backupPath) {
           console.log(`\n💾 Резервная копия: ${path.relative(process.cwd(), result.backupPath)}`);
+        }
+
+        // Предупреждения о семантических проблемах
+        if (result.semanticResults?.typeErrors && result.semanticResults.typeErrors.length > 0) {
+          console.log(
+            `\n⚠️ ВНИМАНИЕ: Осталось ${result.semanticResults.typeErrors.length} ошибок типов`
+          );
+          console.log('   Рекомендуется исправить их вручную');
+        }
+
+        if (
+          result.semanticResults?.cyclicDependencies &&
+          result.semanticResults.cyclicDependencies.length > 0
+        ) {
+          console.log(
+            `\n⚠️ ВНИМАНИЕ: Обнаружено ${result.semanticResults.cyclicDependencies.length} циклических зависимостей`
+          );
+          console.log('   Рекомендуется реструктурировать код');
+        }
+
+        if (
+          result.semanticResults?.unusedFunctions &&
+          result.semanticResults.unusedFunctions.length > 0
+        ) {
+          console.log(
+            `\n⚠️ ВНИМАНИЕ: Обнаружено ${result.semanticResults.unusedFunctions.length} неиспользуемых функций`
+          );
+          console.log(
+            `   ${result.semanticResults.unusedFunctions.slice(0, 5).join(', ')}${result.semanticResults.unusedFunctions.length > 5 ? '...' : ''}`
+          );
+        }
+
+        if (
+          result.verificationResults &&
+          result.verificationResults.filter(r => !r.isValid).length > 0
+        ) {
+          const failedCount = result.verificationResults.filter(r => !r.isValid).length;
+          console.log(`\n⚠️ ВНИМАНИЕ: ${failedCount} функций НЕ ПРОШЛИ формальную верификацию`);
         }
 
         console.log('\n💡 Совет: Запустите линтер и тесты после рефакторинга');
@@ -135,13 +258,15 @@ program
 
 program
   .command('analyze <file>')
-  .description('Только анализ файла без изменений (показывает кластеры)')
+  .description('Только анализ файла без изменений (показывает кластеры и семантические проблемы)')
   .option('-t, --target-size <number>', 'Целевой размер кластера', '3')
   .option('-m, --max-size <number>', 'Максимальный размер кластера', '10')
   .option('-c, --min-cohesion <number>', 'Минимальная связность (%)', '60')
+  .option('--formal', 'Включить формальную верификацию', false)
+  .option('-v, --verbose', 'Подробный вывод', false)
   .action(async (file, options) => {
     console.log('\n' + '='.repeat(60));
-    console.log('🔍 АНАЛИЗ ФАЙЛА (без изменений)');
+    console.log('🔍 АНАЛИЗ ФАЙЛА С ПОЛНЫМ PIPELINE');
     console.log('='.repeat(60));
     console.log(`\n📄 Файл: ${file}`);
 
@@ -157,35 +282,291 @@ program
         maxClusterSize: parseInt(options.maxSize),
         minCohesionScore: parseInt(options.minCohesion),
         dryRun: true,
+        verbose: options.verbose,
+        semanticAnalysis: true,
+        formalVerification: options.formal || false,
+        jsxAnalysis: true,
+        vueAnalysis: true,
+        dataFlowAnalysis: true,
+        callGraphAnalysis: true,
+        eslintCheck: true,
+        typeCheck: true,
+        codeValidation: true,
+        autoFix: false,
+        fixUnusedImports: false,
+        optimizeImports: false,
+        extractIsolatedFunctions: true,
       });
 
+      await refactor.initialize();
       const result = await refactor.refactor(absolutePath);
+      await refactor.dispose();
 
       if (result.modules.length > 0) {
         console.log('\n📊 НАЙДЕННЫЕ КЛАСТЕРЫ:');
         for (let i = 0; i < result.modules.length; i++) {
           const module = result.modules[i];
           if (!module) continue;
-
           console.log(`\n   ${i + 1}. Модуль "${module.name}":`);
           console.log(`      📦 Экспорты: ${module.exports.join(', ')}`);
           if (module.dependencies.length > 0) {
             console.log(`      🔗 Зависимости: ${module.dependencies.join(', ')}`);
           }
         }
-
         console.log(`\n✨ Найдено ${result.modules.length} кандидатов в модули`);
+      } else {
+        console.log('\nℹ️ Не найдено кандидатов для выделения в модули');
+      }
+
+      // Вывод семантических метрик
+      if (result.metrics) {
+        console.log('\n📊 СЕМАНТИЧЕСКИЕ МЕТРИКИ:');
+        console.log(`   • Цикломатическая сложность: ${result.metrics.cyclomaticComplexity}`);
+        console.log(`   • Всего функций: ${result.metrics.totalFunctions}`);
+        console.log(`   • Неиспользуемых функций: ${result.metrics.unusedFunctionsCount}`);
+        console.log(`   • Ошибок типов: ${result.metrics.typeErrorsCount}`);
+      }
+
+      // Вывод проблем
+      if (result.semanticResults?.typeErrors && result.semanticResults.typeErrors.length > 0) {
+        console.log(`\n❌ ОШИБКИ ТИПОВ (первые 5):`);
+        for (const error of result.semanticResults.typeErrors.slice(0, 5)) {
+          console.log(`   • ${error.message}`);
+          console.log(`     Expected: ${error.expected}, Got: ${error.actual}`);
+        }
+        if (result.semanticResults.typeErrors.length > 5) {
+          console.log(`   ... и ещё ${result.semanticResults.typeErrors.length - 5} ошибок`);
+        }
+      }
+
+      if (
+        result.semanticResults?.cyclicDependencies &&
+        result.semanticResults.cyclicDependencies.length > 0
+      ) {
+        console.log(`\n🔄 ЦИКЛИЧЕСКИЕ ЗАВИСИМОСТИ:`);
+        for (const cycle of result.semanticResults.cyclicDependencies.slice(0, 3)) {
+          console.log(`   • ${cycle.join(' → ')}`);
+        }
+        if (result.semanticResults.cyclicDependencies.length > 3) {
+          console.log(
+            `   ... и ещё ${result.semanticResults.cyclicDependencies.length - 3} циклов`
+          );
+        }
+      }
+
+      if (
+        result.semanticResults?.unusedFunctions &&
+        result.semanticResults.unusedFunctions.length > 0
+      ) {
+        console.log(`\n⚠️ НЕИСПОЛЬЗУЕМЫЕ ФУНКЦИИ:`);
+        for (const func of result.semanticResults.unusedFunctions.slice(0, 10)) {
+          console.log(`   • ${func}`);
+        }
+        if (result.semanticResults.unusedFunctions.length > 10) {
+          console.log(`   ... и ещё ${result.semanticResults.unusedFunctions.length - 10} функций`);
+        }
+      }
+
+      if (result.verificationResults && result.verificationResults.length > 0) {
+        const verified = result.verificationResults.filter(r => r.isValid);
+        const failed = result.verificationResults.filter(r => !r.isValid);
+        console.log(`\n🔬 ФОРМАЛЬНАЯ ВЕРИФИКАЦИЯ:`);
+        console.log(`   • Верифицировано: ${verified.length}`);
+        console.log(`   • Не верифицировано: ${failed.length}`);
+        if (failed.length > 0) {
+          console.log(`\n   НЕ ВЕРИФИЦИРОВАННЫЕ ФУНКЦИИ:`);
+          for (const fail of failed.slice(0, 5)) {
+            console.log(
+              `   • ${fail.functionName || 'unknown'}${fail.counterexample ? ` (контрпример: ${JSON.stringify(Object.fromEntries(fail.counterexample))})` : ''}`
+            );
+          }
+        }
+      }
+
+      if (result.modules.length > 0) {
         console.log('\n💡 Запустите рефакторинг командой:');
         console.log(`   ast-refactor refactor ${file}`);
-      } else {
-        console.log('\nℹ️  Не найдено кандидатов для выделения в модули');
-        console.log('\n💡 Попробуйте уменьшить параметры:');
-        console.log(
-          `   --target-size ${parseInt(options.targetSize) - 1} --min-cohesion ${parseInt(options.minCohesion) - 10}`
-        );
+        if (options.formal) {
+          console.log(`   (с верификацией: ast-refactor refactor ${file} --formal)`);
+        }
+      } else if (
+        result.semanticResults?.typeErrors &&
+        result.semanticResults.typeErrors.length > 0
+      ) {
+        console.log('\n💡 Рекомендуется сначала исправить ошибки типов:');
+        console.log(`   ast-refactor validate ${file}`);
       }
     } catch (error) {
       console.error('\n❌ Ошибка анализа:', error);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('validate <file>')
+  .description('Запустить все валидаторы без рефакторинга')
+  .option('-v, --verbose', 'Подробный вывод', false)
+  .option('--formal', 'Включить формальную верификацию', false)
+  .option('--fix', 'Применить автоисправления', false)
+  .action(async (file, options) => {
+    console.log('\n' + '='.repeat(60));
+    console.log('🔍 ЗАПУСК ВСЕХ ВАЛИДАТОРОВ');
+    console.log('='.repeat(60));
+    console.log(`\n📄 Файл: ${file}`);
+    console.log(`🔧 Автоисправление: ${options.fix ? 'ВКЛЮЧЕНО' : 'ВЫКЛЮЧЕНО'}`);
+
+    const absolutePath = path.resolve(file);
+    if (!fs.existsSync(absolutePath)) {
+      console.error(`\n❌ Файл не найден: ${absolutePath}`);
+      process.exit(1);
+    }
+
+    try {
+      const refactor = new AutoRefactor({
+        dryRun: !options.fix,
+        verbose: options.verbose,
+        semanticAnalysis: true,
+        formalVerification: options.formal || false,
+        jsxAnalysis: true,
+        vueAnalysis: true,
+        dataFlowAnalysis: true,
+        callGraphAnalysis: true,
+        eslintCheck: true,
+        eslintFix: options.fix,
+        typeCheck: true,
+        codeValidation: true,
+        autoFix: options.fix,
+        createBackup: options.fix,
+        fixUnusedImports: options.fix,
+        optimizeImports: options.fix,
+        extractIsolatedFunctions: true,
+      });
+
+      await refactor.initialize();
+      const result = await refactor.refactor(absolutePath);
+      await refactor.dispose();
+
+      console.log('\n📊 РЕЗУЛЬТАТЫ ВАЛИДАЦИИ:');
+
+      if (result.metrics) {
+        console.log(`\n📈 МЕТРИКИ:`);
+        console.log(`   • Цикломатическая сложность: ${result.metrics.cyclomaticComplexity}`);
+        console.log(`   • Всего функций: ${result.metrics.totalFunctions}`);
+        console.log(`   • Неиспользуемых функций: ${result.metrics.unusedFunctionsCount}`);
+        console.log(`   • Ошибок типов: ${result.metrics.typeErrorsCount}`);
+        console.log(`   • Верифицировано функций: ${result.metrics.verifiedFunctionsCount}`);
+        if (options.fix) {
+          console.log(`   • ESLint исправлений: ${result.metrics.eslintFixesCount}`);
+          console.log(`   • TypeScript исправлений: ${result.metrics.tsFixesCount}`);
+          console.log(`   • Code исправлений: ${result.metrics.codeFixesCount}`);
+        }
+      }
+
+      if (result.validationResults) {
+        console.log(`\n⚠️ CODE VALIDATION:`);
+        console.log(`   • Ошибок: ${result.validationResults.summary.errors}`);
+        console.log(`   • Предупреждений: ${result.validationResults.summary.warnings}`);
+        console.log(`   • Автоисправимых: ${result.validationResults.summary.autoFixable}`);
+
+        if (result.validationResults.summary.errors > 0) {
+          console.log(`\n   ОШИБКИ (первые 5):`);
+          const errors = result.validationResults.issues
+            .filter(i => i.type === 'error')
+            .slice(0, 5);
+          for (const error of errors) {
+            console.log(`   • ${path.basename(error.file)}:${error.line} - ${error.message}`);
+            if (error.suggestion) {
+              console.log(`     💡 ${error.suggestion}`);
+            }
+          }
+        }
+      }
+
+      if (result.semanticResults?.typeErrors && result.semanticResults.typeErrors.length > 0) {
+        console.log(`\n❌ ОШИБКИ ТИПОВ (первые 5):`);
+        for (const error of result.semanticResults.typeErrors.slice(0, 5)) {
+          console.log(`   • ${error.message}`);
+          console.log(`     Expected: ${error.expected}, Got: ${error.actual}`);
+        }
+        if (result.semanticResults.typeErrors.length > 5) {
+          console.log(`   ... и ещё ${result.semanticResults.typeErrors.length - 5} ошибок`);
+        }
+      }
+
+      if (
+        result.semanticResults?.cyclicDependencies &&
+        result.semanticResults.cyclicDependencies.length > 0
+      ) {
+        console.log(`\n🔄 ЦИКЛИЧЕСКИЕ ЗАВИСИМОСТИ:`);
+        for (const cycle of result.semanticResults.cyclicDependencies.slice(0, 3)) {
+          console.log(`   • ${cycle.join(' → ')}`);
+        }
+      }
+
+      if (
+        result.semanticResults?.unusedFunctions &&
+        result.semanticResults.unusedFunctions.length > 0
+      ) {
+        console.log(`\n⚠️ НЕИСПОЛЬЗУЕМЫЕ ФУНКЦИИ (первые 10):`);
+        for (const func of result.semanticResults.unusedFunctions.slice(0, 10)) {
+          console.log(`   • ${func}`);
+        }
+      }
+
+      if (result.verificationResults && result.verificationResults.length > 0) {
+        const verified = result.verificationResults.filter(r => r.isValid);
+        const failed = result.verificationResults.filter(r => !r.isValid);
+        console.log(`\n🔬 ФОРМАЛЬНАЯ ВЕРИФИКАЦИЯ:`);
+        console.log(`   • Верифицировано: ${verified.length}`);
+        console.log(`   • Не верифицировано: ${failed.length}`);
+        if (failed.length > 0) {
+          console.log(`\n   НЕ ВЕРИФИЦИРОВАННЫЕ ФУНКЦИИ:`);
+          for (const fail of failed.slice(0, 5)) {
+            console.log(`   • ${(fail as any).functionName || 'unknown'}`);
+            if (fail.counterexample) {
+              console.log(
+                `     Контрпример: ${JSON.stringify(Object.fromEntries(fail.counterexample))}`
+              );
+            }
+          }
+        }
+      }
+
+      if (result.eslintResults && result.eslintResults.length > 0) {
+        const totalFixes = result.eslintResults.reduce((sum, r) => sum + r.fixes, 0);
+        if (totalFixes > 0) {
+          console.log(`\n📝 ESLINT:`);
+          console.log(`   • Исправлено проблем: ${totalFixes}`);
+        }
+      }
+
+      if (result.tsFixResults && result.tsFixResults.fixedCount > 0) {
+        console.log(`\n🔷 TYPESCRIPT:`);
+        console.log(`   • Исправлено ошибок: ${result.tsFixResults.fixedCount}`);
+        if (result.tsFixResults.remainingErrors > 0) {
+          console.log(`   • Осталось ошибок: ${result.tsFixResults.remainingErrors}`);
+        }
+      }
+
+      const hasErrors =
+        (result.validationResults?.summary.errors || 0) > 0 ||
+        (result.semanticResults?.typeErrors?.length || 0) > 0 ||
+        (result.verificationResults?.filter(r => !r.isValid).length || 0) > 0;
+
+      if (!hasErrors) {
+        console.log('\n✨ ВСЕ ПРОВЕРКИ ПРОЙДЕНЫ УСПЕШНО!');
+      } else if (options.fix && result.success) {
+        console.log('\n✅ АВТОИСПРАВЛЕНИЕ ПРИМЕНЕНО!');
+        console.log('   Рекомендуется запустить повторную проверку:');
+        console.log(`   ast-refactor validate ${file}`);
+      } else if (!options.fix && !result.success) {
+        console.log('\n💡 Для автоматического исправления запустите:');
+        console.log(`   ast-refactor validate ${file} --fix`);
+      }
+
+      process.exit(result.success ? 0 : 1);
+    } catch (error) {
+      console.error('\n❌ Ошибка валидации:', error);
       process.exit(1);
     }
   });
@@ -204,10 +585,8 @@ program
       process.exit(1);
     }
 
-    // Определяем целевой файл
     let targetPath = options.output;
     if (!targetPath) {
-      // Удаляем суффикс .backup.{timestamp}
       targetPath = backupPath.replace(/\.backup\.\d+$/, '');
     }
 
@@ -216,7 +595,6 @@ program
     console.log(`\n📁 Резервная копия: ${backupPath}`);
     console.log(`📄 Целевой файл: ${absoluteTarget}`);
 
-    // Подтверждение
     console.log('\n⚠️  ВНИМАНИЕ: Это перезапишет целевой файл!');
     console.log('   Нажмите Enter для продолжения или Ctrl+C для отмены...');
 
@@ -244,63 +622,55 @@ program
   .description('Показать подробную справку')
   .action(() => {
     console.log(`\n╔═══════════════════════════════════════════════════════════════════════════════╗
-║                    AST REFACTOR - автоматическое выделение модулей            ║
+║                 AST REFACTOR - ПОЛНЫЙ PIPELINE РЕФАКТОРИНГА                   ║
 ╠═══════════════════════════════════════════════════════════════════════════════╣
 ║                                                                               ║
 ║  ОПИСАНИЕ:                                                                    ║
-║    Автоматически анализирует файл, находит связные группы функций и           ║
-║    выделяет их в отдельные модули. Поддерживает JavaScript, TypeScript        ║
-║    и Vue файлы (с обновлением template).                                      ║
+║    Автоматический рефакторинг файлов с выделением модулей.                    ║
+║    Включает семантический анализ, формальную верификацию,                    ║
+║    ESLint, TypeScript валидацию и автоисправление.                           ║
 ║                                                                               ║
 ║  КОМАНДЫ:                                                                     ║
-║                                                                               ║
-║    refactor <file>     - Выполнить рефакторинг файла                          ║
-║    analyze <file>      - Только анализ без изменений                          ║
+║    refactor <file>     - Полный pipeline: анализ + валидация + рефакторинг    ║
+║    analyze <file>      - Только анализ (без изменений)                        ║
+║    validate <file>     - Запустить все валидаторы (с опциональным фиксом)     ║
 ║    restore <backup>    - Восстановить файл из резервной копии                 ║
 ║    help                - Показать эту справку                                 ║
 ║                                                                               ║
-║  ОПЦИИ (для refactor):                                                        ║
+║  ОСНОВНЫЕ ОПЦИИ (refactor):                                                   ║
+║    -o, --out-dir <dir>     Директория для модулей (по умолчанию: modules)     ║
+║    -t, --target-size <n>   Целевой размер кластера (по умолчанию: 3)          ║
+║    -c, --min-cohesion <n>  Минимальная связность % (по умолчанию: 60)         ║
+║    -d, --dry-run           Пробный запуск без изменений                       ║
+║    -v, --verbose           Подробный вывод                                     ║
 ║                                                                               ║
-║    -o, --out-dir <dir>    Директория для модулей (по умолчанию: modules)      ║
-║    -t, --target-size <n>  Целевой размер кластера (по умолчанию: 3)           ║
-║    -m, --max-size <n>     Максимальный размер кластера (по умолчанию: 10)     ║
-║    -c, --min-cohesion <n> Минимальная связность % (по умолчанию: 60)          ║
-║    --no-vue               Не обновлять template Vue файлов                    ║
-║    -d, --dry-run          Пробный запуск без изменений                        ║
-║    --no-backup            Не создавать резервную копию                        ║
-║    -v, --verbose          Подробный вывод                                     ║
+║  ОПЦИИ ДЛЯ ОТКЛЮЧЕНИЯ (по умолчанию все анализаторы ВКЛЮЧЕНЫ):                ║
+║    --no-semantic           Отключить семантический анализ                     ║
+║    --no-formal             Отключить формальную верификацию Z3                ║
+║    --no-jsx                Отключить анализ JSX/TSX                           ║
+║    --no-vue-analysis       Отключить анализ Vue компонентов                   ║
+║    --no-eslint             Отключить ESLint проверку                          ║
+║    --no-typescript         Отключить TypeScript проверку                      ║
+║    --no-code-validation    Отключить Code Validation                          ║
+║    --no-fix-imports        Отключить исправление импортов                     ║
+║    --no-optimize-imports   Отключить оптимизацию импортов                     ║
+║    --no-extract-isolated   Не выделять изолированные функции                  ║
 ║                                                                               ║
 ║  ПРИМЕРЫ:                                                                     ║
+║    # Полный pipeline со всеми анализаторами                                   ║
+║    ast-refactor refactor ./src/utils.js                                       ║
 ║                                                                               ║
-║    # Анализ файла перед рефакторингом                                         ║
-║    ast-refactor analyze ./src/huge-component.js                               ║
+║    # С отключением формальной верификации                                     ║
+║    ast-refactor refactor ./src/utils.js --no-formal                           ║
 ║                                                                               ║
-║    # Рефакторинг JS файла                                                     ║
-║    ast-refactor refactor ./src/utils.js -o ./modules                          ║
+║    # Только валидация с автоисправлением                                      ║
+║    ast-refactor validate ./src/utils.js --fix                                 ║
 ║                                                                               ║
-║    # Рефакторинг Vue компонента (обновит и template)                          ║
-║    ast-refactor refactor ./src/App.vue -t 4                                   ║
-║                                                                               ║
-║    # Пробный запуск без изменений                                             ║
-║    ast-refactor refactor ./src/file.js --dry-run                              ║
+║    # Анализ Vue компонента                                                   ║
+║    ast-refactor analyze ./src/App.vue                                        ║
 ║                                                                               ║
 ║    # Восстановление из бэкапа                                                 ║
 ║    ast-refactor restore ./src/file.js.backup.1703123456789                    ║
-║                                                                               ║
-║  АЛГОРИТМ РАБОТЫ:                                                             ║
-║                                                                               ║
-║    1. Построение графа зависимостей внутри файла                              ║
-║    2. Выделение сильно связанных компонентов (кластеров)                      ║
-║    3. Фильтрация кластеров по связности и размеру                             ║
-║    4. Создание новых файлов модулей                                           ║
-║    5. Обновление импортов в исходном файле                                    ║
-║    6. (Vue) Обновление template ссылок                                        ║
-║                                                                               ║
-║  БЕЗОПАСНОСТЬ:                                                                ║
-║    - Все изменения сначала применяются в памяти                               ║
-║    - Создаётся резервная копия исходного файла                                ║
-║    - Режим dry-run для проверки перед реальным запуском                       ║
-║    - Возможность восстановления из бэкапа                                     ║
 ║                                                                               ║
 ╚═══════════════════════════════════════════════════════════════════════════════╝
     `);

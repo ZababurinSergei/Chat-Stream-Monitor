@@ -109,7 +109,10 @@ node "$CLI_REFACTOR" refactor "$TARGET_FILE" --dry-run > "$OUTPUT_DIR/dry-run-re
 ### 2.3 refactor - реальный рефакторинг
 
 ```bash
-node "$CLI_REFACTOR" refactor "$TARGET_FILE" -t 1 -c 10 -o ./modules --no-backup
+node "$CLI_REFACTOR" refactor "$TARGET_FILE" \
+  -t 2 \
+  -c 60 \
+  -v 
 ```
 
 ### 2.4 refactor с параметрами

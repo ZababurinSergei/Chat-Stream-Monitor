@@ -21,7 +21,7 @@ out/
 # Turbo
 .turbo/
 Directory
-
+pnpm-lock.yaml
 # Directory packages (основное обновление)
 Directory/*/dist/
 Directory/*/build/

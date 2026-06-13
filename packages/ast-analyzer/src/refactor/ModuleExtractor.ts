@@ -1,5 +1,5 @@
 // src/refactor/ModuleExtractor.ts
-import { Project, SourceFile, Node, SyntaxKind } from 'ts-morph';
+import { Project, SourceFile, Node } from 'ts-morph';
 import fs from 'fs';
 import path from 'path';
 import type { ExtractedModule } from './index.js';
@@ -27,6 +27,9 @@ export class ModuleExtractor {
 
     const modules: ExtractedModule[] = [];
 
+    // Собираем все узлы для удаления
+    const nodesToRemoveMap = new Map<Node, string>(); // узел -> имя функции
+
     for (let i = 0; i < clusters.length; i++) {
       const cluster = clusters[i];
       if (!cluster) continue;
@@ -43,31 +46,36 @@ export class ModuleExtractor {
         { named: Set<string>; default?: string; namespace?: string }
       >();
 
+      const clusterNodes: Node[] = [];
+
       for (const funcName of cluster.functions) {
         const node = this.findNode(sourceFile, funcName);
-        if (!node) continue;
+        if (node) {
+          clusterNodes.push(node);
+          nodesToRemoveMap.set(node, funcName);
 
-        // Находим все импорты, используемые в этом узле, через AST
-        const usedImports = this.findUsedImports(sourceFile, node);
+          // Находим все импорты, используемые в этом узле, через AST
+          const usedImports = this.findUsedImports(sourceFile, node);
 
-        for (const [importPath, importInfo] of usedImports) {
-          if (!importsMap.has(importPath)) {
-            importsMap.set(importPath, {
-              named: new Set(),
-              default: undefined,
-              namespace: undefined,
-            });
-          }
-          const info = importsMap.get(importPath)!;
+          for (const [importPath, importInfo] of usedImports) {
+            if (!importsMap.has(importPath)) {
+              importsMap.set(importPath, {
+                named: new Set(),
+                default: undefined,
+                namespace: undefined,
+              });
+            }
+            const info = importsMap.get(importPath)!;
 
-          if (importInfo.named) {
-            importInfo.named.forEach(n => info.named.add(n));
-          }
-          if (importInfo.default && !info.default) {
-            info.default = importInfo.default;
-          }
-          if (importInfo.namespace && !info.namespace) {
-            info.namespace = importInfo.namespace;
+            if (importInfo.named) {
+              importInfo.named.forEach(n => info.named.add(n));
+            }
+            if (importInfo.default && !info.default) {
+              info.default = importInfo.default;
+            }
+            if (importInfo.namespace && !info.namespace) {
+              info.namespace = importInfo.namespace;
+            }
           }
         }
       }
@@ -97,24 +105,30 @@ export class ModuleExtractor {
       const exportedNames: string[] = [];
 
       // Копируем функции/классы/константы в модуль через AST
-      for (const funcName of cluster.functions) {
-        const node = this.findNode(sourceFile, funcName);
-        if (node) {
-          // Получаем текст узла через AST
-          const text = node.getText();
+      for (const node of clusterNodes) {
+        // Получаем текст узла через AST
+        let text = node.getText();
 
-          // Добавляем export через AST если его нет
-          let exportedText = text;
-          if (!text.trim().startsWith('export')) {
-            exportedText = `export ${text}`;
-          }
+        // Добавляем export через AST если его нет
+        if (!text.trim().startsWith('export')) {
+          text = `export ${text}`;
+        }
 
-          // Добавляем в новый файл через AST
-          moduleFile.addStatements(exportedText);
-          exportedNames.push(funcName);
+        // Добавляем в новый файл через AST
+        moduleFile.addStatements(text);
 
-          // Удаляем из исходного файла через AST
-          this.safeRemoveNode(sourceFile, node);
+        // Извлекаем имя для экспорта
+        let nodeName = '';
+        if (Node.isFunctionDeclaration(node)) {
+          nodeName = node.getName() || '';
+        } else if (Node.isClassDeclaration(node)) {
+          nodeName = node.getName() || '';
+        } else if (Node.isVariableDeclaration(node)) {
+          nodeName = node.getName();
+        }
+
+        if (nodeName) {
+          exportedNames.push(nodeName);
         }
       }
 
@@ -135,6 +149,11 @@ export class ModuleExtractor {
       console.log(`  📦 Создан модуль: ${moduleName}.js (${exportedNames.length} экспортов)`);
     }
 
+    // Удаляем все узлы через метод remove() в ts-morph с безопасной проверкой
+    if (nodesToRemoveMap.size > 0) {
+      this.removeNodesWithTsMorph(nodesToRemoveMap);
+    }
+
     // Сохраняем изменения в исходном файле через AST
     await sourceFile.save();
 
@@ -142,77 +161,27 @@ export class ModuleExtractor {
   }
 
   /**
-   * Безопасно удаляет узел из исходного файла
+   * Удаляет узлы с помощью ts-morph метода remove() с безопасной проверкой
    */
-  private safeRemoveNode(sourceFile: SourceFile, node: Node): void {
-    try {
-      // Метод 1: Пробуем стандартное удаление
-      if (typeof (node as any).remove === 'function') {
-        (node as any).remove();
-        console.log(`  🗑️ Удалён узел: ${node.getKindName()}`);
-        return;
-      }
+  private removeNodesWithTsMorph(nodesToRemove: Map<Node, string>): void {
+    const nodesArray = Array.from(nodesToRemove.keys());
 
-      // Метод 2: Удаление через родительский синтаксис-лист
-      const parent = node.getParent();
-      if (parent) {
-        const syntaxList = parent.getChildrenOfKind(SyntaxKind.SyntaxList)[0];
-        if (syntaxList && typeof (syntaxList as any).removeChild === 'function') {
-          (syntaxList as any).removeChild(node);
-          console.log(`  🗑️ Удалён узел через SyntaxList: ${node.getKindName()}`);
-          return;
+    // Сортируем от конца к началу (чтобы не нарушать индексы)
+    nodesArray.sort((a, b) => b.getStart() - a.getStart());
+
+    for (const node of nodesArray) {
+      try {
+        const name = nodesToRemove.get(node) || 'unknown';
+        // Безопасная проверка наличия метода remove
+        if ('remove' in node && typeof (node as any).remove === 'function') {
+          (node as any).remove();
+          console.log(`  🗑️ Удалён узел: ${name}`);
+        } else {
+          console.log(`  ⏭️ Узел ${name} не поддерживает удаление`);
         }
+      } catch (error) {
+        console.log(`  ⚠️ Не удалось удалить узел: ${error}`);
       }
-
-      // Метод 3: Если это переменная в VariableStatement, удаляем всё выражение
-      if (Node.isVariableDeclaration(node)) {
-        const varStatement = node.getParent();
-        if (varStatement && Node.isVariableStatement(varStatement)) {
-          const declarations = varStatement.getDeclarations();
-          if (declarations.length === 1) {
-            const statementWithRemove = varStatement as any;
-            if (typeof statementWithRemove.remove === 'function') {
-              statementWithRemove.remove();
-              console.log(`  🗑️ Удалено VariableStatement: ${node.getKindName()}`);
-              return;
-            }
-          } else if (typeof (node as any).remove === 'function') {
-            (node as any).remove();
-            console.log(`  🗑️ Удалена переменная из списка: ${node.getKindName()}`);
-            return;
-          }
-        }
-      }
-
-      // Метод 4: Если это функция или класс - пробуем удалить через родителя
-      if (Node.isFunctionDeclaration(node) || Node.isClassDeclaration(node)) {
-        const parent = node.getParent();
-        if (parent) {
-          const statementList = parent.getChildrenOfKind(SyntaxKind.SyntaxList)[0];
-          if (statementList && typeof (statementList as any).removeChild === 'function') {
-            (statementList as any).removeChild(node);
-            console.log(`  🗑️ Удалена функция/класс: ${node.getKindName()}`);
-            return;
-          }
-        }
-      }
-
-      // Метод 5: Fallback - удаление через замену текста
-      const text = sourceFile.getText();
-      const start = node.getStart();
-      const end = node.getEnd();
-
-      // Проверяем, что диапазон корректен
-      if (start >= 0 && end > start && end <= text.length) {
-        const newText = text.slice(0, start) + text.slice(end);
-        sourceFile.replaceWithText(newText);
-        console.log(`  🗑️ Удалён узел через замену текста: ${node.getKindName()}`);
-        return;
-      }
-
-      console.warn(`  ⚠️ Не удалось удалить узел: ${node.getKindName()} - нет подходящего метода`);
-    } catch (error) {
-      console.warn(`  ⚠️ Ошибка при удалении узла ${node.getKindName()}: ${error}`);
     }
   }
 
@@ -350,6 +319,100 @@ export class ModuleExtractor {
     }
 
     return `module-${index + 1}`;
+  }
+
+  /**
+   * Извлекает модули из глобальных функций (без экспортов)
+   */
+  async extractModulesFromGlobals(
+    sourcePath: string,
+    clusters: Cluster[]
+  ): Promise<ExtractedModule[]> {
+    const sourceFile = this.project.addSourceFileAtPath(sourcePath);
+    const modulesDir = path.join(path.dirname(sourcePath), this.options.modulesDir || 'modules');
+
+    await fs.promises.mkdir(modulesDir, { recursive: true });
+
+    const modules: ExtractedModule[] = [];
+    const nodesToRemove: Node[] = [];
+
+    for (let i = 0; i < clusters.length; i++) {
+      const cluster = clusters[i];
+      if (!cluster) continue;
+
+      const moduleName = this.generateModuleName(cluster, i);
+      const modulePath = path.join(modulesDir, `${moduleName}.js`);
+      const moduleFile = this.project.createSourceFile(modulePath, '', { overwrite: true });
+
+      const exportedNames: string[] = [];
+
+      for (const funcName of cluster.functions) {
+        const node = this.findNode(sourceFile, funcName);
+        if (node) {
+          let text = node.getText();
+
+          // Добавляем export для глобальных функций
+          if (!text.trim().startsWith('export')) {
+            text = `export ${text}`;
+          }
+
+          moduleFile.addStatements(text);
+          exportedNames.push(funcName);
+
+          // Сохраняем узел для удаления
+          nodesToRemove.push(node);
+        }
+      }
+
+      // Добавляем импорт в исходный файл
+      const relativePath = this.getRelativePath(sourcePath, modulePath);
+      sourceFile.addImportDeclaration({
+        namedImports: exportedNames,
+        moduleSpecifier: relativePath,
+      });
+
+      await moduleFile.save();
+
+      modules.push({
+        name: moduleName,
+        path: modulePath,
+        exports: exportedNames,
+        dependencies: [],
+        originalNodes: [],
+      });
+
+      console.log(`  📦 Создан модуль: ${moduleName}.js (${exportedNames.length} функций)`);
+    }
+
+    // Удаляем все узлы после создания модулей с безопасной проверкой
+    for (const node of nodesToRemove) {
+      try {
+        if ('remove' in node && typeof (node as any).remove === 'function') {
+          (node as any).remove();
+          console.log(`  🗑️ Удалён узел: ${node.getText().slice(0, 50)}...`);
+        } else {
+          console.log(`  ⏭️ Узел не поддерживает удаление`);
+        }
+      } catch (error) {
+        console.warn(`  ⚠️ Не удалось удалить узел: ${error}`);
+      }
+    }
+
+    await sourceFile.save();
+
+    return modules;
+  }
+
+  /**
+   * Вычисляет относительный путь между файлами
+   */
+  private getRelativePath(from: string, to: string): string {
+    let relative = path.relative(path.dirname(from), to);
+    relative = relative.replace(/\.(ts|js|tsx|jsx|vue)$/, '');
+    if (!relative.startsWith('.') && !relative.startsWith('@')) {
+      relative = './' + relative;
+    }
+    return relative.replace(/\\/g, '/');
   }
 
   /**

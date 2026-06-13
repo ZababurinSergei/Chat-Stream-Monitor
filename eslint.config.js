@@ -1,210 +1,153 @@
-import js from "@eslint/js/index.js";
-import tsParser from "@typescript-eslint/parser";
-import tsPlugin from "@typescript-eslint/eslint-plugin";
+// eslint.config.js
+import js from "@eslint/js";
 import globals from "globals";
+import tseslint from "@typescript-eslint/eslint-plugin";
+import tsParser from "@typescript-eslint/parser";
 
 export default [
-  // Базовые рекомендованные правила ESLint
+  // Базовые настройки для JavaScript файлов
   js.configs.recommended,
 
-  // Глобальные игнорирования
+  // Настройки для JavaScript/JSX файлов
   {
-    ignores: [
-      "**/node_modules/",
-      "**/dist/",
-      "**/build/",
-      "**/coverage/",
-      "**/.turbo/",
-      "**/.next/",
-      "**/out/",
-      "**/Directory/ast-analyzer/dist/",
-      "**/Directory/ast-analyzer/build/",
-      "**/Directory/ast-analyzer/coverage/",
-      "**/Directory/ast-analyzer/modules/",
-      "**/Directory/ast-analyzer/*.backup.*",
-      "**/packages/*/dist/",
-      "**/packages/*/build/",
-      "**/apps/*/dist/",
-      "**/apps/*/.next/",
-      "**/tooling/*/node_modules/",
-      "**/fs/",
-      "**/logs/",
-      "**/*.config.js",
-      "**/*.config.mjs",
-      "**/*.config.ts",
-      "**/__tests__/fixtures/",
-      "**/test-temp-*/",
-      "ai-*.txt",
-      "ai-*.md",
-      "*.json",
-      "*.log",
-    ],
-  },
-
-  // Конфигурация для JavaScript файлов
-  {
-    files: ["**/*.{js,mjs,cjs}"],
+    files: ["**/*.{js,jsx}"],
     languageOptions: {
-      ecmaVersion: 2022,
-      sourceType: "module",
       globals: {
         ...globals.node,
         ...globals.es2022,
-        ...globals.jest,
+        ...globals.browser,
+      },
+      parserOptions: {
+        ecmaVersion: 2022,
+        sourceType: "module",
+        ecmaFeatures: {
+          jsx: true,
+        },
       },
     },
     rules: {
+      "no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
       "no-console": "off",
-      "no-unused-vars": [
+      "no-debugger": "warn",
+      eqeqeq: ["error", "always"],
+      "no-var": "error",
+      "prefer-const": "warn",
+      semi: ["warn", "always"],
+      quotes: ["warn", "single", { avoidEscape: true }],
+      "comma-dangle": ["warn", "always-multiline"],
+    },
+  },
+
+  // Настройки для TypeScript/TSX файлов
+  {
+    files: ["**/*.{ts,tsx}"],
+    languageOptions: {
+      parser: tsParser,
+      globals: {
+        ...globals.node,
+        ...globals.es2022,
+        ...globals.browser,
+      },
+      parserOptions: {
+        ecmaVersion: 2022,
+        sourceType: "module",
+        ecmaFeatures: {
+          jsx: true,
+        },
+        project: "./tsconfig.json",
+      },
+    },
+    plugins: {
+      "@typescript-eslint": tseslint,
+    },
+    rules: {
+      // TypeScript правила
+      ...tseslint.configs.recommended.rules,
+
+      // Отключаем дублирующиеся правила
+      "no-unused-vars": "off",
+      "@typescript-eslint/no-unused-vars": [
         "warn",
         {
           argsIgnorePattern: "^_",
           varsIgnorePattern: "^_",
         },
       ],
-      "no-undef": "error",
-      "no-empty": "warn",
-      "no-prototype-builtins": "off",
-    },
-  },
 
-  // Конфигурация для TypeScript файлов
-  {
-    files: ["**/*.{ts,tsx}"],
-    languageOptions: {
-      parser: tsParser,
-      parserOptions: {
-        ecmaVersion: 2022,
-        sourceType: "module",
-        project: "./tsconfig.base.json",
-        tsconfigRootDir: process.cwd(),
-      },
-      globals: {
-        ...globals.node,
-        ...globals.es2022,
-        ...globals.jest,
-      },
-    },
-    plugins: {
-      "@typescript-eslint": tsPlugin,
-    },
-    rules: {
-      ...tsPlugin.configs.recommended.rules,
-      ...tsPlugin.configs["recommended-requiring-type-checking"]?.rules,
+      "no-console": "off",
+      "no-debugger": "warn",
 
-      // Правила для TypeScript
+      // Стилистические правила
+      eqeqeq: ["error", "always"],
+      "no-var": "error",
+      "prefer-const": "warn",
+      semi: ["warn", "always"],
+      quotes: ["warn", "single", { avoidEscape: true }],
+      "comma-dangle": ["warn", "always-multiline"],
+
+      // TypeScript специфичные правила
       "@typescript-eslint/no-explicit-any": "warn",
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        {
-          argsIgnorePattern: "^_",
-          varsIgnorePattern: "^_",
-        },
-      ],
-      "@typescript-eslint/no-empty-interface": "warn",
-      "@typescript-eslint/no-empty-function": "warn",
-      "@typescript-eslint/no-inferrable-types": "warn",
-      "@typescript-eslint/ban-ts-comment": "warn",
-      "@typescript-eslint/ban-types": "warn",
-      "@typescript-eslint/no-var-requires": "off",
+      "@typescript-eslint/explicit-function-return-type": "off",
       "@typescript-eslint/explicit-module-boundary-types": "off",
       "@typescript-eslint/no-non-null-assertion": "warn",
+      "@typescript-eslint/no-empty-function": "warn",
+      "@typescript-eslint/ban-ts-comment": "warn",
+      "@typescript-eslint/no-inferrable-types": "warn",
+      "@typescript-eslint/consistent-type-imports": [
+        "warn",
+        {
+          prefer: "type-imports",
+          fixStyle: "separate-type-imports",
+        },
+      ],
+      "@typescript-eslint/consistent-type-exports": "warn",
 
-      // Отключаем некоторые строгие правила для гибкости
+      // Правила для безопасности
       "@typescript-eslint/no-unsafe-assignment": "off",
       "@typescript-eslint/no-unsafe-member-access": "off",
       "@typescript-eslint/no-unsafe-call": "off",
       "@typescript-eslint/no-unsafe-return": "off",
-      "@typescript-eslint/no-floating-promises": "off",
-      "@typescript-eslint/await-thenable": "off",
-
-      // Общие правила
-      "no-console": "off",
     },
   },
 
-  // Конфигурация для тестовых файлов (менее строгая)
+  // Общие правила для всех файлов
   {
-    files: ["**/*.test.ts", "**/*.spec.ts", "**/__tests__/**/*.ts"],
-    languageOptions: {
-      parser: tsParser,
-      parserOptions: {
-        ecmaVersion: 2022,
-        sourceType: "module",
-        project: null, // Отключаем type checking для тестов
-      },
-      globals: {
-        ...globals.node,
-        ...globals.es2022,
-        ...globals.jest,
-        describe: "readonly",
-        it: "readonly",
-        expect: "readonly",
-        beforeEach: "readonly",
-        afterEach: "readonly",
-        beforeAll: "readonly",
-        afterAll: "readonly",
-        vi: "readonly",
-      },
-    },
-    plugins: {
-      "@typescript-eslint": tsPlugin,
-    },
-    rules: {
-      "@typescript-eslint/no-explicit-any": "off",
-      "@typescript-eslint/no-unused-vars": "off",
-      "@typescript-eslint/no-empty-function": "off",
-      "@typescript-eslint/ban-ts-comment": "off",
-      "@typescript-eslint/no-unsafe-assignment": "off",
-      "@typescript-eslint/no-unsafe-member-access": "off",
-    },
-  },
-
-  // Конфигурация для скриптов в корне (CLI скрипты)
-  {
-    files: ["*.mjs", "*.js", "scripts/**/*.mjs", "scripts/**/*.js"],
-    languageOptions: {
-      ecmaVersion: 2022,
-      sourceType: "module",
-      globals: {
-        ...globals.node,
-        ...globals.es2022,
-      },
-    },
+    files: ["**/*.{js,jsx,ts,tsx}"],
     rules: {
       "no-console": "off",
-      "@typescript-eslint/no-var-requires": "off",
+      "no-debugger": "warn",
     },
   },
 
-  // Конфигурация для пакета ast-analyzer (специфичные правила)
-  {
-    files: ["Directory/ast-analyzer/src/**/*.ts"],
-    rules: {
-      "@typescript-eslint/no-explicit-any": "warn",
-      "@typescript-eslint/explicit-module-boundary-types": "off",
-      "no-console": "off",
-    },
-  },
-
-  // Конфигурация для shared-types пакета
-  {
-    files: ["packages/shared-types/src/**/*.ts"],
-    rules: {
-      "@typescript-eslint/no-explicit-any": "error",
-      "@typescript-eslint/explicit-module-boundary-types": "error",
-    },
-  },
-
-  // Конфигурация для конфигурационных файлов
+  // Специальные правила для тестов
   {
     files: [
-      "**/turbo.json",
-      "**/pnpm-workspace.yaml",
-      "**/*.config.{js,mjs,ts}",
+      "**/*.test.{js,ts}",
+      "**/*.spec.{js,ts}",
+      "**/__tests__/**/*.{js,ts}",
     ],
     rules: {
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-non-null-assertion": "off",
       "no-console": "off",
     },
+  },
+
+  // Игнорируемые файлы и директории
+  {
+    ignores: [
+      "node_modules/**",
+      "dist/**",
+      "build/**",
+      "coverage/**",
+      ".turbo/**",
+      ".next/**",
+      ".nuxt/**",
+      ".output/**",
+      "*.config.js",
+      "*.config.ts",
+      "**/*.d.ts",
+      "**/*.backup.*",
+    ],
   },
 ];

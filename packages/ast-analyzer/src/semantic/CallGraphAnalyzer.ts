@@ -629,7 +629,10 @@ export class CallGraphAnalyzer {
 
     // ИСПРАВЛЕНО: безопасная фильтрация компонентов
     const jsxComponents = Array.from(this.nodes.values()).filter(
-      node => node.name && node.name.length > 0 && node.name.charAt(0) === node.name.charAt(0).toUpperCase()
+      node =>
+        node.name &&
+        node.name.length > 0 &&
+        node.name.charAt(0) === node.name.charAt(0).toUpperCase()
     );
 
     report += `## 📊 Statistics\n\n`;

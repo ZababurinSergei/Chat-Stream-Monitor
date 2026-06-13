@@ -22,6 +22,7 @@ export interface VerificationResult {
   counterexample?: Map<string, any>;
   time?: number;
   error?: string;
+  functionName?: string;
 }
 
 export interface FunctionContract {

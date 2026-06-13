@@ -1,4 +1,4 @@
-// Directory/ast-analyzer/src/refactor/ImportManager.ts
+// src/refactor/ImportManager.ts
 import { Project, SourceFile } from 'ts-morph';
 import path from 'path';
 import type { ExtractedModule } from './index.js';
@@ -6,9 +6,11 @@ import type { ExtractedModule } from './index.js';
 export class ImportManager {
   constructor(private project: Project) {}
 
+  /**
+   * Обновляет импорты в исходном файле после извлечения модулей
+   */
   async updateImports(sourcePath: string, modules: ExtractedModule[]): Promise<void> {
     const sourceFile = this.project.addSourceFileAtPath(sourcePath);
-
     if (!sourceFile) {
       console.warn(`⚠️ Не удалось загрузить файл: ${sourcePath}`);
       return;
@@ -16,7 +18,7 @@ export class ImportManager {
 
     console.log(`\n📦 Обновление импортов в ${path.basename(sourcePath)}`);
 
-    // Сначала собираем все экспорты, которые были перенесены
+    // Собираем все экспорты, которые были перенесены
     const allExportedNames = new Set<string>();
     const moduleMap = new Map<string, ExtractedModule>();
 
@@ -77,12 +79,96 @@ export class ImportManager {
       }
     }
 
-    // Удаляем только те импорты, которые точно не используются
-    this.removeUnusedImportsSafe(sourceFile, allExportedNames);
+    // Удаляем неиспользуемые импорты
+    await this.removeUnusedImports(sourceFile);
 
     await sourceFile.save();
   }
 
+  /**
+   * Оптимизирует порядок импортов: внешние → алиасы → внутренние
+   */
+  async optimizeImportOrder(sourcePath: string): Promise<void> {
+    const sourceFile = this.project.addSourceFileAtPath(sourcePath);
+    if (!sourceFile) return;
+
+    const imports = sourceFile.getImportDeclarations();
+    if (imports.length <= 1) return;
+
+    const external: typeof imports = [];
+    const aliases: typeof imports = [];
+    const internal: typeof imports = [];
+
+    for (const imp of imports) {
+      const specifier = imp.getModuleSpecifierValue();
+      if (specifier.startsWith('@') || specifier.startsWith('#')) {
+        aliases.push(imp);
+      } else if (specifier.startsWith('.')) {
+        internal.push(imp);
+      } else {
+        external.push(imp);
+      }
+    }
+
+    const sortBySpecifier = (a: (typeof imports)[0], b: (typeof imports)[0]) => {
+      return a.getModuleSpecifierValue().localeCompare(b.getModuleSpecifierValue());
+    };
+
+    external.sort(sortBySpecifier);
+    aliases.sort(sortBySpecifier);
+    internal.sort(sortBySpecifier);
+
+    const allImports = [...external, ...aliases, ...internal];
+
+    // Проверяем, нужна ли перестановка
+    let needsReorder = false;
+    for (let i = 0; i < imports.length; i++) {
+      if (imports[i] !== allImports[i]) {
+        needsReorder = true;
+        break;
+      }
+    }
+
+    if (needsReorder) {
+      const importData = allImports.map(imp => ({
+        defaultImport: imp.getDefaultImport()?.getText(),
+        namespaceImport: imp.getNamespaceImport()?.getText(),
+        namedImports: imp.getNamedImports().map(n => n.getName()),
+        moduleSpecifier: imp.getModuleSpecifierValue(),
+      }));
+
+      for (const imp of imports) {
+        imp.remove();
+      }
+
+      for (const data of importData) {
+        if (data.defaultImport) {
+          sourceFile.addImportDeclaration({
+            defaultImport: data.defaultImport,
+            namedImports: data.namedImports.length > 0 ? data.namedImports : undefined,
+            moduleSpecifier: data.moduleSpecifier,
+          });
+        } else if (data.namespaceImport) {
+          sourceFile.addImportDeclaration({
+            namespaceImport: data.namespaceImport,
+            moduleSpecifier: data.moduleSpecifier,
+          });
+        } else if (data.namedImports.length > 0) {
+          sourceFile.addImportDeclaration({
+            namedImports: data.namedImports,
+            moduleSpecifier: data.moduleSpecifier,
+          });
+        }
+      }
+
+      await sourceFile.save();
+      console.log(`  📋 Оптимизирован порядок импортов в ${path.basename(sourcePath)}`);
+    }
+  }
+
+  /**
+   * Добавляет недостающие импорты
+   */
   async addMissingImports(sourcePath: string, modules: ExtractedModule[]): Promise<void> {
     const sourceFile = this.project.addSourceFileAtPath(sourcePath);
     if (!sourceFile) return;
@@ -117,33 +203,25 @@ export class ImportManager {
           moduleSpecifier: modulePath,
         });
         console.log(`  ➕ Добавлен импорт: { ${exports.join(', ')} } from '${modulePath}'`);
-      } else {
-        const existingSpecifiers = existingImport.getNamedImports().map(s => s.getName());
-        const newSpecifiers = [...new Set([...existingSpecifiers, ...exports])];
-        if (newSpecifiers.length > existingSpecifiers.length) {
-          existingImport.remove();
-          sourceFile.addImportDeclaration({
-            namedImports: newSpecifiers,
-            moduleSpecifier: modulePath,
-          });
-          console.log(`  🔄 Обновлён импорт: { ${newSpecifiers.join(', ')} } from '${modulePath}'`);
-        }
       }
     }
 
     await sourceFile.save();
   }
 
-  private removeUnusedImportsSafe(sourceFile: SourceFile, exportedNames: Set<string>): void {
+  /**
+   * Удаляет неиспользуемые импорты
+   */
+  private async removeUnusedImports(sourceFile: SourceFile): Promise<void> {
     const imports = sourceFile.getImportDeclarations();
-    const usedIdentifiers = this.collectUsedIdentifiersSafe(sourceFile, exportedNames);
-
+    const usedIdentifiers = this.collectUsedIdentifiers(sourceFile);
     let removedCount = 0;
 
     for (const imp of imports) {
       const specifiers = imp.getNamedImports();
-      const moduleSpec = imp.getModuleSpecifier().getLiteralValue();
+      const moduleSpec = imp.getModuleSpecifierValue();
 
+      // Пропускаем импорты из modules директории (они нужны)
       if (moduleSpec.includes('/modules/') || moduleSpec.startsWith('./modules/')) {
         continue;
       }
@@ -172,44 +250,9 @@ export class ImportManager {
     }
   }
 
-  private collectUsedIdentifiersSafe(
-    sourceFile: SourceFile,
-    exportedNames: Set<string>
-  ): Set<string> {
-    const used = new Set<string>();
-    const content = sourceFile.getText();
-
-    for (const name of exportedNames) {
-      used.add(name);
-    }
-
-    const sourceFileNode = sourceFile.compilerNode;
-    if (sourceFileNode) {
-      const walk = (node: any) => {
-        if (!node) return;
-        if (node.kind === 79) {
-          const name = node.getText();
-          if (name && !this.isReservedWord(name)) {
-            used.add(name);
-          }
-        }
-        node.forEachChild(walk);
-      };
-      walk(sourceFileNode);
-    } else {
-      const identifierPattern = /\b([a-zA-Z_$][a-zA-Z0-9_$]*)\b/g;
-      let match;
-      while ((match = identifierPattern.exec(content)) !== null) {
-        const identifier = match[1];
-        if (identifier && !this.isReservedWord(identifier)) {
-          used.add(identifier);
-        }
-      }
-    }
-
-    return used;
-  }
-
+  /**
+   * Проверяет, используется ли экспорт в файле
+   */
   private isExportUsed(sourceFile: SourceFile, exportName: string): boolean {
     const content = sourceFile.getText();
 
@@ -218,7 +261,6 @@ export class ImportManager {
       new RegExp(`\\b${this.escapeRegex(exportName)}\\b`, 'g'),
       new RegExp(`['"\`]${this.escapeRegex(exportName)}['"\`]`, 'g'),
       new RegExp(`return\\s+${this.escapeRegex(exportName)}\\b`, 'g'),
-      new RegExp(`export\\s+{[^}]*${this.escapeRegex(exportName)}[^}]*}`, 'g'),
     ];
 
     for (const pattern of patterns) {
@@ -231,47 +273,17 @@ export class ImportManager {
     return false;
   }
 
-  private getRelativePath(from: string, to: string): string {
-    let relative = path.relative(path.dirname(from), to);
-    relative = relative.replace(/\.(ts|js|tsx|jsx|vue)$/, '');
-    if (!relative.startsWith('.') && !relative.startsWith('@')) {
-      relative = './' + relative;
-    }
-    return relative.replace(/\\/g, '/');
-  }
-
-  private collectUsedIdentifiersLegacy(sourceFile: SourceFile): Set<string> {
+  /**
+   * Собирает все используемые идентификаторы в файле
+   */
+  private collectUsedIdentifiers(sourceFile: SourceFile): Set<string> {
     const used = new Set<string>();
     const content = sourceFile.getText();
 
-    const sourceFileNode = sourceFile.compilerNode;
-    if (sourceFileNode) {
-      const walk = (node: any) => {
-        if (!node) return;
-        if (node.kind === 79) {
-          const name = node.getText();
-          if (name && !this.isReservedWord(name)) {
-            used.add(name);
-          }
-        }
-        node.forEachChild(walk);
-      };
-      walk(sourceFileNode);
-    } else {
-      const identifierPattern = /\b([a-zA-Z_$][a-zA-Z0-9_$]*)\b/g;
-      let match;
-      while ((match = identifierPattern.exec(content)) !== null) {
-        const identifier = match[1];
-        if (identifier && !this.isReservedWord(identifier)) {
-          used.add(identifier);
-        }
-      }
-    }
+    // Простой regex для поиска идентификаторов
+    const identifierPattern = /\b([a-zA-Z_$][a-zA-Z0-9_$]*)\b/g;
+    let match;
 
-    return used;
-  }
-
-  private isReservedWord(word: string): boolean {
     const reservedWords = new Set([
       'if',
       'else',
@@ -326,17 +338,39 @@ export class ImportManager {
       'abstract',
       'override',
     ]);
-    return reservedWords.has(word);
+
+    while ((match = identifierPattern.exec(content)) !== null) {
+      const identifier = match[1];
+      if (identifier && !reservedWords.has(identifier)) {
+        used.add(identifier);
+      }
+    }
+
+    return used;
   }
 
+  /**
+   * Вычисляет относительный путь между файлами
+   */
+  private getRelativePath(from: string, to: string): string {
+    let relative = path.relative(path.dirname(from), to);
+    relative = relative.replace(/\.(ts|js|tsx|jsx|vue)$/, '');
+    if (!relative.startsWith('.') && !relative.startsWith('@')) {
+      relative = './' + relative;
+    }
+    return relative.replace(/\\/g, '/');
+  }
+
+  /**
+   * Экранирует regex специальные символы
+   */
   private escapeRegex(str: string): string {
     return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 
-  hasUnsavedChanges(sourceFile: SourceFile): boolean {
-    return sourceFile.isSaved() === false;
-  }
-
+  /**
+   * Получает статистику по импортам
+   */
   getImportStats(sourceFile: SourceFile): {
     total: number;
     external: number;
@@ -344,7 +378,7 @@ export class ImportManager {
     unused: number;
   } {
     const imports = sourceFile.getImportDeclarations();
-    const usedIdentifiers = this.collectUsedIdentifiersLegacy(sourceFile);
+    const usedIdentifiers = this.collectUsedIdentifiers(sourceFile);
 
     let external = 0;
     let internal = 0;
@@ -352,7 +386,7 @@ export class ImportManager {
 
     for (const imp of imports) {
       const specifiers = imp.getNamedImports();
-      const moduleSpec = imp.getModuleSpecifier().getLiteralValue();
+      const moduleSpec = imp.getModuleSpecifierValue();
       const isExternal = !moduleSpec.startsWith('.') && !moduleSpec.startsWith('@/');
 
       if (isExternal) {
@@ -371,66 +405,10 @@ export class ImportManager {
     return { total: imports.length, external, internal, unused };
   }
 
-  async optimizeImportOrder(sourcePath: string): Promise<void> {
-    const sourceFile = this.project.addSourceFileAtPath(sourcePath);
-    if (!sourceFile) return;
-
-    const imports = sourceFile.getImportDeclarations();
-    if (imports.length === 0) return;
-
-    const external: typeof imports = [];
-    const internal: typeof imports = [];
-    const aliases: typeof imports = [];
-
-    for (const imp of imports) {
-      const moduleSpec = imp.getModuleSpecifier().getLiteralValue();
-      if (moduleSpec.startsWith('@/') || moduleSpec.startsWith('~')) {
-        aliases.push(imp);
-      } else if (moduleSpec.startsWith('.')) {
-        internal.push(imp);
-      } else {
-        external.push(imp);
-      }
-    }
-
-    const sortBySpecifier = (a: (typeof imports)[0], b: (typeof imports)[0]) => {
-      return a
-        .getModuleSpecifier()
-        .getLiteralValue()
-        .localeCompare(b.getModuleSpecifier().getLiteralValue());
-    };
-
-    external.sort(sortBySpecifier);
-    aliases.sort(sortBySpecifier);
-    internal.sort(sortBySpecifier);
-
-    const allImportsData = [...external, ...aliases, ...internal].map(imp => {
-      const specifiers = imp.getNamedImports().map(s => s.getName());
-      const defaultImport = imp.getDefaultImport()?.getText();
-      const namespaceImport = imp.getNamespaceImport()?.getText();
-      const moduleSpec = imp.getModuleSpecifier().getLiteralValue();
-      return { defaultImport, namespaceImport, specifiers, moduleSpec };
-    });
-
-    for (const imp of imports) {
-      imp.remove();
-    }
-
-    for (const { defaultImport, namespaceImport, specifiers, moduleSpec } of allImportsData) {
-      if (defaultImport) {
-        sourceFile.addImportDeclaration({
-          defaultImport,
-          namedImports: specifiers,
-          moduleSpecifier: moduleSpec,
-        });
-      } else if (namespaceImport) {
-        sourceFile.addImportDeclaration({ namespaceImport, moduleSpecifier: moduleSpec });
-      } else {
-        sourceFile.addImportDeclaration({ namedImports: specifiers, moduleSpecifier: moduleSpec });
-      }
-    }
-
-    await sourceFile.save();
-    console.log(`  📋 Оптимизирован порядок импортов в ${path.basename(sourcePath)}`);
+  /**
+   * Проверяет, есть ли несохранённые изменения
+   */
+  hasUnsavedChanges(sourceFile: SourceFile): boolean {
+    return sourceFile.isSaved() === false;
   }
 }

@@ -11,13 +11,12 @@ import { CodeFixer, FixResult } from './CodeFixer.js';
 import { ImportManager } from './ImportManager.js';
 import { TemplateUpdater } from './TemplateUpdater.js';
 
-// Импорт семантических модулей
+// Семантические модули
 import { CFGAnalyzer, ControlFlowGraph } from '../semantic/CFGAnalyzer.js';
 import { CallGraphAnalyzer, CallGraph } from '../semantic/CallGraphAnalyzer.js';
 import { TypeAnalyzer, TypeAnalysisResult, TypeError } from '../semantic/TypeAnalyzer.js';
 import { DataFlowAnalyzer, DataFlowGraph } from '../semantic/DataFlowAnalyzer.js';
 import { Z3Verifier, FunctionContract, VerificationResult, range } from '../formal/Z3Verifier.js';
-import { SemanticPipeline, PipelineResult } from '../ci-cd/SemanticPipeline.js';
 
 export interface RefactorOptions {
   modulesDir?: string;
@@ -29,13 +28,34 @@ export interface RefactorOptions {
   updateTemplate?: boolean;
   verbose?: boolean;
 
-  // Новые опции для семантического анализа
+  // Семантический анализ (ВСЕ ВКЛЮЧЕНЫ ПО УМОЛЧАНИЮ)
   semanticAnalysis?: boolean;
   formalVerification?: boolean;
   dataFlowAnalysis?: boolean;
   callGraphAnalysis?: boolean;
+  jsxAnalysis?: boolean;
+  vueAnalysis?: boolean;
   criticalFunctions?: string[];
   maxCallDepth?: number;
+
+  // Валидация и исправление (ВСЕ ВКЛЮЧЕНЫ ПО УМОЛЧАНИЮ)
+  eslintCheck?: boolean;
+  eslintFix?: boolean;
+  typeCheck?: boolean;
+  codeValidation?: boolean;
+  autoFix?: boolean;
+  maxIterations?: number;
+
+  // Импорты (ВСЕ ВКЛЮЧЕНЫ ПО УМОЛЧАНИЮ)
+  fixUnusedImports?: boolean;
+  fixUnusedVariables?: boolean;
+  addMissingTypes?: boolean;
+  optimizeImports?: boolean;
+
+  // Кластеризация
+  minClusterSize?: number;
+  extractIsolatedFunctions?: boolean;
+  groupByCallGraph?: boolean;
 }
 
 export interface ExtractedModule {
@@ -52,7 +72,6 @@ export interface RefactorResult {
   backupPath?: string;
   error?: string;
 
-  // Результаты семантического анализа
   semanticResults?: {
     cfg?: ControlFlowGraph;
     callGraph?: CallGraph;
@@ -62,12 +81,16 @@ export interface RefactorResult {
     unusedFunctions?: string[];
     cyclicDependencies?: string[][];
     unreachableCode?: Array<{ file: string; line: number }>;
+    jsx?: any;
+    vue?: any;
   };
 
-  // Результаты формальной верификации
   verificationResults?: VerificationResult[];
+  validationResults?: ValidationResult;
+  eslintResults?: ESLintFixResult[];
+  tsFixResults?: { fixedCount: number; remainingErrors: number };
+  codeFixResults?: FixResult[];
 
-  // Метрики
   metrics?: {
     cyclomaticComplexity: number;
     totalFunctions: number;
@@ -75,27 +98,34 @@ export interface RefactorResult {
     typeErrorsCount: number;
     verifiedFunctionsCount: number;
     dataFlowIssuesCount: number;
+    eslintFixesCount: number;
+    tsFixesCount: number;
+    codeFixesCount: number;
   };
+}
+
+export interface ESLintFixResult {
+  success: boolean;
+  file: string;
+  fixes: number;
+  errors: string[];
 }
 
 export class AutoRefactor {
   private project: Project;
   private extractor: ModuleExtractor;
+  private importManager: ImportManager;
   private options: RefactorOptions;
 
-  // Семантические анализаторы
   private cfgAnalyzer: CFGAnalyzer;
   private callGraphAnalyzer: CallGraphAnalyzer;
   private dataFlowAnalyzer: DataFlowAnalyzer;
   private z3Verifier: Z3Verifier;
-  private semanticPipeline: SemanticPipeline;
 
-  // Существующие валидаторы (помечены как public для доступа в тестах)
-  public tsValidator: TypeScriptValidator;
-  public eslintFixer: ESLintASTFixer;
+  private tsValidator: TypeScriptValidator;
+  private eslintFixer: ESLintASTFixer;
   private codeValidator: CodeValidator;
   private codeFixer: CodeFixer;
-  public importManager: ImportManager;
   private templateUpdater: TemplateUpdater;
 
   constructor(options: RefactorOptions = {}) {
@@ -109,16 +139,33 @@ export class AutoRefactor {
       updateTemplate: true,
       verbose: false,
 
-      // Значения по умолчанию для семантического анализа
       semanticAnalysis: true,
-      formalVerification: false,
+      formalVerification: true,
       dataFlowAnalysis: true,
       callGraphAnalysis: true,
-      maxCallDepth: 5,
+      jsxAnalysis: true,
+      vueAnalysis: true,
+      maxCallDepth: 10,
+
+      eslintCheck: true,
+      eslintFix: true,
+      typeCheck: true,
+      codeValidation: true,
+      autoFix: true,
+      maxIterations: 5,
+
+      fixUnusedImports: true,
+      fixUnusedVariables: true,
+      addMissingTypes: true,
+      optimizeImports: true,
+
+      minClusterSize: 2,
+      extractIsolatedFunctions: true,
+      groupByCallGraph: true,
+
       ...options,
     };
 
-    // Создаём проект ts-morph для работы с AST
     this.project = new Project({
       compilerOptions: {
         target: ScriptTarget.ES2020,
@@ -126,59 +173,40 @@ export class AutoRefactor {
         allowJs: true,
         allowSyntheticDefaultImports: true,
         esModuleInterop: true,
-        strict: false,
+        strict: true,
         skipLibCheck: true,
       },
       useInMemoryFileSystem: false,
     });
 
-    // Инициализация семантических анализаторов
     this.cfgAnalyzer = new CFGAnalyzer();
     this.callGraphAnalyzer = new CallGraphAnalyzer();
     this.dataFlowAnalyzer = new DataFlowAnalyzer();
     this.z3Verifier = new Z3Verifier();
-    this.semanticPipeline = new SemanticPipeline();
 
-    // Инициализация существующих компонентов
     this.extractor = new ModuleExtractor(this.project, this.options);
+    this.importManager = new ImportManager(this.project);
     this.tsValidator = new TypeScriptValidator();
     this.eslintFixer = new ESLintASTFixer();
     this.codeValidator = new CodeValidator();
     this.codeFixer = new CodeFixer();
-    this.importManager = new ImportManager(this.project);
     this.templateUpdater = new TemplateUpdater(this.options);
   }
 
-  /**
-   * Основной метод рефакторинга с семантическим анализом
-   */
   async refactor(filePath: string): Promise<RefactorResult> {
     const absolutePath = path.resolve(filePath);
 
-    console.log(`\n${'='.repeat(60)}`);
-    console.log(`🔧 АВТОМАТИЧЕСКИЙ РЕФАКТОРИНГ С СЕМАНТИЧЕСКИМ АНАЛИЗОМ`);
-    console.log(`${'='.repeat(60)}`);
-    console.log(`\n📄 Целевой файл: ${absolutePath}`);
-    console.log(`📁 Выходная директория: ${this.options.modulesDir}`);
-    console.log(
+    this.logHeader('АВТОМАТИЧЕСКИЙ РЕФАКТОРИНГ С ПОЛНЫМ PIPELINE');
+    this.log(`📄 Целевой файл: ${absolutePath}`);
+    this.log(`📁 Выходная директория: ${this.options.modulesDir}`);
+    this.log(
       `🎯 Параметры: размер кластера=${this.options.targetClusterSize}, связность=${this.options.minCohesionScore}%`
     );
 
-    if (this.options.semanticAnalysis) {
-      console.log(`🧠 Семантический анализ: ВКЛЮЧЕН`);
-      if (this.options.formalVerification) {
-        console.log(`🔬 Формальная верификация: ВКЛЮЧЕНА (Z3)`);
-      }
-      if (this.options.dataFlowAnalysis) {
-        console.log(`🌊 Data Flow анализ: ВКЛЮЧЕН`);
-      }
-      if (this.options.callGraphAnalysis) {
-        console.log(`🕸️ Call Graph анализ: ВКЛЮЧЕН`);
-      }
-    }
+    this.logSemanticStatus();
 
     if (this.options.dryRun) {
-      console.log('\n⚠️ РЕЖИМ DRY RUN: изменения не будут применены к файлам\n');
+      this.log('⚠️ РЕЖИМ DRY RUN: изменения не будут применены к файлам\n');
     }
 
     if (!fs.existsSync(absolutePath)) {
@@ -190,335 +218,639 @@ export class AutoRefactor {
       backupPath = await this.createBackup(absolutePath);
     }
 
-    // Результаты семантического анализа
-    let semanticResults: RefactorResult['semanticResults'];
+    let semanticResults: RefactorResult['semanticResults'] = {};
     let verificationResults: VerificationResult[] = [];
-    let metrics: RefactorResult['metrics'];
+    let validationResults: ValidationResult | undefined;
+    let eslintResults: ESLintFixResult[] = [];
+    let tsFixResults: { fixedCount: number; remainingErrors: number } = {
+      fixedCount: 0,
+      remainingErrors: 0,
+    };
+    let codeFixResults: FixResult[] = [];
+    let metrics: RefactorResult['metrics'] = {
+      cyclomaticComplexity: 0,
+      totalFunctions: 0,
+      unusedFunctionsCount: 0,
+      typeErrorsCount: 0,
+      verifiedFunctionsCount: 0,
+      dataFlowIssuesCount: 0,
+      eslintFixesCount: 0,
+      tsFixesCount: 0,
+      codeFixesCount: 0,
+    };
 
     try {
-      // Загружаем файл в проект AST
       const sourceFile = this.project.addSourceFileAtPath(absolutePath);
 
-      // ============================================
-      // СЕМАНТИЧЕСКИЙ АНАЛИЗ
-      // ============================================
-
       if (this.options.semanticAnalysis) {
-        console.log('\n🧠 ЗАПУСК СЕМАНТИЧЕСКОГО АНАЛИЗА');
-        console.log('-'.repeat(40));
+        this.logSection('СЕМАНТИЧЕСКИЙ АНАЛИЗ');
+        semanticResults = await this.runSemanticAnalysis(sourceFile, absolutePath);
 
-        semanticResults = {};
+        if (semanticResults) {
+          if (this.options.jsxAnalysis && (absolutePath.endsWith('.tsx') || absolutePath.endsWith('.jsx'))) {
+            this.log('  ⚛️ Анализ JSX/TSX...');
+            const { JSXAnalyzer } = await import('../semantic/JSXAnalyzer.js');
+            const jsxAnalyzer = new JSXAnalyzer(absolutePath);
+            const jsxResult = jsxAnalyzer.analyze(sourceFile);
+            semanticResults.jsx = jsxResult;
 
-        // 1. Control Flow Graph анализ
-        if (this.options.callGraphAnalysis) {
-          console.log('  🔀 Анализ Control Flow Graph...');
-          const cfg = this.cfgAnalyzer.build(sourceFile);
-          semanticResults.cfg = cfg;
-
-          const unreachable = cfg.findUnreachableBlocks();
-          if (unreachable.length > 0) {
-            console.log(`     ⚠️ Найдено ${unreachable.length} недостижимых блоков`);
+            if (jsxResult.elements.length > 0) {
+              this.log(`     ⚛️ Найдено JSX элементов: ${jsxResult.elements.length}`);
+              this.log(`     🧩 Компонентов: ${jsxResult.componentProps.size}`);
+            }
           }
 
-          const cyclomaticComplexity = this.calculateCyclomaticComplexity(cfg);
-          console.log(`     📊 Цикломатическая сложность: ${cyclomaticComplexity}`);
-        }
+          if (this.options.vueAnalysis && absolutePath.endsWith('.vue')) {
+            this.log('  🎯 Анализ Vue компонента...');
+            const { analyzeVueComponent } = await import('../modes/vue-analyzer.js');
+            const vueAnalysis = analyzeVueComponent(absolutePath);
+            semanticResults.vue = vueAnalysis;
 
-        // 2. Call Graph анализ
-        if (this.options.callGraphAnalysis) {
-          console.log('  🕸️ Анализ Call Graph...');
-          const callGraph = await this.callGraphAnalyzer.analyze(
-            absolutePath,
-            this.options.maxCallDepth || 5
-          );
-          semanticResults.callGraph = callGraph;
-
-          const unused = callGraph.findUnusedFunctions();
-          if (unused.length > 0) {
-            console.log(`     ⚠️ Найдено ${unused.length} неиспользуемых функций`);
-          }
-
-          const cycles = callGraph.findCyclicDependencies();
-          if (cycles.length > 0) {
-            console.log(`     🔄 Найдено ${cycles.length} циклических зависимостей`);
-            // Преобразуем CallEdge[][] в string[][]
-            const stringCycles: string[][] = cycles.map(cycleEdges =>
-              cycleEdges.map(edge => `${edge.from}->${edge.to}`)
-            );
-            semanticResults.cyclicDependencies = stringCycles;
-          }
-        }
-
-        // 3. Type анализ
-        console.log('  📝 Анализ типов...');
-        const typeAnalyzer = new TypeAnalyzer(absolutePath);
-        const typeAnalysis = typeAnalyzer.analyze();
-        semanticResults.typeAnalysis = typeAnalysis;
-
-        const typeErrors = typeAnalysis.findTypeErrors();
-        if (typeErrors.length > 0) {
-          console.log(`     ❌ Найдено ${typeErrors.length} ошибок типов`);
-          semanticResults.typeErrors = typeErrors;
-        }
-
-        // 4. Data Flow анализ
-        if (this.options.dataFlowAnalysis) {
-          console.log('  🌊 Анализ Data Flow...');
-          const dataFlow = this.dataFlowAnalyzer.analyze(sourceFile);
-          semanticResults.dataFlow = dataFlow;
-
-          const unusedVars = dataFlow.findUnusedVariables();
-          if (unusedVars.length > 0) {
-            console.log(`     ⚠️ Найдено ${unusedVars.length} неиспользуемых переменных`);
-          }
-
-          const reassignedConsts = dataFlow.findReassignedConstants();
-          if (reassignedConsts.length > 0) {
-            console.log(`     🔒 Найдено ${reassignedConsts.length} переопределенных констант`);
-          }
-        }
-
-        // 5. Формальная верификация (опционально)
-        if (this.options.formalVerification) {
-          console.log('  🔬 Формальная верификация через Z3...');
-          await this.z3Verifier.initialize();
-
-          const functions = sourceFile.getFunctions();
-          const criticalSet = new Set(this.options.criticalFunctions || []);
-
-          for (const func of functions) {
-            const funcName = func.getName();
-            if (!funcName) continue;
-
-            // Верифицируем все функции или только критические
-            if (criticalSet.size === 0 || criticalSet.has(funcName)) {
-              const contract = this.extractFunctionContract(func);
-              if (contract) {
-                const result = await this.z3Verifier.verifyFunction(contract);
-                verificationResults.push(result);
-
-                if (result.isValid) {
-                  console.log(`     ✅ ${funcName} - верифицирована`);
-                } else {
-                  console.log(`     ❌ ${funcName} - НЕ ПРОШЛА верификацию`);
-                  if (result.counterexample) {
-                    console.log(`        Контрпример: ${JSON.stringify(result.counterexample)}`);
-                  }
-                }
-              }
+            if (vueAnalysis) {
+              this.log(`     📥 Props: ${vueAnalysis.props.names.length}`);
+              this.log(`     📤 Events: ${vueAnalysis.emits.names.length}`);
+              this.log(`     🎭 Slots: ${vueAnalysis.slots.length}`);
+              this.log(`     🧩 Composables: ${vueAnalysis.composables.length}`);
             }
           }
         }
-
-        // Собираем метрики
-        metrics = {
-          cyclomaticComplexity: semanticResults.cfg
-            ? this.calculateCyclomaticComplexity(semanticResults.cfg)
-            : 0,
-          totalFunctions: semanticResults.callGraph?.nodes.size || 0,
-          unusedFunctionsCount: semanticResults.callGraph?.findUnusedFunctions().length || 0,
-          typeErrorsCount: typeErrors.length,
-          verifiedFunctionsCount: verificationResults.filter(r => r.isValid).length,
-          dataFlowIssuesCount: semanticResults.dataFlow?.findUnusedVariables().length || 0,
-        };
-
-        console.log('\n📊 СЕМАНТИЧЕСКИЕ МЕТРИКИ:');
-        console.log(`   • Цикломатическая сложность: ${metrics.cyclomaticComplexity}`);
-        console.log(`   • Всего функций: ${metrics.totalFunctions}`);
-        console.log(`   • Неиспользуемых: ${metrics.unusedFunctionsCount}`);
-        console.log(`   • Ошибок типов: ${metrics.typeErrorsCount}`);
-        console.log(`   • Верифицировано: ${metrics.verifiedFunctionsCount}`);
       }
 
-      // ============================================
-      // СУЩЕСТВУЮЩИЙ АНАЛИЗ ДЛЯ РЕФАКТОРИНГА
-      // ============================================
+      if (this.options.formalVerification) {
+        this.logSection('ФОРМАЛЬНАЯ ВЕРИФИКАЦИЯ (Z3)');
+        verificationResults = await this.runFormalVerification(sourceFile);
+      }
 
-      // Анализируем файл через AST
+      if (this.options.codeValidation) {
+        this.logSection('CODE VALIDATION');
+        validationResults = await this.runCodeValidation([absolutePath]);
+      }
+
+      if (this.options.eslintCheck) {
+        this.logSection('ESLint АНАЛИЗ И ИСПРАВЛЕНИЕ');
+        eslintResults = await this.runESLintFix([absolutePath]);
+      }
+
+      if (this.options.typeCheck) {
+        this.logSection('TYPESCRIPT ВАЛИДАЦИЯ И ИСПРАВЛЕНИЕ');
+        tsFixResults = await this.runTypeScriptFix([absolutePath]);
+      }
+
+      if (this.options.autoFix && validationResults) {
+        this.logSection('АВТОМАТИЧЕСКОЕ ИСПРАВЛЕНИЕ КОДА');
+        codeFixResults = await this.runCodeFix(validationResults);
+      }
+
+      this.logSection('АНАЛИЗ СТРУКТУРЫ ФАЙЛА');
       const analysis = await this.analyzeFile(sourceFile);
       if (!analysis) {
-        return {
-          success: false,
-          modules: [],
-          error: 'Не удалось проанализировать файл',
-          backupPath,
+        return this.createErrorResult('Не удалось проанализировать файл', backupPath, {
           semanticResults,
           verificationResults,
+          validationResults,
+          eslintResults,
+          tsFixResults,
+          codeFixResults,
           metrics,
-        };
+        });
       }
 
-      // Выявляем кластеры функций
+      this.logSection('КЛАСТЕРИЗАЦИЯ ФУНКЦИЙ');
       const clusters = this.identifyClusters(analysis);
 
-      if (clusters.length === 0) {
-        console.log('\nℹ️ Не найдено кандидатов для выделения в модули');
-        return {
-          success: true,
-          modules: [],
-          backupPath,
-          semanticResults,
-          verificationResults,
-          metrics,
-        };
+      const filteredClusters = clusters.filter(
+        c => c.functions.length >= (this.options.minClusterSize || 2)
+      );
+
+      let finalClusters = filteredClusters;
+      if (this.options.extractIsolatedFunctions) {
+        const isolated = this.findIsolatedFunctions(analysis, filteredClusters);
+        finalClusters = [...filteredClusters, ...isolated];
       }
 
-      console.log(`\n📊 Найдено кластеров: ${clusters.length}`);
-      clusters.forEach((cluster, i) => {
-        console.log(
-          `   ${i + 1}. ${cluster.name}: [${cluster.functions.join(', ')}] (связность: ${cluster.cohesionScore}%)`
-        );
-      });
+      if (finalClusters.length === 0) {
+        this.log('ℹ️ Не найдено кандидатов для выделения в модули');
+        return this.createSuccessResult([], backupPath, {
+          semanticResults,
+          verificationResults,
+          validationResults,
+          eslintResults,
+          tsFixResults,
+          codeFixResults,
+          metrics,
+        });
+      }
+
+      this.logClusters(finalClusters);
 
       if (this.options.dryRun) {
-        console.log('\n⚠️ DRY RUN: Изменения не будут применены');
-        return {
-          success: true,
-          modules: [],
-          backupPath,
+        this.log('⚠️ DRY RUN: Изменения не будут применены');
+        return this.createSuccessResult([], backupPath, {
           semanticResults,
           verificationResults,
+          validationResults,
+          eslintResults,
+          tsFixResults,
+          codeFixResults,
           metrics,
-        };
+        });
       }
 
-      // Извлекаем модули через AST
-      const modules = await this.extractor.extractModules(absolutePath, clusters);
+      this.logSection('ИЗВЛЕЧЕНИЕ МОДУЛЕЙ');
+      const modules = await this.extractor.extractModules(absolutePath, finalClusters);
 
-      // Обновляем импорты в исходном файле через AST
+      this.logSection('ОБНОВЛЕНИЕ ИМПОРТОВ');
       await this.updateImports(sourceFile, modules);
 
-      // Обновляем шаблоны для Vue файлов
+      if (this.options.optimizeImports) {
+        this.logSection('ОПТИМИЗАЦИЯ ИМПОРТОВ');
+        await this.optimizeImportOrder(sourceFile);
+      }
+
       if (this.options.updateTemplate && absolutePath.endsWith('.vue')) {
+        this.logSection('ОБНОВЛЕНИЕ VUE ШАБЛОНА');
         await this.templateUpdater.update(absolutePath, modules);
       }
 
-      // Сохраняем все изменения
+      this.logSection('ФИНАЛЬНАЯ ВАЛИДАЦИЯ');
       await this.project.save();
 
-      console.log(`\n✨ РЕФАКТОРИНГ УСПЕШНО ЗАВЕРШЁН!`);
-      console.log(`📦 Создано модулей: ${modules.length}`);
+      const finalValidation = await this.runCodeValidation([absolutePath]);
+      const finalESLint = await this.runESLintFix([absolutePath]);
+      const finalTS = await this.runTypeScriptFix([absolutePath]);
 
-      if (modules.length > 0) {
-        console.log(`\n📁 СОЗДАННЫЕ МОДУЛИ:`);
-        for (const module of modules) {
-          const relativePath = path.relative(process.cwd(), module.path);
-          console.log(`   ✅ ${relativePath} (${module.exports.length} экспортов)`);
-        }
-      }
-
-      return {
-        success: true,
-        modules,
-        backupPath,
+      metrics = this.collectMetrics({
         semanticResults,
         verificationResults,
+        validationResults: finalValidation,
+        eslintResults: finalESLint,
+        tsFixResults: finalTS,
+        codeFixResults,
+        clusters: finalClusters,
+      });
+
+      this.logMetrics(metrics);
+      this.logSuccess(modules, backupPath);
+
+      return this.createSuccessResult(modules, backupPath, {
+        semanticResults,
+        verificationResults,
+        validationResults: finalValidation,
+        eslintResults: finalESLint,
+        tsFixResults: finalTS,
+        codeFixResults,
         metrics,
-      };
+      });
     } catch (error) {
-      console.error(`\n❌ Ошибка рефакторинга:`, error);
+      this.logError(error);
 
       if (backupPath && !this.options.dryRun) {
         await this.restoreBackup(absolutePath, backupPath);
       }
 
-      return {
-        success: false,
-        modules: [],
+      return this.createErrorResult(
+        error instanceof Error ? error.message : String(error),
         backupPath,
-        error: error instanceof Error ? error.message : String(error),
-        semanticResults,
-        verificationResults,
-        metrics,
-      };
+        {
+          semanticResults,
+          verificationResults,
+          validationResults,
+          eslintResults,
+          tsFixResults,
+          codeFixResults,
+          metrics,
+        }
+      );
     }
   }
 
-  /**
-   * Запуск полного семантического пайплайна
-   */
-  async runSemanticPipeline(filePaths: string[]): Promise<PipelineResult> {
-    console.log('\n🚀 ЗАПУСК СЕМАНТИЧЕСКОГО ПАЙПЛАЙНА');
-    console.log('='.repeat(60));
+  private async runSemanticAnalysis(
+    sourceFile: SourceFile,
+    filePath: string
+  ): Promise<RefactorResult['semanticResults']> {
+    const results: RefactorResult['semanticResults'] = {};
 
-    const result = await this.semanticPipeline.run(filePaths, {
-      formalVerification: this.options.formalVerification,
-      maxDepth: this.options.maxCallDepth,
-      criticalFunctions: this.options.criticalFunctions,
-    });
+    this.log('  🔀 Анализ Control Flow Graph...');
+    const cfg = this.cfgAnalyzer.build(sourceFile);
+    results.cfg = cfg;
+    const unreachable = cfg.findUnreachableBlocks();
+    if (unreachable.length > 0) {
+      this.log(`     ⚠️ Найдено ${unreachable.length} недостижимых блоков`);
+      results.unreachableCode = unreachable.map(block => ({
+        file: sourceFile.getFilePath(),
+        line: block.instructions[0]?.getStartLineNumber() || 1,
+      }));
+    }
 
+    this.log('  🕸️ Анализ Call Graph...');
+    const callGraph = await this.callGraphAnalyzer.analyze(
+      filePath,
+      this.options.maxCallDepth || 10
+    );
+    results.callGraph = callGraph;
+    const unused = callGraph.findUnusedFunctions();
+    if (unused.length > 0) {
+      this.log(`     ⚠️ Найдено ${unused.length} неиспользуемых функций`);
+      results.unusedFunctions = unused.map(f => f.name);
+    }
+    const cycles = callGraph.findCyclicDependencies();
+    if (cycles.length > 0) {
+      this.log(`     🔄 Найдено ${cycles.length} циклических зависимостей`);
+      results.cyclicDependencies = cycles.map(cycleEdges =>
+        cycleEdges.map(edge => `${edge.from}->${edge.to}`)
+      );
+    }
+
+    this.log('  📝 Анализ типов...');
+    const typeAnalyzer = new TypeAnalyzer(filePath);
+    const typeAnalysis = typeAnalyzer.analyze();
+    results.typeAnalysis = typeAnalysis;
+    const typeErrors = typeAnalysis.findTypeErrors();
+    if (typeErrors.length > 0) {
+      this.log(`     ❌ Найдено ${typeErrors.length} ошибок типов`);
+      results.typeErrors = typeErrors;
+    }
+
+    this.log('  🌊 Анализ Data Flow...');
+    const dataFlow = this.dataFlowAnalyzer.analyze(sourceFile);
+    results.dataFlow = dataFlow;
+    const unusedVars = dataFlow.findUnusedVariables();
+    if (unusedVars.length > 0) {
+      this.log(`     ⚠️ Найдено ${unusedVars.length} неиспользуемых переменных`);
+    }
+    const reassignedConsts = dataFlow.findReassignedConstants();
+    if (reassignedConsts.length > 0) {
+      this.log(`     🔒 Найдено ${reassignedConsts.length} переопределенных констант`);
+    }
+
+    this.log(`\n  📊 СТАТИСТИКА АНАЛИЗА:`);
+    this.log(`     • Функций: ${callGraph?.nodes.size || 0}`);
+    this.log(`     • Вызовов: ${callGraph?.edges.length || 0}`);
+    this.log(`     • Циклов: ${callGraph?.cycles.length || 0}`);
+    this.log(`     • Ошибок типов: ${typeErrors.length || 0}`);
+    this.log(`     • Неиспользуемых переменных: ${unusedVars.length || 0}`);
+
+    return results;
+  }
+
+  private async runFormalVerification(sourceFile: SourceFile): Promise<VerificationResult[]> {
+    const verificationResults: VerificationResult[] = [];
+
+    await this.z3Verifier.initialize();
+
+    const functions = sourceFile.getFunctions();
+    const criticalSet = new Set(this.options.criticalFunctions || []);
+
+    for (const func of functions) {
+      const funcName = func.getName();
+      if (!funcName) continue;
+
+      if (criticalSet.size === 0 || criticalSet.has(funcName)) {
+        const contract = this.extractFunctionContract(func);
+        if (contract) {
+          const result = await this.z3Verifier.verifyFunction(contract);
+          verificationResults.push({ ...result, functionName: funcName });
+          if (result.isValid) {
+            this.log(`     ✅ ${funcName} - ВЕРИФИЦИРОВАНА`);
+          } else {
+            this.log(`     ❌ ${funcName} - НЕ ПРОШЛА верификацию`);
+          }
+        }
+      }
+    }
+
+    return verificationResults;
+  }
+
+  private async runCodeValidation(filePaths: string[]): Promise<ValidationResult> {
+    this.log('  🔍 Запуск валидации кода...');
+    const result = await this.codeValidator.validateFiles(filePaths);
+    this.log(`     ❌ Ошибок: ${result.summary.errors}`);
+    this.log(`     ⚠️ Предупреждений: ${result.summary.warnings}`);
+    this.log(`     🔧 Автоисправимых: ${result.summary.autoFixable}`);
     return result;
   }
 
-  /**
-   * Валидация кода с семантическим анализом
-   */
-  async validateWithSemantics(filePath: string): Promise<ValidationResult> {
-    console.log(`\n🔍 ВАЛИДАЦИЯ КОДА С СЕМАНТИЧЕСКИМ АНАЛИЗОМ: ${path.basename(filePath)}`);
-    console.log('='.repeat(60));
-
-    const sourceFile = this.project.addSourceFileAtPath(filePath);
-    if (!sourceFile) {
-      throw new Error(`Не удалось загрузить файл: ${filePath}`);
-    }
-
-    // Запускаем семантический анализ
-    if (this.options.semanticAnalysis) {
-      // CFG анализ
-      const cfg = this.cfgAnalyzer.build(sourceFile);
-      const unreachable = cfg.findUnreachableBlocks();
-
-      // Call Graph анализ
-      const callGraph = await this.callGraphAnalyzer.analyze(
-        filePath,
-        this.options.maxCallDepth || 5
-      );
-      const unused = callGraph.findUnusedFunctions();
-
-      // Type анализ
-      const typeAnalyzer = new TypeAnalyzer(filePath);
-      const typeAnalysis = typeAnalyzer.analyze();
-      const typeErrors = typeAnalysis.findTypeErrors();
-
-      // Data Flow анализ
-      const dataFlow = this.dataFlowAnalyzer.analyze(sourceFile);
-      const unusedVars = dataFlow.findUnusedVariables();
-
-      console.log(`\n📊 РЕЗУЛЬТАТЫ СЕМАНТИЧЕСКОЙ ВАЛИДАЦИИ:`);
-      console.log(`   • Недостижимые блоки: ${unreachable.length}`);
-      console.log(`   • Неиспользуемые функции: ${unused.length}`);
-      console.log(`   • Ошибки типов: ${typeErrors.length}`);
-      console.log(`   • Неиспользуемые переменные: ${unusedVars.length}`);
-    }
-
-    // Запускаем стандартную валидацию
-    const validationResult = await this.codeValidator.validateFiles([filePath]);
-
-    return validationResult;
+  private async runESLintFix(filePaths: string[]): Promise<ESLintFixResult[]> {
+    this.log('  📝 Запуск ESLint анализа...');
+    const results = await this.eslintFixer.fixFiles(filePaths, this.options.createBackup);
+    const totalFixes = results.reduce((sum, r) => sum + r.fixes, 0);
+    const fixedFiles = results.filter(r => r.success && r.fixes > 0).length;
+    this.log(`     ✅ Исправлено файлов: ${fixedFiles}`);
+    this.log(`     🔧 Всего исправлений: ${totalFixes}`);
+    return results;
   }
 
-  /**
-   * Автоматическое исправление проблем с семантическим анализом
-   */
-  async autoFixWithSemantics(filePath: string): Promise<FixResult[]> {
-    console.log(`\n🔧 АВТОИСПРАВЛЕНИЕ С СЕМАНТИЧЕСКИМ АНАЛИЗОМ: ${path.basename(filePath)}`);
-    console.log('='.repeat(60));
-
-    // Сначала находим проблемы через семантический анализ
-    const validationResult = await this.validateWithSemantics(filePath);
-
-    // Исправляем через AST
-    const fixResults = await this.codeFixer.autoFix(
-      validationResult.issues,
-      this.options.createBackup
-    );
-
-    return fixResults;
+  private async runTypeScriptFix(
+    filePaths: string[]
+  ): Promise<{ fixedCount: number; remainingErrors: number }> {
+    this.log('  🔷 Запуск TypeScript валидации...');
+    const result = await this.tsValidator.validateAndFix(filePaths, this.options.maxIterations);
+    this.log(`     ✅ Исправлено: ${result.fixedCount}`);
+    this.log(`     ❌ Осталось ошибок: ${result.remainingErrors}`);
+    return { fixedCount: result.fixedCount, remainingErrors: result.remainingErrors };
   }
 
-  /**
-   * Извлечение контракта функции для формальной верификации
-   */
+  private async runCodeFix(validationResult: ValidationResult): Promise<FixResult[]> {
+    this.log('  🔧 Запуск автоматического исправления...');
+    const results = await this.codeFixer.autoFix(validationResult.issues, this.options.createBackup);
+    const totalFixes = results.reduce((sum, r) => sum + r.fixes, 0);
+    const successFiles = results.filter(r => r.success).length;
+    this.log(`     ✅ Исправлено файлов: ${successFiles}`);
+    this.log(`     🔧 Всего исправлений: ${totalFixes}`);
+    return results;
+  }
+
+  private async analyzeFile(sourceFile: SourceFile): Promise<any> {
+    const functions: string[] = [];
+    const callGraph: Record<string, string[]> = {};
+
+    const functionDeclarations = sourceFile.getFunctions();
+    for (const func of functionDeclarations) {
+      const name = func.getName();
+      if (!name) continue;
+      functions.push(name);
+      callGraph[name] = [];
+      func.forEachDescendant(node => {
+        if (Node.isCallExpression(node)) {
+          const expression = node.getExpression();
+          if (Node.isIdentifier(expression)) {
+            const calledName = expression.getText();
+            if (calledName !== name) {
+              const currentCalls = callGraph[name];
+              if (currentCalls && !currentCalls.includes(calledName)) {
+                currentCalls.push(calledName);
+              }
+            }
+          }
+        }
+      });
+    }
+
+    const variableDeclarations = sourceFile.getVariableDeclarations();
+    for (const variable of variableDeclarations) {
+      const name = variable.getName();
+      const initializer = variable.getInitializer();
+      if (initializer && (Node.isArrowFunction(initializer) || Node.isFunctionExpression(initializer))) {
+        if (!functions.includes(name)) {
+          functions.push(name);
+          callGraph[name] = [];
+          initializer.forEachDescendant(node => {
+            if (Node.isCallExpression(node)) {
+              const expression = node.getExpression();
+              if (Node.isIdentifier(expression)) {
+                const calledName = expression.getText();
+                if (calledName !== name) {
+                  const currentCalls = callGraph[name];
+                  if (currentCalls && !currentCalls.includes(calledName)) {
+                    currentCalls.push(calledName);
+                  }
+                }
+              }
+            }
+          });
+        }
+      }
+    }
+
+    if (this.options.verbose) {
+      this.log(`\n📊 Анализ AST: найдено ${functions.length} функций`);
+      for (const [fn, deps] of Object.entries(callGraph)) {
+        if (deps.length > 0) {
+          this.log(`   ${fn} → ${deps.join(', ')}`);
+        }
+      }
+    }
+
+    return { functions, callGraph, sourceFile };
+  }
+
+  private identifyClusters(analysis: any): any[] {
+    const { functions, callGraph } = analysis;
+    const clusters: any[] = [];
+    const visited = new Set<string>();
+
+    const importance = new Map<string, number>();
+    for (const [caller, callees] of Object.entries(callGraph)) {
+      if (Array.isArray(callees)) {
+        for (const callee of callees) {
+          importance.set(callee, (importance.get(callee) || 0) + 1);
+        }
+      }
+      importance.set(caller, (importance.get(caller) || 0) + 0.5);
+    }
+
+    const entryPoints = this.findEntryPoints(callGraph, functions);
+
+    for (const entryPoint of entryPoints) {
+      if (visited.has(entryPoint)) continue;
+
+      const cluster: any = {
+        name: this.generateClusterName(entryPoint),
+        functions: [entryPoint],
+        cohesionScore: 0,
+        isEntryPoint: true,
+        type: 'unknown',
+        recommendation: '',
+      };
+
+      const queue = [entryPoint];
+      visited.add(entryPoint);
+
+      while (queue.length > 0 && cluster.functions.length < (this.options.maxClusterSize || 10)) {
+        const current = queue.shift()!;
+        const deps = callGraph[current] || [];
+        const callers = this.findCallers(callGraph, current);
+
+        for (const dep of deps) {
+          if (!visited.has(dep) && functions.includes(dep)) {
+            visited.add(dep);
+            cluster.functions.push(dep);
+            if (cluster.functions.length < (this.options.maxClusterSize || 10)) {
+              queue.push(dep);
+            }
+          }
+        }
+
+        for (const caller of callers) {
+          if (!visited.has(caller) && functions.includes(caller)) {
+            visited.add(caller);
+            cluster.functions.unshift(caller);
+            if (cluster.functions.length < (this.options.maxClusterSize || 10)) {
+              queue.unshift(caller);
+            }
+          }
+        }
+      }
+
+      if (cluster.functions.length > 0) {
+        cluster.cohesionScore = this.calculateCohesion(cluster.functions, callGraph);
+        cluster.type = this.determineClusterType(cluster, callGraph);
+        cluster.recommendation = this.getClusterRecommendation(cluster);
+        clusters.push(cluster);
+      }
+    }
+
+    for (const func of functions) {
+      if (!visited.has(func)) {
+        const deps = callGraph[func] || [];
+        const callers = this.findCallers(callGraph, func);
+
+        if (deps.length === 0 && callers.length === 0) {
+          clusters.push({
+            name: this.generateClusterName(func),
+            functions: [func],
+            cohesionScore: 100,
+            type: 'isolated',
+            recommendation: '⚡ Изолированная функция - можно оставить или вынести в utils',
+            isEntryPoint: false,
+          });
+        } else if (deps.length > 0 || callers.length > 0) {
+          clusters.push({
+            name: this.generateClusterName(func),
+            functions: [func],
+            cohesionScore: 0,
+            type: 'orphan',
+            recommendation: '❓ Функция имеет связи, но не вошла в кластер',
+            isEntryPoint: false,
+            dependencies: deps,
+            callers: callers,
+          });
+        }
+        visited.add(func);
+      }
+    }
+
+    clusters.sort((a, b) => {
+      if (a.cohesionScore !== b.cohesionScore) return b.cohesionScore - a.cohesionScore;
+      if (a.functions.length !== b.functions.length) return b.functions.length - a.functions.length;
+      return a.name.localeCompare(b.name);
+    });
+
+    if (this.options.verbose) {
+      this.log(`\n📊 Детальный анализ кластеров:`);
+      for (const cluster of clusters) {
+        this.log(`\n   📦 ${cluster.name}:`);
+        this.log(`      Функции: ${cluster.functions.join(', ')}`);
+        this.log(`      Связность: ${cluster.cohesionScore}%`);
+        this.log(`      Тип: ${cluster.type}`);
+        this.log(`      Рекомендация: ${cluster.recommendation}`);
+      }
+    }
+
+    return clusters;
+  }
+
+  private findEntryPoints(callGraph: Record<string, string[]>, functions: string[]): string[] {
+    const calledFunctions = new Set<string>();
+    for (const callees of Object.values(callGraph)) {
+      if (Array.isArray(callees)) {
+        for (const callee of callees) {
+          calledFunctions.add(callee);
+        }
+      }
+    }
+    const entryPoints = functions.filter(f => !calledFunctions.has(f));
+    if (entryPoints.length === 0) {
+      const callCount = new Map<string, number>();
+      for (const [caller, callees] of Object.entries(callGraph)) {
+        if (Array.isArray(callees)) {
+          callCount.set(caller, (callCount.get(caller) || 0) + callees.length);
+        }
+      }
+      const sorted = Array.from(callCount.entries()).sort((a, b) => b[1] - a[1]);
+      return sorted.slice(0, 3).map(([func]) => func);
+    }
+    return entryPoints;
+  }
+
+  private findCallers(callGraph: Record<string, string[]>, target: string): string[] {
+    const callers: string[] = [];
+    for (const [caller, callees] of Object.entries(callGraph)) {
+      if (Array.isArray(callees) && callees.includes(target)) {
+        callers.push(caller);
+      }
+    }
+    return callers;
+  }
+
+  private calculateCohesion(functions: string[], callGraph: Record<string, string[]>): number {
+    if (functions.length <= 1) return 100;
+    let internalEdges = 0;
+    for (const fn of functions) {
+      const deps = callGraph[fn] || [];
+      if (Array.isArray(deps)) {
+        internalEdges += deps.filter(dep => functions.includes(dep)).length;
+      }
+    }
+    const totalPossibleEdges = functions.length * (functions.length - 1);
+    return totalPossibleEdges > 0 ? Math.round((internalEdges / totalPossibleEdges) * 100) : 0;
+  }
+
+  private determineClusterType(cluster: any, callGraph: Record<string, string[]>): string {
+    const hasExternalDeps = cluster.functions.some((fn: string) => {
+      const deps = callGraph[fn] || [];
+      if (Array.isArray(deps)) {
+        return deps.some((dep: string) => !cluster.functions.includes(dep));
+      }
+      return false;
+    });
+    const isCalledExternally = cluster.functions.some((fn: string) => {
+      for (const [caller, callees] of Object.entries(callGraph)) {
+        if (Array.isArray(callees) && !cluster.functions.includes(caller) && callees.includes(fn)) {
+          return true;
+        }
+      }
+      return false;
+    });
+    if (cluster.isEntryPoint && hasExternalDeps) return 'core';
+    if (isCalledExternally && !hasExternalDeps) return 'library';
+    if (!hasExternalDeps && !isCalledExternally) return 'internal';
+    return 'utility';
+  }
+
+  private getClusterRecommendation(cluster: any): string {
+    if (cluster.type === 'core') return '🔷 Основной модуль - рекомендуется выделить в отдельный файл';
+    if (cluster.type === 'library') return '📚 Библиотечный модуль - можно вынести для переиспользования';
+    if (cluster.type === 'internal') return '🔒 Внутренний модуль - хороший кандидат для выделения';
+    if (cluster.type === 'isolated') return '⚡ Изолированная функция - можно оставить или вынести в utils';
+    return '❓ Требует анализа - проверьте зависимости';
+  }
+
+  private findIsolatedFunctions(analysis: any, existingClusters: any[]): any[] {
+    const allFunctionsInClusters = new Set<string>();
+    for (const cluster of existingClusters) {
+      for (const fn of cluster.functions) {
+        allFunctionsInClusters.add(fn);
+      }
+    }
+    const isolated: any[] = [];
+    for (const func of analysis.functions) {
+      if (!allFunctionsInClusters.has(func)) {
+        const deps = analysis.callGraph[func] || [];
+        if (deps.length === 0) {
+          isolated.push({
+            name: this.generateClusterName(func),
+            functions: [func],
+            cohesionScore: 100,
+            type: 'isolated',
+            recommendation: '⚡ Изолированная функция',
+          });
+        }
+      }
+    }
+    return isolated;
+  }
+
+  private async updateImports(sourceFile: SourceFile, modules: ExtractedModule[]): Promise<void> {
+    if (modules.length === 0) return;
+    await this.importManager.updateImports(sourceFile.getFilePath(), modules);
+  }
+
+  private async optimizeImportOrder(sourceFile: SourceFile): Promise<void> {
+    await this.importManager.optimizeImportOrder(sourceFile.getFilePath());
+  }
+
   private extractFunctionContract(func: any): FunctionContract | null {
     const name = func.getName();
     if (!name) return null;
@@ -529,49 +861,16 @@ export class AutoRefactor {
     }));
 
     const returnType = this.getReturnType(func);
+    const preconditions: any[] = [];
+    const postconditions: any[] = [];
 
-    // Извлекаем JSDoc комментарии для предусловий/постусловий
-    const jsDoc = func.getJsDocs()[0];
-    let preconditions: any[] = [];
-    let postconditions: any[] = [];
-
-    if (jsDoc) {
-      const tags = jsDoc.getTags();
-
-      for (const tag of tags) {
-        const tagName = tag.getTagName();
-        const comment = tag.getCommentText();
-
-        if (tagName === 'param' && comment) {
-          // Добавляем предусловие на основе параметра
-          const paramMatch = comment.match(/(\w+)\s+(.+)/);
-          if (paramMatch) {
-            preconditions.push(this.parseJSDocCondition(paramMatch[2]));
-          }
-        }
-
-        if (tagName === 'returns' && comment) {
-          // Добавляем постусловие
-          postconditions.push(this.parseJSDocCondition(comment));
-        }
-      }
-    }
-
-    // Добавляем типовые предусловия
     for (const param of params) {
       if (param.type === 'int') {
         preconditions.push(range(param.name, -1000, 1000));
       }
     }
 
-    return {
-      name,
-      params,
-      returnType,
-      preconditions,
-      postconditions,
-      invariants: [],
-    };
+    return { name, params, returnType, preconditions, postconditions, invariants: [] };
   }
 
   private getParamType(param: any): 'int' | 'bool' | 'string' {
@@ -590,384 +889,152 @@ export class AutoRefactor {
     return 'void';
   }
 
-  private parseJSDocCondition(comment: string): any {
-    // Парсим JSDoc комментарии в формат VerificationConstraint
-    if (comment.includes('> 0')) {
-      return { type: 'range', variable: 'result', min: 1, max: Infinity };
+  private generateClusterName(funcName: string): string {
+    let name = funcName.replace(/^(get|set|is|has|use|fetch|handle|on|validate|process|calculate)/, '');
+    name = name.charAt(0).toLowerCase() + name.slice(1);
+    return name + 'Module';
+  }
+
+  private async createBackup(filePath: string): Promise<string> {
+    const backupPath = `${filePath}.backup.${Date.now()}`;
+    await fs.promises.copyFile(filePath, backupPath);
+    this.log(`💾 Бэкап создан: ${path.basename(backupPath)}`);
+    return backupPath;
+  }
+
+  private async restoreBackup(filePath: string, backupPath: string): Promise<void> {
+    if (fs.existsSync(backupPath)) {
+      await fs.promises.copyFile(backupPath, filePath);
+      this.log(`🔄 Восстановлен бэкап: ${path.basename(backupPath)}`);
     }
-    if (comment.includes('>= 0')) {
-      return { type: 'range', variable: 'result', min: 0, max: Infinity };
-    }
-    return { type: 'equality', left: true, right: true };
+  }
+
+  private collectMetrics(data: any): RefactorResult['metrics'] {
+    const cyclomaticComplexity = data.semanticResults?.cfg
+      ? this.calculateCyclomaticComplexity(data.semanticResults.cfg)
+      : 0;
+
+    return {
+      cyclomaticComplexity,
+      totalFunctions: data.semanticResults?.callGraph?.nodes.size || 0,
+      unusedFunctionsCount: data.semanticResults?.unusedFunctions?.length || 0,
+      typeErrorsCount: data.semanticResults?.typeErrors?.length || 0,
+      verifiedFunctionsCount: data.verificationResults?.filter((r: VerificationResult) => r.isValid).length || 0,
+      dataFlowIssuesCount: data.semanticResults?.dataFlow?.findUnusedVariables().length || 0,
+      eslintFixesCount: data.eslintResults?.reduce((sum: number, r: ESLintFixResult) => sum + r.fixes, 0) || 0,
+      tsFixesCount: data.tsFixResults?.fixedCount || 0,
+      codeFixesCount: data.codeFixResults?.reduce((sum: number, r: FixResult) => sum + r.fixes, 0) || 0,
+    };
   }
 
   private calculateCyclomaticComplexity(cfg: ControlFlowGraph): number {
-    // V(G) = E - N + 2P
     const nodes = cfg.blocks.length;
     let edges = 0;
     for (const block of cfg.blocks) {
       edges += block.successors.length;
     }
-    return edges - nodes + 2;
+    return Math.max(1, edges - nodes + 2);
   }
 
-  /**
-   * Анализирует файл через AST: собирает все функции и их вызовы
-   */
-  private async analyzeFile(sourceFile: SourceFile): Promise<any> {
-    const functions: string[] = [];
-    const callGraph: Record<string, string[]> = {};
-
-    // Получаем все функции через AST
-    const functionDeclarations = sourceFile.getFunctions();
-
-    for (const func of functionDeclarations) {
-      const name = func.getName();
-      if (!name) continue;
-
-      functions.push(name);
-      if (!callGraph[name]) {
-        callGraph[name] = [];
-      }
-
-      // Анализируем вызовы внутри функции через обход AST
-      func.forEachDescendant(node => {
-        if (Node.isCallExpression(node)) {
-          const expression = node.getExpression();
-          if (Node.isIdentifier(expression)) {
-            const calledName = expression.getText();
-            if (calledName !== name && callGraph[name] && !callGraph[name].includes(calledName)) {
-              callGraph[name].push(calledName);
-            }
-          }
-        }
-      });
-    }
-
-    // Получаем стрелочные функции и функции-выражения
-    const variableDeclarations = sourceFile.getVariableDeclarations();
-    for (const variable of variableDeclarations) {
-      const name = variable.getName();
-      const initializer = variable.getInitializer();
-
-      if (
-        initializer &&
-        (Node.isArrowFunction(initializer) || Node.isFunctionExpression(initializer))
-      ) {
-        if (!functions.includes(name)) {
-          functions.push(name);
-          if (!callGraph[name]) {
-            callGraph[name] = [];
-          }
-
-          // Анализируем вызовы внутри стрелочной функции
-          initializer.forEachDescendant(node => {
-            if (Node.isCallExpression(node)) {
-              const expression = node.getExpression();
-              if (Node.isIdentifier(expression)) {
-                const calledName = expression.getText();
-                if (
-                  calledName !== name &&
-                  callGraph[name] &&
-                  !callGraph[name].includes(calledName)
-                ) {
-                  callGraph[name].push(calledName);
-                }
-              }
-            }
-          });
-        }
-      }
-    }
-
-    if (this.options.verbose) {
-      console.log(`\n📊 Анализ AST: найдено ${functions.length} функций`);
-      for (const [fn, deps] of Object.entries(callGraph)) {
-        if (deps.length > 0) {
-          console.log(`   ${fn} → ${deps.join(', ')}`);
-        }
-      }
-    }
-
-    return { functions, callGraph, sourceFile };
+  private logHeader(title: string): void {
+    console.log('\n' + '='.repeat(60));
+    console.log(`🔧 ${title}`);
+    console.log('='.repeat(60));
   }
 
-  /**
-   * Выявляет кластеры функций на основе графа вызовов
-   */
-  private identifyClusters(analysis: any): any[] {
-    const { functions, callGraph } = analysis;
-    const clusters: any[] = [];
-    const visited = new Set<string>();
+  private logSection(title: string): void {
+    console.log(`\n📌 ${title}`);
+    console.log('-'.repeat(40));
+  }
 
-    for (const func of functions) {
-      if (visited.has(func)) continue;
+  private log(message: string): void {
+    console.log(message);
+  }
 
-      const cluster = {
-        name: this.generateClusterName(func),
-        functions: [func],
-        cohesionScore: 0,
-      };
-
-      const queue = [func];
-      visited.add(func);
-
-      // BFS для сбора связанных функций
-      while (queue.length > 0 && cluster.functions.length < (this.options.maxClusterSize || 10)) {
-        const current = queue.shift()!;
-        const deps = callGraph[current] || [];
-
-        for (const dep of deps) {
-          if (!visited.has(dep) && functions.includes(dep)) {
-            visited.add(dep);
-            cluster.functions.push(dep);
-            queue.push(dep);
-          }
-        }
-      }
-
-      if (cluster.functions.length > 0) {
-        // Вычисляем связность кластера
-        let internalEdges = 0;
-        for (const fn of cluster.functions) {
-          const deps = callGraph[fn] || [];
-          internalEdges += deps.filter((dep: string) => cluster.functions.includes(dep)).length;
-        }
-        const maxEdges = cluster.functions.length * (cluster.functions.length - 1);
-        cluster.cohesionScore = maxEdges > 0 ? Math.round((internalEdges / maxEdges) * 100) : 0;
-
-        // Фильтруем по минимальной связности
-        if (cluster.cohesionScore >= (this.options.minCohesionScore || 60)) {
-          clusters.push(cluster);
-        }
-      }
+  private logSemanticStatus(): void {
+    if (this.options.semanticAnalysis) {
+      this.log(`🧠 Семантический анализ: ВКЛЮЧЕН`);
+      if (this.options.formalVerification) this.log(`🔬 Формальная верификация: ВКЛЮЧЕНА (Z3)`);
+      if (this.options.dataFlowAnalysis) this.log(`🌊 Data Flow анализ: ВКЛЮЧЕН`);
+      if (this.options.callGraphAnalysis) this.log(`🕸️ Call Graph анализ: ВКЛЮЧЕН`);
+      if (this.options.jsxAnalysis) this.log(`⚛️ JSX/TSX анализ: ВКЛЮЧЕН`);
+      if (this.options.vueAnalysis) this.log(`🎯 Vue анализ: ВКЛЮЧЕН`);
     }
+    if (this.options.eslintCheck) this.log(`📝 ESLint: ВКЛЮЧЕН${this.options.eslintFix ? ' (с автоисправлением)' : ''}`);
+    if (this.options.typeCheck) this.log(`🔷 TypeScript проверка: ВКЛЮЧЕНА`);
+    if (this.options.autoFix) this.log(`🔧 Автоисправление: ВКЛЮЧЕНО`);
+    if (this.options.optimizeImports) this.log(`📦 Оптимизация импортов: ВКЛЮЧЕНА`);
+    if (this.options.extractIsolatedFunctions) this.log(`⚡ Выделение изолированных функций: ВКЛЮЧЕНО`);
+  }
 
-    // Сортируем по связности и размеру
-    clusters.sort((a, b) => {
-      if (a.cohesionScore !== b.cohesionScore) {
-        return b.cohesionScore - a.cohesionScore;
-      }
-      return b.functions.length - a.functions.length;
+  private logClusters(clusters: any[]): void {
+    this.log(`\n📊 Найдено кластеров: ${clusters.length}`);
+    clusters.forEach((cluster, i) => {
+      this.log(`   ${i + 1}. ${cluster.name}: [${cluster.functions.join(', ')}] (связность: ${cluster.cohesionScore}%, тип: ${cluster.type})`);
     });
-
-    return clusters;
   }
 
-  /**
-   * Генерирует имя кластера на основе имени функции
-   */
-  private generateClusterName(funcName: string): string {
-    // Убираем распространённые префиксы
-    let name = funcName.replace(
-      /^(get|set|is|has|use|fetch|handle|on|validate|process|calculate)/,
-      ''
-    );
-    // Приводим к camelCase с маленькой буквы
-    name = name.charAt(0).toLowerCase() + name.slice(1);
-    // Добавляем суффикс Module
-    return name + 'Module';
+  private logMetrics(metrics: RefactorResult['metrics']): void {
+    this.log('\n📊 ИТОГОВЫЕ МЕТРИКИ:');
+    this.log(`   • Цикломатическая сложность: ${metrics?.cyclomaticComplexity}`);
+    this.log(`   • Всего функций: ${metrics?.totalFunctions}`);
+    this.log(`   • Неиспользуемых функций: ${metrics?.unusedFunctionsCount}`);
+    this.log(`   • Ошибок типов: ${metrics?.typeErrorsCount}`);
+    this.log(`   • Верифицировано функций: ${metrics?.verifiedFunctionsCount}`);
+    this.log(`   • Проблем Data Flow: ${metrics?.dataFlowIssuesCount}`);
+    this.log(`   • ESLint исправлений: ${metrics?.eslintFixesCount}`);
+    this.log(`   • TypeScript исправлений: ${metrics?.tsFixesCount}`);
+    this.log(`   • Code исправлений: ${metrics?.codeFixesCount}`);
   }
 
-  /**
-   * Обновляет импорты в исходном файле через AST
-   */
-  private async updateImports(sourceFile: SourceFile, modules: ExtractedModule[]): Promise<void> {
-    if (modules.length === 0) return;
-
-    const sourceDir = path.dirname(sourceFile.getFilePath());
-
-    for (const module of modules) {
-      const relativePath = path.relative(sourceDir, module.path);
-      let importPath = relativePath.replace(/\.js$/, '').replace(/\\/g, '/');
-
-      // Добавляем ./ для относительных путей
-      if (!importPath.startsWith('.') && !importPath.startsWith('@')) {
-        importPath = './' + importPath;
-      }
-
-      // Проверяем, существует ли уже такой импорт
-      const existingImport = sourceFile.getImportDeclaration(importPath);
-
-      if (!existingImport) {
-        // Добавляем новый импорт через AST
-        sourceFile.addImportDeclaration({
-          namedImports: module.exports,
-          moduleSpecifier: importPath,
-        });
-        console.log(`  ➕ Добавлен импорт: { ${module.exports.join(', ')} } from '${importPath}'`);
-      } else {
-        // Обновляем существующий импорт
-        const existingNames = existingImport.getNamedImports().map(n => n.getName());
-        const newNames = [...new Set([...existingNames, ...module.exports])];
-
-        if (newNames.length > existingNames.length) {
-          existingImport.remove();
-          sourceFile.addImportDeclaration({
-            namedImports: newNames,
-            moduleSpecifier: importPath,
-          });
-          console.log(`  🔄 Обновлён импорт: { ${newNames.join(', ')} } from '${importPath}'`);
-        }
+  private logSuccess(modules: ExtractedModule[], backupPath?: string): void {
+    this.log('\n✨ РЕФАКТОРИНГ УСПЕШНО ЗАВЕРШЁН!');
+    this.log(`📦 Создано модулей: ${modules.length}`);
+    if (modules.length > 0) {
+      this.log('\n📁 СОЗДАННЫЕ МОДУЛИ:');
+      for (const module of modules) {
+        const relativePath = path.relative(process.cwd(), module.path);
+        this.log(`   ✅ ${relativePath} (${module.exports.length} экспортов)`);
       }
     }
-
-    // Оптимизируем порядок импортов
-    await this.optimizeImportOrder(sourceFile);
+    if (backupPath) this.log(`\n💾 Бэкап: ${path.relative(process.cwd(), backupPath)}`);
+    this.log('\n💡 Совет: Запустите линтер и тесты после рефакторинга');
   }
 
-  /**
-   * Оптимизирует порядок импортов: внешние → алиасы → внутренние
-   */
-  private async optimizeImportOrder(sourceFile: SourceFile): Promise<void> {
-    const imports = sourceFile.getImportDeclarations();
-    if (imports.length <= 1) return;
-
-    const external: typeof imports = [];
-    const aliases: typeof imports = [];
-    const internal: typeof imports = [];
-
-    for (const imp of imports) {
-      const specifier = imp.getModuleSpecifierValue();
-      if (specifier.startsWith('@') || specifier.startsWith('#')) {
-        aliases.push(imp);
-      } else if (specifier.startsWith('.')) {
-        internal.push(imp);
-      } else {
-        external.push(imp);
-      }
-    }
-
-    // Сортируем внутри групп по алфавиту
-    const sortBySpecifier = (a: (typeof imports)[0], b: (typeof imports)[0]) => {
-      return a.getModuleSpecifierValue().localeCompare(b.getModuleSpecifierValue());
-    };
-
-    external.sort(sortBySpecifier);
-    aliases.sort(sortBySpecifier);
-    internal.sort(sortBySpecifier);
-
-    const allImports = [...external, ...aliases, ...internal];
-
-    // Проверяем, нужно ли менять порядок
-    let needsReorder = false;
-    for (let i = 0; i < imports.length; i++) {
-      if (imports[i] !== allImports[i]) {
-        needsReorder = true;
-        break;
-      }
-    }
-
-    if (needsReorder) {
-      // Сохраняем данные импортов
-      const importData = allImports.map(imp => ({
-        defaultImport: imp.getDefaultImport()?.getText(),
-        namespaceImport: imp.getNamespaceImport()?.getText(),
-        namedImports: imp.getNamedImports().map(n => n.getName()),
-        moduleSpecifier: imp.getModuleSpecifierValue(),
-      }));
-
-      // Удаляем все импорты
-      for (const imp of imports) {
-        imp.remove();
-      }
-
-      // Добавляем в правильном порядке
-      for (const data of importData) {
-        if (data.defaultImport) {
-          sourceFile.addImportDeclaration({
-            defaultImport: data.defaultImport,
-            namedImports: data.namedImports.length > 0 ? data.namedImports : undefined,
-            moduleSpecifier: data.moduleSpecifier,
-          });
-        } else if (data.namespaceImport) {
-          sourceFile.addImportDeclaration({
-            namespaceImport: data.namespaceImport,
-            moduleSpecifier: data.moduleSpecifier,
-          });
-        } else if (data.namedImports.length > 0) {
-          sourceFile.addImportDeclaration({
-            namedImports: data.namedImports,
-            moduleSpecifier: data.moduleSpecifier,
-          });
-        }
-      }
-
-      console.log(`  📋 Оптимизирован порядок импортов`);
+  private logError(error: unknown): void {
+    this.log('\n❌ КРИТИЧЕСКАЯ ОШИБКА:');
+    this.log(error instanceof Error ? error.message : String(error));
+    if (this.options.verbose && error instanceof Error && error.stack) {
+      this.log('\nСтек вызовов:');
+      this.log(error.stack);
     }
   }
 
-  /**
-   * Создаёт резервную копию файла
-   */
-  private async createBackup(filePath: string): Promise<string> {
-    const backupPath = `${filePath}.backup.${Date.now()}`;
-    await fs.promises.copyFile(filePath, backupPath);
-    console.log(`💾 Бэкап создан: ${path.basename(backupPath)}`);
-    return backupPath;
+  private createSuccessResult(modules: ExtractedModule[], backupPath: string | undefined, extra: any): RefactorResult {
+    return { success: true, modules, backupPath, ...extra };
   }
 
-  /**
-   * Восстанавливает файл из резервной копии
-   */
-  private async restoreBackup(filePath: string, backupPath: string): Promise<void> {
-    if (fs.existsSync(backupPath)) {
-      await fs.promises.copyFile(backupPath, filePath);
-      console.log(`🔄 Восстановлен бэкап: ${path.basename(backupPath)}`);
-    }
+  private createErrorResult(error: string, backupPath: string | undefined, extra: any): RefactorResult {
+    return { success: false, modules: [], backupPath, error, ...extra };
   }
 
-  /**
-   * Инициализация всех компонентов
-   */
   async initialize(): Promise<void> {
-    console.log('🚀 Инициализация AutoRefactor с семантическими компонентами...');
-
-    if (this.options.formalVerification) {
-      await this.z3Verifier.initialize();
-    }
-
-    console.log('✅ Все компоненты инициализированы');
+    this.log('🚀 Инициализация AutoRefactor с полным pipeline...');
+    if (this.options.formalVerification) await this.z3Verifier.initialize();
+    this.log('✅ Все компоненты инициализированы');
   }
 
-  /**
-   * Очистка ресурсов
-   */
   async dispose(): Promise<void> {
-    if (this.z3Verifier) {
-      await this.z3Verifier.dispose();
-    }
+    if (this.z3Verifier) await this.z3Verifier.dispose();
   }
 }
 
-// Экспорт дополнительных типов и утилит
 export { TypeScriptValidator } from './TypeScriptValidator.js';
 export { ESLintASTFixer } from './ESLintASTFixer.js';
 export { CodeValidator } from './CodeValidator.js';
 export type { ValidationResult } from './CodeValidator.js';
-
 export { CodeFixer } from './CodeFixer.js';
 export type { FixResult } from './CodeFixer.js';
-
 export { ImportManager } from './ImportManager.js';
 export { TemplateUpdater } from './TemplateUpdater.js';
 export { ModuleExtractor } from './ModuleExtractor.js';
-
-// Экспорт семантических компонентов
-export { CFGAnalyzer } from '../semantic/CFGAnalyzer.js';
-export type { ControlFlowGraph, BasicBlock } from '../semantic/CFGAnalyzer.js';
-
-export { CallGraphAnalyzer } from '../semantic/CallGraphAnalyzer.js';
-export type { CallGraph, CallGraphNode } from '../semantic/CallGraphAnalyzer.js';
-
-export { TypeAnalyzer } from '../semantic/TypeAnalyzer.js';
-export type { TypeAnalysisResult, TypeError, TypeInfo } from '../semantic/TypeAnalyzer.js';
-
-export { DataFlowAnalyzer } from '../semantic/DataFlowAnalyzer.js';
-export type { DataFlowGraph, DataFlowNode, DataFlowEdge } from '../semantic/DataFlowAnalyzer.js';
-
-export { Z3Verifier, range } from '../formal/Z3Verifier.js';
-export type { FunctionContract, VerificationResult } from '../formal/Z3Verifier.js';
-
-export { SemanticPipeline } from '../ci-cd/SemanticPipeline.js';
-export type { PipelineResult } from '../ci-cd/SemanticPipeline.js';
