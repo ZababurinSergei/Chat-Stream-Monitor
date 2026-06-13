@@ -29,7 +29,9 @@ Directory/*/coverage/
 Directory/*/.turbo/
 Directory/*/node_modules/
 Directory/*/out/
-
+packages/ast-analyzer/.git/
+packages/ast-analyzer/.turbo/
+packages/ast-analyzer/node_modules/
 # Specific package exclusions
 Directory/ast-analyzer/dist/
 Directory/ast-analyzer/build/

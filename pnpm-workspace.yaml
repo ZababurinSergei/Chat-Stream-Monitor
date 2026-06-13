@@ -1,6 +1,7 @@
 packages:
   # Существующие пакеты
   - "packages/*"
+  - "packages/ast-analyzer"
   - "apps/*"
   - "tooling/*"
   # ❌ Явно исключаем остальные Directory/*

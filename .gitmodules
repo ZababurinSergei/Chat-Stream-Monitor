@@ -1,0 +1,4 @@
+[submodule "packages/ast-analyzer"]
+    path = packages/ast-analyzer
+    url = https://github.com/ZababurinSergei/ast-analyzer
+    branch = main
