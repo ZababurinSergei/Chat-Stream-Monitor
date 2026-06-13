@@ -6,7 +6,7 @@
     "pnpm-lock.yaml"
   ],
   "globalEnv": ["NODE_ENV", "CI", "TURBO_TOKEN", "TURBO_TEAM"],
-  "pipeline": {
+  "tasks": {
     "build": {
       "dependsOn": ["^build"],
       "outputs": [
@@ -14,14 +14,11 @@
         "build/**",
         ".next/**",
         "!.next/cache/**",
-        "Directory/**/dist/**",
-        "Directory/**/build/**",
         "packages/**/dist/**",
         "packages/**/build/**"
       ],
       "inputs": [
         "src/**",
-        "Directory/**/src/**",
         "packages/**/src/**",
         "tsconfig.json",
         "tsconfig.base.json",
@@ -30,14 +27,12 @@
         "*.config.ts",
         "*.config.mjs"
       ],
-      "cache": true,
-      "outputMode": "full"
+      "cache": true
     },
     "test": {
       "dependsOn": ["build"],
       "inputs": [
         "src/**",
-        "Directory/**/src/**",
         "packages/**/src/**",
         "test/**",
         "__tests__/**",
@@ -47,18 +42,12 @@
         "**/*.spec.js"
       ],
       "outputs": [],
-      "cache": true,
-      "outputMode": "full"
+      "cache": true
     },
     "test:coverage": {
       "dependsOn": ["build"],
-      "outputs": [
-        "coverage/**",
-        "Directory/**/coverage/**",
-        "packages/**/coverage/**"
-      ],
-      "cache": true,
-      "outputMode": "full"
+      "outputs": ["coverage/**", "packages/**/coverage/**"],
+      "cache": true
     },
     "test:watch": {
       "cache": false,
@@ -68,7 +57,6 @@
       "dependsOn": [],
       "inputs": [
         "src/**",
-        "Directory/**/src/**",
         "packages/**/src/**",
         "*.config.js",
         "*.config.ts",
@@ -77,18 +65,11 @@
         "eslint.config.*"
       ],
       "outputs": [],
-      "cache": true,
-      "outputMode": "full"
+      "cache": true
     },
     "lint:fix": {
       "dependsOn": [],
-      "inputs": [
-        "src/**",
-        "Directory/**/src/**",
-        "packages/**/src/**",
-        "*.config.js",
-        "*.config.ts"
-      ],
+      "inputs": ["src/**", "packages/**/src/**", "*.config.js", "*.config.ts"],
       "outputs": [],
       "cache": false
     },
@@ -96,14 +77,12 @@
       "dependsOn": ["^build"],
       "inputs": [
         "src/**",
-        "Directory/**/src/**",
         "packages/**/src/**",
         "tsconfig.json",
         "tsconfig.base.json"
       ],
       "outputs": [],
-      "cache": true,
-      "outputMode": "full"
+      "cache": true
     },
     "dev": {
       "cache": false,
@@ -120,7 +99,6 @@
       "dependsOn": [],
       "inputs": [
         "src/**",
-        "Directory/**/src/**",
         "packages/**/src/**",
         "**/*.json",
         "**/*.md",
@@ -132,13 +110,7 @@
     },
     "format:check": {
       "dependsOn": [],
-      "inputs": [
-        "src/**",
-        "Directory/**/src/**",
-        "packages/**/src/**",
-        "**/*.json",
-        "**/*.md"
-      ],
+      "inputs": ["src/**", "packages/**/src/**", "**/*.json", "**/*.md"],
       "outputs": [],
       "cache": true
     },
@@ -155,10 +127,7 @@
     },
     "precommit": {
       "cache": false,
-      "dependsOn": ["lint:fix", "format", "type-check"]
-    },
-    "//#clean": {
-      "cache": false
+      "dependsOn": ["lint:fix", "format"]
     }
   }
 }

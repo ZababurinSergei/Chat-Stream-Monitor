@@ -24,8 +24,7 @@
     }
   },
   "scripts": {
-    "lint": "eslint . --config index.js",
-    "type-check": "tsc --noEmit"
+    "lint": "eslint . --config index.js"
   },
   "dependencies": {
     "@eslint/js": "^10.0.1",
