@@ -247,7 +247,10 @@ export class AutoRefactor {
         semanticResults = await this.runSemanticAnalysis(sourceFile, absolutePath);
 
         if (semanticResults) {
-          if (this.options.jsxAnalysis && (absolutePath.endsWith('.tsx') || absolutePath.endsWith('.jsx'))) {
+          if (
+            this.options.jsxAnalysis &&
+            (absolutePath.endsWith('.tsx') || absolutePath.endsWith('.jsx'))
+          ) {
             this.log('  ⚛️ Анализ JSX/TSX...');
             const { JSXAnalyzer } = await import('../semantic/JSXAnalyzer.js');
             const jsxAnalyzer = new JSXAnalyzer(absolutePath);
@@ -553,7 +556,10 @@ export class AutoRefactor {
 
   private async runCodeFix(validationResult: ValidationResult): Promise<FixResult[]> {
     this.log('  🔧 Запуск автоматического исправления...');
-    const results = await this.codeFixer.autoFix(validationResult.issues, this.options.createBackup);
+    const results = await this.codeFixer.autoFix(
+      validationResult.issues,
+      this.options.createBackup
+    );
     const totalFixes = results.reduce((sum, r) => sum + r.fixes, 0);
     const successFiles = results.filter(r => r.success).length;
     this.log(`     ✅ Исправлено файлов: ${successFiles}`);
@@ -591,7 +597,10 @@ export class AutoRefactor {
     for (const variable of variableDeclarations) {
       const name = variable.getName();
       const initializer = variable.getInitializer();
-      if (initializer && (Node.isArrowFunction(initializer) || Node.isFunctionExpression(initializer))) {
+      if (
+        initializer &&
+        (Node.isArrowFunction(initializer) || Node.isFunctionExpression(initializer))
+      ) {
         if (!functions.includes(name)) {
           functions.push(name);
           callGraph[name] = [];
@@ -810,10 +819,13 @@ export class AutoRefactor {
   }
 
   private getClusterRecommendation(cluster: any): string {
-    if (cluster.type === 'core') return '🔷 Основной модуль - рекомендуется выделить в отдельный файл';
-    if (cluster.type === 'library') return '📚 Библиотечный модуль - можно вынести для переиспользования';
+    if (cluster.type === 'core')
+      return '🔷 Основной модуль - рекомендуется выделить в отдельный файл';
+    if (cluster.type === 'library')
+      return '📚 Библиотечный модуль - можно вынести для переиспользования';
     if (cluster.type === 'internal') return '🔒 Внутренний модуль - хороший кандидат для выделения';
-    if (cluster.type === 'isolated') return '⚡ Изолированная функция - можно оставить или вынести в utils';
+    if (cluster.type === 'isolated')
+      return '⚡ Изолированная функция - можно оставить или вынести в utils';
     return '❓ Требует анализа - проверьте зависимости';
   }
 
@@ -890,7 +902,10 @@ export class AutoRefactor {
   }
 
   private generateClusterName(funcName: string): string {
-    let name = funcName.replace(/^(get|set|is|has|use|fetch|handle|on|validate|process|calculate)/, '');
+    let name = funcName.replace(
+      /^(get|set|is|has|use|fetch|handle|on|validate|process|calculate)/,
+      ''
+    );
     name = name.charAt(0).toLowerCase() + name.slice(1);
     return name + 'Module';
   }
@@ -919,11 +934,14 @@ export class AutoRefactor {
       totalFunctions: data.semanticResults?.callGraph?.nodes.size || 0,
       unusedFunctionsCount: data.semanticResults?.unusedFunctions?.length || 0,
       typeErrorsCount: data.semanticResults?.typeErrors?.length || 0,
-      verifiedFunctionsCount: data.verificationResults?.filter((r: VerificationResult) => r.isValid).length || 0,
+      verifiedFunctionsCount:
+        data.verificationResults?.filter((r: VerificationResult) => r.isValid).length || 0,
       dataFlowIssuesCount: data.semanticResults?.dataFlow?.findUnusedVariables().length || 0,
-      eslintFixesCount: data.eslintResults?.reduce((sum: number, r: ESLintFixResult) => sum + r.fixes, 0) || 0,
+      eslintFixesCount:
+        data.eslintResults?.reduce((sum: number, r: ESLintFixResult) => sum + r.fixes, 0) || 0,
       tsFixesCount: data.tsFixResults?.fixedCount || 0,
-      codeFixesCount: data.codeFixResults?.reduce((sum: number, r: FixResult) => sum + r.fixes, 0) || 0,
+      codeFixesCount:
+        data.codeFixResults?.reduce((sum: number, r: FixResult) => sum + r.fixes, 0) || 0,
     };
   }
 
@@ -960,17 +978,21 @@ export class AutoRefactor {
       if (this.options.jsxAnalysis) this.log(`⚛️ JSX/TSX анализ: ВКЛЮЧЕН`);
       if (this.options.vueAnalysis) this.log(`🎯 Vue анализ: ВКЛЮЧЕН`);
     }
-    if (this.options.eslintCheck) this.log(`📝 ESLint: ВКЛЮЧЕН${this.options.eslintFix ? ' (с автоисправлением)' : ''}`);
+    if (this.options.eslintCheck)
+      this.log(`📝 ESLint: ВКЛЮЧЕН${this.options.eslintFix ? ' (с автоисправлением)' : ''}`);
     if (this.options.typeCheck) this.log(`🔷 TypeScript проверка: ВКЛЮЧЕНА`);
     if (this.options.autoFix) this.log(`🔧 Автоисправление: ВКЛЮЧЕНО`);
     if (this.options.optimizeImports) this.log(`📦 Оптимизация импортов: ВКЛЮЧЕНА`);
-    if (this.options.extractIsolatedFunctions) this.log(`⚡ Выделение изолированных функций: ВКЛЮЧЕНО`);
+    if (this.options.extractIsolatedFunctions)
+      this.log(`⚡ Выделение изолированных функций: ВКЛЮЧЕНО`);
   }
 
   private logClusters(clusters: any[]): void {
     this.log(`\n📊 Найдено кластеров: ${clusters.length}`);
     clusters.forEach((cluster, i) => {
-      this.log(`   ${i + 1}. ${cluster.name}: [${cluster.functions.join(', ')}] (связность: ${cluster.cohesionScore}%, тип: ${cluster.type})`);
+      this.log(
+        `   ${i + 1}. ${cluster.name}: [${cluster.functions.join(', ')}] (связность: ${cluster.cohesionScore}%, тип: ${cluster.type})`
+      );
     });
   }
 
@@ -1010,11 +1032,19 @@ export class AutoRefactor {
     }
   }
 
-  private createSuccessResult(modules: ExtractedModule[], backupPath: string | undefined, extra: any): RefactorResult {
+  private createSuccessResult(
+    modules: ExtractedModule[],
+    backupPath: string | undefined,
+    extra: any
+  ): RefactorResult {
     return { success: true, modules, backupPath, ...extra };
   }
 
-  private createErrorResult(error: string, backupPath: string | undefined, extra: any): RefactorResult {
+  private createErrorResult(
+    error: string,
+    backupPath: string | undefined,
+    extra: any
+  ): RefactorResult {
     return { success: false, modules: [], backupPath, error, ...extra };
   }
 

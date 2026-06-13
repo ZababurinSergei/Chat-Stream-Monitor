@@ -112,7 +112,7 @@ node "$CLI_REFACTOR" refactor "$TARGET_FILE" --dry-run > "$OUTPUT_DIR/dry-run-re
 node "$CLI_REFACTOR" refactor "$TARGET_FILE" \
   -t 2 \
   -c 60 \
-  -v 
+  -v
 ```
 
 ### 2.4 refactor с параметрами
