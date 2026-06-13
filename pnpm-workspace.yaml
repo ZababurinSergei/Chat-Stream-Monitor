@@ -3,16 +3,8 @@ packages:
   - "packages/*"
   - "apps/*"
   - "tooling/*"
-
-  # ✅ Только ast-analyzer из Directory
-  - "Directory/ast-analyzer"
-
   # ❌ Явно исключаем остальные Directory/*
-  - "!Directory/10"
-  - "!Directory/11"
-  - "!Directory/12"
-  - "!Directory/13"
-  - "!Directory/typescript-sdk"
+  - "!Directory/*"
 
   # Исключаем тестовые и скомпилированные директории
   - "!**/__tests__/fixtures"

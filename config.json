@@ -10,7 +10,7 @@
     },
     {
       "id": "11",
-      "name": "Directory/11",
+      "name": "Directory/elite",
       "description": "Пользовательские функции: скрипты, расширения, пользовательские утилиты",
       "description_en": "User functions: scripts, extensions, user utilities",
       "required": false,
@@ -18,7 +18,7 @@
     },
     {
       "id": "12",
-      "name": "Directory/12",
+      "name": "Directory/extensions",
       "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
       "description_en": "User files: sources, templates, projects, user data",
       "required": false,
@@ -34,7 +34,7 @@
     },
     {
       "id": "14",
-      "name": "Directory/ast-analyzer",
+      "name": "packages/ast-analyzer",
       "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
       "description_en": "User files: sources, templates, projects, user data",
       "required": false,

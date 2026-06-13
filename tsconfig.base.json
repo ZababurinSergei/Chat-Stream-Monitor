@@ -96,12 +96,7 @@
 
   "exclude": [
     // ИСКЛЮЧАЕМ все остальные Directory/* (кроме ast-analyzer)
-    "Directory/10",
-    "Directory/11",
-    "Directory/12",
-    "Directory/13",
-    "Directory/typescript-sdk",
-
+    "Directory",
     // Исключаем системные папки внутри ast-analyzer
     "Directory/ast-analyzer/node_modules",
     "Directory/ast-analyzer/dist",
