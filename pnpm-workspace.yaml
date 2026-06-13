@@ -3,3 +3,6 @@ packages:
   - "packages/*"
   - "packages/*/*"
   - "tools/*"
+allowBuilds:
+  '@parcel/watcher': false
+  esbuild: false
