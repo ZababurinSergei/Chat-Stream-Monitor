@@ -20,6 +20,7 @@ out/
 
 # Turbo
 .turbo/
+Directory
 
 # Directory packages (основное обновление)
 Directory/*/dist/

@@ -36,8 +36,6 @@
 
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-
-    "baseUrl": ".",
     "paths": {
       "@newkind/ast-analyzer": ["./Directory/ast-analyzer/src/index.ts"],
       "@newkind/ast-analyzer/*": ["./Directory/ast-analyzer/src/*"],
@@ -58,10 +56,8 @@
       "@repo/eslint-config": ["./tooling/eslint-config/index.js"],
       "@repo/prettier-config": ["./tooling/prettier-config/index.js"],
       "@repo/typescript-config": ["./tooling/typescript-config/base.json"],
-
-      "@/*": ["./*/src/*"],
-      "@directory/*": ["./Directory/*/src/*"],
-      "@packages/*": ["./packages/*/src/*"]
+      "@directory/*": ["./Directory/src/*"],
+      "@packages/*": ["./packages/src/*"]
     },
 
     "types": ["node", "vitest/globals"],
@@ -74,7 +70,47 @@
     "tsBuildInfoFile": ".tsbuildinfo"
   },
 
+  "include": [
+    // ТОЛЬКО ast-analyzer из папки Directory
+    "Directory/ast-analyzer/src/**/*.ts",
+    "Directory/ast-analyzer/src/**/*.tsx",
+    "Directory/ast-analyzer/src/**/*.js",
+    "Directory/ast-analyzer/src/**/*.jsx",
+    "Directory/ast-analyzer/src/**/*.vue",
+    "Directory/ast-analyzer/src/**/*.mjs",
+    "Directory/ast-analyzer/src/**/*.cjs",
+
+    // Остальные пакеты
+    "packages/*/src/**/*.ts",
+    "packages/*/src/**/*.tsx",
+    "packages/*/src/**/*.js",
+    "packages/*/src/**/*.jsx",
+    "tooling/*/**/*.ts",
+    "tooling/*/**/*.js",
+    "*.ts",
+    "*.js",
+    "*.mjs",
+    "*.cjs",
+    "*.d.ts"
+  ],
+
   "exclude": [
+    // ИСКЛЮЧАЕМ все остальные Directory/* (кроме ast-analyzer)
+    "Directory/10",
+    "Directory/11",
+    "Directory/12",
+    "Directory/13",
+    "Directory/typescript-sdk",
+
+    // Исключаем системные папки внутри ast-analyzer
+    "Directory/ast-analyzer/node_modules",
+    "Directory/ast-analyzer/dist",
+    "Directory/ast-analyzer/build",
+    "Directory/ast-analyzer/coverage",
+    "Directory/ast-analyzer/.turbo",
+    "Directory/ast-analyzer/modules",
+
+    // Остальные исключения
     "node_modules",
     "dist",
     "build",
@@ -82,73 +118,20 @@
     ".turbo",
     ".next",
     "out",
-
     "**/__tests__/fixtures",
     "**/__tests__/temp",
     "**/*.test.ts",
     "**/*.spec.ts",
     "**/*.test.tsx",
     "**/*.spec.tsx",
-
-    "Directory/10",
-    "Directory/11",
-    "Directory/12",
-    "Directory/13",
-    "Directory/typescript-sdk",
-
-    "Directory/*/dist",
-    "Directory/*/build",
-    "Directory/*/coverage",
-    "Directory/*/node_modules",
-    "Directory/*/.turbo",
-    "Directory/*/modules",
-
     "packages/*/dist",
     "packages/*/build",
     "packages/*/coverage",
     "packages/*/node_modules",
-
-    "apps/*/dist",
-    "apps/*/build",
-    "apps/*/.next",
-    "apps/*/out",
-    "apps/*/node_modules",
-
     "tooling/*/node_modules",
-
     "**/*.backup.*",
     "**/*.tmp",
     "**/*.swp"
-  ],
-
-  "include": [
-    "Directory/*/src/**/*.ts",
-    "Directory/*/src/**/*.tsx",
-    "Directory/*/src/**/*.js",
-    "Directory/*/src/**/*.jsx",
-    "Directory/*/src/**/*.vue",
-    "Directory/*/src/**/*.mjs",
-    "Directory/*/src/**/*.cjs",
-
-    "packages/*/src/**/*.ts",
-    "packages/*/src/**/*.tsx",
-    "packages/*/src/**/*.js",
-    "packages/*/src/**/*.jsx",
-
-    "apps/*/src/**/*.ts",
-    "apps/*/src/**/*.tsx",
-    "apps/*/src/**/*.js",
-    "apps/*/src/**/*.jsx",
-
-    "tooling/*/**/*.ts",
-    "tooling/*/**/*.js",
-
-    "*.ts",
-    "*.js",
-    "*.mjs",
-    "*.cjs",
-
-    "*.d.ts"
   ],
 
   "compileOnSave": false,

@@ -4,10 +4,10 @@ packages:
   - "apps/*"
   - "tooling/*"
 
-  # ✅ Добавляем Directory и все его поддиректории
-  - "Directory/*"
+  # ✅ Только ast-analyzer из Directory
+  - "Directory/ast-analyzer"
 
-  # ❌ Исключаем пользовательские/временные директории
+  # ❌ Явно исключаем остальные Directory/*
   - "!Directory/10"
   - "!Directory/11"
   - "!Directory/12"
@@ -22,10 +22,4 @@ packages:
   - "!**/.turbo"
   - "!**/node_modules"
 
-  # Исключаем скрытые директории
-  - "!**/.*"
-allowBuilds:
-  '@parcel/watcher': false
-  esbuild: false
-minimumReleaseAgeExclude:
-  - eslint@10.5.0
+minimumReleaseAge: 0

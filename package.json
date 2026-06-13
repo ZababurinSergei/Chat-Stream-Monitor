@@ -6,6 +6,7 @@
   "description": "Monorepo for AST Analyzer and FS Scanner tools",
   "main": "main.mjs",
   "scripts": {
+    "scan": "node main.mjs",
     "dev": "turbo dev",
     "build": "turbo build",
     "build:ast": "cd Directory/ast-analyzer && pnpm build",
@@ -26,7 +27,6 @@
     "version-packages": "changeset version",
     "release": "turbo build --filter=./packages/* && changeset publish",
     "prepare": "husky",
-    "scan": "node main.mjs",
     "config": "node generate-config.mjs",
     "license:add": "node check-license.mjs add",
     "license:check": "node check-license.mjs check",
@@ -57,14 +57,18 @@
   },
   "dependencies": {
     "@hpcc-js/wasm-graphviz": "^1.22.0",
-    "@typescript-eslint/parser": "^8.61.0",
     "estree-walker": "^3.0.3",
     "glob": "^13.0.6"
   },
   "devDependencies": {
     "@changesets/cli": "^2.31.0",
+    "@eslint/js": "^10.0.1",
     "@types/node": "^25.9.3",
+    "@typescript-eslint/eslint-plugin": "^8.61.0",
+    "@typescript-eslint/parser": "^8.61.0",
     "@vitest/coverage-v8": "^4.1.8",
+    "eslint": "10.5.0",
+    "globals": "^17.6.0",
     "husky": "^9.1.7",
     "jshint": "^2.13.6",
     "lint-staged": "^17.0.7",
@@ -73,14 +77,25 @@
     "typescript": "^6.0.3"
   },
   "lint-staged": {
-    "*.{ts,tsx,js,jsx}": [
+    "Directory/ast-analyzer/**/*.{ts,tsx,js,jsx}": [
+      "eslint --fix --cache",
+      "prettier --write"
+    ],
+    "Directory/ast-analyzer/**/*.{json,md,yaml,yml}": [
+      "prettier --write"
+    ],
+    "packages/**/*.{ts,tsx,js,jsx}": [
+      "eslint --fix --cache",
+      "prettier --write"
+    ],
+    "packages/**/*.{json,md,yaml,yml}": [
+      "prettier --write"
+    ],
+    "tooling/**/*.{ts,tsx,js,jsx}": [
       "eslint --fix --cache",
       "prettier --write"
     ],
     "*.{json,md,yaml,yml}": [
-      "prettier --write"
-    ],
-    "*.{css,scss}": [
       "prettier --write"
     ]
   },

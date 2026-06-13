@@ -175,46 +175,46 @@ pnpm clean
 
 ## 📝 Доступные команды
 
-| Команда | Описание |
-|---------|----------|
-| `pnpm dev` | Запуск в режиме разработки |
-| `pnpm build` | Сборка всех пакетов |
-| `pnpm test` | Запуск всех тестов |
-| `pnpm test:coverage` | Запуск тестов с покрытием |
-| `pnpm lint` | Проверка линтинга |
-| `pnpm lint:fix` | Исправление проблем линтинга |
-| `pnpm type-check` | Проверка TypeScript типов |
-| `pnpm format` | Форматирование кода |
-| `pnpm format:check` | Проверка форматирования |
-| `pnpm clean` | Очистка билдов и зависимостей |
-| `pnpm changeset` | Создание changeset для релиза |
-| `pnpm version-packages` | Обновление версий пакетов |
-| `pnpm release` | Публикация пакетов |
+| Команда                 | Описание                      |
+| ----------------------- | ----------------------------- |
+| `pnpm dev`              | Запуск в режиме разработки    |
+| `pnpm build`            | Сборка всех пакетов           |
+| `pnpm test`             | Запуск всех тестов            |
+| `pnpm test:coverage`    | Запуск тестов с покрытием     |
+| `pnpm lint`             | Проверка линтинга             |
+| `pnpm lint:fix`         | Исправление проблем линтинга  |
+| `pnpm type-check`       | Проверка TypeScript типов     |
+| `pnpm format`           | Форматирование кода           |
+| `pnpm format:check`     | Проверка форматирования       |
+| `pnpm clean`            | Очистка билдов и зависимостей |
+| `pnpm changeset`        | Создание changeset для релиза |
+| `pnpm version-packages` | Обновление версий пакетов     |
+| `pnpm release`          | Публикация пакетов            |
 
 ## 📦 Пакеты
 
 ### Production пакеты
 
-| Пакет | Версия | Описание |
-|-------|--------|----------|
-| `@newkind/ast-analyzer` | 3.0.0 | AST анализ, рефакторинг и семантическая верификация |
-| `@newkind/shared-types` | 0.0.1 | Общие TypeScript типы |
+| Пакет                   | Версия | Описание                                            |
+| ----------------------- | ------ | --------------------------------------------------- |
+| `@newkind/ast-analyzer` | 3.0.0  | AST анализ, рефакторинг и семантическая верификация |
+| `@newkind/shared-types` | 0.0.1  | Общие TypeScript типы                               |
 
 ### Internal tooling
 
-| Пакет | Описание |
-|-------|----------|
-| `@repo/eslint-config` | Общая ESLint конфигурация |
+| Пакет                   | Описание                    |
+| ----------------------- | --------------------------- |
+| `@repo/eslint-config`   | Общая ESLint конфигурация   |
 | `@repo/prettier-config` | Общая Prettier конфигурация |
 
 ### Использование пакетов
 
 ```typescript
 // Импорт из ast-analyzer
-import { AutoRefactor, analyzeVueComponent } from '@newkind/ast-analyzer';
+import { AutoRefactor, analyzeVueComponent } from "@newkind/ast-analyzer";
 
 // Импорт общих типов
-import type { FileNode, Config } from '@newkind/shared-types';
+import type { FileNode, Config } from "@newkind/shared-types";
 ```
 
 ## 🔄 CI/CD
@@ -281,23 +281,23 @@ pnpm ast-analyzer impact ./src/db.ts findUser
 ### Программное использование
 
 ```typescript
-import { AutoRefactor, SemanticPipeline } from '@newkind/ast-analyzer';
+import { AutoRefactor, SemanticPipeline } from "@newkind/ast-analyzer";
 
 // Автоматический рефакторинг
 const refactor = new AutoRefactor({
-  modulesDir: 'modules',
+  modulesDir: "modules",
   targetClusterSize: 3,
   minCohesionScore: 60,
-  dryRun: false
+  dryRun: false,
 });
 
-const result = await refactor.refactor('./src/my-file.ts');
+const result = await refactor.refactor("./src/my-file.ts");
 
 // Семантический анализ
 const pipeline = new SemanticPipeline();
-const analysis = await pipeline.run(['./src/app.ts'], {
+const analysis = await pipeline.run(["./src/app.ts"], {
   formalVerification: true,
-  maxDepth: 5
+  maxDepth: 5,
 });
 ```
 
@@ -371,6 +371,7 @@ pnpm license:verify
 ```
 
 Этот README.md содержит:
+
 - Полную структуру монорепозитория
 - Инструкции по установке и настройке
 - Все доступные команды
@@ -379,7 +380,6 @@ pnpm license:verify
 - CI/CD информацию
 - Лицензионные требования
 - Инструкции для контрибьюторов
-
 
 □ /Directory/monorepo/tooling/eslint-config/package.json
 □ /Directory/monorepo/tooling/prettier-config/index.js
