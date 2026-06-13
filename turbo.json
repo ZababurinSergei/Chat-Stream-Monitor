@@ -2,45 +2,108 @@
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": [
     "**/.env.*local",
-    "tsconfig.json",
-    "tsconfig.base.json"
+    "tsconfig.base.json",
+    "pnpm-lock.yaml"
   ],
-  "globalEnv": ["NODE_ENV", "CI"],
+  "globalEnv": ["NODE_ENV", "CI", "TURBO_TOKEN", "TURBO_TEAM"],
   "pipeline": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", "build/**", ".next/**", "!.next/cache/**"],
+      "outputs": [
+        "dist/**",
+        "build/**",
+        ".next/**",
+        "!.next/cache/**",
+        "Directory/**/dist/**",
+        "Directory/**/build/**",
+        "packages/**/dist/**",
+        "packages/**/build/**"
+      ],
       "inputs": [
         "src/**",
+        "Directory/**/src/**",
+        "packages/**/src/**",
         "tsconfig.json",
+        "tsconfig.base.json",
         "package.json",
         "*.config.js",
-        "*.config.ts"
+        "*.config.ts",
+        "*.config.mjs"
       ],
-      "cache": true
+      "cache": true,
+      "outputMode": "full"
     },
     "test": {
       "dependsOn": ["build"],
-      "inputs": ["src/**", "test/**", "**/*.test.ts", "**/*.spec.ts"],
+      "inputs": [
+        "src/**",
+        "Directory/**/src/**",
+        "packages/**/src/**",
+        "test/**",
+        "__tests__/**",
+        "**/*.test.ts",
+        "**/*.spec.ts",
+        "**/*.test.js",
+        "**/*.spec.js"
+      ],
       "outputs": [],
-      "cache": true
+      "cache": true,
+      "outputMode": "full"
     },
     "test:coverage": {
       "dependsOn": ["build"],
-      "outputs": ["coverage/**"],
-      "cache": true
+      "outputs": [
+        "coverage/**",
+        "Directory/**/coverage/**",
+        "packages/**/coverage/**"
+      ],
+      "cache": true,
+      "outputMode": "full"
+    },
+    "test:watch": {
+      "cache": false,
+      "persistent": true
     },
     "lint": {
       "dependsOn": [],
-      "inputs": ["src/**", "*.config.js"],
+      "inputs": [
+        "src/**",
+        "Directory/**/src/**",
+        "packages/**/src/**",
+        "*.config.js",
+        "*.config.ts",
+        "*.config.mjs",
+        ".eslintrc*",
+        "eslint.config.*"
+      ],
       "outputs": [],
-      "cache": true
+      "cache": true,
+      "outputMode": "full"
+    },
+    "lint:fix": {
+      "dependsOn": [],
+      "inputs": [
+        "src/**",
+        "Directory/**/src/**",
+        "packages/**/src/**",
+        "*.config.js",
+        "*.config.ts"
+      ],
+      "outputs": [],
+      "cache": false
     },
     "type-check": {
       "dependsOn": ["^build"],
-      "inputs": ["src/**", "tsconfig.json"],
+      "inputs": [
+        "src/**",
+        "Directory/**/src/**",
+        "packages/**/src/**",
+        "tsconfig.json",
+        "tsconfig.base.json"
+      ],
       "outputs": [],
-      "cache": true
+      "cache": true,
+      "outputMode": "full"
     },
     "dev": {
       "cache": false,
@@ -50,6 +113,51 @@
       "cache": false
     },
     "build:watch": {
+      "cache": false,
+      "persistent": true
+    },
+    "format": {
+      "dependsOn": [],
+      "inputs": [
+        "src/**",
+        "Directory/**/src/**",
+        "packages/**/src/**",
+        "**/*.json",
+        "**/*.md",
+        "**/*.yaml",
+        "**/*.yml"
+      ],
+      "outputs": [],
+      "cache": false
+    },
+    "format:check": {
+      "dependsOn": [],
+      "inputs": [
+        "src/**",
+        "Directory/**/src/**",
+        "packages/**/src/**",
+        "**/*.json",
+        "**/*.md"
+      ],
+      "outputs": [],
+      "cache": true
+    },
+    "changeset": {
+      "cache": false
+    },
+    "version-packages": {
+      "cache": false,
+      "dependsOn": ["build"]
+    },
+    "release": {
+      "cache": false,
+      "dependsOn": ["build", "test", "lint", "type-check"]
+    },
+    "precommit": {
+      "cache": false,
+      "dependsOn": ["lint:fix", "format", "type-check"]
+    },
+    "//#clean": {
       "cache": false
     }
   }

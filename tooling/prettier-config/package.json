@@ -1,0 +1,60 @@
+{
+  "name": "@repo/prettier-config",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "index.js",
+  "exports": {
+    ".": {
+      "import": "./index.js",
+      "require": "./index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "index.js",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "echo \"No tests for config package\"",
+    "lint": "eslint index.js",
+    "format": "prettier --write index.js"
+  },
+  "peerDependencies": {
+    "prettier": "^3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "prettier": {
+      "optional": false
+    }
+  },
+  "devDependencies": {
+    "prettier": "^3.8.4"
+  },
+  "keywords": [
+    "prettier",
+    "config",
+    "monorepo",
+    "formatting",
+    "code-style"
+  ],
+  "author": "Забабурин Сергей <zababurins@vk.com>",
+  "license": "CSL-1.0",
+  "description": "Shared Prettier configuration for monorepo packages",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ZababurinSergei/Chat-Stream-Monitor.git",
+    "directory": "tooling/prettier-config"
+  },
+  "homepage": "https://github.com/ZababurinSergei/Chat-Stream-Monitor/tree/main/tooling/prettier-config",
+  "bugs": {
+    "url": "https://github.com/ZababurinSergei/Chat-Stream-Monitor/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
+}

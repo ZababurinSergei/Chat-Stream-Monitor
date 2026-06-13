@@ -1,0 +1,27 @@
+#!/bin/sh
+
+echo "🔍 Running pre-commit checks..."
+
+# Проверка пакетного менеджера
+if [ ! -f "pnpm-lock.yaml" ]; then
+  echo "❌ This project uses pnpm. pnpm-lock.yaml is missing!"
+  exit 1
+fi
+
+# Быстрая проверка форматирования staged файлов
+echo "📝 Checking formatting with Prettier..."
+pnpm prettier --write --cache --ignore-unknown .
+
+# Запуск ESLint только для staged файлов через lint-staged
+echo "🔍 Running ESLint on staged files..."
+pnpm lint-staged
+
+# Проверка типов TypeScript (только измененные файлы для скорости)
+echo "📊 Running TypeScript type check..."
+pnpm type-check
+
+# Проверка лицензий (опционально, можно закомментировать если мешает)
+# echo "📄 Checking license headers..."
+# pnpm license:check || true
+
+echo "✅ All pre-commit checks passed successfully!"

@@ -1,55 +1,202 @@
-# Dependency directory
-.idea
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+.pnp.loader.mjs
+
+# Testing
+coverage/
+.nyc_output/
+*.lcov
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.nuxt/
+.output/
+.vercel/
+
+# Turbo
+.turbo/
+
+# Directory packages (основное обновление)
+Directory/*/dist/
+Directory/*/build/
+Directory/*/coverage/
+Directory/*/.turbo/
+Directory/*/node_modules/
+Directory/*/out/
+
+# Specific package exclusions
+Directory/ast-analyzer/dist/
+Directory/ast-analyzer/build/
+Directory/ast-analyzer/coverage/
+Directory/ast-analyzer/.turbo/
+Directory/ast-analyzer/*.backup.*
+Directory/ast-analyzer/modules/
+
+# Packages
+packages/*/dist/
+packages/*/build/
+packages/*/coverage/
+packages/*/.turbo/
+packages/*/node_modules/
+
+# Apps (для будущих приложений)
+apps/*/dist/
+apps/*/build/
+apps/*/.next/
+apps/*/out/
+apps/*/node_modules/
+
+# Tooling
+tooling/*/node_modules/
+tooling/*/dist/
+
 # Logs
-logs
+logs/
 *.log
-/_sandbox
-_sandbox
-/_sandbox_1
 npm-debug.log*
-refactor-output
-# Runtime data
-pids
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# Environment
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+
+# Cache
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+.prettiercache
+
+# Temp files
+*.tmp
+*.temp
+*.backup.*
+*.bak
+*.orig
+
+# Misc
 *.pid
 *.seed
-.idea
-*.ssh
-madge
-*.ppk
-v8-compile-cache-0/
-Thumbs.db
-./__Directory
-Directory
-Directory/**
-**/Directory/**
-fs
-# node-waf configuration
-.lock-wscript
+*.pid.lock
+*.tgz
+*.tar.gz
+*.rar
 
-# Compiled binary addons (http://nodejs.org/api/addons.html)
-bin
-# Personal Scripts
-*.ssh
-package-lock.json
-# Editors
-.vscode
-yarn.lock
-# Build Files
-temp
-*.map
-*.bc
-*.out
-node_modules
-**/node_modules/**
-declaration
-/declaration
-**/declaration
-**/bundle
-/bundle
-/dist
-./dist
-**/dist
-./_sandbox
-./_sandbox_1
-**/index.bundle.mjs/**
-**/index.bundle.mjs.map/**
+# TypeScript
+*.tsbuildinfo
+
+# ESLint
+.eslintcache
+
+# Prettier
+.prettiercache
+
+# Jest / Vitest
+coverage/
+
+# GitHub
+.github/
+
+# License reports (если генерируются)
+license-report/
+third-party-licenses/
+
+# Build tools
+.cache-loader/
+.swc/
+
+# System files
+.directory
+.dirstamp
+
+# Проект-специфичные (из текущего проекта)
+fs/fs.json
+fs/*.json
+fs/*.svg
+fs/*.dot
+
+# Отчеты
+scan_report.log
+verification-reports/
+cicd-reports/
+semantic-reports/
+
+# Документация (если генерируется)
+docs/api/
+docs/generated/
+
+# User directories (исключаем из контроля версий)
+Directory/10/
+Directory/11/
+Directory/12/
+Directory/13/
+Directory/typescript-sdk/
+Directory/*/__pycache__/
+Directory/*/.cache/
+
+# Temporary test files (временные файлы тестов)
+**/__tests__/fixtures/temp/
+**/test-temp-*/
+test-temp-*/
+
+# Lock files (если нужно исключить - обычно включают, но оставлю на выбор)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# Turbo remote cache
+.vercel/turbo
+
+# Output files from ast-analyzer modes
+ai-context.txt
+ai-prompt-bundle.md
+ai-split-module-prompt.md
+ai-project-context.md
+ai-dead-code-report.md
+ai-impact-report.md
+module-analysis.json
+internal-graph.json
+vue-analysis.json
+output.json
+output.dot
+output.svg
+report.html
+
+# Modules extracted by refactor
+**/modules/
+**/modules/**/*.js
+**/modules/**/*.ts
+
+# TypeScript validator backups
+**/*.backup.*.ts
+**/*.backup.*.js

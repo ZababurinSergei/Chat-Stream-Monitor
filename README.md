@@ -1,318 +1,386 @@
-# File System Scanner
+# 🚀 Chat Stream Monitor Monorepo
 
-## 📋 Описание
+[![License](https://img.shields.io/badge/license-CSL--1.0-blue.svg)](LICENSE)
+[![Node Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen)](https://nodejs.org/)
+[![pnpm Version](https://img.shields.io/badge/pnpm-%3E%3D8.0.0-orange)](https://pnpm.io/)
+[![Turbo](https://img.shields.io/badge/Turbo-2.9.18-00B4D8)](https://turbo.build/)
 
-Инструмент для сканирования файловой системы с поддержкой конфигурации, исключения директорий, сохранения отчетов на русском и английском языках.
+Монорепозиторий для инструментов анализа кода, AST-анализатора и сканера файловой системы.
 
-## 🚀 Установка и запуск
+## 📋 Оглавление
+
+- [Структура](#-структура)
+- [Предварительные требования](#-предварительные-требования)
+- [Быстрый старт](#-быстрый-старт)
+- [Разработка](#-разработка)
+- [Доступные команды](#-доступные-команды)
+- [Пакеты](#-пакеты)
+- [CI/CD](#-cicd)
+- [Лицензия](#-лицензия)
+
+## 📁 Структура
+
+```
+Directory/monorepo/
+├── Directory/                      # Основные проекты
+│   ├── ast-analyzer/              # 🌟 AST Analyzer (главный инструмент)
+│   │   ├── src/                   # Исходный код
+│   │   ├── dist/                  # Сборка (gitignored)
+│   │   ├── package.json           # Конфигурация пакета
+│   │   └── README.md              # Документация
+│   ├── 10/                        # Пользовательская документация (gitignored)
+│   ├── 11/                        # Пользовательские функции (gitignored)
+│   └── 12/                        # Пользовательские файлы (gitignored)
+├── packages/                      # Публикуемые npm-пакеты
+│   └── shared-types/              # Общие TypeScript типы
+├── apps/                          # Приложения (демо, примеры использования)
+│   └── (будущие приложения)
+├── tooling/                       # Внутренние инструменты
+│   ├── eslint-config/             # Общий ESLint конфиг
+│   └── prettier-config/           # Общий Prettier конфиг
+├── scripts/                       # Скрипты автоматизации
+│   └── setup-workspace.sh         # Настройка workspace
+├── logs/                          # Логи сканирования (gitignored)
+├── fs/                            # Результаты сканирования FS (gitignored)
+├── .husky/                        # Git hooks
+├── pnpm-workspace.yaml            # Конфигурация pnpm workspace
+├── turbo.json                     # Конфигурация Turborepo
+├── tsconfig.base.json             # Базовая TypeScript конфигурация
+├── package.json                   # Корневой package.json
+└── README.md                      # Этот файл
+```
+
+## 📦 Предварительные требования
+
+- **Node.js** >= 18.0.0
+- **pnpm** >= 8.0.0
+- **Git** >= 2.30.0
+
+### Установка pnpm (если не установлен)
 
 ```bash
-# Установка зависимостей (не требуются, используются только встроенные модули Node.js)
-npm install
+# npm
+npm install -g pnpm
 
-# Запуск сканирования
-npm run scan
+# или через curl
+curl -fsSL https://get.pnpm.io/install.sh | sh -
 
-# Генерация конфигурации по умолчанию
-npm run config
+# или через homebrew (macOS)
+brew install pnpm
 ```
 
-## ⚙️ Полная конфигурация config.json
+## 🚀 Быстрый старт
 
-```json
-{
-  "directories": [
-    {
-      "id": "10",
-      "name": "Directory/10",
-      "description": "Пользовательская документация: проектные описания, инструкции, чек-листы",
-      "description_en": "User documentation: project descriptions, instructions, checklists",
-      "required": false,
-      "excluded": false
-    }
-  ],
-  "scanOptions": {
-    "recursive": true,
-    "followSymlinks": false,
-    "maxDepth": 100,
-    "excludeExcludedDirs": true
-  },
-  "output": {
-    "fileName": "fs.json",
-    "prettyPrint": true,
-    "includeMetadata": true
-  },
-  "report": {
-    "enabled": true,
-    "path": "scan_report.log",
-    "append": false,
-    "includeTimestamp": true,
-    "includeSystemInfo": true,
-    "language": "russian"
-  },
-  "supportedExtensions": [
-    ".js", ".mjs", ".html", ".css", ".json", ".md", ".txt",
-    ".jsx", ".ts", ".tsx", ".vue", ".py", ".java", ".go", ".c", ".h"
-  ],
-  "specialFiles": ["Dockerfile", "Makefile", ".gitmodules", ".env"],
-  "descriptions": {
-    "10": "Пользовательская документация",
-    "11": "Пользовательские функции",
-    "12": "Пользовательские файлы"
-  },
-  "descriptions_en": {
-    "10": "User documentation",
-    "11": "User functions",
-    "12": "User files"
-  }
-}
+### 1. Клонирование репозитория
+
+```bash
+git clone https://github.com/ZababurinSergei/Chat-Stream-Monitor.git
+cd Chat-Stream-Monitor/Directory/monorepo
 ```
 
-## 📖 Параметры конфигурации
+### 2. Настройка workspace
 
-### 1. `directories` - Список директорий для сканирования
+```bash
+# Автоматическая настройка (рекомендуется)
+./scripts/setup-workspace.sh
 
-| Параметр | Тип | Описание | Пример |
-|----------|-----|----------|--------|
-| `id` | string | Уникальный идентификатор директории | `"10"` |
-| `name` | string | Путь к директории относительно корня проекта | `"Directory/10"` |
-| `description` | string | Описание директории на русском языке | `"Пользовательская документация"` |
-| `description_en` | string | Описание директории на английском языке (опционально) | `"User documentation"` |
-| `required` | boolean | Обязательна ли директория (если true и директория отсутствует - ошибка) | `false` |
-| `excluded` | boolean | Исключить директорию из сканирования | `false` |
-
-### 2. `scanOptions` - Настройки сканирования
-
-| Параметр | Тип | Описание | Значение по умолчанию |
-|----------|-----|----------|---------------------|
-| `recursive` | boolean | Рекурсивное сканирование поддиректорий | `true` |
-| `followSymlinks` | boolean | Следовать символическим ссылкам | `false` |
-| `maxDepth` | number | Максимальная глубина рекурсии | `100` |
-| `excludeExcludedDirs` | boolean | Исключать директории с параметром `excluded: true` | `true` |
-
-### 3. `output` - Настройки вывода JSON файла
-
-| Параметр | Тип | Описание | Значение по умолчанию |
-|----------|-----|----------|---------------------|
-| `fileName` | string | Имя выходного JSON файла | `"fs.json"` |
-| `prettyPrint` | boolean | Форматировать JSON с отступами | `true` |
-| `includeMetadata` | boolean | Включать метаданные (дата сканирования, версия и т.д.) | `true` |
-
-### 4. `report` - Настройки отчета сканирования
-
-| Параметр | Тип | Описание | Значение по умолчанию |
-|----------|-----|----------|---------------------|
-| `enabled` | boolean | Включить сохранение отчета в файл | `true` |
-| `path` | string | Путь к файлу отчета | `"scan_report.log"` |
-| `append` | boolean | Добавлять к существующему файлу (true) или перезаписывать (false) | `false` |
-| `includeTimestamp` | boolean | Включать дату и время в отчет | `true` |
-| `includeSystemInfo` | boolean | Включать информацию о системе (Node.js версия, платформа и т.д.) | `true` |
-| `language` | string | Язык отчета (`"russian"` или `"english"`) | `"russian"` |
-
-### 5. `supportedExtensions` - Поддерживаемые расширения файлов
-
-Массив строк с расширениями файлов, которые будут обработаны. Файлы с другими расширениями будут пропущены.
-
-**Пример:**
-```json
-["js", ".mjs", ".html", ".css", ".json", ".md", ".txt", ".jsx", ".ts", ".tsx"]
+# Или вручную
+pnpm install
+pnpm build
 ```
 
-### 6. `specialFiles` - Специальные файлы без расширения
+### 3. Проверка работоспособности
 
-Массив имен файлов без расширения, которые всегда обрабатываются.
+```bash
+# Запустить все тесты
+pnpm test
 
-**Пример:**
-```json
-["Dockerfile", "Makefile", ".gitmodules", ".env", ".gitignore"]
+# Проверить типы
+pnpm type-check
+
+# Запустить линтер
+pnpm lint
 ```
 
-### 7. `descriptions` - Описания директорий на русском языке
+## 🔧 Разработка
 
-Объект с описаниями директорий по их именам.
+### Режим разработки
 
-**Пример:**
-```json
-{
-  "10": "Пользовательская документация",
-  "11": "Пользовательские функции",
-  "12": "Пользовательские файлы"
-}
+```bash
+# Запустить все пакеты в режиме разработки
+pnpm dev
+
+# Запустить конкретный пакет
+pnpm turbo dev --filter=@newkind/ast-analyzer
 ```
 
-### 8. `descriptions_en` - Описания директорий на английском языке
+### Сборка
 
-Объект с описаниями директорий на английском языке (используется при `language: "english"`).
+```bash
+# Собрать все пакеты
+pnpm build
 
-**Пример:**
-```json
-{
-  "10": "User documentation",
-  "11": "User functions", 
-  "12": "User files"
-}
+# Собрать конкретный пакет
+pnpm turbo build --filter=@newkind/ast-analyzer
+
+# Сборка в watch режиме
+pnpm turbo build:watch
 ```
 
-## 🎯 Примеры использования
+### Тестирование
 
-### Пример 1: Только русский язык, исключить директории 11 и 12
+```bash
+# Запустить все тесты
+pnpm test
 
-```json
-{
-  "directories": [
-    {"id": "10", "name": "Directory/10", "excluded": false},
-    {"id": "11", "name": "Directory/11", "excluded": true},
-    {"id": "12", "name": "Directory/12", "excluded": true}
-  ],
-  "report": {
-    "enabled": true,
-    "language": "russian"
-  }
-}
+# Запустить тесты с покрытием
+pnpm test:coverage
+
+# Запустить тесты конкретного пакета
+pnpm turbo test --filter=@newkind/ast-analyzer
 ```
 
-### Пример 2: Английский язык, добавлять к существующему отчету
+### Линтинг и форматирование
 
-```json
-{
-  "report": {
-    "enabled": true,
-    "language": "english",
-    "append": true,
-    "path": "logs/scan.log"
-  }
-}
+```bash
+# Проверить линтинг
+pnpm lint
+
+# Автоматически исправить проблемы
+pnpm lint:fix
+
+# Проверить форматирование
+pnpm format:check
+
+# Отформатировать код
+pnpm format
 ```
 
-### Пример 3: Отключить сохранение отчета
+### TypeScript проверка
 
-```json
-{
-  "report": {
-    "enabled": false
-  }
-}
+```bash
+# Проверить типы во всех пакетах
+pnpm type-check
+
+# Проверить типы в конкретном пакете
+pnpm turbo type-check --filter=@newkind/ast-analyzer
 ```
 
-### Пример 4: Только определенные расширения файлов
+### Очистка
 
-```json
-{
-  "supportedExtensions": [".js", ".json", ".md"],
-  "specialFiles": ["Dockerfile"]
-}
+```bash
+# Очистить все билды и зависимости
+pnpm clean
 ```
 
-### Пример 5: Без рекурсивного сканирования
-
-```json
-{
-  "scanOptions": {
-    "recursive": false,
-    "maxDepth": 1
-  }
-}
-```
-
-## 📊 Выходные файлы
-
-### 1. `fs.json` - Полная структура файловой системы
-
-Содержит полную информацию о всех отсканированных файлах и директориях.
-
-### 2. `scan_report.log` - Отчет сканирования
-
-Пример отчета на русском языке:
-```
-========================================
-ОТЧЕТ СКАНИРОВАНИЯ ФАЙЛОВОЙ СИСТЕМЫ
-Дата: 07.06.2026, 10:30:45
-========================================
-
-СИСТЕМНАЯ ИНФОРМАЦИЯ:
-  Node.js версия: v26.2.0
-  Платформа: linux
-  Архитектура: x64
-  Рабочая директория: /home/user/project
-
-СТАТИСТИКА СКАНИРОВАНИЯ:
-  📁 Всего директорий в конфигурации: 3
-  🚫 Исключено из сканирования: 2
-  ✅ Успешно отсканировано: 1
-  ⚠️  Отсутствует (с предупреждением): 0
-  ❌ Ошибок: 0
-
-ИСКЛЮЧЕННЫЕ ДИРЕКТОРИИ:
-  🚫 Directory/11 - Пользовательские функции
-  🚫 Directory/12 - Пользовательские файлы
-
-УСПЕШНО ОТСКАНИРОВАННЫЕ ДИРЕКТОРИИ:
-  ✅ Directory/10 - Пользовательская документация
-     Файлов: 5
-
-========================================
-КОНЕЦ ОТЧЕТА
-========================================
-```
-
-## 🔧 Управление исключенными директориями
-
-### Включить/исключить директорию:
-
-```json
-{
-  "directories": [
-    {
-      "id": "10",
-      "name": "Directory/10",
-      "excluded": false,  // ✅ Будет сканироваться
-      "required": false
-    },
-    {
-      "id": "11", 
-      "name": "Directory/11",
-      "excluded": true,   // 🚫 Будет исключена
-      "required": false
-    }
-  ]
-}
-```
-
-### Временно отключить фильтрацию исключенных директорий:
-
-```json
-{
-  "scanOptions": {
-    "excludeExcludedDirs": false  // Будут сканироваться даже excluded: true
-  }
-}
-```
-
-## 📝 Команды
+## 📝 Доступные команды
 
 | Команда | Описание |
 |---------|----------|
-| `npm run scan` | Запустить сканирование |
-| `npm run config` | Сгенерировать конфигурацию по умолчанию |
-| `npm run generate` | Альтернативный запуск сканирования |
+| `pnpm dev` | Запуск в режиме разработки |
+| `pnpm build` | Сборка всех пакетов |
+| `pnpm test` | Запуск всех тестов |
+| `pnpm test:coverage` | Запуск тестов с покрытием |
+| `pnpm lint` | Проверка линтинга |
+| `pnpm lint:fix` | Исправление проблем линтинга |
+| `pnpm type-check` | Проверка TypeScript типов |
+| `pnpm format` | Форматирование кода |
+| `pnpm format:check` | Проверка форматирования |
+| `pnpm clean` | Очистка билдов и зависимостей |
+| `pnpm changeset` | Создание changeset для релиза |
+| `pnpm version-packages` | Обновление версий пакетов |
+| `pnpm release` | Публикация пакетов |
 
-## 🐛 Устранение проблем с кодировкой
+## 📦 Пакеты
 
-Если русские символы отображаются некорректно при копировании из терминала:
+### Production пакеты
 
-```bash
-# Сохранить вывод в файл с UTF-8
-npm run scan > scan_result.txt 2>&1
+| Пакет | Версия | Описание |
+|-------|--------|----------|
+| `@newkind/ast-analyzer` | 3.0.0 | AST анализ, рефакторинг и семантическая верификация |
+| `@newkind/shared-types` | 0.0.1 | Общие TypeScript типы |
 
-# Или использовать tee
-npm run scan 2>&1 | tee scan.log
+### Internal tooling
+
+| Пакет | Описание |
+|-------|----------|
+| `@repo/eslint-config` | Общая ESLint конфигурация |
+| `@repo/prettier-config` | Общая Prettier конфигурация |
+
+### Использование пакетов
+
+```typescript
+// Импорт из ast-analyzer
+import { AutoRefactor, analyzeVueComponent } from '@newkind/ast-analyzer';
+
+// Импорт общих типов
+import type { FileNode, Config } from '@newkind/shared-types';
 ```
 
-## 📄 Лицензия
+## 🔄 CI/CD
 
-CSL-1.0 (Custom Source License) - использование только в некоммерческих целях.
+### GitHub Actions
 
-## 👤 Автор
+Проект настроен на автоматическую проверку при каждом push и pull request:
 
-Забабурин Сергей <zababurins@vk.com>
+- ✅ Линтинг кода
+- ✅ Проверка типов TypeScript
+- ✅ Запуск тестов
+- ✅ Сборка всех пакетов
+- ✅ Проверка лицензий
 
+### Pre-commit хуки (Husky)
+
+Автоматически запускаются перед каждым коммитом:
+
+```bash
+# Форматирование staged файлов
+pnpm lint-staged
+
+# Проверка типов
+pnpm type-check
+```
+
+### Changesets для управления версиями
+
+```bash
+# Создать changeset
+pnpm changeset
+
+# Обновить версии пакетов
+pnpm version-packages
+
+# Опубликовать релиз
+pnpm release
+```
+
+## 🎯 Использование AST Analyzer
+
+### CLI команды
+
+```bash
+# Анализ зависимостей проекта
+pnpm ast-analyzer project ./src/index.ts 3
+
+# Анализ внутреннего графа файла
+pnpm ast-analyzer file ./src/component.ts
+
+# Автоматический рефакторинг с выделением модулей
+pnpm ast-refactor refactor ./src/huge-file.js -t 3 -c 60
+
+# Анализ Vue компонента
+pnpm ast-analyzer vue-analyze ./src/App.vue
+
+# Поиск мертвого кода
+pnpm ast-analyzer dead-code ./src/legacy.js
+
+# Анализ зоны влияния изменений
+pnpm ast-analyzer impact ./src/db.ts findUser
+```
+
+### Программное использование
+
+```typescript
+import { AutoRefactor, SemanticPipeline } from '@newkind/ast-analyzer';
+
+// Автоматический рефакторинг
+const refactor = new AutoRefactor({
+  modulesDir: 'modules',
+  targetClusterSize: 3,
+  minCohesionScore: 60,
+  dryRun: false
+});
+
+const result = await refactor.refactor('./src/my-file.ts');
+
+// Семантический анализ
+const pipeline = new SemanticPipeline();
+const analysis = await pipeline.run(['./src/app.ts'], {
+  formalVerification: true,
+  maxDepth: 5
+});
+```
+
+## 📄 Сканирование файловой системы
+
+### Генерация конфигурации
+
+```bash
+pnpm config
+```
+
+### Запуск сканирования
+
+```bash
+pnpm start
+# или
+pnpm scan
+```
+
+Результаты сохраняются в `fs/fs.json`, отчет в `logs/scan_report.log`.
+
+## 🔒 Лицензия
+
+Этот проект использует **CSL-1.0 (Custom Source License)**:
+
+- ✅ Некоммерческое использование разрешено
+- ✅ Изменения только через Pull Request
+- ❌ Коммерческое использование ТОЛЬКО с письменного разрешения автора
+
+Полный текст лицензии: [LICENSE](./LICENSE)
+
+### Проверка лицензий
+
+```bash
+# Добавить лицензионные заголовки
+pnpm license:add
+
+# Проверить неавторизованные изменения
+pnpm license:check
+
+# Полная верификация
+pnpm license:verify
+```
+
+## 🤝 Контрибьютинг
+
+1. Форкните репозиторий
+2. Создайте ветку для изменений (`git checkout -b feature/amazing-feature`)
+3. Внесите изменения (только через Pull Request!)
+4. Запустите проверки (`pnpm lint && pnpm test && pnpm type-check`)
+5. Создайте Pull Request в ветку `main`
+
+## 📞 Контакты
+
+- **Автор:** Забабурин Сергей
+- **Email:** zababurins@vk.com
+- **GitHub:** [ZababurinSergei](https://github.com/ZababurinSergei)
+
+## 🙏 Благодарности
+
+- [Turborepo](https://turbo.build/) - высокопроизводительная система сборки
+- [pnpm](https://pnpm.io/) - быстрый и эффективный менеджер пакетов
+- [Changesets](https://github.com/changesets/changesets) - управление версиями
+- [Vitest](https://vitest.dev/) - современный фреймворк для тестирования
+
+---
+
+<div align="center">
+  <sub>Built with ❤️ by Zababurin Sergei</sub>
+</div>
+```
+
+Этот README.md содержит:
+- Полную структуру монорепозитория
+- Инструкции по установке и настройке
+- Все доступные команды
+- Информацию о пакетах
+- Примеры использования AST Analyzer
+- CI/CD информацию
+- Лицензионные требования
+- Инструкции для контрибьюторов
+
+
+□ /Directory/monorepo/tooling/eslint-config/package.json
+□ /Directory/monorepo/tooling/prettier-config/index.js
+□ /Directory/monorepo/tooling/prettier-config/package.json

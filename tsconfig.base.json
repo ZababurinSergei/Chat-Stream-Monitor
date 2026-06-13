@@ -1,0 +1,158 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM"],
+    "jsx": "preserve",
+
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "removeComments": false,
+    "noEmit": false,
+
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": true,
+    "noFallthroughCasesInSwitch": true,
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
+
+    "allowJs": true,
+    "checkJs": false,
+
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    "baseUrl": ".",
+    "paths": {
+      "@newkind/ast-analyzer": ["./Directory/ast-analyzer/src/index.ts"],
+      "@newkind/ast-analyzer/*": ["./Directory/ast-analyzer/src/*"],
+      "@newkind/ast-analyzer/cli": ["./Directory/ast-analyzer/src/cli.ts"],
+      "@newkind/ast-analyzer/refactor": [
+        "./Directory/ast-analyzer/src/refactor/index.ts"
+      ],
+      "@newkind/ast-analyzer/semantic": [
+        "./Directory/ast-analyzer/src/semantic/index.ts"
+      ],
+      "@newkind/ast-analyzer/formal": [
+        "./Directory/ast-analyzer/src/formal/index.ts"
+      ],
+
+      "@newkind/shared-types": ["./packages/shared-types/src/index.ts"],
+      "@newkind/shared-types/*": ["./packages/shared-types/src/*"],
+
+      "@repo/eslint-config": ["./tooling/eslint-config/index.js"],
+      "@repo/prettier-config": ["./tooling/prettier-config/index.js"],
+      "@repo/typescript-config": ["./tooling/typescript-config/base.json"],
+
+      "@/*": ["./*/src/*"],
+      "@directory/*": ["./Directory/*/src/*"],
+      "@packages/*": ["./packages/*/src/*"]
+    },
+
+    "types": ["node", "vitest/globals"],
+
+    "moduleDetection": "force",
+    "isolatedModules": true,
+    "verbatimModuleSyntax": false,
+
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo"
+  },
+
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "coverage",
+    ".turbo",
+    ".next",
+    "out",
+
+    "**/__tests__/fixtures",
+    "**/__tests__/temp",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/*.test.tsx",
+    "**/*.spec.tsx",
+
+    "Directory/10",
+    "Directory/11",
+    "Directory/12",
+    "Directory/13",
+    "Directory/typescript-sdk",
+
+    "Directory/*/dist",
+    "Directory/*/build",
+    "Directory/*/coverage",
+    "Directory/*/node_modules",
+    "Directory/*/.turbo",
+    "Directory/*/modules",
+
+    "packages/*/dist",
+    "packages/*/build",
+    "packages/*/coverage",
+    "packages/*/node_modules",
+
+    "apps/*/dist",
+    "apps/*/build",
+    "apps/*/.next",
+    "apps/*/out",
+    "apps/*/node_modules",
+
+    "tooling/*/node_modules",
+
+    "**/*.backup.*",
+    "**/*.tmp",
+    "**/*.swp"
+  ],
+
+  "include": [
+    "Directory/*/src/**/*.ts",
+    "Directory/*/src/**/*.tsx",
+    "Directory/*/src/**/*.js",
+    "Directory/*/src/**/*.jsx",
+    "Directory/*/src/**/*.vue",
+    "Directory/*/src/**/*.mjs",
+    "Directory/*/src/**/*.cjs",
+
+    "packages/*/src/**/*.ts",
+    "packages/*/src/**/*.tsx",
+    "packages/*/src/**/*.js",
+    "packages/*/src/**/*.jsx",
+
+    "apps/*/src/**/*.ts",
+    "apps/*/src/**/*.tsx",
+    "apps/*/src/**/*.js",
+    "apps/*/src/**/*.jsx",
+
+    "tooling/*/**/*.ts",
+    "tooling/*/**/*.js",
+
+    "*.ts",
+    "*.js",
+    "*.mjs",
+    "*.cjs",
+
+    "*.d.ts"
+  ],
+
+  "compileOnSave": false,
+  "typesAcquisition": {
+    "enable": false
+  }
+}
