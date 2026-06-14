@@ -15,24 +15,12 @@
     "resolveJsonModule": true,
     "isolatedModules": false,
     "noEmit": true,
-    "types": [
-      "node"
-    ],
+    "types": ["node"],
     "typeRoots": [
       "/home/sergei/Desktop/system/packages/ast-analyzer/node_modules/@types",
       "/home/sergei/Desktop/system/packages/ast-analyzer/node_modules/@types/node"
     ]
   },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.js",
-    "**/*.jsx"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "build",
-    "coverage"
-  ]
+  "include": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"],
+  "exclude": ["node_modules", "dist", "build", "coverage"]
 }

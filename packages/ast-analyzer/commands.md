@@ -95,70 +95,58 @@ node "$CLI_JS" vue-analyze "$VUE_FILE" -o "$OUTPUT_DIR"
 ## 🔧 Режимы CLI-Refactor.js {#режимы-cli-refactorjs}
 
 # Базовая команда анализа
+
 ```bash
 node "$CLI_REFACTOR" analyze "$TARGET_FILE"
 ```
 
 # С пользовательскими параметрами кластеризации
+
 ```bash
 node "$CLI_REFACTOR" analyze "$TARGET_FILE" -t 2 -c 20
 ```
 
 # Полный анализ со всеми анализаторами (по умолчанию)
+
 ```bash
 node "$CLI_REFACTOR" analyze "$TARGET_FILE" -t 2 -c 20 -v
 ```
 
 # Анализ с формальной верификацией
+
 ```bash
 node "$CLI_REFACTOR" analyze "$TARGET_FILE" -t 2 -c 20 --formal
 ```
 
 # Анализ с отключением некоторых анализаторов для ускорения
+
 ```bash
 node "$CLI_REFACTOR" analyze "$TARGET_FILE" --no-cfg --no-dataflow --no-jsx
 ```
 
 # Анализ TypeScript файла с проверкой типов
+
 ```bash
 node "$CLI_REFACTOR" analyze "$TARGET_FILE" --no-typescript false
 ```
 
 # Анализ Vue файла
+
 ```bash
 node "$CLI_REFACTOR" analyze "$TARGET_FILE" --no-vue false
 ```
 
 # Полный анализ с сохранением отчета
+
 ```bash
 node "$CLI_REFACTOR" analyze "$TARGET_FILE" -t 2 -c 20 --formal -v
 ```
 
 # Сохранение результата в файл
+
 ```bash
 node "$CLI_REFACTOR" analyze "$TARGET_FILE" -t 2 -c 20 > "$OUTPUT_DIR/analysis-report.txt"
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ### 2.2 refactor --dry-run - пробный рефакторинг
 
