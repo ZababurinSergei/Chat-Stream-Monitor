@@ -26,14 +26,15 @@ export class TypeScriptValidator {
   private fixHistory: Map<string, string[]> = new Map();
 
   constructor(tsConfigPath?: string) {
+    // Настраиваем Project с правильными типами для Node.js
     this.project = new Project({
       compilerOptions: {
-        target: 99,
-        module: 99,
-        moduleResolution: 99,
+        target: 99, // ESNext
+        module: 99, // ESNext
+        moduleResolution: 99, // NodeNext
         allowJs: true,
-        checkJs: true,
-        jsx: 2,
+        checkJs: true, // Включаем проверку JS файлов
+        jsx: 2, // JSX support
         strict: false,
         noImplicitAny: false,
         strictNullChecks: false,
@@ -48,13 +49,139 @@ export class TypeScriptValidator {
         resolveJsonModule: true,
         isolatedModules: false,
         noEmit: true,
+        // Добавляем типы Node.js
+        types: ['node'],
+        typeRoots: [
+          path.resolve(process.cwd(), 'node_modules/@types'),
+          path.resolve(process.cwd(), 'node_modules/@types/node'),
+        ],
       },
       useInMemoryFileSystem: false,
     });
 
+    // Добавляем глобальные декларации для Node.js модулей
+    this.addGlobalDeclarations();
+
     if (tsConfigPath && fs.existsSync(tsConfigPath)) {
       this.project.addSourceFileAtPath(tsConfigPath);
     }
+  }
+
+  /**
+   * Добавляет глобальные декларации для Node.js модулей
+   */
+  private addGlobalDeclarations(): void {
+    const declarationFile = this.project.createSourceFile(
+      '__node_globals.d.ts',
+      `
+// Node.js global declarations
+declare module 'fs' {
+  export * from 'fs';
+  export default fs;
+}
+
+declare module 'fs/promises' {
+  export * from 'fs/promises';
+  export default fsPromises;
+}
+
+declare module 'path' {
+  export * from 'path';
+  export default path;
+}
+
+declare module 'url' {
+  export * from 'url';
+  export default url;
+}
+
+declare module 'process' {
+  export * from 'process';
+  export default process;
+}
+
+declare module 'util' {
+  export * from 'util';
+  export default util;
+}
+
+declare module 'crypto' {
+  export * from 'crypto';
+  export default crypto;
+}
+
+declare module 'stream' {
+  export * from 'stream';
+  export default stream;
+}
+
+declare module 'events' {
+  export * from 'events';
+  export default events;
+}
+
+declare module 'child_process' {
+  export * from 'child_process';
+  export default child_process;
+}
+
+declare module 'os' {
+  export * from 'os';
+  export default os;
+}
+
+declare module 'http' {
+  export * from 'http';
+  export default http;
+}
+
+declare module 'https' {
+  export * from 'https';
+  export default https;
+}
+
+declare module 'zlib' {
+  export * from 'zlib';
+  export default zlib;
+}
+
+declare module 'assert' {
+  export * from 'assert';
+  export default assert;
+}
+
+declare module 'buffer' {
+  export * from 'buffer';
+  export default buffer;
+}
+
+declare module 'tty' {
+  export * from 'tty';
+  export default tty;
+}
+
+declare module 'readline' {
+  export * from 'readline';
+  export default readline;
+}
+
+declare module 'string_decoder' {
+  export * from 'string_decoder';
+  export default string_decoder;
+}
+
+// Global variables
+declare const process: NodeJS.Process;
+declare const __dirname: string;
+declare const __filename: string;
+declare const require: NodeJS.Require;
+declare const module: NodeJS.Module;
+declare const exports: any;
+`,
+      { overwrite: true }
+    );
+
+    declarationFile.saveSync();
   }
 
   private loadFile(filePath: string): SourceFile | undefined {
@@ -122,6 +249,9 @@ export class TypeScriptValidator {
         const message = this.getDiagnosticMessage(diag);
         const code = diag.getCode();
 
+        // Игнорируем deprecated опции (они не влияют на код)
+        if (code === 5107 || code === 5110) continue;
+
         issues.push({
           type: 'error',
           severity: 7,
@@ -188,7 +318,7 @@ export class TypeScriptValidator {
    */
   private fixCannotFindName(sourceFile: SourceFile, diagnostic: Diagnostic): boolean {
     const message = this.getDiagnosticMessage(diagnostic);
-    const match = message.match(/Cannot find name ['"](\\w+)['"]/);
+    const match = message.match(/Cannot find name ['\"](\\w+)['\"]/);
     if (!match) return false;
 
     const name = match[1];
@@ -223,7 +353,7 @@ export class TypeScriptValidator {
    */
   private fixCannotFindModule(sourceFile: SourceFile, diagnostic: Diagnostic): boolean {
     const message = this.getDiagnosticMessage(diagnostic);
-    const match = message.match(/Cannot find module ['"]([^'"]+)['"]/);
+    const match = message.match(/Cannot find module ['\"]([^'\"]+)['\"]/);
     if (!match) return false;
 
     const modulePath = match[1];
@@ -277,7 +407,9 @@ export class TypeScriptValidator {
    */
   private fixMissingProperty(sourceFile: SourceFile, diagnostic: Diagnostic): boolean {
     const message = this.getDiagnosticMessage(diagnostic);
-    const match = message.match(/Property ['"](\\w+)['"] does not exist on type ['"]([^'"]+)['"]/);
+    const match = message.match(
+      /Property ['\"](\\w+)['\"] does not exist on type ['\"]([^'\"]+)['\"]/
+    );
     if (!match) return false;
 
     const property = match[1];
@@ -319,7 +451,7 @@ export class TypeScriptValidator {
    */
   private fixImplicitAny(sourceFile: SourceFile, diagnostic: Diagnostic): boolean {
     const message = this.getDiagnosticMessage(diagnostic);
-    const match = message.match(/Parameter ['"](\\w+)['"] implicitly has an 'any' type/);
+    const match = message.match(/Parameter ['\"](\\w+)['\"] implicitly has an 'any' type/);
     if (!match) return false;
 
     const paramName = match[1];
@@ -373,7 +505,7 @@ export class TypeScriptValidator {
    */
   private fixBindingImplicitAny(sourceFile: SourceFile, diagnostic: Diagnostic): boolean {
     const message = this.getDiagnosticMessage(diagnostic);
-    const match = message.match(/Binding element ['"](\\w+)['"] implicitly has an 'any' type/);
+    const match = message.match(/Binding element ['\"](\\w+)['\"] implicitly has an 'any' type/);
     if (!match) return false;
 
     const bindingName = match[1];
@@ -432,7 +564,7 @@ export class TypeScriptValidator {
    */
   private fixUnusedVariable(sourceFile: SourceFile, diagnostic: Diagnostic): boolean {
     const message = this.getDiagnosticMessage(diagnostic);
-    const match = message.match(/['"](\\w+)['"] is declared but never used/);
+    const match = message.match(/['\"](\\w+)['\"] is declared but never used/);
     if (!match) return false;
 
     const varName = match[1];
@@ -462,7 +594,6 @@ export class TypeScriptValidator {
       }
     }
 
-    // Проверяем также переменные в деструктуризации
     const bindings = sourceFile.getVariableDeclarations();
     for (const binding of bindings) {
       const name = binding.getName();
@@ -511,7 +642,7 @@ export class TypeScriptValidator {
    */
   private fixTypo(sourceFile: SourceFile, diagnostic: Diagnostic): boolean {
     const message = this.getDiagnosticMessage(diagnostic);
-    const match = message.match(/Cannot find name ['"](\\w+)['"].*Did you mean ['"](\\w+)['"]/);
+    const match = message.match(/Cannot find name ['\"](\\w+)['\"].*Did you mean ['\"](\\w+)['\"]/);
     if (!match) return false;
 
     const wrongName = match[1];
@@ -605,7 +736,7 @@ export class TypeScriptValidator {
    */
   private fixMissingTypes(sourceFile: SourceFile, diagnostic: Diagnostic): boolean {
     const message = this.getDiagnosticMessage(diagnostic);
-    const match = message.match(/Cannot find name ['"](\\w+)['"]/);
+    const match = message.match(/Cannot find name ['\"](\\w+)['\"]/);
     if (!match) return false;
 
     const name = match[1];
@@ -645,6 +776,7 @@ export class TypeScriptValidator {
     console.log('\n🔍 TypeScript ВАЛИДАЦИЯ И ИСПРАВЛЕНИЕ (ЧЕРЕЗ AST)');
     console.log('='.repeat(60));
 
+    // Загружаем все файлы
     for (const filePath of filePaths) {
       this.loadFile(filePath);
     }
@@ -664,6 +796,11 @@ export class TypeScriptValidator {
         const diagnostics = this.getDiagnostics(sourceFile);
 
         for (const diagnostic of diagnostics) {
+          const code = diagnostic.getCode();
+
+          // Пропускаем deprecated опции
+          if (code === 5107 || code === 5110) continue;
+
           const formatted = this.formatDiagnostic(diagnostic, filePath);
           if (formatted && formatted.severity === 'error') {
             iterationDiagnostics.push(formatted);
@@ -697,6 +834,9 @@ export class TypeScriptValidator {
     for (const [filePath, sourceFile] of this.sourceFiles) {
       const diagnostics = this.getDiagnostics(sourceFile);
       for (const diagnostic of diagnostics) {
+        const code = diagnostic.getCode();
+        if (code === 5107 || code === 5110) continue;
+
         const formatted = this.formatDiagnostic(diagnostic, filePath);
         if (formatted && formatted.severity === 'error') {
           finalDiagnostics.push(formatted);

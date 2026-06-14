@@ -27,6 +27,14 @@ export interface DataFlowGraph {
   findReassignedConstants(): DataFlowNode[];
   findDataDependencies(variable: string): DataFlowNode[];
   getDefinitionUsageChain(variable: string): DataFlowNode[];
+  getVariableStats(): {
+    total: number;
+    used: number;
+    unused: number;
+    constants: number;
+    reassignedConstants: number;
+  };
+  isVariableUsed(variableName: string): boolean;
 }
 
 export class DataFlowAnalyzer {
@@ -88,6 +96,8 @@ export class DataFlowAnalyzer {
       findReassignedConstants: () => this.findReassigned(),
       findDataDependencies: variable => this.findDependencies(variable),
       getDefinitionUsageChain: variable => this.getChain(variable),
+      getVariableStats: () => this.getVariableStats(),
+      isVariableUsed: (variableName: string) => this.isVariableUsed(variableName),
     };
   }
 

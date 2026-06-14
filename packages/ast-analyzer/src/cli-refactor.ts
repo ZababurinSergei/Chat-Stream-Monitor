@@ -263,18 +263,36 @@ program
   .option('-m, --max-size <number>', 'Максимальный размер кластера', '10')
   .option('-c, --min-cohesion <number>', 'Минимальная связность (%)', '60')
   .option('--formal', 'Включить формальную верификацию', false)
+  .option('--no-cfg', 'Отключить CFG анализ', false)
+  .option('--no-callgraph', 'Отключить Call Graph анализ', false)
+  .option('--no-dataflow', 'Отключить Data Flow анализ', false)
+  .option('--no-jsx', 'Отключить JSX анализ', false)
+  .option('--no-vue', 'Отключить Vue анализ', false)
+  .option('--no-typescript', 'Отключить TypeScript анализ', false)
   .option('-v, --verbose', 'Подробный вывод', false)
   .action(async (file, options) => {
-    console.log('\n' + '='.repeat(60));
+    const startTime = Date.now();
+
+    console.log('\n' + '='.repeat(70));
     console.log('🔍 АНАЛИЗ ФАЙЛА С ПОЛНЫМ PIPELINE');
-    console.log('='.repeat(60));
+    console.log('='.repeat(70));
     console.log(`\n📄 Файл: ${file}`);
+    console.log(`📅 Время: ${new Date().toLocaleString()}`);
 
     const absolutePath = path.resolve(file);
     if (!fs.existsSync(absolutePath)) {
       console.error(`\n❌ Файл не найден: ${absolutePath}`);
       process.exit(1);
     }
+
+    console.log(`\n⚙️ АКТИВНЫЕ АНАЛИЗАТОРЫ:`);
+    console.log(`   • CFG Analysis: ${!options.noCfg ? '✅' : '❌'}`);
+    console.log(`   • Call Graph Analysis: ${!options.noCallgraph ? '✅' : '❌'}`);
+    console.log(`   • Data Flow Analysis: ${!options.noDataflow ? '✅' : '❌'}`);
+    console.log(`   • TypeScript Analysis: ${!options.noTypescript ? '✅' : '❌'}`);
+    console.log(`   • JSX/TSX Analysis: ${!options.noJsx ? '✅' : '❌'}`);
+    console.log(`   • Vue Analysis: ${!options.noVue ? '✅' : '❌'}`);
+    console.log(`   • Formal Verification: ${options.formal ? '✅' : '❌'}`);
 
     try {
       const refactor = new AutoRefactor({
@@ -283,14 +301,16 @@ program
         minCohesionScore: parseInt(options.minCohesion),
         dryRun: true,
         verbose: options.verbose,
+
         semanticAnalysis: true,
         formalVerification: options.formal || false,
-        jsxAnalysis: true,
-        vueAnalysis: true,
-        dataFlowAnalysis: true,
-        callGraphAnalysis: true,
-        eslintCheck: true,
-        typeCheck: true,
+        dataFlowAnalysis: !options.noDataflow,
+        callGraphAnalysis: !options.noCallgraph,
+        jsxAnalysis: !options.noJsx,
+        vueAnalysis: !options.noVue,
+
+        eslintCheck: false,
+        typeCheck: !options.noTypescript,
         codeValidation: true,
         autoFix: false,
         fixUnusedImports: false,
@@ -299,11 +319,31 @@ program
       });
 
       await refactor.initialize();
+
+      // Сохраняем оригинальный console.log для перехвата вывода
+      const originalLog = console.log;
+      let analysisOutput = '';
+      console.log = (...args) => {
+        analysisOutput += args.join(' ') + '\n';
+        originalLog(...args);
+      };
+
       const result = await refactor.refactor(absolutePath);
+
+      // Восстанавливаем console.log
+      console.log = originalLog;
+
       await refactor.dispose();
 
+      const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+
+      console.log('\n' + '='.repeat(70));
+      console.log('📊 ИТОГОВЫЙ ОТЧЕТ АНАЛИЗА');
+      console.log('='.repeat(70));
+      console.log(`⏱️  Время выполнения: ${duration} сек`);
+
       if (result.modules.length > 0) {
-        console.log('\n📊 НАЙДЕННЫЕ КЛАСТЕРЫ:');
+        console.log(`\n📁 НАЙДЕННЫЕ КЛАСТЕРЫ (${result.modules.length}):`);
         for (let i = 0; i < result.modules.length; i++) {
           const module = result.modules[i];
           if (!module) continue;
@@ -313,29 +353,25 @@ program
             console.log(`      🔗 Зависимости: ${module.dependencies.join(', ')}`);
           }
         }
-        console.log(`\n✨ Найдено ${result.modules.length} кандидатов в модули`);
       } else {
-        console.log('\nℹ️ Не найдено кандидатов для выделения в модули');
+        console.log(`\nℹ️ Не найдено кандидатов для выделения в модули`);
       }
 
-      // Вывод семантических метрик
       if (result.metrics) {
-        console.log('\n📊 СЕМАНТИЧЕСКИЕ МЕТРИКИ:');
+        console.log(`\n📊 СЕМАНТИЧЕСКИЕ МЕТРИКИ:`);
         console.log(`   • Цикломатическая сложность: ${result.metrics.cyclomaticComplexity}`);
         console.log(`   • Всего функций: ${result.metrics.totalFunctions}`);
         console.log(`   • Неиспользуемых функций: ${result.metrics.unusedFunctionsCount}`);
         console.log(`   • Ошибок типов: ${result.metrics.typeErrorsCount}`);
+        console.log(`   • Верифицировано функций: ${result.metrics.verifiedFunctionsCount}`);
+        console.log(`   • Проблем Data Flow: ${result.metrics.dataFlowIssuesCount}`);
       }
 
-      // Вывод проблем
       if (result.semanticResults?.typeErrors && result.semanticResults.typeErrors.length > 0) {
-        console.log(`\n❌ ОШИБКИ ТИПОВ (первые 5):`);
-        for (const error of result.semanticResults.typeErrors.slice(0, 5)) {
+        console.log(`\n❌ ОШИБКИ ТИПОВ (${result.semanticResults.typeErrors.length}):`);
+        for (const error of result.semanticResults.typeErrors.slice(0, 10)) {
           console.log(`   • ${error.message}`);
           console.log(`     Expected: ${error.expected}, Got: ${error.actual}`);
-        }
-        if (result.semanticResults.typeErrors.length > 5) {
-          console.log(`   ... и ещё ${result.semanticResults.typeErrors.length - 5} ошибок`);
         }
       }
 
@@ -343,14 +379,11 @@ program
         result.semanticResults?.cyclicDependencies &&
         result.semanticResults.cyclicDependencies.length > 0
       ) {
-        console.log(`\n🔄 ЦИКЛИЧЕСКИЕ ЗАВИСИМОСТИ:`);
-        for (const cycle of result.semanticResults.cyclicDependencies.slice(0, 3)) {
+        console.log(
+          `\n🔄 ЦИКЛИЧЕСКИЕ ЗАВИСИМОСТИ (${result.semanticResults.cyclicDependencies.length}):`
+        );
+        for (const cycle of result.semanticResults.cyclicDependencies.slice(0, 5)) {
           console.log(`   • ${cycle.join(' → ')}`);
-        }
-        if (result.semanticResults.cyclicDependencies.length > 3) {
-          console.log(
-            `   ... и ещё ${result.semanticResults.cyclicDependencies.length - 3} циклов`
-          );
         }
       }
 
@@ -358,12 +391,11 @@ program
         result.semanticResults?.unusedFunctions &&
         result.semanticResults.unusedFunctions.length > 0
       ) {
-        console.log(`\n⚠️ НЕИСПОЛЬЗУЕМЫЕ ФУНКЦИИ:`);
+        console.log(
+          `\n⚠️ НЕИСПОЛЬЗУЕМЫЕ ФУНКЦИИ (${result.semanticResults.unusedFunctions.length}):`
+        );
         for (const func of result.semanticResults.unusedFunctions.slice(0, 10)) {
           console.log(`   • ${func}`);
-        }
-        if (result.semanticResults.unusedFunctions.length > 10) {
-          console.log(`   ... и ещё ${result.semanticResults.unusedFunctions.length - 10} функций`);
         }
       }
 
@@ -373,29 +405,69 @@ program
         console.log(`\n🔬 ФОРМАЛЬНАЯ ВЕРИФИКАЦИЯ:`);
         console.log(`   • Верифицировано: ${verified.length}`);
         console.log(`   • Не верифицировано: ${failed.length}`);
-        if (failed.length > 0) {
-          console.log(`\n   НЕ ВЕРИФИЦИРОВАННЫЕ ФУНКЦИИ:`);
-          for (const fail of failed.slice(0, 5)) {
-            console.log(
-              `   • ${fail.functionName || 'unknown'}${fail.counterexample ? ` (контрпример: ${JSON.stringify(Object.fromEntries(fail.counterexample))})` : ''}`
-            );
-          }
+      }
+
+      if (result.semanticResults?.jsx) {
+        const jsx = result.semanticResults.jsx;
+        console.log(`\n⚛️ JSX/TSX АНАЛИЗ:`);
+        console.log(`   • JSX элементов: ${jsx.elements.length}`);
+        console.log(`   • Компонентов: ${jsx.componentProps.size}`);
+        console.log(`   • Ошибок пропсов: ${jsx.propTypeErrors.length}`);
+      }
+
+      if (result.semanticResults?.vue) {
+        const vue = result.semanticResults.vue;
+        console.log(`\n🎯 VUE АНАЛИЗ:`);
+        console.log(`   • Props: ${vue.props.names.length}`);
+        console.log(`   • Events: ${vue.emits.names.length}`);
+        console.log(`   • Slots: ${vue.slots.length}`);
+        console.log(`   • Composables: ${vue.composables.length}`);
+      }
+
+      console.log(`\n💡 РЕКОМЕНДУЕМЫЕ ПАРАМЕТРЫ ДЛЯ РЕФАКТОРИНГА:`);
+      console.log(`   ─────────────────────────────────────────────`);
+
+      if (result.metrics) {
+        if (result.metrics.cyclomaticComplexity > 15) {
+          console.log(`   🔧 Для сложного кода (>15):`);
+          console.log(`      ast-refactor refactor ${file} -t 4 -m 12 -c 50`);
+        } else if (result.metrics.totalFunctions > 30) {
+          console.log(`   🔧 Для большого количества функций (>30):`);
+          console.log(`      ast-refactor refactor ${file} -t 3 -m 10 -c 60`);
+        } else if (result.metrics.totalFunctions < 10) {
+          console.log(`   🔧 Для небольшого файла (<10 функций):`);
+          console.log(`      ast-refactor refactor ${file} -t 2 -m 5 -c 70`);
+        } else {
+          console.log(`   🔧 Стандартные настройки:`);
+          console.log(`      ast-refactor refactor ${file} -t 3 -m 10 -c 60`);
         }
       }
 
-      if (result.modules.length > 0) {
-        console.log('\n💡 Запустите рефакторинг командой:');
-        console.log(`   ast-refactor refactor ${file}`);
-        if (options.formal) {
-          console.log(`   (с верификацией: ast-refactor refactor ${file} --formal)`);
-        }
-      } else if (
-        result.semanticResults?.typeErrors &&
-        result.semanticResults.typeErrors.length > 0
-      ) {
-        console.log('\n💡 Рекомендуется сначала исправить ошибки типов:');
-        console.log(`   ast-refactor validate ${file}`);
+      if (result.semanticResults?.typeErrors && result.semanticResults.typeErrors.length > 0) {
+        console.log(`\n   🔧 Для исправления ошибок типов:`);
+        console.log(`      ast-refactor validate ${file} --fix`);
       }
+
+      console.log(`\n✨ Анализ завершен!`);
+
+      const reportPath = path.join(process.cwd(), `analysis-report-${Date.now()}.txt`);
+      const fullReport =
+        analysisOutput +
+        '\n' +
+        '='.repeat(70) +
+        '\n' +
+        `📊 ИТОГОВЫЙ ОТЧЕТ АНАЛИЗА\n` +
+        `Файл: ${file}\n` +
+        `Время: ${new Date().toLocaleString()}\n` +
+        `Длительность: ${duration} сек\n` +
+        `Метрики: ${JSON.stringify(result.metrics, null, 2)}\n` +
+        `Кластеров: ${result.modules.length}\n` +
+        `Ошибок типов: ${result.semanticResults?.typeErrors?.length || 0}\n` +
+        `Неиспользуемых функций: ${result.semanticResults?.unusedFunctions?.length || 0}\n` +
+        `Циклических зависимостей: ${result.semanticResults?.cyclicDependencies?.length || 0}\n`;
+
+      fs.writeFileSync(reportPath, fullReport);
+      console.log(`\n📄 Полный отчет сохранен: ${reportPath}`);
     } catch (error) {
       console.error('\n❌ Ошибка анализа:', error);
       process.exit(1);

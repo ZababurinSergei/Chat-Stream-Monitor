@@ -1,6 +1,6 @@
 // packages/ast-analyzer/esbuild.config.js
 import esbuild from 'esbuild';
-import { readdirSync, existsSync, statSync } from 'fs';
+import { readdirSync, existsSync, statSync, copyFileSync, mkdirSync, writeFileSync } from 'fs';
 import { resolve, dirname, join } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -60,8 +60,137 @@ const entryPoints = findEntryPoints(srcDir);
 
 console.log(`📦 Building ${entryPoints.length} entry points...`);
 
-// Оптимизированный список external packages - оставляем только то,
-// что действительно должно оставаться внешним
+// Функция для копирования WASM файлов
+function copyWasmFiles() {
+  console.log('\n📋 Copying WASM files...');
+
+  const wasmDestDir = resolve(__dirname, 'dist/wasm');
+  if (!existsSync(wasmDestDir)) {
+    mkdirSync(wasmDestDir, { recursive: true });
+  }
+
+  let copiedCount = 0;
+
+  // 1. Копируем из tree-sitter-wasms/out
+  const tsWasmDir = resolve(process.cwd(), 'node_modules/tree-sitter-wasms/out');
+  if (existsSync(tsWasmDir)) {
+    try {
+      const files = readdirSync(tsWasmDir);
+      for (const file of files) {
+        if (file.endsWith('.wasm')) {
+          const srcPath = join(tsWasmDir, file);
+          const destPath = join(wasmDestDir, file);
+          copyFileSync(srcPath, destPath);
+          console.log(`   ✅ Copied: ${file}`);
+          copiedCount++;
+        }
+      }
+    } catch (error) {
+      console.warn(`   ⚠️ Could not copy from tree-sitter-wasms: ${error}`);
+    }
+  }
+
+  // 2. Копируем из @codeflow-map/wasm
+  const cfWasmDir = resolve(process.cwd(), 'node_modules/@codeflow-map/wasm');
+  if (existsSync(cfWasmDir)) {
+    try {
+      const files = readdirSync(cfWasmDir);
+      for (const file of files) {
+        if (file.endsWith('.wasm')) {
+          const srcPath = join(cfWasmDir, file);
+          const destPath = join(wasmDestDir, file);
+          copyFileSync(srcPath, destPath);
+          console.log(`   ✅ Copied: ${file}`);
+          copiedCount++;
+        }
+      }
+    } catch (error) {
+      console.warn(`   ⚠️ Could not copy from @codeflow-map/wasm: ${error}`);
+    }
+  }
+
+  // 3. Копируем из локальной grammars директории (если есть)
+  const localGrammarsDir = resolve(process.cwd(), 'grammars');
+  if (existsSync(localGrammarsDir)) {
+    try {
+      const files = readdirSync(localGrammarsDir);
+      for (const file of files) {
+        if (file.endsWith('.wasm')) {
+          const srcPath = join(localGrammarsDir, file);
+          const destPath = join(wasmDestDir, file);
+          copyFileSync(srcPath, destPath);
+          console.log(`   ✅ Copied from grammars: ${file}`);
+          copiedCount++;
+        }
+      }
+    } catch (error) {
+      console.warn(`   ⚠️ Could not copy from grammars: ${error}`);
+    }
+  }
+
+  // 4. Копируем из callsight-vscode (fallback)
+  const callsightGrammarsDir = resolve(process.cwd(), '../../Directory/callsight-vscode/grammars');
+  if (existsSync(callsightGrammarsDir)) {
+    try {
+      const files = readdirSync(callsightGrammarsDir);
+      for (const file of files) {
+        if (file.endsWith('.wasm')) {
+          const srcPath = join(callsightGrammarsDir, file);
+          const destPath = join(wasmDestDir, file);
+          copyFileSync(srcPath, destPath);
+          console.log(`   ✅ Copied from callsight-vscode: ${file}`);
+          copiedCount++;
+        }
+      }
+    } catch (error) {
+      console.warn(`   ⚠️ Could not copy from callsight-vscode: ${error}`);
+    }
+  }
+
+  // Создаём README с инструкцией
+  const readmePath = join(wasmDestDir, 'README.md');
+  if (!existsSync(readmePath)) {
+    const readmeContent = `# WASM Files for Tree-sitter
+
+This directory contains WebAssembly files for Tree-sitter language parsers.
+
+## Required files for JavaScript/TypeScript parsing:
+- tree-sitter-javascript.wasm
+- tree-sitter-typescript.wasm
+- tree-sitter-tsx.wasm
+
+## How to obtain WASM files:
+
+### Option 1: Install tree-sitter-wasms package
+\`\`\`bash
+pnpm add tree-sitter-wasms
+# Then copy from node_modules/tree-sitter-wasms/out/
+\`\`\`
+
+### Option 2: Copy from callsight-vscode
+\`\`\`bash
+cp ../../Directory/callsight-vscode/grammars/*.wasm ./
+\`\`\`
+
+### Option 3: Download from CDN
+\`\`\`bash
+curl -O https://unpkg.com/tree-sitter-wasms@latest/out/tree-sitter-javascript.wasm
+curl -O https://unpkg.com/tree-sitter-wasms@latest/out/tree-sitter-typescript.wasm
+curl -O https://unpkg.com/tree-sitter-wasms@latest/out/tree-sitter-tsx.wasm
+\`\`\`
+`;
+    writeFileSync(readmePath, readmeContent);
+    console.log(`   📄 Created README.md`);
+  }
+
+  console.log(`   📦 Total WASM files copied: ${copiedCount}`);
+  if (copiedCount === 0) {
+    console.log(`   ⚠️ No WASM files found! Call Graph analysis will be limited.`);
+    console.log(`   💡 Run: cp -r ../../Directory/callsight-vscode/grammars/*.wasm grammars/`);
+  }
+}
+
+// Оптимизированный список external packages
 const externalPackages = [
   // Node.js built-ins
   'fs',
@@ -84,21 +213,16 @@ const externalPackages = [
   'string_decoder',
 
   // Тяжелые зависимости с нативными модулями
-  '@hpcc-js/wasm-graphviz', // WebAssembly модуль
   'z3-solver', // Нативный бинарник Z3
 
   // Должен быть установлен отдельно пользователем
   'typescript',
 ];
 
-// Пакеты, которые можно безопасно включить в бандл (удалены из external)
-// @typescript-eslint/parser, estree-walker, @vue/compiler-sfc,
-// ts-morph, commander и другие теперь будут забандлены
-
 const buildOptions = {
   entryPoints,
-  bundle: true,
   outdir: 'dist',
+  bundle: true,
   platform: 'node',
   target: 'node18',
   format: 'esm',
@@ -114,6 +238,7 @@ const buildOptions = {
     '.js': 'js',
     '.mjs': 'js',
     '.cjs': 'js',
+    '.wasm': 'binary',
   },
   tsconfig: './tsconfig.json',
   logLevel: 'info',
@@ -152,17 +277,15 @@ const buildOptions = {
       },
     },
     {
-      name: 'remove-pnpm-lock-warning',
+      name: 'copy-wasm-after-build',
       setup(build) {
-        build.onStart(() => {
-          console.log('🚀 Starting build...');
+        build.onEnd(() => {
+          copyWasmFiles();
         });
       },
     },
   ],
 };
-
-import path from 'path';
 
 if (isProduction) {
   console.log('🏭 Production build: minifying...');
@@ -194,6 +317,23 @@ try {
       console.log(`   📄 ${file}: ${(size / 1024).toFixed(2)} KB`);
     }
   }
+
+  // Проверяем WASM файлы
+  const wasmDir = resolve(__dirname, 'dist/wasm');
+  if (existsSync(wasmDir)) {
+    const wasmFiles = readdirSync(wasmDir);
+    console.log(`\n⚙️ WASM files in dist/wasm/: ${wasmFiles.length}`);
+    for (const file of wasmFiles.slice(0, 10)) {
+      const size = statSync(resolve(wasmDir, file)).size;
+      console.log(`   📦 ${file}: ${(size / 1024).toFixed(2)} KB`);
+    }
+    if (wasmFiles.length > 10) {
+      console.log(`   ... and ${wasmFiles.length - 10} more WASM files`);
+    }
+  } else {
+    console.log(`\n⚠️ No WASM directory created (no WASM files found)`);
+  }
+
   console.log(`\n📊 Total bundle size: ${(totalSize / 1024).toFixed(2)} KB`);
 } catch (error) {
   console.error('❌ Build failed:', error);

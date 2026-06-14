@@ -1,0 +1,139 @@
+
+============================================================
+🔍 АНАЛИЗ ФАЙЛА С ПОЛНЫМ PIPELINE
+============================================================
+
+📄 Файл: /home/sergei/Desktop/system/FileSystemScanner.js
+🚀 Инициализация AutoRefactor с полным pipeline...
+✅ Все компоненты инициализированы
+
+============================================================
+🔧 АВТОМАТИЧЕСКИЙ РЕФАКТОРИНГ С ПОЛНЫМ PIPELINE
+============================================================
+📄 Целевой файл: /home/sergei/Desktop/system/FileSystemScanner.js
+📁 Выходная директория: modules
+🎯 Параметры: размер кластера=2, связность=20%
+🧠 Семантический анализ: ВКЛЮЧЕН
+🌊 Data Flow анализ: ВКЛЮЧЕН
+🕸️ Call Graph анализ: ВКЛЮЧЕН
+⚛️ JSX/TSX анализ: ВКЛЮЧЕН
+🎯 Vue анализ: ВКЛЮЧЕН
+📝 ESLint: ВКЛЮЧЕН (с автоисправлением)
+🔷 TypeScript проверка: ВКЛЮЧЕНА
+⚡ Выделение изолированных функций: ВКЛЮЧЕНО
+⚠️ РЕЖИМ DRY RUN: изменения не будут применены к файлам
+
+
+📌 СЕМАНТИЧЕСКИЙ АНАЛИЗ
+----------------------------------------
+  🔀 Анализ Control Flow Graph...
+     ⚠️ Найдено 17 недостижимых блоков
+  🕸️ Анализ Call Graph...
+  📝 Анализ типов...
+     ❌ Найдено 107 ошибок типов
+  🌊 Анализ Data Flow...
+     ⚠️ Найдено 1 неиспользуемых переменных
+     🔒 Найдено 2 переопределенных констант
+
+  📊 СТАТИСТИКА АНАЛИЗА:
+     • Функций: 0
+     • Вызовов: 0
+     • Циклов: 0
+     • Ошибок типов: 107
+     • Неиспользуемых переменных: 1
+
+📌 CODE VALIDATION
+----------------------------------------
+  🔍 Запуск валидации кода...
+
+🔍 ЗАПУСК ПОЛНОЙ ПРОВЕРКИ КОДА
+============================================================
+
+📄 Проверка: FileSystemScanner.js
+
+📊 ИТОГИ ПРОВЕРКИ:
+   ❌ Ошибок: 1
+   ⚠️  Предупреждений: 0
+   ℹ️  Замечаний: 2
+   🔧 Автоисправимых: 0
+   ⏱️  Время: 0.40 сек
+     ❌ Ошибок: 1
+     ⚠️ Предупреждений: 0
+     🔧 Автоисправимых: 0
+
+📌 ESLint АНАЛИЗ И ИСПРАВЛЕНИЕ
+----------------------------------------
+  📝 Запуск ESLint анализа...
+
+🔧 Исправление ESLint ошибок в FileSystemScanner.js
+✅ FileSystemScanner.js: исправлено 0 проблем
+
+📊 ВСЕГО ИСПРАВЛЕНО: 0 проблем
+     ✅ Исправлено файлов: 0
+     🔧 Всего исправлений: 0
+
+📌 TYPESCRIPT ВАЛИДАЦИЯ И ИСПРАВЛЕНИЕ
+----------------------------------------
+  🔷 Запуск TypeScript валидации...
+
+🔍 TypeScript ВАЛИДАЦИЯ И ИСПРАВЛЕНИЕ (ЧЕРЕЗ AST)
+============================================================
+
+🔄 ИТЕРАЦИЯ 1/5
+----------------------------------------
+   📊 Ошибок: 9, Исправлено: 0
+
+⚠️ Остались ошибки, но они не могут быть исправлены автоматически
+
+📊 ФИНАЛЬНЫЙ ОТЧЁТ
+============================================================
+   ✅ Исправлено всего: 0
+   ❌ Осталось ошибок: 9
+
+   ОСТАВШИЕСЯ ОШИБКИ:
+   📄 FileSystemScanner.js:1 - TS5107: Option 'alwaysStrict=false' is deprecated and will stop functioning in TypeScrip
+   📄 FileSystemScanner.js:1 - TS5110: Option 'module' must be set to 'NodeNext' when option 'moduleResolution' is set 
+   📄 FileSystemScanner.js:2 - TS2591: Cannot find name 'fs'. Do you need to install type definitions for node? Try `np
+   📄 FileSystemScanner.js:3 - TS2591: Cannot find name 'path'. Do you need to install type definitions for node? Try `
+   📄 FileSystemScanner.js:4 - TS2591: Cannot find name 'url'. Do you need to install type definitions for node? Try `n
+   📄 FileSystemScanner.js:600 - TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Tr
+   📄 FileSystemScanner.js:601 - TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Tr
+   📄 FileSystemScanner.js:602 - TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Tr
+   📄 FileSystemScanner.js:603 - TS2591: Cannot find name 'process'. Do you need to install type definitions for node? Tr
+     ✅ Исправлено: 0
+     ❌ Осталось ошибок: 9
+
+📌 АНАЛИЗ СТРУКТУРЫ ФАЙЛА
+----------------------------------------
+
+📌 КЛАСТЕРИЗАЦИЯ ФУНКЦИЙ
+----------------------------------------
+
+📊 Найдено кластеров: 2
+   1. escapeHtmlContentModule: [createFileSystemJSON, scanDirectory, processFile, escapeHtmlContent, escapeContent, getDirectoryDescription, isExcluded, getCurrentLanguage, isSupportedFile, loadConfig, getDirectoriesToScan, isDirectoryExcluded, getLocalizedDescription, t] (связность: 11%, тип: core)
+   2. defaultConfigModule: [getDefaultConfig] (связность: 100%, тип: isolated)
+⚠️ DRY RUN: Изменения не будут применены
+
+ℹ️ Не найдено кандидатов для выделения в модули
+
+📊 СЕМАНТИЧЕСКИЕ МЕТРИКИ:
+   • Цикломатическая сложность: 0
+   • Всего функций: 0
+   • Неиспользуемых функций: 0
+   • Ошибок типов: 0
+
+❌ ОШИБКИ ТИПОВ (первые 5):
+   • Return type mismatch
+     Expected: () => string, Got: "russian" | "english"
+   • Argument type mismatch for parameter key
+     Expected: string, Got: "noDescription"
+   • Return type mismatch
+     Expected: (name: string, type: string, fullPath: string) => boolean, Got: false
+   • Return type mismatch
+     Expected: (name: string, type: string, fullPath: string) => boolean, Got: true
+   • Return type mismatch
+     Expected: (name: string, type: string, fullPath: string) => boolean, Got: true
+   ... и ещё 102 ошибок
+
+💡 Рекомендуется сначала исправить ошибки типов:
+   ast-refactor validate /home/sergei/Desktop/system/FileSystemScanner.js

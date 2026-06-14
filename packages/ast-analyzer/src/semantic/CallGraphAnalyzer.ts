@@ -1,11 +1,10 @@
 // src/semantic/CallGraphAnalyzer.ts
-// Полный файл с поддержкой JSX/TSX
-
 import {
   parseFile,
   buildCallGraph,
   detectEntryPoints,
   partitionFlows,
+  initTreeSitter,
   type CallEdge,
   type FunctionNode,
 } from '@codeflow-map/core';
@@ -37,25 +36,92 @@ export class CallGraphAnalyzer {
   private nodes: Map<string, CallGraphNode> = new Map();
   private parsedFiles: Map<string, any> = new Map();
   private callEdges: CallEdge[] = [];
+  private initialized = false;
+  private wasmPath: string;
+
+  constructor(wasmPath?: string) {
+    // ✅ Используем переданный путь или ищем по умолчанию
+    this.wasmPath = wasmPath || path.resolve(process.cwd(), 'grammars');
+  }
+
+  /**
+   * Инициализация Tree-sitter (однократная)
+   */
+  private async ensureInitialized(): Promise<void> {
+    if (this.initialized) return;
+
+    if (!fs.existsSync(this.wasmPath)) {
+      console.warn(`  ⚠️ WASM directory not found: ${this.wasmPath}`);
+      console.warn(`  💡 Create grammars/ directory with WASM files from tree-sitter-wasms`);
+      this.initialized = false;
+      return;
+    }
+
+    const wasmFiles = fs.readdirSync(this.wasmPath).filter((f: string) => f.endsWith('.wasm'));
+    if (wasmFiles.length === 0) {
+      console.warn(`  ⚠️ No WASM files found in: ${this.wasmPath}`);
+      console.warn(`  💡 Copy WASM files from node_modules/tree-sitter-wasms/out/ to grammars/`);
+      this.initialized = false;
+      return;
+    }
+
+    try {
+      console.log(`  🚀 Initializing Tree-sitter with WASM from: ${this.wasmPath}`);
+      await initTreeSitter(this.wasmPath);
+      this.initialized = true;
+      console.log(`  ✅ Tree-sitter initialized (${wasmFiles.length} grammars)`);
+    } catch (error) {
+      console.error(`  ❌ Failed to initialize Tree-sitter: ${error}`);
+      this.initialized = false;
+    }
+  }
+
+  /**
+   * ✅ Установить путь к WASM директории
+   */
+  setWasmPath(wasmPath: string): void {
+    this.wasmPath = wasmPath;
+    this.initialized = false; // Требует переинициализации
+  }
+
+  /**
+   * ✅ Получить текущий путь к WASM директории
+   */
+  getWasmPath(): string {
+    return this.wasmPath;
+  }
+
+  /**
+   * ✅ Проверить, инициализирован ли анализатор
+   */
+  isInitialized(): boolean {
+    return this.initialized;
+  }
 
   async analyze(entryPoint: string, maxDepth: number = 5): Promise<CallGraph> {
-    // 1. Парсим все файлы
+    await this.ensureInitialized();
+
+    if (!this.initialized) {
+      console.warn('  ⚠️ Call Graph analysis skipped: Tree-sitter not initialized');
+      return {
+        nodes: new Map(),
+        edges: [],
+        entryPoints: [],
+        cycles: [],
+        findUnusedFunctions: () => [],
+        findCyclicDependencies: () => [],
+      };
+    }
+
     await this.parseDirectory(path.dirname(entryPoint), maxDepth);
 
-    // 2. Строим граф вызовов
     const allFunctions = Array.from(this.parsedFiles.values()).flatMap(p => p.functions || []);
     const allCalls = Array.from(this.parsedFiles.values()).flatMap(p => p.calls || []);
 
     this.callEdges = buildCallGraph(allFunctions, allCalls);
-
-    // 3. Строим узлы графа
     this.buildNodes(allFunctions);
-
-    // 4. Определяем entry points - detectEntryPoints возвращает void,
-    //    но modifies nodes directly
     detectEntryPoints(allFunctions, this.callEdges);
 
-    // Получаем entry points из nodes, где isEntryPoint = true
     const entryPointsArray: CallGraphNode[] = [];
     for (const node of this.nodes.values()) {
       if (node.isEntry) {
@@ -63,11 +129,8 @@ export class CallGraphAnalyzer {
       }
     }
 
-    // 5. Разделяем на execution flows
     const flowResult = partitionFlows(allFunctions, this.callEdges);
     const orphans = flowResult?.orphans || [];
-
-    // 6. Находим циклы
     const cycles = this.detectCycles();
 
     return {
@@ -78,6 +141,88 @@ export class CallGraphAnalyzer {
       findUnusedFunctions: () => this.findUnused(orphans),
       findCyclicDependencies: () => this.detectCycles(),
     };
+  }
+
+  /**
+   * Анализирует только один файл, без рекурсивного обхода директории
+   */
+  async analyzeSingle(filePath: string, _maxDepth: number = 5): Promise<CallGraph> {
+    await this.ensureInitialized();
+
+    if (!this.initialized) {
+      console.warn('  ⚠️ Call Graph analysis skipped: Tree-sitter not initialized');
+      return {
+        nodes: new Map(),
+        edges: [],
+        entryPoints: [],
+        cycles: [],
+        findUnusedFunctions: () => [],
+        findCyclicDependencies: () => [],
+      };
+    }
+
+    // Очищаем состояние для нового анализа
+    this.nodes.clear();
+    this.parsedFiles.clear();
+    this.callEdges = [];
+
+    await this.parseSingleFile(filePath);
+
+    const allFunctions = Array.from(this.parsedFiles.values()).flatMap(p => p.functions || []);
+    const allCalls = Array.from(this.parsedFiles.values()).flatMap(p => p.calls || []);
+
+    this.callEdges = buildCallGraph(allFunctions, allCalls);
+    this.buildNodes(allFunctions);
+    detectEntryPoints(allFunctions, this.callEdges);
+
+    const entryPointsArray: CallGraphNode[] = [];
+    for (const node of this.nodes.values()) {
+      if (node.isEntry) {
+        entryPointsArray.push(node);
+      }
+    }
+
+    const flowResult = partitionFlows(allFunctions, this.callEdges);
+    const orphans = flowResult?.orphans || [];
+    const cycles = this.detectCycles();
+
+    return {
+      nodes: this.nodes,
+      edges: this.callEdges,
+      entryPoints: entryPointsArray,
+      cycles,
+      findUnusedFunctions: () => this.findUnused(orphans),
+      findCyclicDependencies: () => this.detectCycles(),
+    };
+  }
+
+  private async parseSingleFile(filePath: string): Promise<void> {
+    if (this.parsedFiles.has(filePath)) return;
+
+    if (!fs.existsSync(filePath)) {
+      console.warn(`  ⚠️ File not found: ${filePath}`);
+      return;
+    }
+
+    try {
+      const content = fs.readFileSync(filePath, 'utf-8');
+      const extension = path.extname(filePath).slice(1);
+
+      let language: 'typescript' | 'javascript' = 'typescript';
+      if (['js', 'jsx', 'mjs', 'cjs'].includes(extension)) {
+        language = 'javascript';
+      }
+
+      const parsed = await parseFile(content, filePath, this.wasmPath, language);
+      this.parsedFiles.set(filePath, parsed);
+
+      console.log(
+        `  📄 Parsed: ${path.basename(filePath)} (${parsed.functions?.length || 0} functions, ${parsed.calls?.length || 0} calls)`
+      );
+    } catch (error) {
+      console.error(`  ❌ Error parsing ${filePath}:`, error);
+      this.parsedFiles.set(filePath, { functions: [], calls: [] });
+    }
   }
 
   /**
@@ -339,7 +484,6 @@ export class CallGraphAnalyzer {
     }
 
     // Компоненты с заглавной буквы считаются пользовательскими
-    // ИСПРАВЛЕНО: безопасное получение первого символа через charAt()
     const firstChar = componentName.charAt(0);
     return firstChar === firstChar.toUpperCase();
   }
@@ -404,26 +548,15 @@ export class CallGraphAnalyzer {
 
       // Для JSX/TSX файлов используем специальные настройки
       if (extension === 'jsx' || extension === 'tsx') {
-        // @codeflow-map/core поддерживает JSX/TSX через флаг
         console.log(`  ⚛️ Parsing JSX/TSX file: ${path.basename(filePath)}`);
       }
 
-      const parsed = await parseFile(
-        content,
-        filePath,
-        './node_modules/@codeflow-map/wasm',
-        language
-      );
+      const parsed = await parseFile(content, filePath, this.wasmPath, language);
       this.parsedFiles.set(filePath, parsed);
 
       console.log(
         `  📄 Parsed: ${path.basename(filePath)} (${parsed.functions?.length || 0} functions, ${parsed.calls?.length || 0} calls)`
       );
-
-      // Убираем обращение к jsxComponents - его нет в типе
-      // if (parsed.jsxComponents && parsed.jsxComponents.length > 0) {
-      //   console.log(`     ⚛️ JSX components: ${parsed.jsxComponents.length}`);
-      // }
     } catch (error) {
       console.error(`  ❌ Error parsing ${filePath}:`, error);
     }
@@ -578,9 +711,6 @@ export class CallGraphAnalyzer {
 
     for (const file of jsxFiles) {
       await this.parseFile(file);
-
-      // Здесь нужно получить SourceFile из ts-morph
-      // Для этого потребуется передать Project instance
       console.log(`  ⚛️ Found JSX file: ${path.basename(file)}`);
     }
 
@@ -589,7 +719,6 @@ export class CallGraphAnalyzer {
 
   /**
    * Экспорт графа вызовов в формате JSON с поддержкой JSX
-   * ИСПРАВЛЕНО: безопасный подсчет компонентов
    */
   exportToJSON(includeJSXInfo: boolean = false): any {
     const exportData: any = {
@@ -608,7 +737,6 @@ export class CallGraphAnalyzer {
     };
 
     if (includeJSXInfo) {
-      // ИСПРАВЛЕНО: безопасное получение первого символа через charAt()
       const totalComponents = Array.from(this.nodes.values()).filter(
         n => n.name && n.name.length > 0 && n.name.charAt(0) === n.name.charAt(0).toUpperCase()
       ).length;
@@ -622,12 +750,10 @@ export class CallGraphAnalyzer {
 
   /**
    * Генерация отчета о JSX компонентах
-   * ИСПРАВЛЕНО: безопасная фильтрация компонентов
    */
   generateJSXReport(): string {
     let report = '# ⚛️ JSX/TSX Components Report\n\n';
 
-    // ИСПРАВЛЕНО: безопасная фильтрация компонентов
     const jsxComponents = Array.from(this.nodes.values()).filter(
       node =>
         node.name &&

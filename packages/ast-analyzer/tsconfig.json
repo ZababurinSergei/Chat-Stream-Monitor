@@ -2,11 +2,11 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "ESNext",
-    "lib": ["ES2022", "DOM"],
     "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM"],
     "resolveJsonModule": true,
     "allowJs": true,
-    "checkJs": false,
+    "checkJs": true,
     "outDir": "./dist",
     "rootDir": "./src",
     "declaration": true,
@@ -23,9 +23,10 @@
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "types": ["node", "vitest/globals"]
+    "types": ["node"],
+    "typeRoots": ["./node_modules/@types"]
   },
-  "include": ["src/**/*.ts", "src/**/*.mts", "src/**/*.cts", "src/**/*.d.ts"],
+  "include": ["src/**/*.ts", "src/**/*.mts", "src/**/*.cts", "globals.d.ts", "src/**/*.d.ts"],
   "exclude": [
     "node_modules",
     "dist",
