@@ -5,6 +5,8 @@
 [submodule "packages/devextreme-migration"]
 	path = packages/devextreme-migration
 	url = git@gitlab.infoenergo.loc:internal/devextreme-migration.git
+    branch = rc
 [submodule "packages/infoenergo-ui"]
 	path = packages/infoenergo-ui
 	url = git@gitlab.infoenergo.loc:infoenergo.npm/infoenergo-ui.git
+    branch = rc
