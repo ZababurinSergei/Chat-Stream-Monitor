@@ -1,5 +1,6 @@
 // src/refactor/ESLintASTFixer.ts
-import { Project, SourceFile, Node } from 'ts-morph';
+import type { SourceFile } from 'ts-morph';
+import { Project, Node } from 'ts-morph';
 import fs from 'fs';
 import path from 'path';
 import { ESLint } from 'eslint';
@@ -194,7 +195,7 @@ export class ESLintASTFixer {
     const lineIndex = lineNumber - 1;
 
     if (lines[lineIndex] && lineIndex >= 0 && lineIndex < lines.length) {
-      let line = lines[lineIndex];
+      const line = lines[lineIndex];
 
       // Преобразуем <Component></Component> в <Component />
       const openClosePattern = /<(\w+)([^>]*)>[\s]*<\/\1>/g;
@@ -205,7 +206,7 @@ export class ESLintASTFixer {
           sourceFile.replaceWithText(lines.join('\n'));
           this.addToHistory(
             sourceFile.getFilePath(),
-            `react/self-closing-comp: Преобразован в самозакрывающийся тег`
+            'react/self-closing-comp: Преобразован в самозакрывающийся тег'
           );
           return true;
         }
@@ -258,7 +259,7 @@ export class ESLintASTFixer {
             sourceFile.replaceWithText(lines.join('\n'));
             this.addToHistory(
               sourceFile.getFilePath(),
-              `react/self-closing-comp: Преобразован в самозакрывающийся тег (многострочный)`
+              'react/self-closing-comp: Преобразован в самозакрывающийся тег (многострочный)'
             );
             return true;
           }
@@ -278,7 +279,7 @@ export class ESLintASTFixer {
     const lineIndex = lineNumber - 1;
 
     if (lines[lineIndex] && lineIndex >= 0 && lineIndex < lines.length) {
-      let line = lines[lineIndex];
+      const line = lines[lineIndex];
 
       // Преобразуем prop={true} в prop
       const truePattern = /(\w+)=\{true\}/g;
@@ -289,7 +290,7 @@ export class ESLintASTFixer {
           sourceFile.replaceWithText(lines.join('\n'));
           this.addToHistory(
             sourceFile.getFilePath(),
-            `react/jsx-boolean-value: Убрано лишнее {true}`
+            'react/jsx-boolean-value: Убрано лишнее {true}'
           );
           return true;
         }
@@ -301,7 +302,7 @@ export class ESLintASTFixer {
         // false оставляем, но логируем
         this.addToHistory(
           sourceFile.getFilePath(),
-          `react/jsx-boolean-value: prop с false найден, рекомендуется использовать {false}`
+          'react/jsx-boolean-value: prop с false найден, рекомендуется использовать {false}'
         );
       }
     }
@@ -318,7 +319,7 @@ export class ESLintASTFixer {
     const lineIndex = lineNumber - 1;
 
     if (lines[lineIndex] && lineIndex >= 0 && lineIndex < lines.length) {
-      let line = lines[lineIndex];
+      const line = lines[lineIndex];
 
       // Убираем лишние фигурные скобки вокруг строк
       const curlyStringPattern = /\{['"]([^'"]+)['"]\}/g;
@@ -329,7 +330,7 @@ export class ESLintASTFixer {
           sourceFile.replaceWithText(lines.join('\n'));
           this.addToHistory(
             sourceFile.getFilePath(),
-            `react/jsx-curly-brace-presence: Убраны лишние фигурные скобки вокруг строки`
+            'react/jsx-curly-brace-presence: Убраны лишние фигурные скобки вокруг строки'
           );
           return true;
         }
@@ -344,7 +345,7 @@ export class ESLintASTFixer {
           sourceFile.replaceWithText(lines.join('\n'));
           this.addToHistory(
             sourceFile.getFilePath(),
-            `react/jsx-curly-brace-presence: Добавлены фигурные скобки для выражения`
+            'react/jsx-curly-brace-presence: Добавлены фигурные скобки для выражения'
           );
           return true;
         }
@@ -407,7 +408,7 @@ export class ESLintASTFixer {
     const lineIndex = lineNumber - 1;
 
     if (lines[lineIndex] && lineIndex >= 0 && lineIndex < lines.length) {
-      let line = lines[lineIndex];
+      const line = lines[lineIndex];
 
       // Переносим закрывающую скобку на новую строку
       if (line.includes(' />') && line.length > 80) {
@@ -417,7 +418,7 @@ export class ESLintASTFixer {
           sourceFile.replaceWithText(lines.join('\n'));
           this.addToHistory(
             sourceFile.getFilePath(),
-            `react/jsx-closing-bracket-location: Перенесена закрывающая скобка`
+            'react/jsx-closing-bracket-location: Перенесена закрывающая скобка'
           );
           return true;
         }
@@ -436,7 +437,7 @@ export class ESLintASTFixer {
     const lineIndex = lineNumber - 1;
 
     if (lines[lineIndex] && lineIndex >= 0 && lineIndex < lines.length) {
-      let line = lines[lineIndex];
+      const line = lines[lineIndex];
 
       // Убираем пробелы внутри {}
       const spaceInsidePattern = /\{\s+([^}]+?)\s+\}/g;
@@ -447,7 +448,7 @@ export class ESLintASTFixer {
           sourceFile.replaceWithText(lines.join('\n'));
           this.addToHistory(
             sourceFile.getFilePath(),
-            `react/jsx-curly-spacing: Убраны пробелы внутри фигурных скобок`
+            'react/jsx-curly-spacing: Убраны пробелы внутри фигурных скобок'
           );
           return true;
         }
@@ -462,7 +463,7 @@ export class ESLintASTFixer {
           sourceFile.replaceWithText(lines.join('\n'));
           this.addToHistory(
             sourceFile.getFilePath(),
-            `react/jsx-curly-spacing: Добавлены пробелы внутри фигурных скобок`
+            'react/jsx-curly-spacing: Добавлены пробелы внутри фигурных скобок'
           );
           return true;
         }
@@ -481,7 +482,7 @@ export class ESLintASTFixer {
     const lineIndex = lineNumber - 1;
 
     if (lines[lineIndex] && lineIndex >= 0 && lineIndex < lines.length) {
-      let line = lines[lineIndex];
+      const line = lines[lineIndex];
 
       // Убираем пробелы вокруг =
       const spaceAroundEqual = /\s+=\s+/g;
@@ -492,7 +493,7 @@ export class ESLintASTFixer {
           sourceFile.replaceWithText(lines.join('\n'));
           this.addToHistory(
             sourceFile.getFilePath(),
-            `react/jsx-equals-spacing: Убраны пробелы вокруг '='`
+            "react/jsx-equals-spacing: Убраны пробелы вокруг '='"
           );
           return true;
         }
@@ -571,7 +572,7 @@ export class ESLintASTFixer {
               sourceFile.replaceWithText(lines.join('\n'));
               this.addToHistory(
                 sourceFile.getFilePath(),
-                `react/jsx-indent-props: Исправлен отступ пропа`
+                'react/jsx-indent-props: Исправлен отступ пропа'
               );
               return true;
             }
@@ -592,7 +593,7 @@ export class ESLintASTFixer {
     const lineIndex = lineNumber - 1;
 
     if (lines[lineIndex] && lineIndex >= 0 && lineIndex < lines.length) {
-      let line = lines[lineIndex];
+      const line = lines[lineIndex];
 
       // Считаем количество пропсов в строке
       const propMatches = line.match(/\w+=/g);
@@ -610,14 +611,14 @@ export class ESLintASTFixer {
             const firstProp = props[0];
             const remainingProps = props.slice(1);
 
-            let newLine = `<${tagName} ${firstProp}`;
-            let newLines = [newLine];
+            const newLine = `<${tagName} ${firstProp}`;
+            const newLines = [newLine];
 
             for (const prop of remainingProps) {
               newLines.push(`  ${prop}`);
             }
 
-            newLines.push(`/>`);
+            newLines.push('/>');
 
             // Заменяем строки
             const firstNewLine = newLines[0];
@@ -634,7 +635,7 @@ export class ESLintASTFixer {
             sourceFile.replaceWithText(lines.join('\n'));
             this.addToHistory(
               sourceFile.getFilePath(),
-              `react/jsx-max-props-per-line: Перенесены пропсы на новые строки`
+              'react/jsx-max-props-per-line: Перенесены пропсы на новые строки'
             );
             return true;
           }
@@ -704,7 +705,7 @@ export class ESLintASTFixer {
     const lineIndex = lineNumber - 1;
 
     if (lines[lineIndex] && lineIndex >= 0 && lineIndex < lines.length) {
-      let line = lines[lineIndex];
+      const line = lines[lineIndex];
 
       // Заменяем множественные пробелы на один
       const multiSpacePattern = /\s{2,}/g;
@@ -715,7 +716,7 @@ export class ESLintASTFixer {
           sourceFile.replaceWithText(lines.join('\n'));
           this.addToHistory(
             sourceFile.getFilePath(),
-            `react/jsx-props-no-multi-spaces: Убраны множественные пробелы`
+            'react/jsx-props-no-multi-spaces: Убраны множественные пробелы'
           );
           return true;
         }
@@ -761,7 +762,7 @@ export class ESLintASTFixer {
         sourceFile.replaceWithText(lines.join('\n'));
         this.addToHistory(
           sourceFile.getFilePath(),
-          `react/jsx-tag-spacing: Исправлены пробелы вокруг тега`
+          'react/jsx-tag-spacing: Исправлены пробелы вокруг тега'
         );
         return true;
       }
@@ -827,7 +828,7 @@ export class ESLintASTFixer {
               sourceFile.replaceWithText(lines.join('\n'));
               this.addToHistory(
                 sourceFile.getFilePath(),
-                `react/jsx-wrap-multilines: JSX обернут в скобки`
+                'react/jsx-wrap-multilines: JSX обернут в скобки'
               );
               return true;
             }
@@ -948,7 +949,7 @@ export class ESLintASTFixer {
     });
 
     if (fixed) {
-      this.addToHistory(sourceFile.getFilePath(), `quotes: Заменены двойные кавычки на одинарные`);
+      this.addToHistory(sourceFile.getFilePath(), 'quotes: Заменены двойные кавычки на одинарные');
     }
 
     return fixed;
@@ -989,7 +990,7 @@ export class ESLintASTFixer {
       sourceFile.replaceWithText(text + '\n');
       this.addToHistory(
         sourceFile.getFilePath(),
-        `eol-last: Добавлена пустая строка в конце файла`
+        'eol-last: Добавлена пустая строка в конце файла'
       );
       return true;
     }
@@ -1007,7 +1008,7 @@ export class ESLintASTFixer {
       sourceFile.replaceWithText(newText);
       this.addToHistory(
         sourceFile.getFilePath(),
-        `no-multiple-empty-lines: Удалены лишние пустые строки`
+        'no-multiple-empty-lines: Удалены лишние пустые строки'
       );
       return true;
     }
@@ -1086,7 +1087,7 @@ export class ESLintASTFixer {
     if (fixed) {
       this.addToHistory(
         sourceFile.getFilePath(),
-        `prefer-const: Заменены 'let' на 'const' где возможно`
+        "prefer-const: Заменены 'let' на 'const' где возможно"
       );
     }
 
@@ -1116,7 +1117,7 @@ export class ESLintASTFixer {
     });
 
     if (fixed) {
-      this.addToHistory(sourceFile.getFilePath(), `eqeqeq: Заменены '==' на '===' и '!=' on '!=='`);
+      this.addToHistory(sourceFile.getFilePath(), "eqeqeq: Заменены '==' на '===' и '!=' on '!=='");
     }
 
     return fixed;
@@ -1151,7 +1152,7 @@ export class ESLintASTFixer {
     }
 
     if (fixed) {
-      this.addToHistory(sourceFile.getFilePath(), `no-var: Заменены 'var' на 'let' или 'const'`);
+      this.addToHistory(sourceFile.getFilePath(), "no-var: Заменены 'var' на 'let' или 'const'");
     }
 
     return fixed;
@@ -1182,7 +1183,7 @@ export class ESLintASTFixer {
     if (fixed) {
       this.addToHistory(
         sourceFile.getFilePath(),
-        `object-shorthand: Использована сокращённая запись свойств`
+        'object-shorthand: Использована сокращённая запись свойств'
       );
     }
 
@@ -1221,7 +1222,7 @@ export class ESLintASTFixer {
     });
 
     if (fixed) {
-      this.addToHistory(sourceFile.getFilePath(), `arrow-body-style: Упрощены стрелочные функции`);
+      this.addToHistory(sourceFile.getFilePath(), 'arrow-body-style: Упрощены стрелочные функции');
     }
 
     return fixed;
@@ -1391,7 +1392,7 @@ export class ESLintASTFixer {
   /**
    * Основной метод исправления ESLint ошибок через AST
    */
-  async fixFile(filePath: string, createBackup: boolean = true): Promise<ESLintFixResult> {
+  async fixFile(filePath: string, createBackup = true): Promise<ESLintFixResult> {
     let fixes = 0;
     const errors: string[] = [];
     let backupPath: string | undefined;
@@ -1409,7 +1410,7 @@ export class ESLintASTFixer {
         return { success: false, file: filePath, fixes: 0, errors: ['Не удалось загрузить файл'] };
       }
 
-      let maxIterations = 5;
+      const maxIterations = 5;
       let iteration = 0;
 
       while (iteration < maxIterations) {
@@ -1455,7 +1456,7 @@ export class ESLintASTFixer {
   /**
    * Исправляет несколько файлов
    */
-  async fixFiles(filePaths: string[], createBackup: boolean = true): Promise<ESLintFixResult[]> {
+  async fixFiles(filePaths: string[], createBackup = true): Promise<ESLintFixResult[]> {
     const results: ESLintFixResult[] = [];
 
     for (const filePath of filePaths) {

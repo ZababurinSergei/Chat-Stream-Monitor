@@ -1,5 +1,5 @@
 // src/refactor/ImportManager.ts
-import { Project, SourceFile } from 'ts-morph';
+import type { Project, SourceFile } from 'ts-morph';
 import path from 'path';
 import type { ExtractedModule } from './index.js';
 

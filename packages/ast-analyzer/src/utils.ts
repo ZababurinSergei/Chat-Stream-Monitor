@@ -113,7 +113,7 @@ export function ensureDirectoryExists(dirPath: string): void {
   }
 }
 
-export function renderNode(node: any, indent: string = ''): string {
+export function renderNode(node: any, indent = ''): string {
   let result = '';
   const entries = Object.entries(node);
 

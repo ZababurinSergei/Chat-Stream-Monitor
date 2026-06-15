@@ -55,21 +55,13 @@
     },
     "lint": {
       "dependsOn": [],
-      "inputs": [
-        "src/**",
-        "packages/**/src/**",
-        "*.config.js",
-        "*.config.ts",
-        "*.config.mjs",
-        ".eslintrc*",
-        "eslint.config.*"
-      ],
+      "inputs": ["src/**", "*.config.js", "eslint.config.js"],
       "outputs": [],
       "cache": true
     },
     "lint:fix": {
       "dependsOn": [],
-      "inputs": ["src/**", "packages/**/src/**", "*.config.js", "*.config.ts"],
+      "inputs": ["src/**", "*.config.js", "eslint.config.js"],
       "outputs": [],
       "cache": false
     },

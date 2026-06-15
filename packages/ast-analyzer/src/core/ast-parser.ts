@@ -217,7 +217,7 @@ export function parseFile(filePath: string, _options?: { extractTemplate?: boole
         console.log(`   📥 Найдено импортов: ${importCount}`);
       }
     } else {
-      console.warn(`⚠️ AST построен, но не содержит body`);
+      console.warn('⚠️ AST построен, но не содержит body');
     }
 
     return ast;
@@ -227,7 +227,7 @@ export function parseFile(filePath: string, _options?: { extractTemplate?: boole
       e instanceof Error ? e.message : String(e)
     );
     if (e instanceof Error && e.stack) {
-      console.error(`📚 Стек ошибки:`, e.stack);
+      console.error('📚 Стек ошибки:', e.stack);
     }
     return null;
   }

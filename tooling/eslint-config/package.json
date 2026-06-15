@@ -1,92 +1,51 @@
 {
   "name": "@repo/eslint-config",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "main": "index.js",
-  "types": "index.d.ts",
   "exports": {
     ".": {
       "import": "./index.js",
-      "types": "./index.d.ts"
+      "require": "./index.js"
+    },
+    "./base": {
+      "import": "./base.js",
+      "require": "./base.js"
     },
     "./react": {
       "import": "./react.js",
-      "types": "./react.d.ts"
+      "require": "./react.js"
     },
     "./vue": {
       "import": "./vue.js",
-      "types": "./vue.d.ts"
+      "require": "./vue.js"
     },
-    "./node": {
-      "import": "./node.js",
-      "types": "./node.d.ts"
+    "./typescript": {
+      "import": "./typescript.js",
+      "require": "./typescript.js"
     }
   },
-  "scripts": {
-    "lint": "eslint . --config index.js"
+  "peerDependencies": {
+    "eslint": "^9.0.0",
+    "typescript": "^5.0.0"
   },
   "dependencies": {
     "@eslint/js": "^10.0.1",
     "@typescript-eslint/eslint-plugin": "^8.61.0",
     "@typescript-eslint/parser": "^8.61.0",
-    "eslint": "^10.5.0",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^7.3.0",
-    "globals": "^17.6.0",
-    "typescript-eslint": "^8.61.0"
-  },
-  "devDependencies": {
-    "@types/eslint": "^9.6.1",
-    "@types/node": "^25.9.3",
-    "typescript": "^6.0.3"
-  },
-  "peerDependencies": {
-    "eslint": "^10.0.0",
-    "typescript": "^6.0.0"
-  },
-  "peerDependenciesMeta": {
-    "typescript": {
-      "optional": true
-    }
-  },
-  "engines": {
-    "node": ">=18.0.0",
-    "pnpm": ">=8.0.0"
+    "eslint-plugin-json": "^4.0.1",
+    "eslint-plugin-jsonc": "^3.2.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-vue": "^10.9.2",
+    "eslint-plugin-yml": "^3.4.0",
+    "globals": "^17.6.0"
   },
   "files": [
-    "index.js",
-    "index.d.ts",
-    "react.js",
-    "react.d.ts",
-    "vue.js",
-    "vue.d.ts",
-    "node.js",
-    "node.d.ts"
+    "*.js"
   ],
-  "keywords": [
-    "eslint",
-    "eslint-config",
-    "typescript",
-    "monorepo",
-    "code-quality",
-    "linting"
-  ],
-  "author": "Zababurin Sergei <zababurins@vk.com>",
-  "license": "CSL-1.0",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/ZababurinSergei/Chat-Stream-Monitor",
-    "directory": "tooling/eslint-config"
-  },
-  "homepage": "https://github.com/ZababurinSergei/Chat-Stream-Monitor/tree/main/tooling/eslint-config",
-  "bugs": {
-    "url": "https://github.com/ZababurinSergei/Chat-Stream-Monitor/issues"
-  },
-  "publishConfig": {
-    "access": "restricted",
-    "registry": "https://npm.pkg.github.com/"
+  "devDependencies": {
+    "@eslint/markdown": "^8.0.2"
   }
 }

@@ -15,8 +15,10 @@
     "test:ast": "cd Directory/ast-analyzer && pnpm test",
     "test:shared": "cd packages/shared-types && pnpm test",
     "test:coverage": "turbo test:coverage",
-    "lint": "turbo lint",
-    "lint:fix": "turbo lint:fix",
+    "lint": "eslint . --ext .js,.mjs,.cjs,.ts,.tsx --cache --cache-location .eslintcache",
+    "lint:fix": "pnpm lint --fix",
+    "lint:check": "eslint . --ext .js,.mjs,.cjs,.ts,.tsx --max-warnings 0",
+    "lint:report": "pnpm lint --format html --output-file eslint-report.html",
     "type-check": "turbo type-check",
     "clean": "turbo clean && rm -rf node_modules",
     "clean:ast": "cd Directory/ast-analyzer && pnpm clean",
@@ -68,12 +70,14 @@
     "@typescript-eslint/parser": "^8.61.0",
     "@vitest/coverage-v8": "^4.1.8",
     "eslint": "10.5.0",
+    "eslint-plugin-unicorn": "^66.0.0",
     "globals": "^17.6.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.0.7",
     "prettier": "^3.8.4",
     "turbo": "^2.9.18",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.61.0"
   },
   "lint-staged": {
     "Directory/ast-analyzer/**/*.{ts,tsx,js,jsx}": [

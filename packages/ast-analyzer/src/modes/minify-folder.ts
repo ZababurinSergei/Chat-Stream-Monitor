@@ -52,7 +52,7 @@ function generateDirectoryTree(
     }
   }
 
-  function renderNode(node: any, indent: string = '', _prefix: string = ''): string {
+  function renderNode(node: any, indent = '', _prefix = ''): string {
     let result = '';
     const entries = Object.entries(node);
 
@@ -78,7 +78,7 @@ function generateDirectoryTree(
 
   let output = `\`\`\`\n${path.basename(baseDir)}/\n`;
   output += renderNode(tree, '  ');
-  output += `\`\`\`\n`;
+  output += '```\n';
 
   return output;
 }
@@ -88,7 +88,7 @@ function collectFiles(
   extensions: string[],
   excludePatterns: string[],
   maxDepth: number,
-  currentDepth: number = 0
+  currentDepth = 0
 ): FileInfo[] {
   const files: FileInfo[] = [];
 
@@ -174,27 +174,28 @@ export function minifyFolder(inputDir: string, options: MinifyFolderOptions = {}
     });
   }
 
-  let markdown = `# 🤖 AI Context - Полный проект\n\n`;
+  let markdown = '# 🤖 AI Context - Полный проект\n\n';
   markdown += `**Сгенерировано:** ${new Date().toLocaleString()}\n`;
   markdown += `**Исходная директория:** \`${resolvedDir}\`\n`;
   markdown += `**Всего файлов:** ${files.length}\n`;
   markdown += `**Общий размер:** ${(files.reduce((sum, f) => sum + f.size, 0) / 1024).toFixed(2)} KB\n`;
-  markdown += `**Режим:** Сжатый (только сигнатуры, без реализации)\n\n`;
+  markdown += '**Режим:** Сжатый (только сигнатуры, без реализации)\n\n';
 
-  markdown += `---\n\n`;
-  markdown += `## 📋 ИНСТРУКЦИЯ ДЛЯ ИИ\n\n`;
-  markdown += `Ты — AI ассистент, который анализирует код проекта. Ниже представлен **полный проект** в сжатом виде:\n\n`;
-  markdown += `- ✅ **Сохранены:** импорты, экспорты, сигнатуры функций, JSDoc, TypeScript типы\n`;
-  markdown += `- ❌ **Удалены:** реализации функций, внутренние вычисления, локальные переменные\n`;
-  markdown += `- 🎯 **Цель:** Понимание архитектуры при минимальном расходе токенов\n\n`;
-  markdown += `### Как использовать этот контекст:\n\n`;
-  markdown += `1. Проанализируй структуру проекта\n`;
-  markdown += `2. Ответь на вопросы пользователя о взаимосвязях модулей\n`;
-  markdown += `3. Предложи рефакторинг, основываясь на предоставленных сигнатурах\n\n`;
-  markdown += `---\n\n`;
+  markdown += '---\n\n';
+  markdown += '## 📋 ИНСТРУКЦИЯ ДЛЯ ИИ\n\n';
+  markdown +=
+    'Ты — AI ассистент, который анализирует код проекта. Ниже представлен **полный проект** в сжатом виде:\n\n';
+  markdown += '- ✅ **Сохранены:** импорты, экспорты, сигнатуры функций, JSDoc, TypeScript типы\n';
+  markdown += '- ❌ **Удалены:** реализации функций, внутренние вычисления, локальные переменные\n';
+  markdown += '- 🎯 **Цель:** Понимание архитектуры при минимальном расходе токенов\n\n';
+  markdown += '### Как использовать этот контекст:\n\n';
+  markdown += '1. Проанализируй структуру проекта\n';
+  markdown += '2. Ответь на вопросы пользователя о взаимосвязях модулей\n';
+  markdown += '3. Предложи рефакторинг, основываясь на предоставленных сигнатурах\n\n';
+  markdown += '---\n\n';
 
   if (addTableOfContents) {
-    markdown += `## 📑 Оглавление\n\n`;
+    markdown += '## 📑 Оглавление\n\n';
     const byExt: Record<string, FileInfo[]> = {};
     for (const file of files) {
       if (!byExt[file.ext]) {
@@ -212,22 +213,22 @@ export function minifyFolder(inputDir: string, options: MinifyFolderOptions = {}
         const anchor = file.relativePath.replace(/[^a-zA-Z0-9]/g, '-').toLowerCase();
         markdown += `- [\`${file.relativePath}\`](#${anchor})\n`;
       }
-      markdown += `\n`;
+      markdown += '\n';
     }
-    markdown += `---\n\n`;
+    markdown += '---\n\n';
   }
 
   if (showStructure) {
-    markdown += `## 📁 Структура проекта\n\n`;
+    markdown += '## 📁 Структура проекта\n\n';
     markdown += generateDirectoryTree(
       resolvedDir,
       files.map(f => f.relativePath),
       excludePatterns
     );
-    markdown += `\n---\n\n`;
+    markdown += '\n---\n\n';
   }
 
-  markdown += `## 📄 Содержимое файлов\n\n`;
+  markdown += '## 📄 Содержимое файлов\n\n';
 
   let processedCount = 0;
   let totalOriginalSize = 0;
@@ -253,18 +254,18 @@ export function minifyFolder(inputDir: string, options: MinifyFolderOptions = {}
 
     markdown += `### \`${file.relativePath}\`\n`;
     markdown += `\`\`\`${lang}\n${minified}\n\`\`\`\n\n`;
-    markdown += `---\n\n`;
+    markdown += '---\n\n';
   }
 
-  console.log(`\n`);
+  console.log('\n');
 
   const savedKB = (totalOriginalSize - totalMinifiedSize) / 1024;
   const savedPercent =
     totalOriginalSize > 0 ? ((1 - totalMinifiedSize / totalOriginalSize) * 100).toFixed(1) : 0;
 
-  markdown += `## 📊 Статистика сжатия\n\n`;
-  markdown += `| Показатель | Значение |\n`;
-  markdown += `|------------|----------|\n`;
+  markdown += '## 📊 Статистика сжатия\n\n';
+  markdown += '| Показатель | Значение |\n';
+  markdown += '|------------|----------|\n';
   markdown += `| Исходный размер | ${(totalOriginalSize / 1024).toFixed(2)} KB |\n`;
   markdown += `| Сжатый размер | ${(totalMinifiedSize / 1024).toFixed(2)} KB |\n`;
   markdown += `| Экономия | ${savedKB.toFixed(2)} KB (${savedPercent}%) |\n`;
@@ -273,12 +274,12 @@ export function minifyFolder(inputDir: string, options: MinifyFolderOptions = {}
   fs.writeFileSync(outputFile, markdown, 'utf-8');
 
   console.log(`\n${'='.repeat(60)}`);
-  console.log(`✅ ГОТОВО!`);
+  console.log('✅ ГОТОВО!');
   console.log(`${'='.repeat(60)}`);
   console.log(`📄 Выходной файл: ${path.resolve(outputFile)}`);
   console.log(`📊 Размер: ${(totalMinifiedSize / 1024).toFixed(2)} KB (сжатие ${savedPercent}%)`);
   console.log(`📁 Файлов обработано: ${files.length}`);
-  console.log(`\n💡 Отправьте этот файл в ИИ для анализа всего проекта!`);
+  console.log('\n💡 Отправьте этот файл в ИИ для анализа всего проекта!');
 
   return markdown;
 }

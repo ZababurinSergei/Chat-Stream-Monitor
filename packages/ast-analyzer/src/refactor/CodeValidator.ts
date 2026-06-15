@@ -61,7 +61,7 @@ export class CodeValidator {
           type: 'error',
           severity: 10,
           file: filePath,
-          message: `Файл не существует`,
+          message: 'Файл не существует',
           autoFixable: false,
         });
       }
@@ -70,7 +70,7 @@ export class CodeValidator {
     const summary = this.generateSummary();
     const timestamp = new Date().toISOString();
 
-    console.log(`\n📊 ИТОГИ ПРОВЕРКИ:`);
+    console.log('\n📊 ИТОГИ ПРОВЕРКИ:');
     console.log(`   ❌ Ошибок: ${summary.errors}`);
     console.log(`   ⚠️  Предупреждений: ${summary.warnings}`);
     console.log(`   ℹ️  Замечаний: ${summary.info}`);
@@ -357,7 +357,7 @@ export class CodeValidator {
           line: declaration.getStartLineNumber(),
           message: `Отсутствует JSDoc для экспорта '${exportName}'`,
           autoFixable: true,
-          suggestion: `Добавьте комментарий /** ... */ перед экспортом`,
+          suggestion: 'Добавьте комментарий /** ... */ перед экспортом',
         });
       }
     }
@@ -369,9 +369,9 @@ export class CodeValidator {
         type: 'warning',
         severity: 6,
         file: filePath,
-        message: `Export default объявлен, но символ не найден`,
+        message: 'Export default объявлен, но символ не найден',
         autoFixable: false,
-        suggestion: `Проверьте правильность export default declaration`,
+        suggestion: 'Проверьте правильность export default declaration',
       });
     }
   }
@@ -408,7 +408,7 @@ export class CodeValidator {
             line: decl.getStartLineNumber(),
             message: `Неиспользуемая переменная: '${varName}'`,
             autoFixable: true,
-            suggestion: `Удалите переменную или используйте её`,
+            suggestion: 'Удалите переменную или используйте её',
             code: varName,
           });
         }
@@ -437,7 +437,7 @@ export class CodeValidator {
           line: func.getStartLineNumber(),
           message: `Неиспользуемая функция: '${funcName}'`,
           autoFixable: true,
-          suggestion: `Удалите функцию или используйте её`,
+          suggestion: 'Удалите функцию или используйте её',
         });
       }
     }
@@ -457,7 +457,7 @@ export class CodeValidator {
             line: param.getStartLineNumber(),
             message: `Неиспользуемый параметр: '${paramName}' в функции ${func.getName() || 'anonymous'}`,
             autoFixable: true,
-            suggestion: `Удалите параметр или используйте его, или добавьте префикс '_'`,
+            suggestion: "Удалите параметр или используйте его, или добавьте префикс '_'",
           });
         }
       }
@@ -601,7 +601,7 @@ export class CodeValidator {
           severity: 2,
           file: filePath,
           line: func.getStartLineNumber(),
-          message: `Функция возвращает boolean, но начинается с 'get'`,
+          message: "Функция возвращает boolean, но начинается с 'get'",
           autoFixable: false,
           suggestion: `Используйте префикс 'is' или 'has': is${funcName.slice(3)}`,
         });
@@ -822,19 +822,19 @@ export class CodeValidator {
    * Генерация Markdown отчёта
    */
   private generateMarkdownReport(result: ValidationResult): string {
-    let report = `# 🔍 Отчёт проверки кода\n\n`;
+    let report = '# 🔍 Отчёт проверки кода\n\n';
     report += `**Дата:** ${new Date(result.timestamp).toLocaleString()}\n\n`;
 
-    report += `## 📊 Сводка\n\n`;
-    report += `| Тип | Количество |\n`;
-    report += `|-----|------------|\n`;
+    report += '## 📊 Сводка\n\n';
+    report += '| Тип | Количество |\n';
+    report += '|-----|------------|\n';
     report += `| ❌ Ошибки | ${result.summary.errors} |\n`;
     report += `| ⚠️ Предупреждения | ${result.summary.warnings} |\n`;
     report += `| ℹ️ Замечания | ${result.summary.info} |\n`;
     report += `| 🔧 Автоисправимые | ${result.summary.autoFixable} |\n\n`;
 
     // Группировка по severity
-    report += `## 🎯 По приоритету\n\n`;
+    report += '## 🎯 По приоритету\n\n';
     const critical = result.issues.filter(i => i.severity >= 8);
     const high = result.issues.filter(i => i.severity >= 6 && i.severity < 8);
     const medium = result.issues.filter(i => i.severity >= 4 && i.severity < 6);
@@ -846,7 +846,7 @@ export class CodeValidator {
         report += `- **${path.basename(issue.file)}**: ${issue.message}\n`;
         if (issue.suggestion) report += `  - 💡 ${issue.suggestion}\n`;
       }
-      report += `\n`;
+      report += '\n';
     }
 
     if (high.length > 0) {
@@ -855,7 +855,7 @@ export class CodeValidator {
         report += `- **${path.basename(issue.file)}**: ${issue.message}\n`;
         if (issue.suggestion) report += `  - 💡 ${issue.suggestion}\n`;
       }
-      report += `\n`;
+      report += '\n';
     }
 
     if (medium.length > 0) {
@@ -863,7 +863,7 @@ export class CodeValidator {
       for (const issue of medium) {
         report += `- **${path.basename(issue.file)}**: ${issue.message}\n`;
       }
-      report += `\n`;
+      report += '\n';
     }
 
     if (low.length > 0) {
@@ -871,11 +871,11 @@ export class CodeValidator {
       for (const issue of low) {
         report += `- **${path.basename(issue.file)}**: ${issue.message}\n`;
       }
-      report += `\n`;
+      report += '\n';
     }
 
     // Группировка по файлам
-    report += `## 📁 Проблемы по файлам\n\n`;
+    report += '## 📁 Проблемы по файлам\n\n';
     const byFile = new Map<string, ValidationIssue[]>();
     for (const issue of result.issues) {
       if (!byFile.has(issue.file)) {
@@ -887,8 +887,8 @@ export class CodeValidator {
     for (const [file, issues] of byFile) {
       report += `### 📄 ${path.basename(file)}\n\n`;
       report += `**Путь:** \`${file}\`\n\n`;
-      report += `| Тип | Строка | Severity | Сообщение | Автофикс |\n`;
-      report += `|-----|--------|----------|-----------|----------|\n`;
+      report += '| Тип | Строка | Severity | Сообщение | Автофикс |\n';
+      report += '|-----|--------|----------|-----------|----------|\n';
 
       for (const issue of issues) {
         const typeIcon = issue.type === 'error' ? '❌' : issue.type === 'warning' ? '⚠️' : 'ℹ️';
@@ -897,20 +897,20 @@ export class CodeValidator {
         const autoFix = issue.autoFixable ? '✅' : '❌';
         report += `| ${typeIcon} | ${lineInfo} | ${severityStr} | ${issue.message} | ${autoFix} |\n`;
       }
-      report += `\n`;
+      report += '\n';
     }
 
     // Рекомендации
-    report += `## 💡 Рекомендации\n\n`;
+    report += '## 💡 Рекомендации\n\n';
     if (result.summary.autoFixable > 0) {
       report += `1. Запустите \`npm run fix\` для автоматического исправления ${result.summary.autoFixable} проблем\n`;
     }
     if (result.summary.errors > 0) {
-      report += `2. Исправьте критические ошибки вручную\n`;
+      report += '2. Исправьте критические ошибки вручную\n';
     }
-    report += `3. Запустите повторную проверку после исправлений\n\n`;
+    report += '3. Запустите повторную проверку после исправлений\n\n';
 
-    report += `---\n`;
+    report += '---\n';
     report += `*Сгенерировано AST Validator* | ${new Date().toLocaleString()}\n`;
 
     return report;

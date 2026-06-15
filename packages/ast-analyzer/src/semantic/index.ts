@@ -42,11 +42,15 @@ export {
 // ЕДИНЫЙ ФАСАД ДЛЯ СЕМАНТИЧЕСКОГО АНАЛИЗА
 // ============================================
 
-import { SourceFile } from 'ts-morph';
-import { CFGAnalyzer, ControlFlowGraph } from './CFGAnalyzer.js';
-import { CallGraphAnalyzer, CallGraph } from './CallGraphAnalyzer.js';
-import { TypeAnalyzer, TypeAnalysisResult } from './TypeAnalyzer.js';
-import { DataFlowAnalyzer, DataFlowGraph } from './DataFlowAnalyzer.js';
+import type { SourceFile } from 'ts-morph';
+import type { ControlFlowGraph } from './CFGAnalyzer.js';
+import { CFGAnalyzer } from './CFGAnalyzer.js';
+import type { CallGraph } from './CallGraphAnalyzer.js';
+import { CallGraphAnalyzer } from './CallGraphAnalyzer.js';
+import type { TypeAnalysisResult } from './TypeAnalyzer.js';
+import { TypeAnalyzer } from './TypeAnalyzer.js';
+import type { DataFlowGraph } from './DataFlowAnalyzer.js';
+import { DataFlowAnalyzer } from './DataFlowAnalyzer.js';
 
 export interface SemanticAnalysisOptions {
   /** Максимальная глубина анализа call graph */

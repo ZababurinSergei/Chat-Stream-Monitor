@@ -79,7 +79,7 @@ program
 
     const isVue = absolutePath.endsWith('.vue');
     if (isVue) {
-      console.log(`📦 Обнаружен Vue компонент`);
+      console.log('📦 Обнаружен Vue компонент');
     }
 
     // Вывод статуса компонентов
@@ -285,7 +285,7 @@ program
       process.exit(1);
     }
 
-    console.log(`\n⚙️ АКТИВНЫЕ АНАЛИЗАТОРЫ:`);
+    console.log('\n⚙️ АКТИВНЫЕ АНАЛИЗАТОРЫ:');
     console.log(`   • CFG Analysis: ${!options.noCfg ? '✅' : '❌'}`);
     console.log(`   • Call Graph Analysis: ${!options.noCallgraph ? '✅' : '❌'}`);
     console.log(`   • Data Flow Analysis: ${!options.noDataflow ? '✅' : '❌'}`);
@@ -354,11 +354,11 @@ program
           }
         }
       } else {
-        console.log(`\nℹ️ Не найдено кандидатов для выделения в модули`);
+        console.log('\nℹ️ Не найдено кандидатов для выделения в модули');
       }
 
       if (result.metrics) {
-        console.log(`\n📊 СЕМАНТИЧЕСКИЕ МЕТРИКИ:`);
+        console.log('\n📊 СЕМАНТИЧЕСКИЕ МЕТРИКИ:');
         console.log(`   • Цикломатическая сложность: ${result.metrics.cyclomaticComplexity}`);
         console.log(`   • Всего функций: ${result.metrics.totalFunctions}`);
         console.log(`   • Неиспользуемых функций: ${result.metrics.unusedFunctionsCount}`);
@@ -402,14 +402,14 @@ program
       if (result.verificationResults && result.verificationResults.length > 0) {
         const verified = result.verificationResults.filter(r => r.isValid);
         const failed = result.verificationResults.filter(r => !r.isValid);
-        console.log(`\n🔬 ФОРМАЛЬНАЯ ВЕРИФИКАЦИЯ:`);
+        console.log('\n🔬 ФОРМАЛЬНАЯ ВЕРИФИКАЦИЯ:');
         console.log(`   • Верифицировано: ${verified.length}`);
         console.log(`   • Не верифицировано: ${failed.length}`);
       }
 
       if (result.semanticResults?.jsx) {
         const jsx = result.semanticResults.jsx;
-        console.log(`\n⚛️ JSX/TSX АНАЛИЗ:`);
+        console.log('\n⚛️ JSX/TSX АНАЛИЗ:');
         console.log(`   • JSX элементов: ${jsx.elements.length}`);
         console.log(`   • Компонентов: ${jsx.componentProps.size}`);
         console.log(`   • Ошибок пропсов: ${jsx.propTypeErrors.length}`);
@@ -417,38 +417,38 @@ program
 
       if (result.semanticResults?.vue) {
         const vue = result.semanticResults.vue;
-        console.log(`\n🎯 VUE АНАЛИЗ:`);
+        console.log('\n🎯 VUE АНАЛИЗ:');
         console.log(`   • Props: ${vue.props.names.length}`);
         console.log(`   • Events: ${vue.emits.names.length}`);
         console.log(`   • Slots: ${vue.slots.length}`);
         console.log(`   • Composables: ${vue.composables.length}`);
       }
 
-      console.log(`\n💡 РЕКОМЕНДУЕМЫЕ ПАРАМЕТРЫ ДЛЯ РЕФАКТОРИНГА:`);
-      console.log(`   ─────────────────────────────────────────────`);
+      console.log('\n💡 РЕКОМЕНДУЕМЫЕ ПАРАМЕТРЫ ДЛЯ РЕФАКТОРИНГА:');
+      console.log('   ─────────────────────────────────────────────');
 
       if (result.metrics) {
         if (result.metrics.cyclomaticComplexity > 15) {
-          console.log(`   🔧 Для сложного кода (>15):`);
+          console.log('   🔧 Для сложного кода (>15):');
           console.log(`      ast-refactor refactor ${file} -t 4 -m 12 -c 50`);
         } else if (result.metrics.totalFunctions > 30) {
-          console.log(`   🔧 Для большого количества функций (>30):`);
+          console.log('   🔧 Для большого количества функций (>30):');
           console.log(`      ast-refactor refactor ${file} -t 3 -m 10 -c 60`);
         } else if (result.metrics.totalFunctions < 10) {
-          console.log(`   🔧 Для небольшого файла (<10 функций):`);
+          console.log('   🔧 Для небольшого файла (<10 функций):');
           console.log(`      ast-refactor refactor ${file} -t 2 -m 5 -c 70`);
         } else {
-          console.log(`   🔧 Стандартные настройки:`);
+          console.log('   🔧 Стандартные настройки:');
           console.log(`      ast-refactor refactor ${file} -t 3 -m 10 -c 60`);
         }
       }
 
       if (result.semanticResults?.typeErrors && result.semanticResults.typeErrors.length > 0) {
-        console.log(`\n   🔧 Для исправления ошибок типов:`);
+        console.log('\n   🔧 Для исправления ошибок типов:');
         console.log(`      ast-refactor validate ${file} --fix`);
       }
 
-      console.log(`\n✨ Анализ завершен!`);
+      console.log('\n✨ Анализ завершен!');
 
       const reportPath = path.join(process.cwd(), `analysis-report-${Date.now()}.txt`);
       const fullReport =
@@ -456,7 +456,7 @@ program
         '\n' +
         '='.repeat(70) +
         '\n' +
-        `📊 ИТОГОВЫЙ ОТЧЕТ АНАЛИЗА\n` +
+        '📊 ИТОГОВЫЙ ОТЧЕТ АНАЛИЗА\n' +
         `Файл: ${file}\n` +
         `Время: ${new Date().toLocaleString()}\n` +
         `Длительность: ${duration} сек\n` +
@@ -521,7 +521,7 @@ program
       console.log('\n📊 РЕЗУЛЬТАТЫ ВАЛИДАЦИИ:');
 
       if (result.metrics) {
-        console.log(`\n📈 МЕТРИКИ:`);
+        console.log('\n📈 МЕТРИКИ:');
         console.log(`   • Цикломатическая сложность: ${result.metrics.cyclomaticComplexity}`);
         console.log(`   • Всего функций: ${result.metrics.totalFunctions}`);
         console.log(`   • Неиспользуемых функций: ${result.metrics.unusedFunctionsCount}`);
@@ -535,13 +535,13 @@ program
       }
 
       if (result.validationResults) {
-        console.log(`\n⚠️ CODE VALIDATION:`);
+        console.log('\n⚠️ CODE VALIDATION:');
         console.log(`   • Ошибок: ${result.validationResults.summary.errors}`);
         console.log(`   • Предупреждений: ${result.validationResults.summary.warnings}`);
         console.log(`   • Автоисправимых: ${result.validationResults.summary.autoFixable}`);
 
         if (result.validationResults.summary.errors > 0) {
-          console.log(`\n   ОШИБКИ (первые 5):`);
+          console.log('\n   ОШИБКИ (первые 5):');
           const errors = result.validationResults.issues
             .filter(i => i.type === 'error')
             .slice(0, 5);
@@ -555,7 +555,7 @@ program
       }
 
       if (result.semanticResults?.typeErrors && result.semanticResults.typeErrors.length > 0) {
-        console.log(`\n❌ ОШИБКИ ТИПОВ (первые 5):`);
+        console.log('\n❌ ОШИБКИ ТИПОВ (первые 5):');
         for (const error of result.semanticResults.typeErrors.slice(0, 5)) {
           console.log(`   • ${error.message}`);
           console.log(`     Expected: ${error.expected}, Got: ${error.actual}`);
@@ -569,7 +569,7 @@ program
         result.semanticResults?.cyclicDependencies &&
         result.semanticResults.cyclicDependencies.length > 0
       ) {
-        console.log(`\n🔄 ЦИКЛИЧЕСКИЕ ЗАВИСИМОСТИ:`);
+        console.log('\n🔄 ЦИКЛИЧЕСКИЕ ЗАВИСИМОСТИ:');
         for (const cycle of result.semanticResults.cyclicDependencies.slice(0, 3)) {
           console.log(`   • ${cycle.join(' → ')}`);
         }
@@ -579,7 +579,7 @@ program
         result.semanticResults?.unusedFunctions &&
         result.semanticResults.unusedFunctions.length > 0
       ) {
-        console.log(`\n⚠️ НЕИСПОЛЬЗУЕМЫЕ ФУНКЦИИ (первые 10):`);
+        console.log('\n⚠️ НЕИСПОЛЬЗУЕМЫЕ ФУНКЦИИ (первые 10):');
         for (const func of result.semanticResults.unusedFunctions.slice(0, 10)) {
           console.log(`   • ${func}`);
         }
@@ -588,11 +588,11 @@ program
       if (result.verificationResults && result.verificationResults.length > 0) {
         const verified = result.verificationResults.filter(r => r.isValid);
         const failed = result.verificationResults.filter(r => !r.isValid);
-        console.log(`\n🔬 ФОРМАЛЬНАЯ ВЕРИФИКАЦИЯ:`);
+        console.log('\n🔬 ФОРМАЛЬНАЯ ВЕРИФИКАЦИЯ:');
         console.log(`   • Верифицировано: ${verified.length}`);
         console.log(`   • Не верифицировано: ${failed.length}`);
         if (failed.length > 0) {
-          console.log(`\n   НЕ ВЕРИФИЦИРОВАННЫЕ ФУНКЦИИ:`);
+          console.log('\n   НЕ ВЕРИФИЦИРОВАННЫЕ ФУНКЦИИ:');
           for (const fail of failed.slice(0, 5)) {
             console.log(`   • ${(fail as any).functionName || 'unknown'}`);
             if (fail.counterexample) {
@@ -607,13 +607,13 @@ program
       if (result.eslintResults && result.eslintResults.length > 0) {
         const totalFixes = result.eslintResults.reduce((sum, r) => sum + r.fixes, 0);
         if (totalFixes > 0) {
-          console.log(`\n📝 ESLINT:`);
+          console.log('\n📝 ESLINT:');
           console.log(`   • Исправлено проблем: ${totalFixes}`);
         }
       }
 
       if (result.tsFixResults && result.tsFixResults.fixedCount > 0) {
-        console.log(`\n🔷 TYPESCRIPT:`);
+        console.log('\n🔷 TYPESCRIPT:');
         console.log(`   • Исправлено ошибок: ${result.tsFixResults.fixedCount}`);
         if (result.tsFixResults.remainingErrors > 0) {
           console.log(`   • Осталось ошибок: ${result.tsFixResults.remainingErrors}`);
@@ -684,7 +684,7 @@ program
       await fs.promises.writeFile(absoluteTarget, content, 'utf-8');
       console.log(`\n✅ Файл восстановлен: ${absoluteTarget}`);
     } catch (error) {
-      console.error(`\n❌ Ошибка восстановления:`, error);
+      console.error('\n❌ Ошибка восстановления:', error);
       process.exit(1);
     }
   });

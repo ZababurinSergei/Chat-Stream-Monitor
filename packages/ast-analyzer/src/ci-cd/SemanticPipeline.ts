@@ -1,12 +1,15 @@
 // src/ci-cd/SemanticPipeline.ts
 
-import { SourceFile, Project, Node, SyntaxKind, FunctionDeclaration } from 'ts-morph';
+import type { SourceFile, Node, FunctionDeclaration } from 'ts-morph';
+import { Project, SyntaxKind } from 'ts-morph';
 import { CFGAnalyzer } from '../semantic/CFGAnalyzer';
 import { CallGraphAnalyzer } from '../semantic/CallGraphAnalyzer';
 import { TypeAnalyzer } from '../semantic/TypeAnalyzer';
 import { DataFlowAnalyzer } from '../semantic/DataFlowAnalyzer';
-import { Z3Verifier, FunctionContract, range } from '../formal/Z3Verifier';
-import { JSXAnalyzer, JSXAnalysisResult } from '../semantic/JSXAnalyzer';
+import type { FunctionContract } from '../formal/Z3Verifier';
+import { Z3Verifier, range } from '../formal/Z3Verifier';
+import type { JSXAnalysisResult } from '../semantic/JSXAnalyzer';
+import { JSXAnalyzer } from '../semantic/JSXAnalyzer';
 import fs from 'fs';
 import path from 'path';
 import { glob } from 'glob';
@@ -169,7 +172,7 @@ export class SemanticPipeline {
             line: error.location.line,
             column: error.location.column,
             message: error.message,
-            suggestion: `Check prop types for component`,
+            suggestion: 'Check prop types for component',
           });
         }
 
@@ -1007,14 +1010,14 @@ export class SemanticPipeline {
   }
 
   private generateMarkdownReport(result: PipelineResult): string {
-    let md = `# 🔬 Semantic Analysis Report\n\n`;
+    let md = '# 🔬 Semantic Analysis Report\n\n';
     md += `**Status:** ${result.success ? '✅ PASSED' : '❌ FAILED'}\n`;
     md += `**Timestamp:** ${new Date(result.timestamp).toLocaleString()}\n`;
     md += `**Duration:** ${(result.duration / 1000).toFixed(2)}s\n\n`;
 
-    md += `## 📈 Metrics\n\n`;
-    md += `| Metric | Value |\n`;
-    md += `|--------|-------|\n`;
+    md += '## 📈 Metrics\n\n';
+    md += '| Metric | Value |\n';
+    md += '|--------|-------|\n';
     md += `| Files Analyzed | ${result.metrics.totalFiles} |\n`;
     md += `| Total Functions | ${result.metrics.totalFunctions} |\n`;
     md += `| Unused Functions | ${result.metrics.unusedFunctions} |\n`;
@@ -1026,15 +1029,15 @@ export class SemanticPipeline {
     md += `| Total Issues | ${result.issues.length} |\n\n`;
 
     if (result.jsxAnalysis && result.jsxAnalysis.elements.length > 0) {
-      md += `## ⚛️ JSX/TSX Analysis\n\n`;
-      md += `| Metric | Value |\n`;
-      md += `|--------|-------|\n`;
+      md += '## ⚛️ JSX/TSX Analysis\n\n';
+      md += '| Metric | Value |\n';
+      md += '|--------|-------|\n';
       md += `| JSX Elements | ${result.jsxAnalysis.elements.length} |\n`;
       md += `| Components | ${result.jsxAnalysis.componentProps.size} |\n`;
       md += `| Prop Type Errors | ${result.jsxAnalysis.propTypeErrors.length} |\n\n`;
     }
 
-    md += `## ⚠️ Issues\n\n`;
+    md += '## ⚠️ Issues\n\n';
     const byFile = new Map<string, PipelineIssue[]>();
     for (const issue of result.issues) {
       if (!byFile.has(issue.file)) byFile.set(issue.file, []);
@@ -1043,23 +1046,23 @@ export class SemanticPipeline {
 
     for (const [file, issues] of byFile) {
       md += `### 📄 ${path.basename(file)}\n\n`;
-      md += `| Type | Line | Message | Severity |\n`;
-      md += `|------|------|---------|----------|\n`;
+      md += '| Type | Line | Message | Severity |\n';
+      md += '|------|------|---------|----------|\n';
       for (const issue of issues) {
         const icon = issue.severity === 'error' ? '❌' : issue.severity === 'warning' ? '⚠️' : 'ℹ️';
         md += `| ${icon} ${issue.type} | ${issue.line} | ${issue.message} | ${issue.severity} |\n`;
       }
-      md += `\n`;
+      md += '\n';
     }
 
     if (result.verificationResults.length > 0) {
-      md += `## 🔬 Formal Verification\n\n`;
-      md += `| Function | Status | Time |\n`;
-      md += `|----------|--------|------|\n`;
+      md += '## 🔬 Formal Verification\n\n';
+      md += '| Function | Status | Time |\n';
+      md += '|----------|--------|------|\n';
       for (const vr of result.verificationResults) {
         md += `| ${vr.functionName} | ${vr.isValid ? '✅ Verified' : '❌ Failed'} | ${vr.time}ms |\n`;
       }
-      md += `\n`;
+      md += '\n';
     }
 
     return md;

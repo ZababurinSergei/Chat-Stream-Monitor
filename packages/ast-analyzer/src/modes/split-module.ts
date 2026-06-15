@@ -404,7 +404,7 @@ export function buildSplitModulePrompt(targetFile: string, options: any = {}) {
     });
 
     if (vueAnalysis) {
-      console.log(`\n🎯 Vue компонент обнаружен:`);
+      console.log('\n🎯 Vue компонент обнаружен:');
       console.log(`   📥 Props: ${vueAnalysis.props.names.length}`);
       console.log(`   📤 Events: ${vueAnalysis.emits.names.length}`);
       console.log(`   🎭 Slots: ${vueAnalysis.slots.length}`);
@@ -444,7 +444,7 @@ export function buildSplitModulePrompt(targetFile: string, options: any = {}) {
     vue: prefix && vueAnalysis ? `${prefix}-vue-analysis.json` : 'vue-analysis.json',
   };
 
-  console.log(`\n📊 Статистика файла:`);
+  console.log('\n📊 Статистика файла:');
   console.log(`   ├─ Функций: ${analysis.stats.totalFunctions}`);
   console.log(`   ├─ Классов: ${analysis.stats.totalClasses}`);
   console.log(`   ├─ Констант: ${analysis.stats.totalConstants}`);
@@ -465,50 +465,53 @@ export function buildSplitModulePrompt(targetFile: string, options: any = {}) {
   });
 
   // Генерация Markdown промпта
-  let markdown = `# 🔪 РАЗБИЕНИЕ ФАЙЛА НА МОДУЛИ\n\n`;
+  let markdown = '# 🔪 РАЗБИЕНИЕ ФАЙЛА НА МОДУЛИ\n\n';
   markdown += `**Сгенерировано:** ${new Date().toLocaleString()}\n`;
   markdown += `**Целевой файл:** \`${targetFile}\`\n`;
   markdown += `**Размер файла:** ${(fs.statSync(targetFile).size / 1024).toFixed(2)} KB\n`;
   markdown += `**Количество строк:** ${analysis.stats.totalLines}\n`;
-  markdown += `**Параметры анализа:**\n`;
+  markdown += '**Параметры анализа:**\n';
   markdown += `- Целевой размер кластера: ${targetClusterSize}\n`;
   markdown += `- Максимальный размер кластера: ${maxClusterSize}\n`;
   markdown += `- Глубина анализа: ${maxDepth}\n`;
   if (prefix) markdown += `- Префикс файлов: ${prefix}\n`;
   markdown += `- Паттерны исключения: \`${excludePatterns.join(', ')}\`\n\n`;
 
-  markdown += `---\n\n`;
+  markdown += '---\n\n';
 
-  markdown += `## 📋 ИНСТРУКЦИЯ ДЛЯ ИИ\n\n`;
-  markdown += `Ты — эксперт по рефакторингу кода. Твоя задача — **разбить монолитный файл на логически связанные модули**.\n\n`;
-  markdown += `### Критерии выделения модуля:\n\n`;
-  markdown += `1. **Связность (Cohesion)** — функции/классы, которые часто вызывают друг друга\n`;
-  markdown += `2. **Ответственность (Responsibility)** — общая тема/домен (например, валидация, API, UI)\n`;
-  markdown += `3. **Переиспользование (Reusability)** — сущности, которые могут быть полезны отдельно\n`;
-  markdown += `4. **Тестируемость (Testability)** — можно тестировать независимо\n`;
-  markdown += `5. **Размер модуля** — рекомендуется 50-200 строк на модуль\n\n`;
+  markdown += '## 📋 ИНСТРУКЦИЯ ДЛЯ ИИ\n\n';
+  markdown +=
+    'Ты — эксперт по рефакторингу кода. Твоя задача — **разбить монолитный файл на логически связанные модули**.\n\n';
+  markdown += '### Критерии выделения модуля:\n\n';
+  markdown += '1. **Связность (Cohesion)** — функции/классы, которые часто вызывают друг друга\n';
+  markdown +=
+    '2. **Ответственность (Responsibility)** — общая тема/домен (например, валидация, API, UI)\n';
+  markdown +=
+    '3. **Переиспользование (Reusability)** — сущности, которые могут быть полезны отдельно\n';
+  markdown += '4. **Тестируемость (Testability)** — можно тестировать независимо\n';
+  markdown += '5. **Размер модуля** — рекомендуется 50-200 строк на модуль\n\n';
 
-  markdown += `### Анти-паттерны, которых следует избегать:\n\n`;
-  markdown += `- ❌ Циклические зависимости между модулями\n`;
-  markdown += `- ❌ Один модуль знает слишком много о других\n`;
-  markdown += `- ❌ "Мусорный" модуль (Utils) со всем подряд\n`;
-  markdown += `- ❌ Слишком мелкие модули (1-2 функции)\n`;
-  markdown += `- ❌ Слишком крупные модули (>300 строк)\n\n`;
+  markdown += '### Анти-паттерны, которых следует избегать:\n\n';
+  markdown += '- ❌ Циклические зависимости между модулями\n';
+  markdown += '- ❌ Один модуль знает слишком много о других\n';
+  markdown += '- ❌ "Мусорный" модуль (Utils) со всем подряд\n';
+  markdown += '- ❌ Слишком мелкие модули (1-2 функции)\n';
+  markdown += '- ❌ Слишком крупные модули (>300 строк)\n\n';
 
-  markdown += `---\n\n`;
+  markdown += '---\n\n';
 
   // Vue компонент - специальный анализ
   if (targetFile.endsWith('.vue') && vueAnalysis) {
-    markdown += `## 🎯 VUE КОМПОНЕНТ - СПЕЦИАЛЬНЫЙ АНАЛИЗ\n\n`;
+    markdown += '## 🎯 VUE КОМПОНЕНТ - СПЕЦИАЛЬНЫЙ АНАЛИЗ\n\n';
     markdown += generateVueComponentReport(vueAnalysis);
-    markdown += `---\n\n`;
+    markdown += '---\n\n';
   }
 
   // Статистика
   if (includeStats) {
-    markdown += `## 📊 СТАТИСТИКА ФАЙЛА\n\n`;
-    markdown += `| Показатель | Значение |\n`;
-    markdown += `|------------|----------|\n`;
+    markdown += '## 📊 СТАТИСТИКА ФАЙЛА\n\n';
+    markdown += '| Показатель | Значение |\n';
+    markdown += '|------------|----------|\n';
     markdown += `| Всего строк | ${analysis.stats.totalLines} |\n`;
     markdown += `| Экспортируемых сущностей | ${analysis.stats.totalExports} |\n`;
     markdown += `| Функций | ${analysis.stats.totalFunctions} |\n`;
@@ -516,38 +519,38 @@ export function buildSplitModulePrompt(targetFile: string, options: any = {}) {
     markdown += `| Констант | ${analysis.stats.totalConstants} |\n`;
     markdown += `| Интерфейсов/Типов | ${analysis.stats.totalInterfaces + analysis.stats.totalTypes} |\n`;
     markdown += `| Импортов | ${analysis.stats.totalImports} |\n\n`;
-    markdown += `---\n\n`;
+    markdown += '---\n\n';
   }
 
   // Экспорты
   if (analysis.exports.length > 0) {
-    markdown += `## 📤 ЭКСПОРТИРУЕМЫЕ СУЩНОСТИ\n\n`;
-    markdown += `| Имя | Тип | Строки |\n`;
-    markdown += `|-----|-----|--------|\n`;
+    markdown += '## 📤 ЭКСПОРТИРУЕМЫЕ СУЩНОСТИ\n\n';
+    markdown += '| Имя | Тип | Строки |\n';
+    markdown += '|-----|-----|--------|\n';
     for (const exp of analysis.exports) {
       const lines = exp.endLine && exp.startLine ? `${exp.startLine}-${exp.endLine}` : '?';
       markdown += `| \`${exp.name}\` | ${exp.type} | ${lines} |\n`;
     }
-    markdown += `\n---\n\n`;
+    markdown += '\n---\n\n';
   }
 
   // Импорты
   if (analysis.imports.length > 0) {
-    markdown += `## 📥 ИМПОРТЫ\n\n`;
-    markdown += `\`\`\`typescript\n`;
+    markdown += '## 📥 ИМПОРТЫ\n\n';
+    markdown += '```typescript\n';
     for (const imp of analysis.imports) {
       const spec = imp.specifiers
         .map((s: any) => (s.imported === s.local ? s.imported : `${s.imported} as ${s.local}`))
         .join(', ');
       markdown += `import { ${spec} } from '${imp.source}';\n`;
     }
-    markdown += `\`\`\`\n\n---\n\n`;
+    markdown += '```\n\n---\n\n';
   }
 
   // Кластеры
   if (includeSuggestions && clusters.length > 0) {
-    markdown += `## 🔍 ВЫЯВЛЕННЫЕ КЛАСТЕРЫ (КАНДИДАТЫ В МОДУЛИ)\n\n`;
-    markdown += `На основе анализа вызовов функций (call graph) выявлены следующие кластеры:\n\n`;
+    markdown += '## 🔍 ВЫЯВЛЕННЫЕ КЛАСТЕРЫ (КАНДИДАТЫ В МОДУЛИ)\n\n';
+    markdown += 'На основе анализа вызовов функций (call graph) выявлены следующие кластеры:\n\n';
 
     for (let i = 0; i < clusters.length; i++) {
       const cluster = clusters[i];
@@ -560,28 +563,29 @@ export function buildSplitModulePrompt(targetFile: string, options: any = {}) {
       if (cluster.dependencies.length > 0) {
         markdown += `- **Зависимости:** ${cluster.dependencies.map((d: string) => `\`${d}\``).join(', ')}\n`;
       }
-      markdown += `\n`;
+      markdown += '\n';
     }
-    markdown += `---\n\n`;
+    markdown += '---\n\n';
   }
 
   // Циклические зависимости
   if (cyclicEdges.size > 0) {
-    markdown += `## ⚠️ ЦИКЛИЧЕСКИЕ ЗАВИСИМОСТИ\n\n`;
-    markdown += `Обнаружены циклические зависимости, которые необходимо устранить при разбиении:\n\n`;
+    markdown += '## ⚠️ ЦИКЛИЧЕСКИЕ ЗАВИСИМОСТИ\n\n';
+    markdown +=
+      'Обнаружены циклические зависимости, которые необходимо устранить при разбиении:\n\n';
     for (const edge of cyclicEdges) {
       markdown += `- 🔴 \`${edge}\`\n`;
     }
-    markdown += `\n---\n\n`;
+    markdown += '\n---\n\n';
   }
 
   // Предлагаемая структура
   if (includeSuggestions) {
-    markdown += `## 🎯 ПРЕДЛАГАЕМАЯ СТРУКТУРА МОДУЛЕЙ\n\n`;
-    markdown += `На основе анализа предлагается следующая структура:\n\n`;
+    markdown += '## 🎯 ПРЕДЛАГАЕМАЯ СТРУКТУРА МОДУЛЕЙ\n\n';
+    markdown += 'На основе анализа предлагается следующая структура:\n\n';
     markdown += `\`\`\`\n${path.dirname(targetFile)}/\n`;
-    markdown += `├── index.ts                 # Точка входа (реэкспорт)\n`;
-    markdown += `├── types.ts                 # Общие интерфейсы и типы\n`;
+    markdown += '├── index.ts                 # Точка входа (реэкспорт)\n';
+    markdown += '├── types.ts                 # Общие интерфейсы и типы\n';
 
     for (let i = 0; i < Math.min(clusters.length, 5); i++) {
       const cluster = clusters[i];
@@ -589,56 +593,56 @@ export function buildSplitModulePrompt(targetFile: string, options: any = {}) {
       markdown += `├── ${moduleName}.ts          # ${cluster.functions.slice(0, 3).join(', ')}${cluster.functions.length > 3 ? '...' : ''}\n`;
     }
 
-    markdown += `└── utils.ts                 # Общие утилиты\n`;
-    markdown += `\`\`\`\n\n---\n\n`;
+    markdown += '└── utils.ts                 # Общие утилиты\n';
+    markdown += '```\n\n---\n\n';
   }
 
   // Полный код
   if (includeFullCode) {
     const ext = path.extname(targetFile).slice(1);
     const lang = ext === 'ts' || ext === 'tsx' || ext === 'vue' ? 'typescript' : 'javascript';
-    markdown += `## 📄 ПОЛНЫЙ КОД ФАЙЛА\n\n`;
+    markdown += '## 📄 ПОЛНЫЙ КОД ФАЙЛА\n\n';
     markdown += `### \`${path.basename(targetFile)}\`\n`;
     markdown += `\`\`\`${lang}\n${analysis.fullCode}\n\`\`\`\n\n---\n\n`;
   }
 
   // Сжатая версия
   if (includeMinified && minified) {
-    markdown += `## ✂️ СЖАТАЯ ВЕРСИЯ (только сигнатуры)\n\n`;
+    markdown += '## ✂️ СЖАТАЯ ВЕРСИЯ (только сигнатуры)\n\n';
     markdown += `\`\`\`typescript\n${minified}\n\`\`\`\n\n---\n\n`;
   }
 
   // Граф вызовов
   if (includeGraph && Object.keys(analysis.callGraph).length > 0) {
-    markdown += `## 🕸️ ГРАФ ВЫЗОВОВ (Call Graph)\n\n`;
-    markdown += `\`\`\`\n`;
+    markdown += '## 🕸️ ГРАФ ВЫЗОВОВ (Call Graph)\n\n';
+    markdown += '```\n';
     for (const [caller, callees] of Object.entries(analysis.callGraph)) {
       if (callees.length > 0) {
         markdown += `${caller} → ${callees.join(', ')}\n`;
       }
     }
-    markdown += `\`\`\`\n\n---\n\n`;
+    markdown += '```\n\n---\n\n';
   }
 
   // Ожидаемый ответ
-  markdown += `## 📤 ОЖИДАЕМЫЙ ФОРМАТ ОТВЕТА\n\n`;
-  markdown += `### 1. Анализ текущей структуры (2-3 предложения)\n\n`;
-  markdown += `### 2. Предлагаемая структура модулей\n\n`;
+  markdown += '## 📤 ОЖИДАЕМЫЙ ФОРМАТ ОТВЕТА\n\n';
+  markdown += '### 1. Анализ текущей структуры (2-3 предложения)\n\n';
+  markdown += '### 2. Предлагаемая структура модулей\n\n';
   markdown += `\`\`\`\n${path.dirname(targetFile)}/\n`;
-  markdown += `├── modules/\n`;
-  markdown += `│   ├── module-a.ts\n`;
-  markdown += `│   ├── module-b.ts\n`;
-  markdown += `│   └── module-c.ts\n`;
-  markdown += `├── types.ts\n`;
-  markdown += `└── index.ts\n`;
-  markdown += `\`\`\`\n\n`;
-  markdown += `### 3. Код каждого нового модуля\n\n`;
-  markdown += `Для каждого модуля укажи:\n`;
-  markdown += `- Полный код файла\n`;
-  markdown += `- Какие функции/классы переносятся\n`;
-  markdown += `- Новые импорты/экспорты\n\n`;
-  markdown += `### 4. Обновленный корневой файл (index.ts)\n\n`;
-  markdown += `### 5. План миграции (пошагово)\n\n`;
+  markdown += '├── modules/\n';
+  markdown += '│   ├── module-a.ts\n';
+  markdown += '│   ├── module-b.ts\n';
+  markdown += '│   └── module-c.ts\n';
+  markdown += '├── types.ts\n';
+  markdown += '└── index.ts\n';
+  markdown += '```\n\n';
+  markdown += '### 3. Код каждого нового модуля\n\n';
+  markdown += 'Для каждого модуля укажи:\n';
+  markdown += '- Полный код файла\n';
+  markdown += '- Какие функции/классы переносятся\n';
+  markdown += '- Новые импорты/экспорты\n\n';
+  markdown += '### 4. Обновленный корневой файл (index.ts)\n\n';
+  markdown += '### 5. План миграции (пошагово)\n\n';
 
   // Сохранение файлов
   fs.writeFileSync(outputFiles.prompt, markdown, 'utf-8');
@@ -694,7 +698,7 @@ export function buildSplitModulePrompt(targetFile: string, options: any = {}) {
   );
 
   console.log(`\n${'='.repeat(60)}`);
-  console.log(`✅ ПРОМПТ ДЛЯ РАЗБИЕНИЯ СОЗДАН!`);
+  console.log('✅ ПРОМПТ ДЛЯ РАЗБИЕНИЯ СОЗДАН!');
   console.log(`${'='.repeat(60)}`);
   console.log(`📄 Выходные файлы${prefix ? ` (префикс: ${prefix})` : ''}:`);
   console.log(`   ├─ ${outputFiles.prompt}`);

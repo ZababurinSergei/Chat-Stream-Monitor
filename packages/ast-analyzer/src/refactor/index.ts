@@ -1,23 +1,31 @@
 // src/refactor/index.ts
 import { Node } from 'ts-morph';
-import { Project, ScriptTarget, ModuleKind, SourceFile } from 'ts-morph';
+import type { SourceFile } from 'ts-morph';
+import { Project, ScriptTarget, ModuleKind } from 'ts-morph';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { ModuleExtractor } from './ModuleExtractor.js';
 import { TypeScriptValidator } from './TypeScriptValidator.js';
 import { ESLintASTFixer } from './ESLintASTFixer.js';
-import { CodeValidator, ValidationResult } from './CodeValidator.js';
-import { CodeFixer, FixResult } from './CodeFixer.js';
+import type { ValidationResult } from './CodeValidator.js';
+import { CodeValidator } from './CodeValidator.js';
+import type { FixResult } from './CodeFixer.js';
+import { CodeFixer } from './CodeFixer.js';
 import { ImportManager } from './ImportManager.js';
 import { TemplateUpdater } from './TemplateUpdater.js';
 
 // Семантические модули
-import { CFGAnalyzer, ControlFlowGraph } from '../semantic/CFGAnalyzer.js';
-import { CallGraphAnalyzer, CallGraph } from '../semantic/CallGraphAnalyzer.js';
-import { TypeAnalyzer, TypeAnalysisResult, TypeError } from '../semantic/TypeAnalyzer.js';
-import { DataFlowAnalyzer, DataFlowGraph } from '../semantic/DataFlowAnalyzer.js';
-import { Z3Verifier, FunctionContract, VerificationResult, range } from '../formal/Z3Verifier.js';
+import type { ControlFlowGraph } from '../semantic/CFGAnalyzer.js';
+import { CFGAnalyzer } from '../semantic/CFGAnalyzer.js';
+import type { CallGraph } from '../semantic/CallGraphAnalyzer.js';
+import { CallGraphAnalyzer } from '../semantic/CallGraphAnalyzer.js';
+import type { TypeAnalysisResult, TypeError } from '../semantic/TypeAnalyzer.js';
+import { TypeAnalyzer } from '../semantic/TypeAnalyzer.js';
+import type { DataFlowGraph } from '../semantic/DataFlowAnalyzer.js';
+import { DataFlowAnalyzer } from '../semantic/DataFlowAnalyzer.js';
+import type { FunctionContract, VerificationResult } from '../formal/Z3Verifier.js';
+import { Z3Verifier, range } from '../formal/Z3Verifier.js';
 
 // ✅ Импорты для Tree-sitter WASM
 import { initTreeSitter } from '@codeflow-map/core';
@@ -137,7 +145,7 @@ export class AutoRefactor {
 
   // ✅ WASM путь для Tree-sitter
   private wasmPath: string;
-  private treeSitterInitialized: boolean = false;
+  private treeSitterInitialized = false;
 
   constructor(options: RefactorOptions = {}) {
     this.options = {
@@ -572,7 +580,7 @@ export class AutoRefactor {
       lines: sourceFile.getFullText().split('\n').length,
     };
 
-    this.log(`\n  📄 ИНФОРМАЦИЯ О ФАЙЛЕ:`);
+    this.log('\n  📄 ИНФОРМАЦИЯ О ФАЙЛЕ:');
     this.log(`     Имя: ${fileInfo.name}`);
     this.log(`     Размер: ${(fileInfo.size / 1024).toFixed(2)} KB`);
     this.log(`     Строк: ${fileInfo.lines}`);
@@ -592,15 +600,15 @@ export class AutoRefactor {
       const loops = cfg.findLoops();
 
       this.log(`     ✅ Анализ завершен за ${Date.now() - cfgStart}ms`);
-      this.log(`     📊 Результаты CFG:`);
+      this.log('     📊 Результаты CFG:');
       this.log(`        • Базовых блоков: ${cfg.blocks.length}`);
-      this.log(`        • Входных точек: 1`);
-      this.log(`        • Выходных точек: 1`);
+      this.log('        • Входных точек: 1');
+      this.log('        • Выходных точек: 1');
       this.log(`        • Циклов: ${loops.length}`);
       this.log(`        • Недостижимых блоков: ${unreachable.length}`);
 
       if (unreachable.length > 0) {
-        this.log(`        ⚠️ Недостижимый код найден в блоках:`);
+        this.log('        ⚠️ Недостижимый код найден в блоках:');
         for (const block of unreachable.slice(0, 5)) {
           const line = block.instructions[0]?.getStartLineNumber() || 1;
           this.log(`           • строка ${line}`);
@@ -615,9 +623,9 @@ export class AutoRefactor {
       this.log(`        • Цикломатическая сложность: ${cyclomaticComplexity}`);
 
       if (cyclomaticComplexity > 10) {
-        this.log(`        ⚠️ Сложность выше рекомендуемой (10). Рекомендуется рефакторинг.`);
+        this.log('        ⚠️ Сложность выше рекомендуемой (10). Рекомендуется рефакторинг.');
       } else if (cyclomaticComplexity > 20) {
-        this.log(`        🔴 КРИТИЧЕСКАЯ сложность! Необходим рефакторинг.`);
+        this.log('        🔴 КРИТИЧЕСКАЯ сложность! Необходим рефакторинг.');
       }
     } catch (error) {
       this.log(`     ❌ Ошибка CFG анализа: ${error}`);
@@ -641,7 +649,7 @@ export class AutoRefactor {
       results.callGraph = callGraph;
 
       this.log(`     ✅ Анализ завершен за ${Date.now() - cgStart}ms`);
-      this.log(`     📊 Результаты Call Graph:`);
+      this.log('     📊 Результаты Call Graph:');
       this.log(`        • Функций: ${callGraph.nodes.size}`);
       this.log(`        • Вызовов: ${callGraph.edges.length}`);
       this.log(`        • Entry points: ${callGraph.entryPoints.length}`);
@@ -690,7 +698,7 @@ export class AutoRefactor {
         const typeErrors = typeAnalysis.findTypeErrors();
 
         this.log(`     ✅ Анализ завершен за ${Date.now() - tsStart}ms`);
-        this.log(`     📊 Результаты TypeScript:`);
+        this.log('     📊 Результаты TypeScript:');
         this.log(`        • Ошибок типов: ${typeErrors.length}`);
 
         if (typeErrors.length > 0) {
@@ -706,7 +714,7 @@ export class AutoRefactor {
     } else {
       this.log('\n  📝 3. TYPESCRIPT АНАЛИЗ');
       this.log('     ────────────────────');
-      this.log(`     ⏭️ Пропущен (файл не является TypeScript)`);
+      this.log('     ⏭️ Пропущен (файл не является TypeScript)');
     }
 
     // 4. Data Flow Анализ
@@ -722,7 +730,7 @@ export class AutoRefactor {
       const stats = dataFlow.getVariableStats();
 
       this.log(`     ✅ Анализ завершен за ${Date.now() - dfStart}ms`);
-      this.log(`     📊 Результаты Data Flow:`);
+      this.log('     📊 Результаты Data Flow:');
       this.log(`        • Всего переменных: ${stats.total}`);
       this.log(`        • Используемых: ${stats.used}`);
       this.log(`        • Неиспользуемых: ${stats.unused}`);
@@ -730,14 +738,14 @@ export class AutoRefactor {
       this.log(`        • Переопределенных констант: ${stats.reassignedConstants}`);
 
       if (unusedVars.length > 0) {
-        this.log(`        ⚠️ Неиспользуемые переменные:`);
+        this.log('        ⚠️ Неиспользуемые переменные:');
         for (const v of unusedVars.slice(0, 10)) {
           this.log(`           • ${v.name} (строка ${v.line})`);
         }
       }
 
       if (reassignedConsts.length > 0) {
-        this.log(`        🔴 Переопределенные константы:`);
+        this.log('        🔴 Переопределенные константы:');
         for (const c of reassignedConsts) {
           this.log(`           • ${c.name} (строка ${c.line}) - используйте 'let' вместо 'const'`);
         }
@@ -758,7 +766,7 @@ export class AutoRefactor {
         results.jsx = jsxResult;
 
         this.log(`     ✅ Анализ завершен за ${Date.now() - jsxStart}ms`);
-        this.log(`     📊 Результаты JSX анализа:`);
+        this.log('     📊 Результаты JSX анализа:');
         this.log(`        • JSX элементов: ${jsxResult.elements.length}`);
         this.log(`        • Компонентов: ${jsxResult.componentProps.size}`);
         this.log(`        • Ошибок типов пропсов: ${jsxResult.propTypeErrors.length}`);
@@ -766,7 +774,7 @@ export class AutoRefactor {
         this.log(`        • Отсутствующих импортов: ${jsxResult.missingImports.length}`);
 
         if (jsxResult.jsxLintingIssues.length > 0) {
-          this.log(`        ⚠️ Проблемы линтинга:`);
+          this.log('        ⚠️ Проблемы линтинга:');
           for (const issue of jsxResult.jsxLintingIssues.slice(0, 5)) {
             this.log(`           • [${issue.ruleId}] ${issue.message}`);
           }
@@ -788,7 +796,7 @@ export class AutoRefactor {
 
         if (vueAnalysis) {
           this.log(`     ✅ Анализ завершен за ${Date.now() - vueStart}ms`);
-          this.log(`     📊 Результаты Vue анализа:`);
+          this.log('     📊 Результаты Vue анализа:');
           this.log(`        • Props: ${vueAnalysis.props.names.length}`);
           this.log(`        • Events: ${vueAnalysis.emits.names.length}`);
           this.log(`        • Slots: ${vueAnalysis.slots.length}`);
@@ -826,8 +834,8 @@ export class AutoRefactor {
 
     const metricsData = collectedMetrics;
 
-    this.log(`\n  📈 МЕТРИКИ КАЧЕСТВА КОДА:`);
-    this.log(`     ─────────────────────────`);
+    this.log('\n  📈 МЕТРИКИ КАЧЕСТВА КОДА:');
+    this.log('     ─────────────────────────');
     const complexityIcon =
       metricsData.cyclomaticComplexity > 10
         ? '🔴'
@@ -842,59 +850,59 @@ export class AutoRefactor {
     this.log(`     • Ошибок типов: ${metricsData.typeErrorsCount}`);
     this.log(`     • Проблем Data Flow: ${metricsData.dataFlowIssuesCount}`);
 
-    this.log(`\n  💡 РЕКОМЕНДАЦИИ ПО ОПТИМАЛЬНЫМ НАСТРОЙКАМ:`);
-    this.log(`     ───────────────────────────────────────────`);
+    this.log('\n  💡 РЕКОМЕНДАЦИИ ПО ОПТИМАЛЬНЫМ НАСТРОЙКАМ:');
+    this.log('     ───────────────────────────────────────────');
 
     if (metricsData.cyclomaticComplexity > 15) {
-      this.log(`     🔧 Для сложного кода (>15):`);
-      this.log(`        --target-size 4   (увеличить размер кластера)`);
-      this.log(`        --max-size 12     (разрешить большие кластеры)`);
-      this.log(`        --min-cohesion 50 (снизить требования к связности)`);
+      this.log('     🔧 Для сложного кода (>15):');
+      this.log('        --target-size 4   (увеличить размер кластера)');
+      this.log('        --max-size 12     (разрешить большие кластеры)');
+      this.log('        --min-cohesion 50 (снизить требования к связности)');
     } else if (metricsData.totalFunctions > 30) {
-      this.log(`     🔧 Для большого количества функций (>30):`);
-      this.log(`        --target-size 3   (стандартный размер кластера)`);
-      this.log(`        --max-size 10     (ограничить размер кластера)`);
-      this.log(`        --min-cohesion 60 (стандартная связность)`);
+      this.log('     🔧 Для большого количества функций (>30):');
+      this.log('        --target-size 3   (стандартный размер кластера)');
+      this.log('        --max-size 10     (ограничить размер кластера)');
+      this.log('        --min-cohesion 60 (стандартная связность)');
     } else if (metricsData.totalFunctions < 10) {
-      this.log(`     🔧 Для небольшого файла (<10 функций):`);
-      this.log(`        --target-size 2   (меньшие кластеры)`);
-      this.log(`        --max-size 5      (максимальный размер кластера)`);
-      this.log(`        --min-cohesion 70 (высокая связность)`);
+      this.log('     🔧 Для небольшого файла (<10 функций):');
+      this.log('        --target-size 2   (меньшие кластеры)');
+      this.log('        --max-size 5      (максимальный размер кластера)');
+      this.log('        --min-cohesion 70 (высокая связность)');
     } else {
-      this.log(`     🔧 Стандартные настройки:`);
-      this.log(`        --target-size 3   (стандартный размер кластера)`);
-      this.log(`        --max-size 10     (максимальный размер кластера)`);
-      this.log(`        --min-cohesion 60 (минимальная связность)`);
+      this.log('     🔧 Стандартные настройки:');
+      this.log('        --target-size 3   (стандартный размер кластера)');
+      this.log('        --max-size 10     (максимальный размер кластера)');
+      this.log('        --min-cohesion 60 (минимальная связность)');
     }
 
-    this.log(`\n     📋 Рекомендуемые флаги анализа:`);
+    this.log('\n     📋 Рекомендуемые флаги анализа:');
     if (metricsData.typeErrorsCount > 0) {
-      this.log(`        --formal         (формальная верификация для поиска ошибок)`);
+      this.log('        --formal         (формальная верификация для поиска ошибок)');
     }
 
     if (filePath.endsWith('.vue')) {
-      this.log(`        --no-vue         (отключить Vue анализ для ускорения)`);
+      this.log('        --no-vue         (отключить Vue анализ для ускорения)');
     }
 
     if (metricsData.unusedFunctionsCount > 5) {
-      this.log(`\n     🗑️ Код нуждается в очистке:`);
+      this.log('\n     🗑️ Код нуждается в очистке:');
       this.log(`        • Удалите ${metricsData.unusedFunctionsCount} неиспользуемых функций`);
-      this.log(`        • Используйте --fix-imports для автоисправления импортов`);
+      this.log('        • Используйте --fix-imports для автоисправления импортов');
     }
 
     const score = this.calculateQualityScore(metricsData);
-    this.log(`\n  🎯 ОБЩАЯ ОЦЕНКА КАЧЕСТВА КОДА:`);
-    this.log(`     ───────────────────────────────`);
+    this.log('\n  🎯 ОБЩАЯ ОЦЕНКА КАЧЕСТВА КОДА:');
+    this.log('     ───────────────────────────────');
     this.log(`     Оценка: ${score}/100`);
 
     if (score >= 80) {
-      this.log(`     ✅ Отличное качество кода!`);
+      this.log('     ✅ Отличное качество кода!');
     } else if (score >= 60) {
-      this.log(`     🟡 Хорошее качество, есть что улучшить`);
+      this.log('     🟡 Хорошее качество, есть что улучшить');
     } else if (score >= 40) {
-      this.log(`     ⚠️ Среднее качество, требуется рефакторинг`);
+      this.log('     ⚠️ Среднее качество, требуется рефакторинг');
     } else {
-      this.log(`     🔴 Низкое качество, необходим серьезный рефакторинг`);
+      this.log('     🔴 Низкое качество, необходим серьезный рефакторинг');
     }
 
     return results;
@@ -1141,7 +1149,7 @@ export class AutoRefactor {
     });
 
     if (this.options.verbose) {
-      this.log(`\n📊 Детальный анализ кластеров:`);
+      this.log('\n📊 Детальный анализ кластеров:');
       for (const cluster of clusters) {
         this.log(`\n   📦 ${cluster.name}:`);
         this.log(`      Функции: ${cluster.functions.join(', ')}`);
@@ -1399,20 +1407,20 @@ export class AutoRefactor {
 
   private logSemanticStatus(): void {
     if (this.options.semanticAnalysis) {
-      this.log(`🧠 Семантический анализ: ВКЛЮЧЕН`);
-      if (this.options.formalVerification) this.log(`🔬 Формальная верификация: ВКЛЮЧЕНА (Z3)`);
-      if (this.options.dataFlowAnalysis) this.log(`🌊 Data Flow анализ: ВКЛЮЧЕН`);
-      if (this.options.callGraphAnalysis) this.log(`🕸️ Call Graph анализ: ВКЛЮЧЕН`);
-      if (this.options.jsxAnalysis) this.log(`⚛️ JSX/TSX анализ: ВКЛЮЧЕН`);
-      if (this.options.vueAnalysis) this.log(`🎯 Vue анализ: ВКЛЮЧЕН`);
+      this.log('🧠 Семантический анализ: ВКЛЮЧЕН');
+      if (this.options.formalVerification) this.log('🔬 Формальная верификация: ВКЛЮЧЕНА (Z3)');
+      if (this.options.dataFlowAnalysis) this.log('🌊 Data Flow анализ: ВКЛЮЧЕН');
+      if (this.options.callGraphAnalysis) this.log('🕸️ Call Graph анализ: ВКЛЮЧЕН');
+      if (this.options.jsxAnalysis) this.log('⚛️ JSX/TSX анализ: ВКЛЮЧЕН');
+      if (this.options.vueAnalysis) this.log('🎯 Vue анализ: ВКЛЮЧЕН');
     }
     if (this.options.eslintCheck)
       this.log(`📝 ESLint: ВКЛЮЧЕН${this.options.eslintFix ? ' (с автоисправлением)' : ''}`);
-    if (this.options.typeCheck) this.log(`🔷 TypeScript проверка: ВКЛЮЧЕНА`);
-    if (this.options.autoFix) this.log(`🔧 Автоисправление: ВКЛЮЧЕНО`);
-    if (this.options.optimizeImports) this.log(`📦 Оптимизация импортов: ВКЛЮЧЕНА`);
+    if (this.options.typeCheck) this.log('🔷 TypeScript проверка: ВКЛЮЧЕНА');
+    if (this.options.autoFix) this.log('🔧 Автоисправление: ВКЛЮЧЕНО');
+    if (this.options.optimizeImports) this.log('📦 Оптимизация импортов: ВКЛЮЧЕНА');
     if (this.options.extractIsolatedFunctions)
-      this.log(`⚡ Выделение изолированных функций: ВКЛЮЧЕНО`);
+      this.log('⚡ Выделение изолированных функций: ВКЛЮЧЕНО');
   }
 
   private logClusters(clusters: any[]): void {

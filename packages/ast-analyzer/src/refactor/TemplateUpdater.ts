@@ -55,7 +55,7 @@ export class TemplateUpdater {
     template: string,
     exportsMap: Map<string, string>
   ): Promise<string> {
-    let updated = template;
+    const updated = template;
 
     // Обновляем вызовы функций в интерполяциях
     for (const [exportName] of exportsMap) {

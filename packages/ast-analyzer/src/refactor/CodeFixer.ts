@@ -15,7 +15,7 @@ export interface FixResult {
 
 export class CodeFixer {
   private project: Project;
-  private fixesApplied: number = 0;
+  private fixesApplied = 0;
   private eslintFixer: ESLintASTFixer;
 
   constructor() {
@@ -100,7 +100,7 @@ export class CodeFixer {
   /**
    * Автоматическое исправление проблем через AST
    */
-  async autoFix(issues: ValidationIssue[], createBackup: boolean = true): Promise<FixResult[]> {
+  async autoFix(issues: ValidationIssue[], createBackup = true): Promise<FixResult[]> {
     const results: FixResult[] = [];
     const tsFilesToFix = new Map<string, ValidationIssue[]>();
     const eslintFilesToFix = new Set<string>();
@@ -140,7 +140,7 @@ export class CodeFixer {
 
     // Исправляем ESLint проблемы через AST
     if (eslintFilesToFix.size > 0) {
-      console.log(`\n🔧 Исправление ESLint проблем через AST...`);
+      console.log('\n🔧 Исправление ESLint проблем через AST...');
       const eslintResults = await this.eslintFixer.fixFiles(
         Array.from(eslintFilesToFix),
         createBackup
@@ -440,7 +440,7 @@ export class CodeFixer {
           const newText = `(${expression.getText()} as any)[${argument.getText()}]`;
           node.replaceWithText(newText);
           fixed = true;
-          console.log(`  🔧 TS7053: Добавлено 'as any' для индексного доступа`);
+          console.log("  🔧 TS7053: Добавлено 'as any' для индексного доступа");
         }
       }
     });
@@ -494,7 +494,7 @@ export class CodeFixer {
         sourceFile.replaceWithText(
           lines.map((l: string, i: number) => (i === lineIndex ? newLine : l)).join('\n')
         );
-        console.log(`  🔧 TS2322: Добавлено 'as any' для приведения типа`);
+        console.log("  🔧 TS2322: Добавлено 'as any' для приведения типа");
         return true;
       }
     }
@@ -547,7 +547,7 @@ export class CodeFixer {
         if (declaration && !declaration.getTypeNode()) {
           declaration.setType('any');
           fixed = true;
-          console.log(`  🔧 TS18046: Добавлен тип 'any' для переменной в catch блоке`);
+          console.log("  🔧 TS18046: Добавлен тип 'any' для переменной в catch блоке");
         }
       }
     });
@@ -563,7 +563,7 @@ export class CodeFixer {
     const imports = sourceFile.getImportDeclarations();
 
     for (const imp of imports) {
-      let specifier = imp.getModuleSpecifierValue();
+      const specifier = imp.getModuleSpecifierValue();
       if (
         specifier &&
         specifier.startsWith('.') &&
@@ -613,7 +613,7 @@ export class CodeFixer {
   /**
    * Исправление ESLint проблем через AST (делегируется ESLintASTFixer)
    */
-  async fixESLintIssues(filePaths: string[], createBackup: boolean = true): Promise<FixResult[]> {
+  async fixESLintIssues(filePaths: string[], createBackup = true): Promise<FixResult[]> {
     const results = await this.eslintFixer.fixFiles(filePaths, createBackup);
 
     const totalFixes = results.reduce((sum, r) => sum + r.fixes, 0);

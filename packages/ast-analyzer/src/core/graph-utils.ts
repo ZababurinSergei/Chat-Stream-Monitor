@@ -63,11 +63,12 @@ export function convertToDOT(
 ): string {
   const { rootKey, graph } = graphData;
 
-  let dot = `digraph "Dependency Graph" {\n`;
-  dot += `  rankdir=LR;\n`;
-  dot += `  splines=true;\n`;
-  dot += `  node [shape=box, style="filled,rounded", color="#4f46e5", fontname="Arial", fillcolor="#f3f4f6", fontcolor="#1f2937", penwidth=1];\n`;
-  dot += `  edge [color="#9ca3af", arrowhead=vee, penwidth=1];\n`;
+  let dot = 'digraph "Dependency Graph" {\n';
+  dot += '  rankdir=LR;\n';
+  dot += '  splines=true;\n';
+  dot +=
+    '  node [shape=box, style="filled,rounded", color="#4f46e5", fontname="Arial", fillcolor="#f3f4f6", fontcolor="#1f2937", penwidth=1];\n';
+  dot += '  edge [color="#9ca3af", arrowhead=vee, penwidth=1];\n';
 
   // Корневой узел выделяем звездочкой
   dot += `  "${rootKey}" [fillcolor="#4f46e5", fontcolor="#ffffff", penwidth=2, label="⭐ ${rootKey}"];\n`;
@@ -88,7 +89,7 @@ export function convertToDOT(
     }
   });
 
-  dot += `}\n`;
+  dot += '}\n';
   return dot;
 }
 

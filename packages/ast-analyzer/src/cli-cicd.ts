@@ -90,7 +90,7 @@ program
       console.log(`\n📄 Отчёт сохранён: ${outputPath}`);
     }
 
-    console.log(`\n📊 ИТОГИ ПРОВЕРКИ:`);
+    console.log('\n📊 ИТОГИ ПРОВЕРКИ:');
     console.log(`   ❌ Ошибок: ${result.summary.totalErrors}`);
     console.log(`   ⚠️ Предупреждений: ${result.summary.totalWarnings}`);
     console.log(`   🔧 Автоисправимых: ${result.summary.totalFixes}`);
@@ -131,7 +131,7 @@ program
         console.log(`   📄 ${path.basename(fix.file)}:${fix.line} - ${fix.message}`);
       }
 
-      console.log(`\n💡 Для реального исправления запустите без флага --dry-run`);
+      console.log('\n💡 Для реального исправления запустите без флага --dry-run');
       process.exit(0);
     }
 
@@ -227,7 +227,7 @@ program
 
     const filesWithIssues = results.filter(r => r.messages.length > 0 && !r.fixed);
     if (filesWithIssues.length > 0) {
-      console.log(`\n⚠️ Файлы с оставшимися проблемами:`);
+      console.log('\n⚠️ Файлы с оставшимися проблемами:');
       for (const file of filesWithIssues.slice(0, 10)) {
         const errors = file.messages.filter(m => m.severity === 2).length;
         const warnings = file.messages.filter(m => m.severity === 1).length;
@@ -238,7 +238,7 @@ program
       }
       process.exit(1);
     } else {
-      console.log(`\n✨ ESLint проверка пройдена успешно!`);
+      console.log('\n✨ ESLint проверка пройдена успешно!');
     }
   });
 
@@ -333,7 +333,7 @@ program
 
     // JSX статистика
     if (options.jsx && jsxFiles.length > 0) {
-      console.log(`\n⚛️ JSX/TSX Статистика:`);
+      console.log('\n⚛️ JSX/TSX Статистика:');
       console.log(`   📁 Файлов с JSX: ${jsxFiles.length}`);
       console.log(
         `   💡 Запустите "npx ast-cicd eslint ${paths.join(' ')} --fix" для проверки React правил`
@@ -382,7 +382,7 @@ program
     const validator = new TypeScriptValidator();
     const result = await validator.validateFiles([...allTsFiles, ...allJsFiles]);
 
-    console.log(`\n📊 СТАТИСТИКА:`);
+    console.log('\n📊 СТАТИСТИКА:');
     console.log(`   ✅ Успешно: ${result.success ? 'ДА' : 'НЕТ'}`);
     console.log(`   ❌ Ошибок: ${result.summary.totalErrors}`);
     console.log(`   ⚠️ Предупреждений: ${result.summary.totalWarnings}`);
@@ -391,10 +391,10 @@ program
     // Проверка наличия ESLint конфигурации
     const eslintConfigPath = path.join(projectPath, '.eslintrc.json');
     if (fs.existsSync(eslintConfigPath)) {
-      console.log(`\n📝 ESLint конфигурация: ✅ найдена`);
+      console.log('\n📝 ESLint конфигурация: ✅ найдена');
     } else {
-      console.log(`\n📝 ESLint конфигурация: ❌ отсутствует`);
-      console.log(`   💡 Создайте: npx ast-cicd eslint-init`);
+      console.log('\n📝 ESLint конфигурация: ❌ отсутствует');
+      console.log('   💡 Создайте: npx ast-cicd eslint-init');
     }
 
     // Группировка ошибок по файлам
@@ -407,7 +407,7 @@ program
     }
 
     if (issuesByFile.size > 0) {
-      console.log(`\n📁 ОШИБКИ ПО ФАЙЛАМ:`);
+      console.log('\n📁 ОШИБКИ ПО ФАЙЛАМ:');
       const sorted = Array.from(issuesByFile.entries()).sort((a, b) => b[1] - a[1]);
       for (const [file, count] of sorted.slice(0, 10)) {
         const isJsx = file.endsWith('.tsx') || file.endsWith('.jsx');
@@ -579,7 +579,7 @@ program
     const outputPath = path.resolve(options.output);
     fs.writeFileSync(outputPath, JSON.stringify(analysisResults, null, 2));
 
-    console.log(`\n📊 ИТОГИ АНАЛИЗА:`);
+    console.log('\n📊 ИТОГИ АНАЛИЗА:');
     const totalComponents = analysisResults.reduce((sum, r) => sum + (r.componentCount || 0), 0);
     console.log(`   ⚛️ Всего компонентов: ${totalComponents}`);
     console.log(`   📄 Проанализировано файлов: ${analysisResults.length}`);
@@ -592,7 +592,7 @@ program
 async function collectFiles(
   paths: string[],
   recursive: boolean,
-  includeJsx: boolean = true
+  includeJsx = true
 ): Promise<string[]> {
   const files: string[] = [];
   const extensions = includeJsx

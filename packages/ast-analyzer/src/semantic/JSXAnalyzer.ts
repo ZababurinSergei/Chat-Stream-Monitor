@@ -1,6 +1,8 @@
 // src/semantic/JSXAnalyzer.ts
-import { SourceFile, Node, SyntaxKind } from 'ts-morph';
-import { TypeAnalyzer, TypeInfo, TypeError } from './TypeAnalyzer.js';
+import type { SourceFile, Node } from 'ts-morph';
+import { SyntaxKind } from 'ts-morph';
+import type { TypeInfo, TypeError } from './TypeAnalyzer.js';
+import { TypeAnalyzer } from './TypeAnalyzer.js';
 
 export interface JSXElementInfo {
   name: string;
@@ -510,7 +512,7 @@ export class JSXAnalyzer {
     report += '⚛️ JSX/TSX ANALYSIS REPORT\n';
     report += '='.repeat(60) + '\n\n';
 
-    report += `📊 Statistics:\n`;
+    report += '📊 Statistics:\n';
     report += `   • JSX elements: ${result.elements.length}\n`;
     report += `   • Components: ${result.componentProps.size}\n`;
     report += `   • Missing imports: ${result.missingImports.length}\n`;
@@ -518,7 +520,7 @@ export class JSXAnalyzer {
     report += `   • Linting issues: ${result.jsxLintingIssues.length}\n\n`;
 
     if (result.elements.length > 0) {
-      report += `📦 JSX Elements:\n`;
+      report += '📦 JSX Elements:\n';
       for (const element of result.elements.slice(0, 20)) {
         report += `   • <${element.name}> at line ${element.line}\n`;
         if (element.props.size > 0) {
@@ -532,7 +534,7 @@ export class JSXAnalyzer {
     }
 
     if (result.componentProps.size > 0) {
-      report += `🧩 Components:\n`;
+      report += '🧩 Components:\n';
       for (const [name, props] of result.componentProps) {
         report += `   • ${name}: ${props.size} prop(s)\n`;
       }
@@ -540,7 +542,7 @@ export class JSXAnalyzer {
     }
 
     if (result.propTypeErrors.length > 0) {
-      report += `❌ Prop Type Errors:\n`;
+      report += '❌ Prop Type Errors:\n';
       for (const error of result.propTypeErrors.slice(0, 10)) {
         report += `   • ${error.message}\n`;
         report += `     Expected: ${error.expected}, Got: ${error.actual}\n`;
@@ -552,7 +554,7 @@ export class JSXAnalyzer {
     }
 
     if (result.jsxLintingIssues.length > 0) {
-      report += `⚠️ Linting Issues:\n`;
+      report += '⚠️ Linting Issues:\n';
       for (const issue of result.jsxLintingIssues.slice(0, 10)) {
         const icon = issue.severity === 'error' ? '❌' : '⚠️';
         report += `   ${icon} ${issue.ruleId}: ${issue.message}\n`;
@@ -564,7 +566,7 @@ export class JSXAnalyzer {
     }
 
     if (result.missingImports.length > 0) {
-      report += `📦 Missing imports:\n`;
+      report += '📦 Missing imports:\n';
       for (const imp of result.missingImports) {
         report += `   • ${imp}\n`;
       }

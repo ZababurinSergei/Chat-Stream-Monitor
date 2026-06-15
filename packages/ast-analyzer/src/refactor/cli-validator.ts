@@ -57,18 +57,18 @@ program
     }
 
     // Вывод сводки в консоль
-    console.log(`\n📊 ИТОГОВАЯ СВОДКА:`);
+    console.log('\n📊 ИТОГОВАЯ СВОДКА:');
     console.log(`   ❌ Ошибок: ${result.summary.errors}`);
     console.log(`   ⚠️  Предупреждений: ${result.summary.warnings}`);
     console.log(`   ℹ️  Замечаний: ${result.summary.info}`);
     console.log(`   🔧 Автоисправимых: ${result.summary.autoFixable}`);
 
     if (result.summary.errors > 0) {
-      console.log(`\n💡 Для автоматического исправления запустите:`);
+      console.log('\n💡 Для автоматического исправления запустите:');
       console.log(`   npx ast-validator fix ${paths.join(' ')} ${options.recursive ? '-r' : ''}`);
       process.exit(1);
     } else {
-      console.log(`\n✅ ВАЛИДАЦИЯ ПРОЙДЕНА УСПЕШНО!`);
+      console.log('\n✅ ВАЛИДАЦИЯ ПРОЙДЕНА УСПЕШНО!');
     }
   });
 
@@ -108,7 +108,7 @@ program
       console.log(
         `   Всего проблем: ${result.summary.errors + result.summary.warnings + result.summary.info}`
       );
-      console.log(`   Из них автоисправимых: 0`);
+      console.log('   Из них автоисправимых: 0');
       return;
     }
 
@@ -145,7 +145,7 @@ program
         console.log(`   📄 ${path.basename(file)}: ${count} проблем`);
       }
 
-      console.log(`\n💡 Для реального исправления запустите без флага --dry-run`);
+      console.log('\n💡 Для реального исправления запустите без флага --dry-run');
       return;
     }
 
@@ -156,13 +156,13 @@ program
     const successCount = fixResults.filter((r: any) => r.success).length;
     const totalFixes = fixResults.reduce((sum: number, r: any) => sum + r.fixes, 0);
 
-    console.log(`\n📊 ИТОГИ ИСПРАВЛЕНИЯ:`);
+    console.log('\n📊 ИТОГИ ИСПРАВЛЕНИЯ:');
     console.log(`   ✅ Успешно обработано: ${successCount}/${fixResults.length} файлов`);
     console.log(`   🔧 Исправлено проблем: ${totalFixes}`);
     console.log(`   💾 Бэкапы: ${options.backup ? 'созданы' : 'не созданы'}`);
 
     if (totalFixes > 0) {
-      console.log(`\n💡 Рекомендуется запустить повторную проверку:`);
+      console.log('\n💡 Рекомендуется запустить повторную проверку:');
       console.log(
         `   npx ast-validator validate ${paths.join(' ')} ${options.recursive ? '-r' : ''}`
       );
@@ -213,27 +213,27 @@ program
       const validator = new CodeValidator();
       const result = await validator.validateFiles(files);
 
-      console.log(`\n📊 ТЕКУЩЕЕ СОСТОЯНИЕ:`);
+      console.log('\n📊 ТЕКУЩЕЕ СОСТОЯНИЕ:');
       console.log(`   ❌ Ошибок: ${result.summary.errors}`);
       console.log(`   ⚠️  Предупреждений: ${result.summary.warnings}`);
       console.log(`   🔧 Автоисправимых: ${result.summary.autoFixable}`);
 
       if (result.summary.errors === 0 && result.summary.warnings === 0) {
-        console.log(`\n✨ КОД В ИДЕАЛЬНОМ СОСТОЯНИИ!`);
+        console.log('\n✨ КОД В ИДЕАЛЬНОМ СОСТОЯНИИ!');
         allIssuesFixed = true;
         break;
       }
 
       if (result.summary.autoFixable === 0) {
-        console.log(`\n⚠️ Остались проблемы, но они не могут быть исправлены автоматически`);
-        console.log(`   Сохранение отчёта оставшихся проблем...`);
+        console.log('\n⚠️ Остались проблемы, но они не могут быть исправлены автоматически');
+        console.log('   Сохранение отчёта оставшихся проблем...');
         await validator.saveReport(result, './remaining-issues.md');
-        console.log(`   📄 Отчёт: remaining-issues.md`);
+        console.log('   📄 Отчёт: remaining-issues.md');
         break;
       }
 
       // Исправление
-      console.log(`\n🔧 ИСПРАВЛЕНИЕ АВТОИСПРАВИМЫХ ПРОБЛЕМ...`);
+      console.log('\n🔧 ИСПРАВЛЕНИЕ АВТОИСПРАВИМЫХ ПРОБЛЕМ...');
       const fixer = new CodeFixer();
       const fixResults = await fixer.autoFix(result.issues, options.backup);
       const totalFixes = fixResults.reduce((sum: number, r: any) => sum + r.fixes, 0);
@@ -242,16 +242,16 @@ program
 
     if (iteration >= maxIterations && !allIssuesFixed) {
       console.log(`\n⚠️ Достигнуто максимальное количество итераций (${maxIterations})`);
-      console.log(`   Некоторые проблемы могут требовать ручного исправления`);
+      console.log('   Некоторые проблемы могут требовать ручного исправления');
 
       // Финальная проверка
       const validator = new CodeValidator();
       const finalResult = await validator.validateFiles(files);
       await validator.saveReport(finalResult, './final-report.md');
-      console.log(`   📄 Финальный отчёт: final-report.md`);
+      console.log('   📄 Финальный отчёт: final-report.md');
     }
 
-    console.log(`\n✅ ПОЛНЫЙ ЦИКЛ ЗАВЕРШЁН!`);
+    console.log('\n✅ ПОЛНЫЙ ЦИКЛ ЗАВЕРШЁН!');
   });
 
 /**
@@ -281,7 +281,7 @@ program
     await fs.promises.writeFile(options.output, htmlReport, 'utf-8');
 
     console.log(`\n✅ Отчёт сохранён: ${options.output}`);
-    console.log(`   Откройте файл в браузере для детального просмотра`);
+    console.log('   Откройте файл в браузере для детального просмотра');
   });
 
 /**
@@ -323,12 +323,12 @@ program
       byExtension[ext].size += size;
     }
 
-    console.log(`\n📁 ОБЩАЯ СТАТИСТИКА:`);
+    console.log('\n📁 ОБЩАЯ СТАТИСТИКА:');
     console.log(`   📄 Файлов: ${files.length}`);
     console.log(`   📝 Строк кода: ${totalLines.toLocaleString()}`);
     console.log(`   💾 Размер: ${(totalSize / 1024).toFixed(2)} KB`);
 
-    console.log(`\n📊 ПО РАСШИРЕНИЯМ:`);
+    console.log('\n📊 ПО РАСШИРЕНИЯМ:');
     for (const [ext, stats] of Object.entries(byExtension)) {
       console.log(`   ${ext || 'без расширения'}:`);
       console.log(`      Файлов: ${stats.count}`);
@@ -571,7 +571,7 @@ function generateHTMLReport(result: any, files: string[]): string {
                                     <div class="issue-message">${escapeHtml(issue.message)}</div>
                                     ${issue.line ? `<div class="issue-location">Строка ${issue.line}${issue.column ? `, колонка ${issue.column}` : ''}</div>` : ''}
                                     ${issue.suggestion ? `<div class="issue-suggestion">💡 ${escapeHtml(issue.suggestion)}</div>` : ''}
-                                    ${issue.autoFixable ? `<div class="issue-suggestion" style="background: #d4edda; color: #155724;">🔧 Может быть исправлено автоматически</div>` : ''}
+                                    ${issue.autoFixable ? '<div class="issue-suggestion" style="background: #d4edda; color: #155724;">🔧 Может быть исправлено автоматически</div>' : ''}
                                 </div>
                             </div>
                         `

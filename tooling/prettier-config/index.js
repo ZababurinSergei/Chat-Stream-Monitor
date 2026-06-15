@@ -169,7 +169,8 @@ export default {
       },
     },
     {
-      files: [".prettierrc", ".eslintrc", ".stylelintrc"],
+      // Удалено упоминание .eslintrc
+      files: [".prettierrc", ".stylelintrc"],
       options: {
         parser: "json",
         tabWidth: 2,

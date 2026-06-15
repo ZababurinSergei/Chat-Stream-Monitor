@@ -24,7 +24,8 @@ import { ESLintPipeline, type ESLintConfig } from './ESLintPipeline.js';
 import { glob } from 'glob';
 import fs from 'fs';
 import path from 'path';
-import { Project, Node, SourceFile } from 'ts-morph';
+import type { SourceFile } from 'ts-morph';
+import { Project, Node } from 'ts-morph';
 import { JSXAnalyzer, type JSXAnalysisResult } from '../semantic/JSXAnalyzer.js';
 
 // ============================================
@@ -102,7 +103,7 @@ export interface FixResult {
 // ============================================
 
 export class AutoTypeScriptFixer {
-  private fixedCount: number = 0;
+  private fixedCount = 0;
   private project: Project;
 
   constructor() {
@@ -122,7 +123,7 @@ export class AutoTypeScriptFixer {
 
   async autoFixFiles(
     filePaths: string[],
-    createBackup: boolean = true
+    createBackup = true
   ): Promise<{ success: boolean; fixedCount: number }> {
     console.log(`\n🔧 Auto-fixing ${filePaths.length} TypeScript files...`);
 
@@ -147,7 +148,7 @@ export class AutoTypeScriptFixer {
    * @param createBackup Создавать ли резервную копию
    * @returns true если были сделаны изменения, false если изменений не требуется
    */
-  private async fixFile(filePath: string, createBackup: boolean = true): Promise<boolean> {
+  private async fixFile(filePath: string, createBackup = true): Promise<boolean> {
     console.log(`  🔧 Fixing: ${path.basename(filePath)}`);
 
     let hasChanges = false;
@@ -588,7 +589,7 @@ export class AutoTypeScriptFixer {
     const currentDir = path.dirname(sourceFile.getFilePath());
 
     for (const imp of imports) {
-      let specifier = imp.getModuleSpecifierValue();
+      const specifier = imp.getModuleSpecifierValue();
       if (
         specifier &&
         specifier.startsWith('.') &&
@@ -656,14 +657,14 @@ export class AutoTypeScriptFixer {
 // ============================================
 
 export class TypeScriptFixer {
-  private fixedCount: number = 0;
+  private fixedCount = 0;
   private autoFixer: AutoTypeScriptFixer;
 
   constructor() {
     this.autoFixer = new AutoTypeScriptFixer();
   }
 
-  async fixFile(filePath: string, createBackup: boolean = true): Promise<FixResult> {
+  async fixFile(filePath: string, createBackup = true): Promise<FixResult> {
     let backupPath: string | undefined;
 
     try {
@@ -770,7 +771,7 @@ export class CICPipeline {
     console.log('🚀 CI/CD FULL PIPELINE');
     console.log('='.repeat(60));
     console.log(`📁 Files to process: ${filePaths.length}`);
-    console.log(`🔧 Options:`, options);
+    console.log('🔧 Options:', options);
 
     // Stage 1: Семантический анализ
     if (options.semanticAnalysis !== false) {
@@ -825,7 +826,7 @@ export class CICPipeline {
                 line: error.location.line,
                 column: error.location.column,
                 message: error.message,
-                suggestion: `Check prop types for component`,
+                suggestion: 'Check prop types for component',
               });
               results.summary.errors++;
             }
@@ -1006,7 +1007,7 @@ export class CICPipeline {
     console.log('='.repeat(60));
     console.log(`✅ Status: ${results.success ? 'PASSED' : 'FAILED'}`);
     console.log(`⏱️  Duration: ${(results.duration / 1000).toFixed(2)}s`);
-    console.log(`📈 Metrics:`);
+    console.log('📈 Metrics:');
     console.log(`   • Total issues: ${results.summary.totalIssues}`);
     console.log(`   • Errors: ${results.summary.errors}`);
     console.log(`   • Warnings: ${results.summary.warnings}`);
@@ -1065,7 +1066,7 @@ export class CICPipeline {
     const errors = issues.filter(i => i.severity === 'error').length;
     const warnings = issues.filter(i => i.severity === 'warning').length;
 
-    console.log(`\n📊 Results:`);
+    console.log('\n📊 Results:');
     console.log(`   ❌ Errors: ${errors}`);
     console.log(`   ⚠️  Warnings: ${warnings}`);
     console.log(`   ⏱️  Time: ${((Date.now() - startTime) / 1000).toFixed(2)}s`);
@@ -1082,7 +1083,7 @@ export class CICPipeline {
   /**
    * Проверка только семантики (без TypeScript)
    */
-  async semanticCheck(filePaths: string[], formal: boolean = false): Promise<PipelineResult> {
+  async semanticCheck(filePaths: string[], formal = false): Promise<PipelineResult> {
     console.log('\n🔬 SEMANTIC CHECK');
     console.log('='.repeat(40));
 
@@ -1097,7 +1098,7 @@ export class CICPipeline {
    */
   async fullVerification(
     filePaths: string[],
-    outputDir: string = './verification-reports'
+    outputDir = './verification-reports'
   ): Promise<FullVerificationResult> {
     const startTime = Date.now();
     const results: FullVerificationResult = {
@@ -1233,7 +1234,7 @@ export class CICPipeline {
   private async applyTypeScriptFixes(
     _filePaths: string[],
     issues: PipelineIssue[],
-    _createBackup: boolean = true
+    _createBackup = true
   ): Promise<number> {
     let fixed = 0;
 
@@ -1421,19 +1422,19 @@ export class CICPipeline {
     report += `**Status:** ${result.success ? '✅ PASSED' : '❌ FAILED'}\n`;
     report += `**Timestamp:** ${new Date(result.timestamp).toLocaleString()}\n\n`;
 
-    report += `## Summary\n\n`;
-    report += `| Metric | Value |\n`;
-    report += `|--------|-------|\n`;
+    report += '## Summary\n\n';
+    report += '| Metric | Value |\n';
+    report += '|--------|-------|\n';
     report += `| Errors | ${result.summary.totalErrors} |\n`;
     report += `| Warnings | ${result.summary.totalWarnings} |\n`;
     report += `| Auto-fixable | ${result.summary.totalFixes} |\n\n`;
 
     if (result.errors.length > 0) {
-      report += `## Errors\n\n`;
+      report += '## Errors\n\n';
       for (const error of result.errors) {
         report += `- **${error.file}**: ${error.message}\n`;
       }
-      report += `\n`;
+      report += '\n';
     }
 
     return report;
@@ -1445,9 +1446,9 @@ export class CICPipeline {
     report += `**Timestamp:** ${new Date(result.timestamp).toLocaleString()}\n`;
     report += `**Duration:** ${(result.duration / 1000).toFixed(2)}s\n\n`;
 
-    report += `## Summary\n\n`;
-    report += `| Metric | Value |\n`;
-    report += `|--------|-------|\n`;
+    report += '## Summary\n\n';
+    report += '| Metric | Value |\n';
+    report += '|--------|-------|\n';
     report += `| Total Issues | ${result.summary.totalIssues} |\n`;
     report += `| Errors | ${result.summary.errors} |\n`;
     report += `| Warnings | ${result.summary.warnings} |\n`;
@@ -1457,10 +1458,10 @@ export class CICPipeline {
     if (result.jsxAnalysis && result.jsxAnalysis.size > 0) {
       report += `| JSX Components Analyzed | ${result.jsxAnalysis.size} |\n`;
     }
-    report += `\n`;
+    report += '\n';
 
     if (result.issues.length > 0) {
-      report += `## Issues\n\n`;
+      report += '## Issues\n\n';
       for (const issue of result.issues.slice(0, 20)) {
         report += `### ${issue.file}:${issue.line}\n`;
         report += `- **Type:** ${issue.type}\n`;
@@ -1469,7 +1470,7 @@ export class CICPipeline {
         if (issue.suggestion) {
           report += `- **Suggestion:** ${issue.suggestion}\n`;
         }
-        report += `\n`;
+        report += '\n';
       }
     }
 
@@ -1486,7 +1487,7 @@ export class CICPipeline {
  */
 export async function collectFilesForAnalysis(
   paths: string[],
-  recursive: boolean = true
+  recursive = true
 ): Promise<string[]> {
   const files: string[] = [];
   const extensions = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.vue'];

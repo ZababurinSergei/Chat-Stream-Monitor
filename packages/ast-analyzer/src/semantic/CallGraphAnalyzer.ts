@@ -52,7 +52,7 @@ export class CallGraphAnalyzer {
 
     if (!fs.existsSync(this.wasmPath)) {
       console.warn(`  ⚠️ WASM directory not found: ${this.wasmPath}`);
-      console.warn(`  💡 Create grammars/ directory with WASM files from tree-sitter-wasms`);
+      console.warn('  💡 Create grammars/ directory with WASM files from tree-sitter-wasms');
       this.initialized = false;
       return;
     }
@@ -60,7 +60,7 @@ export class CallGraphAnalyzer {
     const wasmFiles = fs.readdirSync(this.wasmPath).filter((f: string) => f.endsWith('.wasm'));
     if (wasmFiles.length === 0) {
       console.warn(`  ⚠️ No WASM files found in: ${this.wasmPath}`);
-      console.warn(`  💡 Copy WASM files from node_modules/tree-sitter-wasms/out/ to grammars/`);
+      console.warn('  💡 Copy WASM files from node_modules/tree-sitter-wasms/out/ to grammars/');
       this.initialized = false;
       return;
     }
@@ -98,7 +98,7 @@ export class CallGraphAnalyzer {
     return this.initialized;
   }
 
-  async analyze(entryPoint: string, maxDepth: number = 5): Promise<CallGraph> {
+  async analyze(entryPoint: string, maxDepth = 5): Promise<CallGraph> {
     await this.ensureInitialized();
 
     if (!this.initialized) {
@@ -146,7 +146,7 @@ export class CallGraphAnalyzer {
   /**
    * Анализирует только один файл, без рекурсивного обхода директории
    */
-  async analyzeSingle(filePath: string, _maxDepth: number = 5): Promise<CallGraph> {
+  async analyzeSingle(filePath: string, _maxDepth = 5): Promise<CallGraph> {
     await this.ensureInitialized();
 
     if (!this.initialized) {
@@ -323,7 +323,7 @@ export class CallGraphAnalyzer {
    */
   private getCurrentFunction(node: any): string | null {
     let current = node;
-    let maxDepth = 50; // Предотвращаем бесконечный цикл
+    const maxDepth = 50; // Предотвращаем бесконечный цикл
     let depth = 0;
 
     while (current && depth < maxDepth) {
@@ -488,11 +488,7 @@ export class CallGraphAnalyzer {
     return firstChar === firstChar.toUpperCase();
   }
 
-  private async parseDirectory(
-    dir: string,
-    maxDepth: number,
-    currentDepth: number = 0
-  ): Promise<void> {
+  private async parseDirectory(dir: string, maxDepth: number, currentDepth = 0): Promise<void> {
     if (currentDepth > maxDepth) return;
 
     let files: string[];
@@ -720,7 +716,7 @@ export class CallGraphAnalyzer {
   /**
    * Экспорт графа вызовов в формате JSON с поддержкой JSX
    */
-  exportToJSON(includeJSXInfo: boolean = false): any {
+  exportToJSON(includeJSXInfo = false): any {
     const exportData: any = {
       nodes: Array.from(this.nodes.entries()).map(([name, node]) => ({
         name,
@@ -761,16 +757,16 @@ export class CallGraphAnalyzer {
         node.name.charAt(0) === node.name.charAt(0).toUpperCase()
     );
 
-    report += `## 📊 Statistics\n\n`;
-    report += `| Metric | Value |\n`;
-    report += `|--------|-------|\n`;
+    report += '## 📊 Statistics\n\n';
+    report += '| Metric | Value |\n';
+    report += '|--------|-------|\n';
     report += `| Total components | ${jsxComponents.length} |\n`;
     report += `| Entry components | ${jsxComponents.filter(c => c.isEntry).length} |\n`;
     report += `| Async components | ${jsxComponents.filter(c => c.isAsync).length} |\n`;
     report += `| Exported components | ${jsxComponents.filter(c => c.isExported).length} |\n\n`;
 
     if (jsxComponents.length > 0) {
-      report += `## 🧩 Components\n\n`;
+      report += '## 🧩 Components\n\n';
       for (const component of jsxComponents.slice(0, 20)) {
         report += `### ${component.name}\n`;
         report += `- **File:** \`${path.basename(component.file)}\`\n`;
@@ -785,7 +781,7 @@ export class CallGraphAnalyzer {
           report += `- **Used by:** ${component.callers.map(c => c.name).join(', ')}\n`;
         }
 
-        report += `\n`;
+        report += '\n';
       }
 
       if (jsxComponents.length > 20) {

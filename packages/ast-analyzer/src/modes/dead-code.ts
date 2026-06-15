@@ -108,24 +108,24 @@ export function findDeadCode(targetFile: string): string | null {
   }
 
   // Формирование отчета
-  let report = `# 🗑️ ОТЧЕТ ПО НЕИСПОЛЬЗУЕМОМУ КОДУ\n\n`;
+  let report = '# 🗑️ ОТЧЕТ ПО НЕИСПОЛЬЗУЕМОМУ КОДУ\n\n';
   report += `**Анализируемый файл:** \`${targetRelKey}\`\n\n`;
 
   if (deadLocals.length === 0 && deadExports.length === 0) {
-    report += `✨ **Отлично!** Мертвый код не обнаружен.\n`;
+    report += '✨ **Отлично!** Мертвый код не обнаружен.\n';
   } else {
     if (deadLocals.length > 0) {
-      report += `## 🚫 Внутренний мертвый код\n`;
-      report += `*Локальные сущности, объявленные, но не используемые в файле:*\n\n`;
+      report += '## 🚫 Внутренний мертвый код\n';
+      report += '*Локальные сущности, объявленные, но не используемые в файле:*\n\n';
       deadLocals.forEach(name => (report += `  - [ ] \`${name}\`\n`));
-      report += `\n`;
+      report += '\n';
     }
 
     if (deadExports.length > 0) {
-      report += `## 📦 Бесполезные экспорты\n`;
-      report += `*Экспортируются, но не импортируются нигде в проекте:*\n\n`;
+      report += '## 📦 Бесполезные экспорты\n';
+      report += '*Экспортируются, но не импортируются нигде в проекте:*\n\n';
       deadExports.forEach(name => (report += `  - [ ] \`export ${name}\`\n`));
-      report += `\n`;
+      report += '\n';
     }
   }
 

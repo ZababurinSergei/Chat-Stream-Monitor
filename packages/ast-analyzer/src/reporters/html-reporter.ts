@@ -27,8 +27,8 @@ export function generateHTMLReport(
   hasCycles: boolean
 ): string {
   const banner = hasCycles
-    ? `<div class="banner error">⚠️ Обнаружены циклические зависимости!</div>`
-    : `<div class="banner success">✅ Циклических зависимостей нет</div>`;
+    ? '<div class="banner error">⚠️ Обнаружены циклические зависимости!</div>'
+    : '<div class="banner success">✅ Циклических зависимостей нет</div>';
 
   return `<!DOCTYPE html>
 <html lang="ru">

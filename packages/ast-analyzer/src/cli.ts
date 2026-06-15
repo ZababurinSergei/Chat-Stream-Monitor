@@ -634,7 +634,7 @@ export async function runCLI(): Promise<void> {
       // Дополнительно загружаем и показываем алиасы
       const tsConfig = loadTsConfig(path.dirname(resolvedTsconfig));
       if (tsConfig?.compilerOptions?.paths) {
-        console.log(`🔗 Найдены алиасы в tsconfig:`);
+        console.log('🔗 Найдены алиасы в tsconfig:');
         Object.entries(tsConfig.compilerOptions.paths).forEach(([alias, targets]) => {
           console.log(`   ${alias} → ${targets[0]}`);
         });
@@ -660,7 +660,7 @@ export async function runCLI(): Promise<void> {
     // Преобразуем targetPath в абсолютный путь относительно исходной директории
     if (!path.isAbsolute(targetPath)) {
       targetPath = path.resolve(originalCwd, targetPath);
-      console.log(`📄 Преобразован относительный путь в абсолютный:`);
+      console.log('📄 Преобразован относительный путь в абсолютный:');
       console.log(`   Было: ${originalTargetPath}`);
       console.log(`   Стало: ${targetPath}`);
     }
@@ -681,7 +681,7 @@ export async function runCLI(): Promise<void> {
     // НОВЫЙ РЕЖИМ: semantic - семантический анализ
     if (mode === 'semantic') {
       console.log(`\n${'='.repeat(60)}`);
-      console.log(`🔬 СЕМАНТИЧЕСКИЙ АНАЛИЗ КОДА`);
+      console.log('🔬 СЕМАНТИЧЕСКИЙ АНАЛИЗ КОДА');
       console.log(`${'='.repeat(60)}\n`);
 
       // Собираем все пути
@@ -706,7 +706,7 @@ export async function runCLI(): Promise<void> {
     // НОВЫЙ РЕЖИМ: verify - формальная верификация
     if (mode === 'verify') {
       console.log(`\n${'='.repeat(60)}`);
-      console.log(`🔬 ФОРМАЛЬНАЯ ВЕРИФИКАЦИЯ`);
+      console.log('🔬 ФОРМАЛЬНАЯ ВЕРИФИКАЦИЯ');
       console.log(`${'='.repeat(60)}\n`);
 
       const z3 = new Z3Verifier();
@@ -733,7 +733,7 @@ export async function runCLI(): Promise<void> {
         };
       }
 
-      console.log(`\n📋 Контракт для верификации:`);
+      console.log('\n📋 Контракт для верификации:');
       console.log(`   Функция: ${contract.name}`);
       console.log(
         `   Параметры: ${contract.params.map((p: any) => `${p.name}:${p.type}`).join(', ')}`
@@ -745,12 +745,12 @@ export async function runCLI(): Promise<void> {
       const result = await z3.verifyFunction(contract);
 
       if (result.isValid) {
-        console.log(`\n✅ Функция ВЕРИФИЦИРОВАНА!`);
+        console.log('\n✅ Функция ВЕРИФИЦИРОВАНА!');
         console.log(`   ${contract.name} удовлетворяет всем контрактам`);
       } else {
-        console.log(`\n❌ Функция НЕ ВЕРИФИЦИРОВАНА!`);
+        console.log('\n❌ Функция НЕ ВЕРИФИЦИРОВАНА!');
         if (result.counterexample) {
-          console.log(`\n🔍 Контрпример:`);
+          console.log('\n🔍 Контрпример:');
           for (const [key, value] of result.counterexample) {
             console.log(`   ${key} = ${value}`);
           }
@@ -768,7 +768,7 @@ export async function runCLI(): Promise<void> {
     // Режим: refactor - автоматический рефакторинг
     if (mode === 'refactor') {
       console.log(`\n${'='.repeat(60)}`);
-      console.log(`🔧 АВТОМАТИЧЕСКИЙ РЕФАКТОРИНГ`);
+      console.log('🔧 АВТОМАТИЧЕСКИЙ РЕФАКТОРИНГ');
       console.log(`${'='.repeat(60)}\n`);
 
       const refactor = new AutoRefactor({
@@ -787,7 +787,7 @@ export async function runCLI(): Promise<void> {
       // Если включен семантический анализ, проверяем результат
       if (options?.semanticAnalysis && result.success && !options?.dryRun) {
         console.log(`\n${'='.repeat(60)}`);
-        console.log(`🔬 СЕМАНТИЧЕСКАЯ ПРОВЕРКА РЕЗУЛЬТАТА`);
+        console.log('🔬 СЕМАНТИЧЕСКАЯ ПРОВЕРКА РЕЗУЛЬТАТА');
         console.log(`${'='.repeat(60)}\n`);
 
         const pipeline = new SemanticPipeline();
@@ -797,8 +797,8 @@ export async function runCLI(): Promise<void> {
         });
 
         if (!semanticResult.success) {
-          console.log(`\n⚠️ ВНИМАНИЕ: Семантический анализ выявил проблемы!`);
-          console.log(`   Проверьте отчет для деталей.`);
+          console.log('\n⚠️ ВНИМАНИЕ: Семантический анализ выявил проблемы!');
+          console.log('   Проверьте отчет для деталей.');
         }
       }
 
@@ -807,7 +807,7 @@ export async function runCLI(): Promise<void> {
         process.exit(1);
       }
 
-      console.log(`\n✨ Рефакторинг успешно завершён!`);
+      console.log('\n✨ Рефакторинг успешно завершён!');
       if (result.modules && result.modules.length > 0) {
         console.log(`📦 Создано модулей: ${result.modules.length}`);
         for (let i = 0; i < result.modules.length; i++) {
@@ -825,7 +825,7 @@ export async function runCLI(): Promise<void> {
     // Режим: analyze - анализ без изменений
     if (mode === 'analyze') {
       console.log(`\n${'='.repeat(60)}`);
-      console.log(`🔍 АНАЛИЗ ФАЙЛА (без изменений)`);
+      console.log('🔍 АНАЛИЗ ФАЙЛА (без изменений)');
       console.log(`${'='.repeat(60)}\n`);
 
       const refactor = new AutoRefactor({
@@ -846,7 +846,7 @@ export async function runCLI(): Promise<void> {
           console.log(`      Экспорты: ${module.exports.join(', ')}`);
         }
       } else {
-        console.log(`\nℹ️ Не найдено кандидатов для выделения в модули`);
+        console.log('\nℹ️ Не найдено кандидатов для выделения в модули');
       }
       return;
     }
@@ -854,7 +854,7 @@ export async function runCLI(): Promise<void> {
     // Режим: vue-analyze
     if (mode === 'vue-analyze' || mode === 'vue') {
       console.log(`\n${'='.repeat(60)}`);
-      console.log(`🎯 АНАЛИЗ VUE КОМПОНЕНТА`);
+      console.log('🎯 АНАЛИЗ VUE КОМПОНЕНТА');
       console.log(`${'='.repeat(60)}\n`);
 
       const analysis = analyzeVueComponent(targetPath, options as any);
@@ -869,15 +869,15 @@ export async function runCLI(): Promise<void> {
         timestamp: new Date().toISOString(),
       };
       fs.writeFileSync('vue-analysis.json', JSON.stringify(jsonOutput, null, 2));
-      console.log(`✅ JSON анализ сохранен: vue-analysis.json`);
+      console.log('✅ JSON анализ сохранен: vue-analysis.json');
 
       // Сохраняем Markdown отчет
       const markdownReport = generateVueComponentReport(analysis);
       fs.writeFileSync('vue-analysis.md', markdownReport);
-      console.log(`✅ Markdown отчет сохранен: vue-analysis.md`);
+      console.log('✅ Markdown отчет сохранен: vue-analysis.md');
 
       // Выводим краткую информацию
-      console.log(`\n📊 КРАТКАЯ ИНФОРМАЦИЯ:`);
+      console.log('\n📊 КРАТКАЯ ИНФОРМАЦИЯ:');
       console.log(`   🏷️  Компонент: ${analysis.componentName}`);
       console.log(`   📥 Props: ${analysis.props.names.length}`);
       console.log(`   📤 Events: ${analysis.emits.names.length}`);
@@ -889,23 +889,23 @@ export async function runCLI(): Promise<void> {
       console.log(`   💻 TypeScript: ${analysis.script.isTS ? '✅' : '❌'}`);
       console.log(`   📦 Setup: ${analysis.script.isSetup ? '✅' : '❌'}`);
 
-      console.log(`\n✨ Анализ Vue компонента завершен!`);
+      console.log('\n✨ Анализ Vue компонента завершен!');
       return;
     }
 
     // Mode: split-module
     if (mode === 'split-module' || mode === 'split') {
       console.log(`\n${'='.repeat(60)}`);
-      console.log(`🔪 РАЗБИЕНИЕ ФАЙЛА НА МОДУЛИ`);
+      console.log('🔪 РАЗБИЕНИЕ ФАЙЛА НА МОДУЛИ');
       console.log(`${'='.repeat(60)}`);
 
       const result = buildSplitModulePrompt(targetPath, options as SplitModuleOptions);
       if (result) {
-        console.log(`\n📋 Инструкция:`);
+        console.log('\n📋 Инструкция:');
         console.log(`   1. Откройте ${result.outputFiles.prompt}`);
-        console.log(`   2. Скопируйте содержимое`);
-        console.log(`   3. Отправьте в ChatGPT/Claude/Gemini`);
-        console.log(`   4. Получите готовую структуру модулей`);
+        console.log('   2. Скопируйте содержимое');
+        console.log('   3. Отправьте в ChatGPT/Claude/Gemini');
+        console.log('   4. Получите готовую структуру модулей');
       }
       return;
     }
@@ -913,7 +913,7 @@ export async function runCLI(): Promise<void> {
     // Mode: minify-folder
     if (mode === 'minify-folder') {
       console.log(`\n${'='.repeat(60)}`);
-      console.log(`📁 РЕКУРСИВНАЯ МИНИФИКАЦИЯ ПРОЕКТА`);
+      console.log('📁 РЕКУРСИВНАЯ МИНИФИКАЦИЯ ПРОЕКТА');
       console.log(`${'='.repeat(60)}`);
 
       minifyFolder(targetPath, options as MinifyFolderOptions);
@@ -927,7 +927,7 @@ export async function runCLI(): Promise<void> {
       if (report) {
         fs.writeFileSync('ai-dead-code-report.md', report);
         console.log(report);
-        console.log(`\n✅ Отчет сохранен: ai-dead-code-report.md`);
+        console.log('\n✅ Отчет сохранен: ai-dead-code-report.md');
       }
       return;
     }
@@ -942,7 +942,7 @@ export async function runCLI(): Promise<void> {
       const report = runImpactAnalysis(targetPath, extraArg);
       fs.writeFileSync('ai-impact-report.md', report);
       console.log(report);
-      console.log(`\n✅ Отчет сохранен: ai-impact-report.md`);
+      console.log('\n✅ Отчет сохранен: ai-impact-report.md');
       return;
     }
 
@@ -952,7 +952,7 @@ export async function runCLI(): Promise<void> {
       console.log(`🎒 Сборка промпт-пака для ${targetPath} (глубина ${depth})`);
       const pack = buildAiPromptPack(targetPath, depth);
       fs.writeFileSync('ai-prompt-bundle.md', pack);
-      console.log(`\n✅ Пакет сохранен: ai-prompt-bundle.md`);
+      console.log('\n✅ Пакет сохранен: ai-prompt-bundle.md');
       console.log(`📊 Размер: ${(pack.length / 1024).toFixed(2)} KB`);
       return;
     }
@@ -963,7 +963,7 @@ export async function runCLI(): Promise<void> {
       const minified = minifyForAI(targetPath);
       if (minified) {
         fs.writeFileSync('ai-context.txt', minified);
-        console.log(`\n✅ Минифицированный код сохранен: ai-context.txt`);
+        console.log('\n✅ Минифицированный код сохранен: ai-context.txt');
         const originalSize = fs.statSync(targetPath).size;
         console.log(`📊 Исходный размер: ${(originalSize / 1024).toFixed(2)} KB`);
         console.log(`📊 Сжатый размер: ${(minified.length / 1024).toFixed(2)} KB`);
@@ -996,13 +996,13 @@ export async function runCLI(): Promise<void> {
 
       const dotContent = convertToDOT(resultData, cyclicEdges);
       fs.writeFileSync('output.dot', dotContent);
-      console.log(`   ✅ output.dot`);
+      console.log('   ✅ output.dot');
 
-      console.log(`⚙️ Генерация SVG...`);
+      console.log('⚙️ Генерация SVG...');
       const graphviz = await Graphviz.load();
       const svgContent = graphviz.dot(dotContent);
       fs.writeFileSync('output.svg', svgContent);
-      console.log(`   ✅ output.svg`);
+      console.log('   ✅ output.svg');
 
       const htmlContent = generateHTMLReport(
         svgContent,
@@ -1012,9 +1012,9 @@ export async function runCLI(): Promise<void> {
         hasCycles
       );
       fs.writeFileSync('report.html', htmlContent);
-      console.log(`   ✅ report.html`);
+      console.log('   ✅ report.html');
 
-      console.log(`\n🎉 Готово! Откройте report.html в браузере`);
+      console.log('\n🎉 Готово! Откройте report.html в браузере');
 
       if (hasCycles) {
         console.log(`\n⚠️ Обнаружено ${cyclicEdges.size} циклических зависимостей:`);
@@ -1071,13 +1071,13 @@ export async function runCLI(): Promise<void> {
 
       const dotContent = convertToDOT(resultData, cyclicEdges);
       fs.writeFileSync('output.dot', dotContent);
-      console.log(`   ✅ output.dot`);
+      console.log('   ✅ output.dot');
 
-      console.log(`⚙️ Генерация SVG...`);
+      console.log('⚙️ Генерация SVG...');
       const graphviz = await Graphviz.load();
       const svgContent = graphviz.dot(dotContent);
       fs.writeFileSync('output.svg', svgContent);
-      console.log(`   ✅ output.svg`);
+      console.log('   ✅ output.svg');
 
       const htmlContent = generateHTMLReport(
         svgContent,
@@ -1087,9 +1087,9 @@ export async function runCLI(): Promise<void> {
         hasCycles
       );
       fs.writeFileSync('report.html', htmlContent);
-      console.log(`   ✅ report.html`);
+      console.log('   ✅ report.html');
 
-      console.log(`\n🎉 Готово! Откройте report.html в браузере`);
+      console.log('\n🎉 Готово! Откройте report.html в браузере');
 
       if (hasCycles) {
         console.log(

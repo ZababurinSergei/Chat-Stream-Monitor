@@ -322,7 +322,7 @@ export async function getControlFlowGraph(filePath: string): Promise<ControlFlow
  * @param entryPoint Точка входа
  * @param maxDepth Максимальная глубина
  */
-export async function getCallGraph(entryPoint: string, maxDepth: number = 5): Promise<CallGraph> {
+export async function getCallGraph(entryPoint: string, maxDepth = 5): Promise<CallGraph> {
   const { CallGraphAnalyzer } = await import('./semantic/CallGraphAnalyzer.js');
   const analyzer = new CallGraphAnalyzer();
 

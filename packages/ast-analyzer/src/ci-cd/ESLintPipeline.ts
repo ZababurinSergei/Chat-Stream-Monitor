@@ -95,7 +95,7 @@ export class ESLintPipeline {
     });
   }
 
-  async run(filePaths: string[], autoFix: boolean = true): Promise<ESLintFixResult[]> {
+  async run(filePaths: string[], autoFix = true): Promise<ESLintFixResult[]> {
     const results: ESLintFixResult[] = [];
 
     for (const filePath of filePaths) {
@@ -144,7 +144,7 @@ export class ESLintPipeline {
   async runWithRules(
     filePaths: string[],
     rules: Record<string, any>,
-    autoFix: boolean = true
+    autoFix = true
   ): Promise<ESLintFixResult[]> {
     const config: ESLintConfig = {
       rules: rules,

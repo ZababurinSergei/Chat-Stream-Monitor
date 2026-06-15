@@ -1,5 +1,6 @@
 // src/refactor/ModuleExtractor.ts
-import { Project, SourceFile, Node } from 'ts-morph';
+import type { Project, SourceFile } from 'ts-morph';
+import { Node } from 'ts-morph';
 import fs from 'fs';
 import path from 'path';
 import type { ExtractedModule } from './index.js';
@@ -391,7 +392,7 @@ export class ModuleExtractor {
           (node as any).remove();
           console.log(`  🗑️ Удалён узел: ${node.getText().slice(0, 50)}...`);
         } else {
-          console.log(`  ⏭️ Узел не поддерживает удаление`);
+          console.log('  ⏭️ Узел не поддерживает удаление');
         }
       } catch (error) {
         console.warn(`  ⚠️ Не удалось удалить узел: ${error}`);

@@ -445,7 +445,7 @@ export function analyzeVueComponent(
 export function generateVueComponentReport(analysis: VueComponentAnalysis): string {
   let report = `# 🎯 Анализ Vue компонента: ${analysis.componentName}\n\n`;
 
-  report += `## 📊 Статистика\n`;
+  report += '## 📊 Статистика\n';
   report += `- **Размер файла:** ${(analysis.stats.totalSize / 1024).toFixed(2)} KB\n`;
   report += `- **Скрипт:** ${analysis.stats.scriptLines} строк (${analysis.script.isSetup ? 'setup' : 'options API'})\n`;
   report += `- **Шаблон:** ${analysis.stats.templateLines} строк\n`;
@@ -454,8 +454,8 @@ export function generateVueComponentReport(analysis: VueComponentAnalysis): stri
 
   if (analysis.props.names.length > 0) {
     report += `## 📥 Props (${analysis.props.names.length})\n\n`;
-    report += `| Имя | Тип | Обязательный | По умолчанию |\n`;
-    report += `|-----|-----|--------------|--------------|\n`;
+    report += '| Имя | Тип | Обязательный | По умолчанию |\n';
+    report += '|-----|-----|--------------|--------------|\n';
     for (const name of analysis.props.names) {
       const type = analysis.props.types[name] || 'any';
       const required = analysis.props.required[name] ? '✅' : '❌';
@@ -463,7 +463,7 @@ export function generateVueComponentReport(analysis: VueComponentAnalysis): stri
         analysis.props.defaults[name] !== undefined ? String(analysis.props.defaults[name]) : '-';
       report += `| \`${name}\` | \`${type}\` | ${required} | ${defaultValue} |\n`;
     }
-    report += `\n`;
+    report += '\n';
   }
 
   if (analysis.emits.names.length > 0) {
@@ -472,15 +472,15 @@ export function generateVueComponentReport(analysis: VueComponentAnalysis): stri
       const typeInfo = analysis.emits.types[name] ? `: \`${analysis.emits.types[name]}\`` : '';
       report += `- **${name}**${typeInfo}\n`;
     }
-    report += `\n`;
+    report += '\n';
   }
 
   if (analysis.expose.length > 0) {
-    report += `## 🔓 Exposed API\n\n`;
+    report += '## 🔓 Exposed API\n\n';
     for (const name of analysis.expose) {
       report += `- \`${name}\`\n`;
     }
-    report += `\n`;
+    report += '\n';
   }
 
   if (analysis.slots.length > 0) {
@@ -488,7 +488,7 @@ export function generateVueComponentReport(analysis: VueComponentAnalysis): stri
     for (const slot of analysis.slots) {
       report += `- \`${slot}\`\n`;
     }
-    report += `\n`;
+    report += '\n';
   }
 
   if (analysis.composables.length > 0) {
@@ -499,7 +499,7 @@ export function generateVueComponentReport(analysis: VueComponentAnalysis): stri
         report += `  - Аргументы: ${comp.args.join(', ')}\n`;
       }
     }
-    report += `\n`;
+    report += '\n';
   }
 
   if (analysis.imports.length > 0) {
@@ -508,24 +508,24 @@ export function generateVueComponentReport(analysis: VueComponentAnalysis): stri
     const internalImports = analysis.imports.filter(i => i.source.startsWith('.'));
 
     if (externalImports.length > 0) {
-      report += `### Внешние зависимости\n`;
+      report += '### Внешние зависимости\n';
       for (const imp of externalImports) {
         report += `- \`${imp.source}\` → ${imp.specifiers.join(', ')}\n`;
       }
-      report += `\n`;
+      report += '\n';
     }
 
     if (internalImports.length > 0) {
-      report += `### Локальные модули\n`;
+      report += '### Локальные модули\n';
       for (const imp of internalImports) {
         report += `- \`${imp.source}\` → ${imp.specifiers.join(', ')}\n`;
       }
-      report += `\n`;
+      report += '\n';
     }
   }
 
   if (analysis.template.complexity > 0) {
-    report += `## 🏗️ Шаблон\n\n`;
+    report += '## 🏗️ Шаблон\n\n';
     report += `- **Сложность:** ${analysis.template.complexity} элементов\n`;
     if (analysis.template.rootElements.length > 0) {
       report += `- **Корневые элементы:** ${analysis.template.rootElements.join(', ')}\n`;
@@ -536,11 +536,11 @@ export function generateVueComponentReport(analysis: VueComponentAnalysis): stri
     if (analysis.template.events.length > 0) {
       report += `- **События:** ${analysis.template.events.join(', ')}\n`;
     }
-    report += `\n`;
+    report += '\n';
   }
 
-  report += `---\n`;
-  report += `## 💡 Рекомендации по разбиению\n\n`;
+  report += '---\n';
+  report += '## 💡 Рекомендации по разбиению\n\n';
 
   if (analysis.template.complexity > 50) {
     report += `⚠️ **Шаблон слишком большой** (${analysis.template.complexity} элементов). Рекомендуется вынести части в отдельные компоненты.\n\n`;
@@ -597,7 +597,7 @@ export async function analyzeVueComponentCli(
   options: AnalysisOptions = {}
 ): Promise<void> {
   console.log(`\n${'='.repeat(60)}`);
-  console.log(`🎯 АНАЛИЗ VUE КОМПОНЕНТА`);
+  console.log('🎯 АНАЛИЗ VUE КОМПОНЕНТА');
   console.log(`${'='.repeat(60)}\n`);
 
   const analysis = analyzeVueComponent(filePath, options);

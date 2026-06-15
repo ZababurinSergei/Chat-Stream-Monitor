@@ -1,6 +1,7 @@
 // src/formal/EquivalenceChecker.ts
 
-import { Z3Verifier, FunctionContract } from './Z3Verifier.js';
+import type { FunctionContract } from './Z3Verifier.js';
+import { Z3Verifier } from './Z3Verifier.js';
 
 export interface EquivalenceResult {
   isEquivalent: boolean;
@@ -340,12 +341,7 @@ export class EquivalenceChecker {
   /**
    * Сравнивает два AST дерева
    */
-  private compareAST(
-    node1: any,
-    node2: any,
-    maxDepth: number,
-    currentDepth: number = 0
-  ): CodeDifference[] {
+  private compareAST(node1: any, node2: any, maxDepth: number, currentDepth = 0): CodeDifference[] {
     const differences: CodeDifference[] = [];
 
     if (currentDepth > maxDepth) return differences;
@@ -648,7 +644,7 @@ export class EquivalenceChecker {
   generateReport(result: EquivalenceResult): string {
     let report = '';
     report += '='.repeat(60) + '\n';
-    report += `🔍 EQUIVALENCE CHECK REPORT\n`;
+    report += '🔍 EQUIVALENCE CHECK REPORT\n';
     report += '='.repeat(60) + '\n';
     report += `Status: ${result.isEquivalent ? '✅ EQUIVALENT' : '❌ NOT EQUIVALENT'}\n`;
     report += `Method: ${result.method}\n`;

@@ -1,6 +1,7 @@
 // src/semantic/DataFlowAnalyzer.ts
 
-import { SourceFile, Node, SyntaxKind } from 'ts-morph';
+import type { SourceFile, Node } from 'ts-morph';
+import { SyntaxKind } from 'ts-morph';
 
 export interface DataFlowNode {
   id: string;

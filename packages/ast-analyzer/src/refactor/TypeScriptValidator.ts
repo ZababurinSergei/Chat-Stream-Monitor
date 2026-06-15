@@ -1,5 +1,6 @@
 // src/refactor/TypeScriptValidator.ts
-import { Project, SourceFile, Node, SyntaxKind, Diagnostic } from 'ts-morph';
+import type { SourceFile, Diagnostic } from 'ts-morph';
+import { Project, Node, SyntaxKind } from 'ts-morph';
 import fs from 'fs';
 import path from 'path';
 
@@ -550,7 +551,7 @@ declare const exports: any;
           fixed = true;
           this.addToHistory(
             sourceFile.getFilePath(),
-            `TS7053: Добавлено 'as any' для индексного доступа`
+            "TS7053: Добавлено 'as any' для индексного доступа"
           );
         }
       }
@@ -628,7 +629,7 @@ declare const exports: any;
         sourceFile.replaceWithText(lines.join('\n'));
         this.addToHistory(
           sourceFile.getFilePath(),
-          `TS2322: Добавлено 'as any' для приведения типа`
+          "TS2322: Добавлено 'as any' для приведения типа"
         );
         return true;
       }
@@ -682,7 +683,7 @@ declare const exports: any;
           fixed = true;
           this.addToHistory(
             sourceFile.getFilePath(),
-            `TS18046: Добавлен тип 'any' для переменной в catch блоке`
+            "TS18046: Добавлен тип 'any' для переменной в catch блоке"
           );
         }
       }
@@ -699,7 +700,7 @@ declare const exports: any;
     const imports = sourceFile.getImportDeclarations();
 
     for (const imp of imports) {
-      let specifier = imp.getModuleSpecifierValue();
+      const specifier = imp.getModuleSpecifierValue();
       if (
         specifier &&
         specifier.startsWith('.') &&
@@ -769,10 +770,7 @@ declare const exports: any;
   /**
    * Основной метод валидации и исправления через AST
    */
-  async validateAndFix(
-    filePaths: string[],
-    maxIterations: number = 5
-  ): Promise<TSValidationResult> {
+  async validateAndFix(filePaths: string[], maxIterations = 5): Promise<TSValidationResult> {
     console.log('\n🔍 TypeScript ВАЛИДАЦИЯ И ИСПРАВЛЕНИЕ (ЧЕРЕЗ AST)');
     console.log('='.repeat(60));
 
@@ -823,7 +821,7 @@ declare const exports: any;
       }
 
       if (iterationFixes === 0) {
-        console.log(`\n⚠️ Остались ошибки, но они не могут быть исправлены автоматически`);
+        console.log('\n⚠️ Остались ошибки, но они не могут быть исправлены автоматически');
         break;
       }
 

@@ -156,7 +156,7 @@ function expandFolderReExport(folderPath: string, _baseDir: string): string[] {
  */
 export function buildProjectGraph(
   entryPoint: string,
-  maxDepth: number = Infinity
+  maxDepth = Infinity
 ): { rootKey: string; graph: Record<string, string[]> } {
   const graph: Record<string, string[]> = {};
   const visited = new Set<string>();
