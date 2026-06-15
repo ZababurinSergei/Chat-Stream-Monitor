@@ -1,18 +1,38 @@
 packages:
-  # Существующие пакеты
+  # Основные пакеты монорепозитория
   - "packages/*"
-  - "packages/ast-analyzer"
-  - "apps/*"
   - "tooling/*"
-  # ❌ Явно исключаем остальные Directory/*
-  - "!Directory/*"
 
-  # Исключаем тестовые и скомпилированные директории
-  - "!**/__tests__/fixtures"
+  # Приложения (если есть)
+  - "apps/*"
+
+  # Стандартные исключения
+  - "!**/node_modules"
   - "!**/dist"
   - "!**/build"
   - "!**/coverage"
   - "!**/.turbo"
-  - "!**/node_modules"
+  - "!**/__tests__/fixtures"
+  - "!**/test-temp-*"
+  - "!**/*.backup.*"
 
+# Настройки для pnpm
+allowBuilds:
+  esbuild: true
+  tree-sitter-wasms: true
+
+# Минимальный возраст релизов (0 - отключено)
 minimumReleaseAge: 0
+
+# Строгие peer зависимости
+strict-peer-dependencies: true
+
+# Автоматическая установка peer dependencies
+auto-install-peers: true
+
+# Запретить обновление lock-файлов другими менеджерами
+package-lock: false
+yarn-lock: false
+
+# Shared store для экономии места
+shared-workspace-lockfile: true

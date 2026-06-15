@@ -34,9 +34,9 @@ import { JSXAnalyzer, type JSXAnalysisResult } from '../semantic/JSXAnalyzer.js'
 
 export interface CIResult {
   success: boolean;
-  errors: Array<{ file: string; message: string; line?: number }>;
-  warnings: Array<{ file: string; message: string; line?: number }>;
-  fixes: Array<{ file: string; line?: number; message: string }>;
+  errors: { file: string; message: string; line?: number }[];
+  warnings: { file: string; message: string; line?: number }[];
+  fixes: { file: string; line?: number; message: string }[];
   summary: {
     totalErrors: number;
     totalWarnings: number;
@@ -72,14 +72,14 @@ export interface QuickCheckResult {
 
 export interface FullVerificationResult {
   success: boolean;
-  files: Array<{
+  files: {
     file: string;
     success: boolean;
     issues: number;
     verified: number;
     reportPath?: string;
     error?: string;
-  }>;
+  }[];
   summary: {
     total: number;
     verified: number;

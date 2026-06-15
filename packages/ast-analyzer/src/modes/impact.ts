@@ -16,7 +16,7 @@ export function runImpactAnalysis(targetFile: string, entityName: string): strin
   console.log(`🔍 Поиск использований "${entityName}" из "${targetRelKey}"...`);
 
   const allFiles = getAllProjectFiles(process.cwd(), [], DEFAULT_EXCLUDE_PATTERNS);
-  const impacts: Array<{ file: string; usages: string[] }> = [];
+  const impacts: { file: string; usages: string[] }[] = [];
 
   for (const file of allFiles) {
     if (path.resolve(file) === targetAbsPath) continue;

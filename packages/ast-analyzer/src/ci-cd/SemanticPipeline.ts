@@ -461,7 +461,7 @@ export class SemanticPipeline {
 
   private async extractContract(func: FunctionDeclaration): Promise<FunctionContract> {
     const name = func.getName() || 'anonymous';
-    const params: Array<{ name: string; type: 'int' | 'bool' | 'string' }> = [];
+    const params: { name: string; type: 'int' | 'bool' | 'string' }[] = [];
 
     for (const param of func.getParameters()) {
       const paramName = param.getName();

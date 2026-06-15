@@ -616,7 +616,7 @@ export async function runCLI(): Promise<void> {
   const parsed = parseArgs();
   if (!parsed) return;
 
-  let { mode, targetPath, extraArg, options, outputDir, tsconfigPath } = parsed;
+  const { mode, targetPath, extraArg, options, outputDir, tsconfigPath } = parsed;
 
   // Сохраняем исходную директорию СРАЗУ
   const originalCwd = process.cwd();
@@ -647,7 +647,7 @@ export async function runCLI(): Promise<void> {
 
   // 2. ПОТОМ обрабатываем outputDir и меняем директорию
   let outputDirChanged = false;
-  const originalTargetPath = targetPath;
+  let currentTargetPath = targetPath;
 
   if (outputDir) {
     // Создаем директорию если её нет (относительно originalCwd)
@@ -659,15 +659,15 @@ export async function runCLI(): Promise<void> {
 
     // Преобразуем targetPath в абсолютный путь относительно исходной директории
     if (!path.isAbsolute(targetPath)) {
-      targetPath = path.resolve(originalCwd, targetPath);
+      currentTargetPath = path.resolve(originalCwd, targetPath);
       console.log('📄 Преобразован относительный путь в абсолютный:');
-      console.log(`   Было: ${originalTargetPath}`);
-      console.log(`   Стало: ${targetPath}`);
+      console.log(`   Было: ${targetPath}`);
+      console.log(`   Стало: ${currentTargetPath}`);
     }
 
     // Проверяем существование файла
-    if (!fs.existsSync(targetPath)) {
-      console.error(`❌ Файл не найден: ${targetPath}`);
+    if (!fs.existsSync(currentTargetPath)) {
+      console.error(`❌ Файл не найден: ${currentTargetPath}`);
       process.exit(1);
     }
 
@@ -685,7 +685,7 @@ export async function runCLI(): Promise<void> {
       console.log(`${'='.repeat(60)}\n`);
 
       // Собираем все пути
-      let paths: string[] = [targetPath];
+      let paths: string[] = [currentTargetPath];
       if (extraArg) {
         paths = paths.concat(extraArg.split(','));
       }
@@ -782,7 +782,7 @@ export async function runCLI(): Promise<void> {
         verbose: options?.verbose || false,
       });
 
-      const result = await refactor.refactor(targetPath);
+      const result = await refactor.refactor(currentTargetPath);
 
       // Если включен семантический анализ, проверяем результат
       if (options?.semanticAnalysis && result.success && !options?.dryRun) {
@@ -791,7 +791,7 @@ export async function runCLI(): Promise<void> {
         console.log(`${'='.repeat(60)}\n`);
 
         const pipeline = new SemanticPipeline();
-        const semanticResult = await pipeline.run([targetPath], {
+        const semanticResult = await pipeline.run([currentTargetPath], {
           formalVerification: false,
           maxDepth: 3,
         });
@@ -835,7 +835,7 @@ export async function runCLI(): Promise<void> {
         dryRun: true,
       });
 
-      const result = await refactor.refactor(targetPath);
+      const result = await refactor.refactor(currentTargetPath);
 
       if (result.modules && result.modules.length > 0) {
         console.log(`\n📊 Найдено кластеров: ${result.modules.length}`);
@@ -857,7 +857,7 @@ export async function runCLI(): Promise<void> {
       console.log('🎯 АНАЛИЗ VUE КОМПОНЕНТА');
       console.log(`${'='.repeat(60)}\n`);
 
-      const analysis = analyzeVueComponent(targetPath, options as any);
+      const analysis = analyzeVueComponent(currentTargetPath, options as any);
       if (!analysis) {
         console.error('❌ Не удалось проанализировать Vue компонент');
         process.exit(1);
@@ -899,7 +899,7 @@ export async function runCLI(): Promise<void> {
       console.log('🔪 РАЗБИЕНИЕ ФАЙЛА НА МОДУЛИ');
       console.log(`${'='.repeat(60)}`);
 
-      const result = buildSplitModulePrompt(targetPath, options as SplitModuleOptions);
+      const result = buildSplitModulePrompt(currentTargetPath, options as SplitModuleOptions);
       if (result) {
         console.log('\n📋 Инструкция:');
         console.log(`   1. Откройте ${result.outputFiles.prompt}`);
@@ -916,14 +916,14 @@ export async function runCLI(): Promise<void> {
       console.log('📁 РЕКУРСИВНАЯ МИНИФИКАЦИЯ ПРОЕКТА');
       console.log(`${'='.repeat(60)}`);
 
-      minifyFolder(targetPath, options as MinifyFolderOptions);
+      minifyFolder(currentTargetPath, options as MinifyFolderOptions);
       return;
     }
 
     // Mode: dead-code
     if (mode === 'dead-code') {
-      console.log(`🔎 Анализ мертвого кода: ${targetPath}`);
-      const report = findDeadCode(targetPath);
+      console.log(`🔎 Анализ мертвого кода: ${currentTargetPath}`);
+      const report = findDeadCode(currentTargetPath);
       if (report) {
         fs.writeFileSync('ai-dead-code-report.md', report);
         console.log(report);
@@ -938,8 +938,8 @@ export async function runCLI(): Promise<void> {
         console.error('❌ Укажите имя сущности: node graph-analyzer.js impact <файл> <entity>');
         process.exit(1);
       }
-      console.log(`💥 Анализ влияния: ${extraArg} в ${targetPath}`);
-      const report = runImpactAnalysis(targetPath, extraArg);
+      console.log(`💥 Анализ влияния: ${extraArg} в ${currentTargetPath}`);
+      const report = runImpactAnalysis(currentTargetPath, extraArg);
       fs.writeFileSync('ai-impact-report.md', report);
       console.log(report);
       console.log('\n✅ Отчет сохранен: ai-impact-report.md');
@@ -949,8 +949,8 @@ export async function runCLI(): Promise<void> {
     // Mode: prompt-pack
     if (mode === 'prompt-pack') {
       const depth = extraArg ? parseInt(extraArg, 10) : 2;
-      console.log(`🎒 Сборка промпт-пака для ${targetPath} (глубина ${depth})`);
-      const pack = buildAiPromptPack(targetPath, depth);
+      console.log(`🎒 Сборка промпт-пака для ${currentTargetPath} (глубина ${depth})`);
+      const pack = buildAiPromptPack(currentTargetPath, depth);
       fs.writeFileSync('ai-prompt-bundle.md', pack);
       console.log('\n✅ Пакет сохранен: ai-prompt-bundle.md');
       console.log(`📊 Размер: ${(pack.length / 1024).toFixed(2)} KB`);
@@ -959,12 +959,12 @@ export async function runCLI(): Promise<void> {
 
     // Mode: minify (single file)
     if (mode === 'minify') {
-      console.log(`✂️ Минификация: ${targetPath}`);
-      const minified = minifyForAI(targetPath);
+      console.log(`✂️ Минификация: ${currentTargetPath}`);
+      const minified = minifyForAI(currentTargetPath);
       if (minified) {
         fs.writeFileSync('ai-context.txt', minified);
         console.log('\n✅ Минифицированный код сохранен: ai-context.txt');
-        const originalSize = fs.statSync(targetPath).size;
+        const originalSize = fs.statSync(currentTargetPath).size;
         console.log(`📊 Исходный размер: ${(originalSize / 1024).toFixed(2)} KB`);
         console.log(`📊 Сжатый размер: ${(minified.length / 1024).toFixed(2)} KB`);
         const ratio = ((minified.length / originalSize) * 100).toFixed(1);
@@ -977,10 +977,10 @@ export async function runCLI(): Promise<void> {
     if (mode === 'project') {
       const maxDepth = extraArg ? parseInt(extraArg, 10) : Infinity;
       console.log(
-        `📁 Построение графа проекта от ${targetPath} (глубина ${maxDepth === Infinity ? '∞' : maxDepth})`
+        `📁 Построение графа проекта от ${currentTargetPath} (глубина ${maxDepth === Infinity ? '∞' : maxDepth})`
       );
 
-      const resultData = buildProjectGraph(targetPath, maxDepth) as GraphResult;
+      const resultData = buildProjectGraph(currentTargetPath, maxDepth) as GraphResult;
       if (!resultData || Object.keys(resultData.graph).length === 0) {
         console.log('⚠️ Зависимости не найдены');
         return;
@@ -1008,7 +1008,7 @@ export async function runCLI(): Promise<void> {
         svgContent,
         dotContent,
         JSON.stringify(resultData, null, 2),
-        targetPath,
+        currentTargetPath,
         hasCycles
       );
       fs.writeFileSync('report.html', htmlContent);
@@ -1053,9 +1053,9 @@ export async function runCLI(): Promise<void> {
 
     // Mode: file (internal graph)
     if (mode === 'file') {
-      console.log(`📄 Построение внутреннего графа файла ${targetPath}`);
+      console.log(`📄 Построение внутреннего графа файла ${currentTargetPath}`);
 
-      const resultData = buildFileInternalGraph(targetPath) as GraphResult;
+      const resultData = buildFileInternalGraph(currentTargetPath) as GraphResult;
       if (!resultData || Object.keys(resultData.graph).length === 0) {
         console.log('⚠️ Зависимости не найдены');
         return;
@@ -1083,7 +1083,7 @@ export async function runCLI(): Promise<void> {
         svgContent,
         dotContent,
         JSON.stringify(resultData, null, 2),
-        targetPath,
+        currentTargetPath,
         hasCycles
       );
       fs.writeFileSync('report.html', htmlContent);

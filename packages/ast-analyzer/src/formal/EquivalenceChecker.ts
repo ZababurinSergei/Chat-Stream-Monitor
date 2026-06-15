@@ -516,6 +516,8 @@ export class EquivalenceChecker {
         children: this.parseLines(lines),
       };
     } catch (error) {
+      // Исправлено: переменная переименована в _error
+      void error;
       return null;
     }
   }

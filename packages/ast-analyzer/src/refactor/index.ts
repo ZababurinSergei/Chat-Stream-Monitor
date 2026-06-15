@@ -95,7 +95,7 @@ export interface RefactorResult {
     typeErrors?: TypeError[];
     unusedFunctions?: string[];
     cyclicDependencies?: string[][];
-    unreachableCode?: Array<{ file: string; line: number }>;
+    unreachableCode?: { file: string; line: number }[];
     jsx?: any;
     vue?: any;
   };

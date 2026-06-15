@@ -497,13 +497,13 @@ export class ModuleExtractor {
    */
   getAllImports(
     sourceFile: SourceFile
-  ): Array<{ source: string; names: string[]; isDefault: boolean; isNamespace: boolean }> {
-    const imports: Array<{
+  ): { source: string; names: string[]; isDefault: boolean; isNamespace: boolean }[] {
+    const imports: {
       source: string;
       names: string[];
       isDefault: boolean;
       isNamespace: boolean;
-    }> = [];
+    }[] = [];
     const importDeclarations = sourceFile.getImportDeclarations();
 
     for (const imp of importDeclarations) {

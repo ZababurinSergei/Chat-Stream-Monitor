@@ -36,28 +36,26 @@
 
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
+
     "paths": {
-      "@newkind/ast-analyzer": ["./Directory/ast-analyzer/src/index.ts"],
-      "@newkind/ast-analyzer/*": ["./Directory/ast-analyzer/src/*"],
-      "@newkind/ast-analyzer/cli": ["./Directory/ast-analyzer/src/cli.ts"],
+      "@newkind/ast-analyzer": ["./packages/ast-analyzer/src/index.ts"],
+      "@newkind/ast-analyzer/*": ["./packages/ast-analyzer/src/*"],
+      "@newkind/ast-analyzer/cli": ["./packages/ast-analyzer/src/cli.ts"],
       "@newkind/ast-analyzer/refactor": [
-        "./Directory/ast-analyzer/src/refactor/index.ts"
+        "./packages/ast-analyzer/src/refactor/index.ts"
       ],
       "@newkind/ast-analyzer/semantic": [
-        "./Directory/ast-analyzer/src/semantic/index.ts"
+        "./packages/ast-analyzer/src/semantic/index.ts"
       ],
       "@newkind/ast-analyzer/formal": [
-        "./Directory/ast-analyzer/src/formal/index.ts"
+        "./packages/ast-analyzer/src/formal/index.ts"
       ],
 
       "@newkind/shared-types": ["./packages/shared-types/src/index.ts"],
       "@newkind/shared-types/*": ["./packages/shared-types/src/*"],
 
       "@repo/eslint-config": ["./tooling/eslint-config/index.js"],
-      "@repo/prettier-config": ["./tooling/prettier-config/index.js"],
-      "@repo/typescript-config": ["./tooling/typescript-config/base.json"],
-      "@directory/*": ["./Directory/src/*"],
-      "@packages/*": ["./packages/src/*"]
+      "@repo/prettier-config": ["./tooling/prettier-config/index.js"]
     },
 
     "types": ["node", "vitest/globals"],
@@ -71,45 +69,22 @@
   },
 
   "include": [
-    "Directory/ast-analyzer/src/**/*",
-    "packages/ast-analyzer/src/**/*",
-    "Directory/ast-analyzer/vitest.config.ts",
-    "packages/ast-analyzer/vitest.config.ts",
-    "Directory/ast-analyzer/vitest.setup.ts",
-    "packages/ast-analyzer/vitest.setup.ts",
-    "Directory/ast-analyzer/src/__tests__/**/*",
-    "packages/ast-analyzer/src/__tests__/**/*",
-    "Directory/callsight-vscode/src/webview/**/*",
-    "Directory/callsight-vscode/vite.config.ts",
-    "Directory/infoenergo-ui/.storybook/**/*",
-    "Directory/infoenergo-ui/test-setup.ts",
-    "src/**/*",
-    "vitest.config.ts",
-    "vitest.setup.ts",
-    ".storybook/**/*",
-    "Directory/ast-analyzer/src/__tests__/**/*.ts",
-    "packages/ast-analyzer/src/__tests__/**/*.ts",
-    "Directory/ast-analyzer/vitest.config.ts",
-    "packages/ast-analyzer/vitest.config.ts",
-    "Directory/*/vite.config.ts",
-    "Directory/*/.storybook/**/*.ts",
-    "Directory/*/test-setup.ts",
-    // ТОЛЬКО ast-analyzer из папки Directory
-    "Directory/ast-analyzer/src/**/*.ts",
-    "Directory/ast-analyzer/src/**/*.tsx",
-    "Directory/ast-analyzer/src/**/*.js",
-    "Directory/ast-analyzer/src/**/*.jsx",
-    "Directory/ast-analyzer/src/**/*.vue",
-    "Directory/ast-analyzer/src/**/*.mjs",
-    "Directory/ast-analyzer/src/**/*.cjs",
-
-    // Остальные пакеты
     "packages/*/src/**/*.ts",
     "packages/*/src/**/*.tsx",
     "packages/*/src/**/*.js",
     "packages/*/src/**/*.jsx",
+    "packages/*/src/**/*.vue",
+    "packages/*/src/**/*.mjs",
+    "packages/*/src/**/*.cjs",
+
     "tooling/*/**/*.ts",
     "tooling/*/**/*.js",
+
+    "apps/*/src/**/*.ts",
+    "apps/*/src/**/*.tsx",
+    "apps/*/src/**/*.js",
+    "apps/*/src/**/*.jsx",
+
     "*.ts",
     "*.js",
     "*.mjs",
@@ -118,17 +93,6 @@
   ],
 
   "exclude": [
-    // ИСКЛЮЧАЕМ все остальные Directory/* (кроме ast-analyzer)
-    "Directory",
-    // Исключаем системные папки внутри ast-analyzer
-    "Directory/ast-analyzer/node_modules",
-    "Directory/ast-analyzer/dist",
-    "Directory/ast-analyzer/build",
-    "Directory/ast-analyzer/coverage",
-    "Directory/ast-analyzer/.turbo",
-    "Directory/ast-analyzer/modules",
-
-    // Остальные исключения
     "node_modules",
     "dist",
     "build",
@@ -136,17 +100,26 @@
     ".turbo",
     ".next",
     "out",
+
     "**/__tests__/fixtures",
     "**/__tests__/temp",
     "**/*.test.ts",
     "**/*.spec.ts",
     "**/*.test.tsx",
     "**/*.spec.tsx",
+
     "packages/*/dist",
     "packages/*/build",
     "packages/*/coverage",
     "packages/*/node_modules",
+
     "tooling/*/node_modules",
+
+    "apps/*/dist",
+    "apps/*/build",
+    "apps/*/.next",
+    "apps/*/node_modules",
+
     "**/*.backup.*",
     "**/*.tmp",
     "**/*.swp"

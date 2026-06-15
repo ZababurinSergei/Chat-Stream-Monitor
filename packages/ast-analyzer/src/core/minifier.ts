@@ -54,7 +54,7 @@ export function minifyCodeString(code: string, ast: any): string {
     return code;
   }
 
-  const cuts: Array<{ start: number; end: number; replaceWith: string }> = [];
+  const cuts: { start: number; end: number; replaceWith: string }[] = [];
 
   // Собираем все узлы рекурсивно
   const allNodes = collectAllNodes(ast);

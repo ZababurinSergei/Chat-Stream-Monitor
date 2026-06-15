@@ -31,8 +31,10 @@
     "node_modules",
     "dist",
     "coverage",
+    "**/__tests__/**",
     "**/*.test.ts",
     "**/*.spec.ts",
-    "src/__tests__/fixtures"
+    "vitest.config.ts",
+    "vitest.setup.ts"
   ]
 }

@@ -180,13 +180,13 @@ curl -O https://unpkg.com/tree-sitter-wasms@latest/out/tree-sitter-tsx.wasm
 \`\`\`
 `;
     writeFileSync(readmePath, readmeContent);
-    console.log(`   📄 Created README.md`);
+    console.log('   📄 Created README.md');
   }
 
   console.log(`   📦 Total WASM files copied: ${copiedCount}`);
   if (copiedCount === 0) {
-    console.log(`   ⚠️ No WASM files found! Call Graph analysis will be limited.`);
-    console.log(`   💡 Run: cp -r ../../Directory/callsight-vscode/grammars/*.wasm grammars/`);
+    console.log('   ⚠️ No WASM files found! Call Graph analysis will be limited.');
+    console.log('   💡 Run: cp -r ../../Directory/callsight-vscode/grammars/*.wasm grammars/');
   }
 }
 
@@ -250,12 +250,10 @@ const buildOptions = {
     {
       name: 'resolve-vue-files',
       setup(build) {
-        build.onResolve({ filter: /\.vue$/ }, args => {
-          return {
-            path: args.path,
-            namespace: 'vue-file',
-          };
-        });
+        build.onResolve({ filter: /\.vue$/ }, args => ({
+          path: args.path,
+          namespace: 'vue-file',
+        }));
 
         build.onLoad({ filter: /\.vue$/, namespace: 'vue-file' }, async args => {
           const fsModule = await import('fs');
@@ -295,16 +293,16 @@ if (isProduction) {
 
 try {
   const result = await esbuild.build(buildOptions);
-  console.log(`\n✅ Build completed successfully!`);
+  console.log('\n✅ Build completed successfully!');
   console.log(`📁 Output directory: ${resolve(__dirname, 'dist')}`);
 
   if (result.errors.length > 0) {
-    console.error(`\n❌ Build errors:`, result.errors);
+    console.error('\n❌ Build errors:', result.errors);
     process.exit(1);
   }
 
   if (result.warnings.length > 0) {
-    console.warn(`\n⚠️ Build warnings:`, result.warnings);
+    console.warn('\n⚠️ Build warnings:', result.warnings);
   }
 
   // Выводим информацию о размере бандла
@@ -331,7 +329,7 @@ try {
       console.log(`   ... and ${wasmFiles.length - 10} more WASM files`);
     }
   } else {
-    console.log(`\n⚠️ No WASM directory created (no WASM files found)`);
+    console.log('\n⚠️ No WASM directory created (no WASM files found)');
   }
 
   console.log(`\n📊 Total bundle size: ${(totalSize / 1024).toFixed(2)} KB`);

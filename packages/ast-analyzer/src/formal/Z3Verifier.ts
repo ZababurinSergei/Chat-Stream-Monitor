@@ -27,7 +27,7 @@ export interface VerificationResult {
 
 export interface FunctionContract {
   name: string;
-  params: Array<{ name: string; type: 'int' | 'bool' | 'string' }>;
+  params: { name: string; type: 'int' | 'bool' | 'string' }[];
   returnType: 'int' | 'bool' | 'string' | 'void';
   preconditions: VerificationConstraint[];
   postconditions: VerificationConstraint[];
@@ -164,12 +164,12 @@ export class Z3Verifier {
           error: 'Z3 returned unknown',
         };
       }
-    } catch (error: any) {
-      console.error('Verification error:', error);
+    } catch (_error: any) {
+      console.error('Verification error:', _error);
       return {
         isValid: false,
         time: Date.now() - startTime,
-        error: error.message,
+        error: _error.message,
       };
     } finally {
       this.solver.pop();
@@ -231,12 +231,12 @@ export class Z3Verifier {
           error: 'Z3 returned unknown',
         };
       }
-    } catch (error: any) {
-      console.error('Equivalence check error:', error);
+    } catch (_error: any) {
+      console.error('Equivalence check error:', _error);
       return {
         isValid: false,
         time: Date.now() - startTime,
-        error: error.message,
+        error: _error.message,
       };
     } finally {
       this.solver.pop();
@@ -307,11 +307,11 @@ export class Z3Verifier {
         counterexample: model,
         time: Date.now() - startTime,
       };
-    } catch (error: any) {
+    } catch (_error: any) {
       return {
         isValid: false,
         time: Date.now() - startTime,
-        error: error.message,
+        error: _error.message,
       };
     } finally {
       this.solver.pop();
@@ -370,11 +370,11 @@ export class Z3Verifier {
           error: 'Z3 returned unknown',
         };
       }
-    } catch (error: any) {
+    } catch (_error: any) {
       return {
         isValid: false,
         time: Date.now() - startTime,
-        error: error.message,
+        error: _error.message,
       };
     } finally {
       this.solver.pop();
@@ -590,6 +590,7 @@ export class Z3Verifier {
           model.set(name, jsValue);
         }
       } catch (error) {
+        void error;
         // Пропускаем переменные, которые не удалось оценить
       }
     }
@@ -631,8 +632,8 @@ export class Z3Verifier {
       }
 
       return null;
-    } catch (error) {
-      console.error('Error getting counterexample:', error);
+    } catch (_error) {
+      console.error('Error getting counterexample:', _error);
       return null;
     }
   }

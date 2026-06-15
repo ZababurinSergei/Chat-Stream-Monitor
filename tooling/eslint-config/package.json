@@ -6,24 +6,7 @@
   "main": "index.js",
   "exports": {
     ".": {
-      "import": "./index.js",
-      "require": "./index.js"
-    },
-    "./base": {
-      "import": "./base.js",
-      "require": "./base.js"
-    },
-    "./react": {
-      "import": "./react.js",
-      "require": "./react.js"
-    },
-    "./vue": {
-      "import": "./vue.js",
-      "require": "./vue.js"
-    },
-    "./typescript": {
-      "import": "./typescript.js",
-      "require": "./typescript.js"
+      "import": "./index.js"
     }
   },
   "peerDependencies": {
@@ -31,21 +14,45 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@eslint/js": "^10.0.1",
+    "@eslint/markdown": "^8.0.2",
     "@typescript-eslint/eslint-plugin": "^8.61.0",
     "@typescript-eslint/parser": "^8.61.0",
-    "eslint-plugin-json": "^4.0.1",
     "eslint-plugin-jsonc": "^3.2.0",
-    "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-hooks": "^7.1.1",
-    "eslint-plugin-vue": "^10.9.2",
     "eslint-plugin-yml": "^3.4.0",
-    "globals": "^17.6.0"
+    "globals": "^17.6.0",
+    "typescript-eslint": "^8.61.0"
   },
   "files": [
-    "*.js"
+    "index.js"
   ],
   "devDependencies": {
-    "@eslint/markdown": "^8.0.2"
+    "eslint": "^10.5.0",
+    "typescript": "^6.0.3"
+  },
+  "keywords": [
+    "eslint",
+    "eslint-config",
+    "monorepo",
+    "typescript",
+    "javascript"
+  ],
+  "author": "Забабурин Сергей <zababurins@vk.com>",
+  "license": "CSL-1.0",
+  "description": "Shared ESLint configuration for monorepo (Flat Config)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ZababurinSergei/Chat-Stream-Monitor.git",
+    "directory": "tooling/eslint-config"
+  },
+  "homepage": "https://github.com/ZababurinSergei/Chat-Stream-Monitor/tree/main/tooling/eslint-config",
+  "bugs": {
+    "url": "https://github.com/ZababurinSergei/Chat-Stream-Monitor/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }

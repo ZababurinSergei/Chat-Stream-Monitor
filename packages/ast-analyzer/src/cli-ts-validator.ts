@@ -168,8 +168,7 @@ program
       const watcher = fs.watch(
         dir,
         { recursive: true },
-        async (_eventType: string, filename: string | null) => {
-          // Добавлен префикс _
+        (_eventType: string, filename: string | null) => {
           if (
             filename &&
             (filename.endsWith('.ts') || filename.endsWith('.tsx') || filename.endsWith('.js'))
@@ -177,7 +176,7 @@ program
             const fullPath = path.join(dir, filename);
             if (fileSet.has(fullPath) || fs.existsSync(fullPath)) {
               fileSet.add(fullPath);
-              await checkAndFix();
+              checkAndFix().catch(console.error);
             }
           }
         }

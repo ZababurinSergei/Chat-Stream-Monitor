@@ -7,7 +7,7 @@ export interface FileNode {
   extension?: string;
   content?: string;
   children?: Record<string, FileNode>;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface ScanStats {

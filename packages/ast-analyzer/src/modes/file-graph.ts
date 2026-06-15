@@ -109,7 +109,7 @@ export function buildFileInternalGraph(
   if (!ast) return null;
 
   const declarations: Record<string, { type: string; node: any }> = {};
-  const relations: Array<{ from: string; to: string }> = [];
+  const relations: { from: string; to: string }[] = [];
 
   // Используем рекурсивный сбор объявлений вместо обхода только верхнего уровня
   collectDeclarationsRecursive(ast, declarations);

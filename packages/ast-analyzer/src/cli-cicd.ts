@@ -16,6 +16,7 @@ import { Command } from 'commander';
 import fs from 'fs';
 import path from 'path';
 import { glob } from 'glob';
+import readline from 'readline';
 import { CICPipeline, AutoTypeScriptFixer } from './ci-cd/index.js';
 import { TypeScriptValidator } from './refactor/TypeScriptValidator.js';
 import { ESLintPipeline } from './ci-cd/ESLintPipeline.js';
@@ -28,9 +29,9 @@ export interface CIResult {
     totalWarnings: number;
     totalFixes: number;
   };
-  errors: Array<{ file: string; line: number; message: string }>;
-  warnings: Array<{ file: string; line: number; message: string }>;
-  fixes: Array<{ file: string; line: number; message: string }>;
+  errors: { file: string; line: number; message: string }[];
+  warnings: { file: string; line: number; message: string }[];
+  fixes: { file: string; line: number; message: string }[];
 }
 
 const program = new Command();
@@ -645,14 +646,14 @@ async function collectFiles(
  * Вспомогательная функция: вопрос пользователю
  */
 function askQuestion(question: string): Promise<string> {
-  const readline = require('readline').createInterface({
+  const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
   });
 
   return new Promise(resolve => {
-    readline.question(question, (answer: string) => {
-      readline.close();
+    rl.question(question, (answer: string) => {
+      rl.close();
       resolve(answer);
     });
   });

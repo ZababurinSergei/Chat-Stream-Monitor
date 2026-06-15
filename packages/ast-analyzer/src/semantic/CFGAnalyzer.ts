@@ -20,7 +20,7 @@ export interface ControlFlowGraph {
   entry: BasicBlock;
   exit: BasicBlock;
   findUnreachableBlocks(): BasicBlock[];
-  findLoops(): Array<{ header: BasicBlock; body: BasicBlock[] }>;
+  findLoops(): { header: BasicBlock; body: BasicBlock[] }[];
   getDominators(block: BasicBlock): Set<BasicBlock>;
 }
 
@@ -273,7 +273,7 @@ export class CFGAnalyzer {
 
   private identifyLoops(): void {
     // Находим обратные ребра
-    const backEdges: Array<[BasicBlock, BasicBlock]> = [];
+    const backEdges: [BasicBlock, BasicBlock][] = [];
 
     for (const block of this.blocks.values()) {
       for (const succ of block.successors) {
@@ -333,8 +333,8 @@ export class CFGAnalyzer {
     return Array.from(this.blocks.values()).filter(b => !b.isReachable && b !== this.exitBlock);
   }
 
-  private getLoops(): Array<{ header: BasicBlock; body: BasicBlock[] }> {
-    const loops: Array<{ header: BasicBlock; body: BasicBlock[] }> = [];
+  private getLoops(): { header: BasicBlock; body: BasicBlock[] }[] {
+    const loops: { header: BasicBlock; body: BasicBlock[] }[] = [];
 
     for (const block of this.blocks.values()) {
       if (block.loopDepth && block.loopDepth > 0) {

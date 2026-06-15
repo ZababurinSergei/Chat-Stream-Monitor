@@ -589,10 +589,10 @@ export function saveScanReport(stats, outputPath, append = false) {
     if (!shouldAppend || !fs.existsSync(actualPath)) {
       // Создаем новый отчет
       if (includeTimestamp) {
-        reportContent += `========================================\n`;
+        reportContent += "========================================\n";
         reportContent += `${t("reportHeader")}\n`;
         reportContent += `${t("scanDate")}: ${new Date().toLocaleString(getCurrentLanguage() === "english" ? "en-US" : "ru-RU")}\n`;
-        reportContent += `========================================\n\n`;
+        reportContent += "========================================\n\n";
       }
 
       if (includeSystemInfo) {
@@ -603,10 +603,10 @@ export function saveScanReport(stats, outputPath, append = false) {
         reportContent += `  ${t("workingDir")}: ${process.cwd()}\n\n`;
       }
     } else {
-      reportContent += `\n========================================\n`;
+      reportContent += "\n========================================\n";
       reportContent += `${t("additionalScan")}\n`;
       reportContent += `${t("scanDate")}: ${new Date().toLocaleString(getCurrentLanguage() === "english" ? "en-US" : "ru-RU")}\n`;
-      reportContent += `========================================\n\n`;
+      reportContent += "========================================\n\n";
     }
 
     // Добавляем статистику
@@ -622,7 +622,7 @@ export function saveScanReport(stats, outputPath, append = false) {
       stats.excludedDirectories.forEach((dir) => {
         reportContent += `  🚫 ${dir.name} - ${dir.description}\n`;
       });
-      reportContent += `\n`;
+      reportContent += "\n";
     }
 
     if (stats.missingDirectories && stats.missingDirectories.length > 0) {
@@ -631,7 +631,7 @@ export function saveScanReport(stats, outputPath, append = false) {
         const required = dir.required ? ` ${t("required")}` : "";
         reportContent += `  ⚠️  ${dir.name}${required} - ${dir.description}\n`;
       });
-      reportContent += `\n`;
+      reportContent += "\n";
     }
 
     if (stats.scannedDirectories && stats.scannedDirectories.length > 0) {
@@ -642,12 +642,12 @@ export function saveScanReport(stats, outputPath, append = false) {
           reportContent += `     ${t("files")}: ${dir.filesCount}\n`;
         }
       });
-      reportContent += `\n`;
+      reportContent += "\n";
     }
 
-    reportContent += `========================================\n`;
+    reportContent += "========================================\n";
     reportContent += `${t("endOfReport")}\n`;
-    reportContent += `========================================\n`;
+    reportContent += "========================================\n";
 
     // Записываем в файл
     const flag = shouldAppend ? "a" : "w";

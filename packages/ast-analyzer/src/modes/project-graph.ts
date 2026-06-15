@@ -161,7 +161,7 @@ export function buildProjectGraph(
   const graph: Record<string, string[]> = {};
   const visited = new Set<string>();
   const rootAbsPath = path.resolve(entryPoint);
-  const queue: Array<{ path: string; depth: number; isRoot: boolean }> = [];
+  const queue: { path: string; depth: number; isRoot: boolean }[] = [];
 
   queue.push({ path: rootAbsPath, depth: 1, isRoot: true });
 
