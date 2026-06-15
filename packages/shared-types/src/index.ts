@@ -1,6 +1,6 @@
 // Общие типы для всех пакетов
 export interface FileNode {
-  type: 'file' | 'directory';
+  type: "file" | "directory";
   path: string;
   name: string;
   size?: number;
@@ -58,7 +58,7 @@ export interface ReportConfig {
   append: boolean;
   includeTimestamp: boolean;
   includeSystemInfo: boolean;
-  language: 'russian' | 'english';
+  language: "russian" | "english";
 }
 
 export interface AnalysisResult {
@@ -82,12 +82,12 @@ export interface AnalysisResult {
 
 export interface ImportInfo {
   source: string;
-  specifiers: Array<{ local: string; imported: string }>;
+  specifiers: { local: string; imported: string }[];
 }
 
 export interface ExportInfo {
   name: string;
-  type: 'function' | 'class' | 'constant';
+  type: "function" | "class" | "constant";
   isDefault?: boolean;
 }
 
@@ -103,5 +103,5 @@ export interface FunctionInfo {
 export interface ClassInfo {
   name: string;
   exported: boolean;
-  methods: Array<{ name: string; kind: string }>;
+  methods: { name: string; kind: string }[];
 }

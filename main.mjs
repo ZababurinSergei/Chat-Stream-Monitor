@@ -5,10 +5,10 @@ import {
   getDirectoriesToScan,
   saveScanReport,
   collectScanStats,
-} from './FileSystemScanner.js';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+} from "./FileSystemScanner.js";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,12 +17,12 @@ const __dirname = path.dirname(__filename);
  * Проверяет наличие директорий перед сканированием
  */
 function checkDirectories() {
-  const config = loadConfig('./config.json');
+  const config = loadConfig("./config.json");
   const directories = getDirectoriesToScan();
   const missingDirs = [];
   const warnings = [];
 
-  console.log('\n🔍 ПРОВЕРКА ДИРЕКТОРИЙ:');
+  console.log("\n🔍 ПРОВЕРКА ДИРЕКТОРИЙ:");
 
   for (const dir of directories) {
     const dirPath = path.join(__dirname, dir.name);
@@ -35,8 +35,8 @@ function checkDirectories() {
       }
     }
 
-    const status = exists ? '✅' : '❌';
-    const requiredMark = dir.required ? ' (обязательная)' : '';
+    const status = exists ? "✅" : "❌";
+    const requiredMark = dir.required ? " (обязательная)" : "";
     console.log(`   ${status} ${dir.name}${requiredMark}: ${dir.description}`);
   }
 
@@ -64,15 +64,15 @@ function checkDirectories() {
  * Основная функция
  */
 async function main() {
-  console.log('🚀 ЗАПУСК СКАНЕРА ФАЙЛОВОЙ СИСТЕМЫ');
-  console.log('====================================\n');
+  console.log("🚀 ЗАПУСК СКАНЕРА ФАЙЛОВОЙ СИСТЕМЫ");
+  console.log("====================================\n");
 
   try {
     // Проверяем наличие конфигурации
-    const configPath = './config.json';
+    const configPath = "./config.json";
     if (!fs.existsSync(path.join(__dirname, configPath))) {
       console.warn(`⚠️  Конфигурационный файл ${configPath} не найден.`);
-      console.log('🔄 Будет использована стандартная конфигурация.\n');
+      console.log("🔄 Будет использована стандартная конфигурация.\n");
     } else {
       console.log(`✅ Конфигурационный файл найден: ${configPath}\n`);
     }
@@ -81,31 +81,31 @@ async function main() {
     checkDirectories();
 
     // Запускаем сканирование
-    console.log('📂 НАЧАЛО СКАНИРОВАНИЯ...\n');
+    console.log("📂 НАЧАЛО СКАНИРОВАНИЯ...\n");
     const fsJSON = createFileSystemJSON(configPath);
 
     // Сохраняем результат
     const outputFileName =
-      loadConfig(configPath)?.output?.fileName || './fs.json';
+      loadConfig(configPath)?.output?.fileName || "./fs.json";
     saveFileSystemJSON(outputFileName, fsJSON, true);
 
     // Сохраняем отчет
     const stats = collectScanStats(fsJSON);
-    saveScanReport(stats, './scan_report.log');
+    saveScanReport(stats, "./scan_report.log");
 
-    console.log('\n✨ СКАНИРОВАНИЕ ЗАВЕРШЕНО УСПЕШНО! ✨');
+    console.log("\n✨ СКАНИРОВАНИЕ ЗАВЕРШЕНО УСПЕШНО! ✨");
   } catch (error) {
-    console.error('\n❌ КРИТИЧЕСКАЯ ОШИБКА:', error.message);
+    console.error("\n❌ КРИТИЧЕСКАЯ ОШИБКА:", error.message);
     console.error(error.stack);
 
     // Сохраняем отчет об ошибке если включено
-    const config = loadConfig('./config.json');
+    const config = loadConfig("./config.json");
     if (config?.report?.enabled) {
-      const errorReport = `ОШИБКА СКАНИРОВАНИЯ\n${new Date().toLocaleString('ru-RU')}\n${error.message}\n${error.stack}\n`;
-      const reportPath = config.report.path || 'scan_report.log';
+      const errorReport = `ОШИБКА СКАНИРОВАНИЯ\n${new Date().toLocaleString("ru-RU")}\n${error.message}\n${error.stack}\n`;
+      const reportPath = config.report.path || "scan_report.log";
       fs.writeFileSync(reportPath, errorReport, {
-        flag: 'a',
-        encoding: 'utf8',
+        flag: "a",
+        encoding: "utf8",
       });
     }
 
