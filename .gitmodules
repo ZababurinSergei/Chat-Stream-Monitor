@@ -2,3 +2,9 @@
     path = packages/ast-analyzer
     url = https://github.com/ZababurinSergei/ast-analyzer
     branch = main
+[submodule "packages/devextreme-migration"]
+	path = packages/devextreme-migration
+	url = git@gitlab.infoenergo.loc:internal/devextreme-migration.git
+[submodule "packages/infoenergo-ui"]
+	path = packages/infoenergo-ui
+	url = git@gitlab.infoenergo.loc:infoenergo.npm/infoenergo-ui.git

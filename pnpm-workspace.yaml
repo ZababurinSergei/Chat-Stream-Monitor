@@ -18,6 +18,7 @@ packages:
 
 # Настройки для pnpm
 allowBuilds:
+  "@parcel/watcher": false
   esbuild: true
   tree-sitter-wasms: true
 
