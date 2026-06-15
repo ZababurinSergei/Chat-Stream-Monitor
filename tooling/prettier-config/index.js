@@ -365,4 +365,4 @@ export function getConfigForFile(filePath) {
 
 // Информация о версии
 export const VERSION = "1.0.0";
-export const NAME = "@repo/prettier-config";
+export const NAME = "@newkind/prettier-config";

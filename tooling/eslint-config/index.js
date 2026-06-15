@@ -49,7 +49,7 @@ export default [
 
   // 2. JavaScript файлы
   {
-    name: "@repo/eslint-config/javascript",
+    name: "@newkind/eslint-config/javascript",
     files: ["**/*.{js,mjs,cjs}"],
     languageOptions: {
       ecmaVersion: 2024,
@@ -119,7 +119,7 @@ export default [
   // 3. TypeScript файлы
   ...tseslint.configs.recommended,
   {
-    name: "@repo/eslint-config/typescript",
+    name: "@newkind/eslint-config/typescript",
     files: ["**/*.{ts,tsx,mts,cts}"],
     languageOptions: {
       parser: tseslint.parser,
@@ -161,7 +161,7 @@ export default [
   // 4. JSON файлы
   ...jsonc.configs["recommended-with-jsonc"],
   {
-    name: "@repo/eslint-config/json",
+    name: "@newkind/eslint-config/json",
     files: ["**/*.json", "**/*.jsonc", "**/*.json5"],
     rules: {
       "jsonc/indent": ["error", 2],
@@ -174,7 +174,7 @@ export default [
 
   // Специальные правила для package.json
   {
-    name: "@repo/eslint-config/package-json",
+    name: "@newkind/eslint-config/package-json",
     files: ["**/package.json"],
     rules: {
       "jsonc/no-comments": "off",
@@ -183,7 +183,7 @@ export default [
 
   // Специальные правила для tsconfig.json
   {
-    name: "@repo/eslint-config/tsconfig-json",
+    name: "@newkind/eslint-config/tsconfig-json",
     files: ["**/tsconfig*.json"],
     rules: {
       "jsonc/no-comments": "off",
@@ -194,7 +194,7 @@ export default [
   // 5. YAML файлы
   ...yml.configs.recommended,
   {
-    name: "@repo/eslint-config/yaml",
+    name: "@newkind/eslint-config/yaml",
     files: ["**/*.{yaml,yml}"],
     rules: {
       "yml/indent": ["error", 2],
@@ -214,7 +214,7 @@ export default [
 
   // 6. Тестовые файлы (переопределения)
   {
-    name: "@repo/eslint-config/tests",
+    name: "@newkind/eslint-config/tests",
     files: [
       "**/__tests__/**/*.{js,ts}",
       "**/*.test.{js,ts}",
@@ -229,7 +229,7 @@ export default [
 
   // 7. Скрипты (переопределения)
   {
-    name: "@repo/eslint-config/scripts",
+    name: "@newkind/eslint-config/scripts",
     files: ["scripts/**/*.{js,mjs}", "**/*.config.{js,mjs}"],
     rules: {
       "no-console": "off",

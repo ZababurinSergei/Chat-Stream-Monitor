@@ -1,4 +1,4 @@
-import eslintConfig from "@repo/eslint-config";
+import eslintConfig from "@newkind/eslint-config";
 
 export default [
   ...eslintConfig,
