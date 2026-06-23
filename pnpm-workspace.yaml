@@ -18,9 +18,14 @@ packages:
 
 # Настройки для pnpm
 allowBuilds:
+  '@infoenergo/asuse-reports-ui': false
   "@parcel/watcher": false
+  core-js: false
   esbuild: true
+  inferno: false
   tree-sitter-wasms: true
+  vue-demi: false
+  yorkie: false
 
 # Минимальный возраст релизов (0 - отключено)
 minimumReleaseAge: 0

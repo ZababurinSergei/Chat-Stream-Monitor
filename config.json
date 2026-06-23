@@ -6,7 +6,7 @@
       "description": "Пользовательская документация: проектные описания, инструкции, чек-листы",
       "description_en": "User documentation: project descriptions, instructions, checklists",
       "required": false,
-      "excluded": false
+      "excluded": true
     },
     {
       "id": "11",
@@ -14,7 +14,7 @@
       "description": "Пользовательские функции: скрипты, расширения, пользовательские утилиты",
       "description_en": "User functions: scripts, extensions, user utilities",
       "required": false,
-      "excluded": true
+      "excluded": false
     },
     {
       "id": "12",
@@ -59,6 +59,7 @@
   ],
   "excludePatterns": {
     "directories": [
+      "migration_commits",
       "cache",
       ".turbo",
       ".github",

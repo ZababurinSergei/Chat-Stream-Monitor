@@ -10,3 +10,9 @@
 	path = packages/infoenergo-ui
 	url = git@gitlab.infoenergo.loc:infoenergo.npm/infoenergo-ui.git
     branch = rc
+[submodule "packages/asuse-ai"]
+	path = packages/asuse-ai
+	url = git@gitlab.infoenergo.loc:asuse.ai/back/asuse-ai.git
+[submodule "packages/front-asuse-ai-infoenergo"]
+	path = packages/front-asuse-ai-infoenergo
+	url = git@gitlab.infoenergo.loc:asuse.ai/front/front-asuse-ai-infoenergo.git
