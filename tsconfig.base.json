@@ -54,8 +54,8 @@
       "@newkind/shared-types": ["./packages/shared-types/src/index.ts"],
       "@newkind/shared-types/*": ["./packages/shared-types/src/*"],
 
-      "@repo/eslint-config": ["./tooling/eslint-config/index.js"],
-      "@repo/prettier-config": ["./tooling/prettier-config/index.js"]
+      "@newkind/eslint-config": ["./tooling/eslint-config/index.js"],
+      "@newkind/prettier-config": ["./tooling/prettier-config/index.js"]
     },
 
     "types": ["node", "vitest/globals"],
