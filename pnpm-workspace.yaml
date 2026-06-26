@@ -23,6 +23,7 @@ allowBuilds:
   core-js: false
   esbuild: true
   inferno: false
+  sqlite3: false
   tree-sitter-wasms: true
   vue-demi: false
   yorkie: false
