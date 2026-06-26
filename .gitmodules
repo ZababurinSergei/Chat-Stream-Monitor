@@ -2,6 +2,10 @@
     path = packages/ast-analyzer
     url = https://github.com/ZababurinSergei/ast-analyzer
     branch = main
+[submodule "packages/extensions"]
+    path = packages/extensions
+    url = https://github.com/ZababurinSergei/chrome-extension-deepseek.git
+    branch = main
 [submodule "packages/unit"]
     path = packages/unit
     url = https://github.com/ZababurinSergei/unit.git
@@ -20,3 +24,5 @@
 [submodule "packages/front-asuse-ai-infoenergo"]
 	path = packages/front-asuse-ai-infoenergo
 	url = git@gitlab.infoenergo.loc:asuse.ai/front/front-asuse-ai-infoenergo.git
+
+

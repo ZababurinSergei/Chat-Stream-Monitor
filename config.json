@@ -68,10 +68,13 @@
   "excludePatterns": {
     "directories": [
       "migration_commits",
+      "packages/ast-analyzer/src/__tests__",
+      "packages/ast-analyzer/src/formal/__tests__",
       "cache",
       ".turbo",
       ".github",
       ".idea",
+      "node_modules",
       ".git",
       "dist",
       "build",
