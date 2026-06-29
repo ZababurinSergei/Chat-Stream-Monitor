@@ -1,12 +1,12 @@
 #!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
+# .husky/pre-push - Хук pre-push для проверки подмодулей
 
-echo "Validating submodule pushes..."
+echo "🔍 Запуск pre-push проверки..."
 
-# Проверяем, что все коммиты подмодулей, на которые ссылается родитель, есть на сервере
-if ! git push --recurse-submodules=check --dry-run; then
-    echo "❌ Ошибка: Вы пытаетесь запушить родительский репозиторий,"
-    echo "но коммиты в подмодулях еще не отправлены на удаленный сервер!"
-    echo "Запушьте подмодули (например, через 'mr push') и повторите попытку."
-    exit 1
-fi
+# Проверка подмодулей перед пушем
+pnpm run validate:push
+
+# Дополнительная проверка консистентности
+pnpm run validate:submodules
+
+echo "✅ Pre-push проверка пройдена успешно!"
