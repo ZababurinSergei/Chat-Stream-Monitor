@@ -38,7 +38,7 @@
       "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
       "description_en": "User files: sources, templates, projects, user data",
       "required": false,
-      "excluded": true
+      "excluded": false
     },
     {
       "id": "15",
@@ -62,11 +62,12 @@
       "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
       "description_en": "User files: sources, templates, projects, user data",
       "required": false,
-      "excluded": false
+      "excluded": true
     }
   ],
   "excludePatterns": {
     "directories": [
+      ".vite-cache",
       "migration_commits",
       "packages/ast-analyzer/src/__tests__",
       "packages/ast-analyzer/src/formal/__tests__",
@@ -85,6 +86,7 @@
       "logs"
     ],
     "files": [
+      "analysis-result.json",
       "README.md",
       "LICENSE.md",
       "package-lock.json",
