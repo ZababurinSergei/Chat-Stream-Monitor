@@ -36,7 +36,9 @@
     "license:verify": "node check-license.mjs verify",
     "license:help": "node check-license.mjs help",
     "precommit": "npm run license:check",
-    "preinstall": "node scripts/check-pnpm.mjs"
+    "preinstall": "node scripts/check-pnpm.mjs && git submodule update --init --recursive",
+    "validate:push": "node scripts/validate-push.js",
+    "validate:submodules": "node scripts/check-consistency.js"
   },
   "keywords": [
     "scanner",

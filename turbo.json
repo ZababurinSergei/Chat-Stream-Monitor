@@ -7,6 +7,10 @@
   ],
   "globalEnv": ["NODE_ENV", "CI", "TURBO_TOKEN", "TURBO_TEAM"],
   "tasks": {
+    "validate:submodules": {
+      "inputs": [".gitmodules", "package.json"],
+      "cache": true
+    },
     "build": {
       "dependsOn": ["^build"],
       "outputs": [
