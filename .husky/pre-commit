@@ -1,1 +1,30 @@
-pnpm turbo run validate:submodules
+#!/bin/sh
+# .husky/pre-commit - Хук pre-commit для автоматического добавления подмодулей
+
+echo "🔍 Запуск pre-commit проверки..."
+
+# Проверяем наличие новых коммитов в подмодулях
+if git submodule status | grep -q "^+"; then
+    echo "📦 Обнаружены новые коммиты в подмодулях."
+    echo "   Автоматическое добавление изменений подмодулей..."
+    
+    # Добавляем все изменения
+    git add .
+    
+    echo "✅ Изменения подмодулей добавлены в индекс."
+    echo "   Продолжаем коммит..."
+fi
+
+# Проверка лицензии
+pnpm run license:check
+
+# Линтинг с автофиксом
+pnpm run lint:fix
+
+# Форматирование
+pnpm run format
+
+# Проверка консистентности подмодулей
+pnpm run validate:submodules
+
+echo "✅ Pre-commit проверка пройдена успешно!"
