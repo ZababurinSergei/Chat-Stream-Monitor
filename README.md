@@ -5,7 +5,8 @@
 [![pnpm Version](https://img.shields.io/badge/pnpm-%3E%3D8.0.0-orange)](https://pnpm.io/)
 [![Turbo](https://img.shields.io/badge/Turbo-2.9.18-00B4D8)](https://turbo.build/)
 
-Монорепозиторий для инструментов анализа кода, AST-анализатора и сканера файловой системы.
+Монорепозиторий для инструментов анализа кода, AST-анализатора и сканера
+файловой системы.
 
 ## 📋 Оглавление
 
@@ -211,10 +212,10 @@ pnpm clean
 
 ```typescript
 // Импорт из ast-analyzer
-import { AutoRefactor, analyzeVueComponent } from "@newkind/ast-analyzer";
+import { AutoRefactor, analyzeVueComponent } from '@newkind/ast-analyzer';
 
 // Импорт общих типов
-import type { FileNode, Config } from "@newkind/shared-types";
+import type { FileNode, Config } from '@newkind/shared-types';
 ```
 
 ## 🔄 CI/CD
@@ -281,21 +282,21 @@ pnpm ast-analyzer impact ./src/db.ts findUser
 ### Программное использование
 
 ```typescript
-import { AutoRefactor, SemanticPipeline } from "@newkind/ast-analyzer";
+import { AutoRefactor, SemanticPipeline } from '@newkind/ast-analyzer';
 
 // Автоматический рефакторинг
 const refactor = new AutoRefactor({
-  modulesDir: "modules",
+  modulesDir: 'modules',
   targetClusterSize: 3,
   minCohesionScore: 60,
   dryRun: false,
 });
 
-const result = await refactor.refactor("./src/my-file.ts");
+const result = await refactor.refactor('./src/my-file.ts');
 
 // Семантический анализ
 const pipeline = new SemanticPipeline();
-const analysis = await pipeline.run(["./src/app.ts"], {
+const analysis = await pipeline.run(['./src/app.ts'], {
   formalVerification: true,
   maxDepth: 5,
 });
@@ -381,6 +382,6 @@ pnpm license:verify
 - Лицензионные требования
 - Инструкции для контрибьюторов
 
-□ /Directory/monorepo/tooling/eslint-config/package.json
-□ /Directory/monorepo/tooling/prettier-config/index.js
-□ /Directory/monorepo/tooling/prettier-config/package.json
+□ /Directory/monorepo/tooling/eslint-config/package.json □
+/Directory/monorepo/tooling/prettier-config/index.js □
+/Directory/monorepo/tooling/prettier-config/package.json

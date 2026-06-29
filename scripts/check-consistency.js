@@ -1,140 +1,131 @@
-import { execSync } from "node:child_process";
+import { execSync } from 'node:child_process';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-console.log("📦 Turborepo: Проверка консистентности модулей...");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+console.log('📦 Проверка подмодулей...');
 
 try {
-  // 1. Проверяем, инициализированы ли все подмодули локально
-  const submoduleStatus = execSync("git submodule status", {
-    encoding: "utf-8",
-  });
-  const lines = submoduleStatus.split("\n").filter(line => line.trim());
+  // Получаем список всех подмодулей
+  const submoduleOutput = execSync('git submodule status', {
+    encoding: 'utf-8',
+  }).trim();
+  const submoduleLines = submoduleOutput.split('\n').filter(line => line.trim());
 
-  const uninitialized = lines.filter(line => line.startsWith("-"));
-  const newCommits = lines.filter(line => line.startsWith("+"));
-  const normal = lines.filter(line => line.startsWith(" "));
-
-  if (uninitialized.length > 0) {
-    console.error("\n❌ ОШИБКА: Обнаружены неинициализированные подмодули!");
-    console.error(
-      `📋 Найдено неинициализированных подмодулей: ${uninitialized.length}`,
-    );
-    console.error("\n🔧 Решение:");
-    console.error("   Запустите инициализацию подмодулей:");
-    console.error("   ─────────────────────────────────────────────");
-    console.error("   pnpm install");
-    console.error("   ─────────────────────────────────────────────");
-    console.error("   Или вручную:");
-    console.error("   git submodule update --init --recursive");
-    process.exit(1);
-  }
-
-  // 2. Если есть новые коммиты в подмодулях
-  if (newCommits.length > 0) {
-    console.log("\n📦 Обнаружены новые коммиты в подмодулях!");
-    console.log(
-      `   Количество подмодулей с новыми коммитами: ${newCommits.length}`,
-    );
-
-    // Показываем какие подмодули изменились
-    console.log("\n   Измененные подмодули:");
-    newCommits.forEach(line => {
-      const hash = line.substring(1, 41);
-      const path = line.substring(42).trim();
-      console.log(`   📦 ${path} (хеш: ${hash.substring(0, 7)}...)`);
-    });
-
-    console.log("\n🔧 Автоматическое добавление изменений...");
-
-    // Добавляем все изменения подмодулей
-    execSync("git add .", { stdio: "inherit" });
-
-    console.log("✅ Изменения подмодулей добавлены в индекс.");
-    console.log("   Теперь можно выполнить коммит.");
-    console.log("   Команда: git commit -m 'обновление подмодулей'");
-    console.log("   или выполните повторный commit с вашим сообщением.\n");
-
+  if (submoduleLines.length === 0) {
+    console.log('✅ Нет подмодулей для проверки');
     process.exit(0);
   }
 
-  // 3. Ищем незакоммиченный код (грязный рабочий каталог) внутри подмодулей
-  const dirtySubmodules = execSync(
-    'git submodule foreach --quiet "git status --porcelain"',
-    { encoding: "utf-8" },
-  ).trim();
+  // Проверяем каждый подмодуль на наличие изменений
+  const dirtyModules = [];
 
-  if (dirtySubmodules) {
-    console.error(
-      "\n❌ ОШИБКА: Внутри Git-подмодулей есть незакоммиченные файлы!",
-    );
-    console.error("\n🔧 Решение:");
-    console.error(
-      "   Перейдите в каждый измененный подмодуль и закоммитьте изменения:",
-    );
-    console.error(
-      "   ────────────────────────────────────────────────────────────────",
-    );
-    console.error("   cd packages/имя_подмодуля");
-    console.error("   git status                    # Посмотреть изменения");
-    console.error("   git add .                     # Добавить изменения");
-    console.error("   git commit -m 'описание'     # Создать коммит");
-    console.error("   cd ../..                     # Вернуться в корень");
-    console.error(
-      "   ────────────────────────────────────────────────────────────────",
-    );
-    console.error("   Или отменить изменения:");
-    console.error("   git submodule foreach --quiet 'git reset --hard HEAD'");
-    process.exit(1);
+  for (const line of submoduleLines) {
+    // Формат: " hash path" или "-hash path" или "+hash path"
+    const parts = line.trim().split(/\s+/);
+    if (parts.length < 2) {
+      continue;
+    }
+
+    const statusChar = parts[0].charAt(0);
+    const hash = parts[0].replace(/^[-+]/, '');
+    const modulePath = parts[1];
+
+    // Игнорируем неинициализированные подмодули (начинаются с -)
+    if (statusChar === '-') {
+      continue; // Пропускаем, не показываем
+    }
+
+    // Игнорируем .vite-cache и другие кэши
+    if (
+      modulePath.includes('.vite-cache') ||
+      modulePath.includes('.cache') ||
+      modulePath.includes('.turbo')
+    ) {
+      continue;
+    }
+
+    const fullPath = path.join(__dirname, modulePath);
+
+    try {
+      // Проверяем изменения в подмодуле
+      const status = execSync(`git -C "${fullPath}" status --porcelain`, {
+        encoding: 'utf-8',
+        stdio: ['pipe', 'pipe', 'ignore'],
+      }).trim();
+
+      if (status) {
+        dirtyModules.push({
+          path: modulePath,
+          fullPath,
+          status,
+        });
+      }
+    } catch (error) {
+      // Подмодуль не инициализирован - игнорируем
+      continue;
+    }
   }
 
-  // 4. Проверка на рассинхронизацию
-  const diffStatus = execSync("git diff --submodule=short", {
-    encoding: "utf-8",
-  }).trim();
-
-  if (diffStatus.includes("Submodule")) {
-    console.error(
-      "\n❌ ОШИБКА: Хеши коммитов в подмодулях рассинхронизированы с родительским репозиторием!",
-    );
-    console.error("\n🔧 Решение:");
-    console.error(
-      "   Обновите ссылки на подмодули в родительском репозитории:",
-    );
-    console.error(
-      "   ────────────────────────────────────────────────────────────────",
-    );
-    console.error(
-      "   git status                    # Посмотреть измененные подмодули",
-    );
-    console.error(
-      "   git add packages/имя_подмодуля # Добавить изменения подмодуля",
-    );
-    console.error("   git commit -m 'обновление подмодулей'");
-    console.error(
-      "   ────────────────────────────────────────────────────────────────",
-    );
-    console.error("   Или обновить подмодули до актуального состояния:");
-    console.error("   git submodule update --remote");
-    process.exit(1);
+  if (dirtyModules.length === 0) {
+    console.log('✅ Все подмодули чисты, изменений нет');
+    process.exit(0);
   }
 
-  console.log("✅ Все модули консистентны!");
-  console.log(
-    "   Подмодули инициализированы, изменений нет, хеши синхронизированы.",
-  );
+  // Выводим информацию об измененных подмодулях
+  console.log('\n' + '═'.repeat(60));
+  console.log('📋 ИЗМЕНЕННЫЕ ПОДМОДУЛИ');
+  console.log('═'.repeat(60));
+
+  for (const module of dirtyModules) {
+    console.log(`\n📦 ${module.path}`);
+    console.log('─'.repeat(50));
+
+    // Подсчитываем количество изменений
+    const lines = module.status.split('\n').filter(l => l.trim());
+    const added = lines.filter(l => l.startsWith('A') || l.includes('新增')).length;
+    const modified = lines.filter(l => l.startsWith(' M') || l.startsWith('M')).length;
+    const deleted = lines.filter(l => l.startsWith(' D') || l.startsWith('D')).length;
+    const untracked = lines.filter(l => l.startsWith('??')).length;
+
+    console.log(`   📊 Изменений: ${lines.length}`);
+    if (added > 0) {
+      console.log(`      ➕ Добавлено: ${added}`);
+    }
+    if (modified > 0) {
+      console.log(`      📝 Изменено: ${modified}`);
+    }
+    if (deleted > 0) {
+      console.log(`      ➖ Удалено: ${deleted}`);
+    }
+    if (untracked > 0) {
+      console.log(`      📄 Неотслеживаемых: ${untracked}`);
+    }
+
+    console.log('\n   🔧 Что делать?');
+    console.log('   ─────────────────────────────────────────────────');
+    console.log('   ✅ ВАРИАНТ 1: Закоммитить изменения');
+    console.log(`      cd ${module.path}`);
+    console.log('      git status');
+    console.log('      git add .');
+    console.log(`      git commit -m "обновление ${module.path}"`);
+    console.log('      cd ../..');
+    console.log('');
+    console.log('   ❌ ВАРИАНТ 2: Отменить изменения');
+    console.log(`      cd ${module.path}`);
+    console.log('      git reset --hard HEAD');
+    console.log('      cd ../..');
+    console.log('   ─────────────────────────────────────────────────');
+  }
+
+  console.log('\n' + '═'.repeat(60));
+  console.log(`📌 Всего измененных подмодулей: ${dirtyModules.length}`);
+  console.log('═'.repeat(60) + '\n');
+
+  process.exit(1);
 } catch (error) {
-  console.error("\n❌ КРИТИЧЕСКАЯ ОШИБКА проверки Git:", error.message);
-  console.error("\n🔧 Общие решения:");
-  console.error(
-    "   ────────────────────────────────────────────────────────────────",
-  );
-  console.error("   1. Проверить состояние Git:");
-  console.error("      git status");
-  console.error("   2. Проверить состояние подмодулей:");
-  console.error("      git submodule status");
-  console.error("   3. Обновить подмодули:");
-  console.error("      git submodule update --init --recursive");
-  console.error(
-    "   ────────────────────────────────────────────────────────────────",
-  );
+  console.error('❌ Ошибка проверки:', error.message);
   process.exit(1);
 }

@@ -215,11 +215,7 @@ export default [
   // 6. Тестовые файлы (переопределения)
   {
     name: '@newkind/eslint-config/tests',
-    files: [
-      '**/__tests__/**/*.{js,ts}',
-      '**/*.test.{js,ts}',
-      '**/*.spec.{js,ts}',
-    ],
+    files: ['**/__tests__/**/*.{js,ts}', '**/*.test.{js,ts}', '**/*.spec.{js,ts}'],
     rules: {
       'no-console': 'off',
       '@typescript-eslint/no-explicit-any': 'off',

@@ -1,28 +1,29 @@
 packages:
   # Основные пакеты монорепозитория
-  - "packages/*"
-  - "tooling/*"
+  - 'packages/*'
+  - 'tooling/*'
 
   # Приложения (если есть)
-  - "apps/*"
+  - 'apps/*'
 
   # Стандартные исключения
-  - "!**/node_modules"
-  - "!**/dist"
-  - "!**/build"
-  - "!**/coverage"
-  - "!**/.turbo"
-  - "!**/__tests__/fixtures"
-  - "!**/test-temp-*"
-  - "!**/*.backup.*"
+  - '!**/node_modules'
+  - '!**/dist'
+  - '!**/build'
+  - '!**/coverage'
+  - '!**/.turbo'
+  - '!**/__tests__/fixtures'
+  - '!**/test-temp-*'
+  - '!**/*.backup.*'
 
 # Настройки для pnpm
 allowBuilds:
   '@infoenergo/asuse-reports-ui': false
-  "@parcel/watcher": false
+  '@parcel/watcher': false
   core-js: false
   esbuild: true
   inferno: false
+  sharp: false
   sqlite3: false
   tree-sitter-wasms: true
   vue-demi: false

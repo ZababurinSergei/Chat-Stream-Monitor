@@ -41,15 +41,9 @@
       "@newkind/ast-analyzer": ["./packages/ast-analyzer/src/index.ts"],
       "@newkind/ast-analyzer/*": ["./packages/ast-analyzer/src/*"],
       "@newkind/ast-analyzer/cli": ["./packages/ast-analyzer/src/cli.ts"],
-      "@newkind/ast-analyzer/refactor": [
-        "./packages/ast-analyzer/src/refactor/index.ts"
-      ],
-      "@newkind/ast-analyzer/semantic": [
-        "./packages/ast-analyzer/src/semantic/index.ts"
-      ],
-      "@newkind/ast-analyzer/formal": [
-        "./packages/ast-analyzer/src/formal/index.ts"
-      ],
+      "@newkind/ast-analyzer/refactor": ["./packages/ast-analyzer/src/refactor/index.ts"],
+      "@newkind/ast-analyzer/semantic": ["./packages/ast-analyzer/src/semantic/index.ts"],
+      "@newkind/ast-analyzer/formal": ["./packages/ast-analyzer/src/formal/index.ts"],
 
       "@newkind/shared-types": ["./packages/shared-types/src/index.ts"],
       "@newkind/shared-types/*": ["./packages/shared-types/src/*"],

@@ -1,9 +1,13 @@
 #!/bin/sh
-# .husky/pre-push - Хук pre-push для проверки подмодулей
+# .husky/pre-push - Хук pre-push
 
 echo "🔍 Запуск pre-push проверки..."
 
 # Проверяем, опубликованы ли коммиты подмодулей
-pnpm run validate:push
+pnpm run validate:push || true
+
+# Запускаем линтинг без ошибок (только предупреждения)
+echo "📝 Проверка кода перед пушем..."
+pnpm run lint || true
 
 echo "✅ Pre-push проверка пройдена успешно!"

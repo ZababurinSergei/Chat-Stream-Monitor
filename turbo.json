@@ -1,10 +1,6 @@
 {
   "$schema": "https://turbo.build/schema.json",
-  "globalDependencies": [
-    "**/.env.*local",
-    "tsconfig.base.json",
-    "pnpm-lock.yaml"
-  ],
+  "globalDependencies": ["**/.env.*local", "tsconfig.base.json", "pnpm-lock.yaml"],
   "globalEnv": ["NODE_ENV", "CI", "TURBO_TOKEN", "TURBO_TEAM"],
   "tasks": {
     "validate:submodules": {
@@ -71,12 +67,7 @@
     },
     "type-check": {
       "dependsOn": ["^build"],
-      "inputs": [
-        "src/**",
-        "packages/**/src/**",
-        "tsconfig.json",
-        "tsconfig.base.json"
-      ],
+      "inputs": ["src/**", "packages/**/src/**", "tsconfig.json", "tsconfig.base.json"],
       "outputs": [],
       "cache": true
     },
@@ -93,14 +84,7 @@
     },
     "format": {
       "dependsOn": [],
-      "inputs": [
-        "src/**",
-        "packages/**/src/**",
-        "**/*.json",
-        "**/*.md",
-        "**/*.yaml",
-        "**/*.yml"
-      ],
+      "inputs": ["src/**", "packages/**/src/**", "**/*.json", "**/*.md", "**/*.yaml", "**/*.yml"],
       "outputs": [],
       "cache": false
     },

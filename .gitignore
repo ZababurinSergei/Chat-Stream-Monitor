@@ -20,7 +20,8 @@ out/
 
 # Turbo
 .turbo/
-Directory
+Directory/
+Directory/*
 pnpm-lock.yaml
 # Directory packages (основное обновление)
 Directory/*/dist/
@@ -117,15 +118,6 @@ Desktop.ini
 
 # TypeScript
 *.tsbuildinfo
-
-# ESLint
-.eslintcache
-
-# Prettier
-.prettiercache
-
-# Jest / Vitest
-coverage/
 
 # GitHub
 .github/

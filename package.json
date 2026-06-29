@@ -24,7 +24,7 @@
     "clean": "turbo clean && rm -rf node_modules",
     "clean:ast": "cd Directory/ast-analyzer && pnpm clean",
     "clean:shared": "cd packages/shared-types && pnpm clean",
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yaml}\"",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yaml}\" --loglevel warn",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yaml}\"",
     "changeset": "changeset",
     "version-packages": "changeset version",
@@ -68,7 +68,6 @@
   "devDependencies": {
     "@changesets/cli": "^2.31.0",
     "@eslint/js": "^10.0.1",
-    "@newkind/eslint-config": "workspace:*",
     "@types/node": "^25.9.3",
     "@typescript-eslint/eslint-plugin": "^8.61.0",
     "@typescript-eslint/parser": "^8.61.0",
@@ -81,7 +80,9 @@
     "prettier": "^3.8.4",
     "turbo": "^2.9.18",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.61.0"
+    "typescript-eslint": "^8.61.0",
+    "@newkind/eslint-config": "workspace:*",
+    "@newkind/prettier-config": "workspace:*"
   },
   "lint-staged": {
     "Directory/ast-analyzer/**/*.{ts,tsx,js,jsx}": [
@@ -116,5 +117,6 @@
     "pnpm": ">=8.0.0",
     "npm": "please-use-pnpm",
     "yarn": "please-use-pnpm"
-  }
+  },
+  "prettier": "@newkind/prettier-config"
 }
