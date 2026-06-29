@@ -195,3 +195,5 @@ report.html
 # TypeScript validator backups
 **/*.backup.*.ts
 **/*.backup.*.js
+
+fs
