@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Квантовый Терминал</title>
+    <script type="importmap">
+        {
+            "imports": {
+                "i18next": "/this/modules/lib-i18next.js",
+                "i18next/options": "/this/i18next/index.js",
+                "@libp2p/logger": "/this/modules/lib-logger.js"
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="/styles/panel-params.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/styles/terminal-script-manager.css">
+    <style>
+        /* Основные стили терминала */
+        body {
+            font-family: 'Courier New', monospace;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background-color: #1e1e1e;
+            color: #f0f0f0;
+        }
+
+        #main-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .terminal-header {
+            padding: 8px 12px;
+            background-color: #252526;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .terminal-title {
+            color: #4CAF50;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .terminal-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .terminal-controls button {
+            background: none;
+            border: none;
+            color: #f0f0f0;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .terminal-container {
+            flex: 1;
+            padding: 8px 12px;
+            overflow-y: auto;
+            font-size: 13px;
+            background-color: #1e1e1e;
+            height: 40vh;
+            min-height: 100px;
+            max-height: calc(100vh - 200px);
+        }
+
+        /* Стили для строк терминала */
+        .terminal-line {
+            margin: 0;
+            padding: 2px 0;
+            line-height: 1.3;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .prompt {
+            color: #4CAF50;
+        }
+
+        .command {
+            color: #569CD6;
+            font-weight: bold;
+        }
+
+        .error {
+            color: #F44747;
+        }
+
+        .warning {
+            color: #FFCC00;
+        }
+
+        .directory {
+            color: #9CDCFE;
+        }
+
+        /* Стили для трехколоночного макета */
+        .three-column-layout {
+            display: flex;
+            height: 50vh;
+            min-height: 200px;
+            max-height: calc(100vh - 150px);
+            border-top: 1px solid #333;
+            overflow-y: auto;
+        }
+
+        .left-column {
+            width: 350px;
+            min-width: 200px;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: width 0.3s ease;
+        }
+
+        .center-column {
+            flex: 1;
+            overflow: auto;
+            padding: 8px;
+            background-color: #1e1e1e;
+            position: relative;
+        }
+
+        .right-column {
+            width: 350px;
+            min-width: 200px;
+            max-width: 500px;
+            border-left: 1px solid #333;
+            background-color: #252526;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: width 0.3s ease;
+        }
+
+        /* Стили для области ввода */
+        .input-area {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            background-color: #252526;
+            border: 1px solid #333;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+
+        .input-prompt {
+            color: #4CAF50;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        #command-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: #f0f0f0;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            outline: none;
+            padding: 5px 0;
+        }
+
+        /* Стили для контейнера пресетов */
+        #presets-container {
+            margin: 0 0 15px 0;
+            border: 1px solid #333;
+            border-radius: 4px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .presets-header {
+            padding: 6px 10px;
+            background-color: #2A2D2E;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 36px;
+        }
+
+        .presets-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: #252526;
+            border: 1px solid #333;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            padding: 8px;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        /* Стили для переключателей */
+        .toggle-container {
+            padding: 15px;
+            background: #2a2d2e;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .toggle-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-icon {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5%;
+            background-color: #2a2d2e;
+            color: #9cdcfe;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-checkbox:checked + .toggle-icon {
+            background-color: rgba(86, 156, 214, 0.2);
+            color: #569cd6;
+            box-shadow: 0 0 0 2px rgba(86, 156, 214, 0.3);
+        }
+
+        .toggle-checkbox:checked + .toggle-icon.blue-highlight {
+            background-color: rgba(86, 156, 214, 0.2);
+            color: #569cd6;
+            box-shadow: 0 0 0 2px rgba(86, 156, 214, 0.3);
+        }
+
+        .toggle-item::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 50%;
+            bottom: -30px;
+            transform: translateX(-50%);
+            background-color: #252526;
+            color: #f0f0f0;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            pointer-events: none;
+            border: 1px solid #333;
+        }
+
+        .toggle-item:hover::after {
+            opacity: 1;
+            visibility: visible;
+            bottom: -35px;
+        }
+
+        /* Стили для конфигуратора панелей */
+        panel-configurator {
+            display: block;
+            width: 100%;
+        }
+
+        /* Адаптивные стили */
+        @media (max-width: 768px) {
+            .three-column-layout {
+                flex-direction: column;
+                height: auto;
+            }
+
+            .left-column, .right-column {
+                width: 100%;
+                min-width: auto;
+                max-width: none;
+            }
+
+            .terminal-container, .three-column-layout {
+                height: auto;
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+<body>
+<div id="main-container">
+    <div class="terminal-header">
+        <div class="terminal-title">Квантовый Терминал v7.4.0</div>
+        <div class="terminal-controls">
+            <button id="clear-btn" title="Очистить терминал"><i class="fas fa-trash"></i></button>
+            <button id="copy-btn" title="Копировать всё"><i class="fas fa-copy"></i></button>
+            <button id="fullscreen-btn" title="Полный экран"><i class="fas fa-expand"></i></button>
+        </div>
+    </div>
+
+    <div class="terminal-container" id="terminal">
+        <div class="terminal-line">
+            <span class="prompt">$</span> <span class="directory">~/quantum-git</span> system init --quantum-bits=256
+        </div>
+        <div class="terminal-line">
+            <span class="prompt">></span> Quantum Git System v7.4.0 initialized
+        </div>
+        <div class="terminal-line">
+            <span class="prompt">></span> Entanglement level: 0.95
+        </div>
+        <div class="terminal-line">
+            <span class="prompt">></span> Ready for quantum operations
+        </div>
+    </div>
+
+    <div class="three-column-layout">
+        <div class="left-column">
+            <div class="toggle-container">
+                <label class="toggle-item" data-tooltip="Показать поле ввода">
+                    <input type="checkbox" id="toggle-input-left" class="toggle-checkbox">
+                    <div class="toggle-icon blue-highlight">
+                        <i class="fas fa-keyboard"></i>
+                    </div>
+                </label>
+
+                <label class="toggle-item" data-tooltip="Показать приватные скрипты">
+                    <input type="checkbox" id="toggle-private-left" class="toggle-checkbox">
+                    <div class="toggle-icon blue-highlight">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                </label>
+
+                <!-- НОВЫЕ КНОПКИ -->
+                <!-- Кнопка 1: Скрыть/показать лейблы "in-progress" -->
+                <label class="toggle-item" data-tooltip="Управление видимостью лейблов in-progress">
+                    <input type="checkbox" id="toggle-labels" class="toggle-checkbox" checked>
+                    <div class="toggle-icon blue-highlight">
+                        <i class="fas fa-tag"></i>
+                    </div>
+                </label>
+
+                <!-- Кнопка 2: Скрыть/показать компоненты с классом in-progress -->
+                <label class="toggle-item" data-tooltip="Управление видимостью компонентов in-progress">
+                    <input type="checkbox" id="toggle-components" class="toggle-checkbox" checked>
+                    <div class="toggle-icon">
+                        <i class="fas fa-tags"></i>
+                    </div>
+                </label>
+                <!-- КОНЕЦ НОВЫХ КНОПОК -->
+
+                <label class="toggle-item" data-tooltip="Конфигуратор панелей">
+                    <input type="checkbox" id="toggle-configurator" class="toggle-checkbox">
+                    <div class="toggle-icon">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                </label>
+            </div>
+
+            <div class="control-menu in-progress">
+                <button class="control-btn" id="run-btn-left">
+                    <i class="fas fa-play"></i> Выполнить последовательность
+                </button>
+                <button class="control-btn" id="save-btn-left">
+                    <i class="fas fa-save"></i> Сохранить
+                </button>
+                <button class="control-btn" id="clear-dnd-btn-left">
+                    <i class="fas fa-trash"></i> Очистить
+                </button>
+                <button class="control-btn" id="add-preset-btn-left">
+                    <i class="fas fa-plus"></i> Добавить пресет
+                </button>
+            </div>
+
+            <div id="dnd-zone-left" class="in-progress">
+                <div class="dnd-script placeholder">
+                    <div class="status-indicators">
+                        <div class="status-indicator"></div>
+                        <div class="status-indicator"></div>
+                        <div class="status-indicator"></div>
+                        <div class="status-indicator"></div>
+                        <div class="status-indicator"></div>
+                    </div>
+                    <i class="fas fa-arrows-alt"></i>
+                    <span>Перетащите скрипты сюда для создания последовательности</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="center-column scroll-container">
+            <!-- Добавленная панель параметров -->
+            <nk-panel-params id="main-params" data-active-app="dynamic-parameter-addition"></nk-panel-params>
+
+            <div class="input-area" id="input-area">
+                <span class="input-prompt">$</span>
+                <input type="text" id="command-input" placeholder="Введите квантовую команду..." autocomplete="off">
+            </div>
+
+            <div id="presets-container">
+                <div class="presets-header">
+                    <span>Пресет: <span class="preset-name">Пустой объект</span></span>
+                    <i class="fas fa-caret-down"></i>
+                </div>
+                <div class="presets-content" id="presets-content"></div>
+            </div>
+
+            <div id="scripts-panel">
+                <div class="scripts-header">
+                    <h3>Доступные скрипты</h3>
+                    <button id="refresh-scripts" title="Обновить скрипты">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                </div>
+                <div class="scripts-list"></div>
+            </div>
+
+            <!-- Конфигуратор панелей -->
+            <panel-configurator></panel-configurator>
+        </div>
+
+        <div class="right-column">
+            <div class="toggle-container">
+                <label class="toggle-item" data-tooltip="Показать поле ввода">
+                    <input type="checkbox" id="toggle-input" class="toggle-checkbox" checked>
+                    <div class="toggle-icon blue-highlight">
+                        <i class="fas fa-keyboard"></i>
+                    </div>
+                </label>
+
+                <label class="toggle-item" data-tooltip="Показать приватные скрипты">
+                    <input type="checkbox" id="toggle-private" class="toggle-checkbox" checked>
+                    <div class="toggle-icon blue-highlight">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                </label>
+            </div>
+
+            <div class="control-menu">
+                <button class="control-btn" id="run-btn">
+                    <i class="fas fa-play"></i> Выполнить последовательность
+                </button>
+                <button class="control-btn" id="save-btn">
+                    <i class="fas fa-save"></i> Сохранить
+                </button>
+                <button class="control-btn in-progress" id="clear-dnd-btn">
+                    <i class="fas fa-trash"></i> Очистить
+                </button>
+                <button class="control-btn in-progress" id="add-preset-btn">
+                    <i class="fas fa-plus"></i> Добавить пресет
+                </button>
+            </div>
+
+            <div id="dnd-zone" class="full-width-dropzone">
+                <div class="dnd-script placeholder">
+                    <div class="status-indicators">
+                        <div class="status-indicator"></div>
+                        <div class="status-indicator"></div>
+                        <div class="status-indicator"></div>
+                        <div class="status-indicator"></div>
+                        <div class="status-indicator"></div>
+                    </div>
+                    <i class="fas fa-arrows-alt"></i>
+                    <span>Перетащите скрипты сюда для создания последовательности</span>
+                </div>
+            </div>
+        </div>
+        <div class="drop-target-highlight"></div>
+    </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script type="module" src="/scripts/TerminalManager/main.js"></script>
+<script type="module" src="/scripts/PanelParams/index.mjs"></script>
+<script type="module" src="/scripts/panel-configurator.js"></script>
+<script>
+    // Обработчики для скроллбаров
+    document.querySelectorAll('.terminal-container, #scripts-panel, #dnd-zone, #dnd-zone-left, .presets-content, .three-column-layout').forEach(el => {
+        el.classList.add('scrollable');
+        let scrollTimer;
+
+        el.addEventListener('scroll', () => {
+            el.classList.add('scrolling');
+
+            clearTimeout(scrollTimer);
+            scrollTimer = setTimeout(() => {
+                el.classList.remove('scrolling');
+            }, 1000);
+        });
+    });
+
+    // Обработчики для переключателей левой колонки
+    document.getElementById('toggle-input-left').addEventListener('change', function() {
+        const isChecked = this.checked;
+        document.getElementById('input-area').style.display = isChecked ? 'flex' : 'none';
+        const icon = this.nextElementSibling;
+        if (isChecked) {
+            icon.classList.add('active');
+        } else {
+            icon.classList.remove('active');
+        }
+        if (isChecked) {
+            setTimeout(() => {
+                document.getElementById('command-input').focus();
+            }, 100);
+        }
+    });
+
+    document.getElementById('toggle-private-left').addEventListener('change', function() {
+        const isChecked = this.checked;
+        const privateGroups = document.querySelectorAll('.private-group');
+        privateGroups.forEach(group => {
+            group.style.display = isChecked ? '' : 'none';
+        });
+        const icon = this.nextElementSibling;
+        if (isChecked) {
+            icon.classList.add('active');
+        } else {
+            icon.classList.remove('active');
+        }
+    });
+
+    // Обработчик для кнопки конфигуратора
+    document.getElementById('toggle-configurator').addEventListener('change', function() {
+        const configurator = document.querySelector('panel-configurator');
+        if (configurator) {
+            const panel = configurator.shadowRoot.querySelector('.panel-config');
+            if (this.checked) {
+                panel.style.height = '200px';
+                panel.classList.remove('collapsed');
+            } else {
+                panel.style.height = '0';
+                panel.classList.add('collapsed');
+            }
+        }
+        const icon = this.nextElementSibling;
+        icon.classList.toggle('active', this.checked);
+    });
+
+    // Обработчик обновления скриптов
+    document.getElementById('refresh-scripts').addEventListener('click', () => {
+        const event = new CustomEvent('refresh-scripts');
+        document.dispatchEvent(event);
+    });
+
+    // НОВЫЕ ОБРАБОТЧИКИ ДЛЯ КНОПОК
+    document.getElementById('toggle-labels').addEventListener('change', function() {
+        const isChecked = this.checked;
+        document.querySelectorAll('.in-progress::after').forEach(el => {
+            el.style.display = isChecked ? 'block' : 'none';
+        });
+        localStorage.setItem('labelsVisible', isChecked);
+    });
+
+    document.querySelector('#toggle-labels').addEventListener('change', function(event) {
+        const isChecked = this.checked;
+        if (isChecked) {
+            // Режим включения - ищем элементы с data-original-classes
+            const elementsToRestore = document.querySelectorAll('[data-original-classes]');
+
+            elementsToRestore.forEach(el => {
+                const originalClasses = el.dataset.originalClasses;
+                if (originalClasses) {
+                    // Восстанавливаем оригинальные классы
+                    el.className = originalClasses;
+
+                    // Добавляем маркер in-progress если его не было
+                    if (!originalClasses.includes('in-progress')) {
+                        el.classList.add('in-progress');
+                    }
+
+                    // Удаляем временный атрибут
+                    el.removeAttribute('data-original-classes');
+                }
+            });
+        } else {
+            // Режим выключения - ищем все in-progress элементы
+            const elementsToHide = document.querySelectorAll('[class*="in-progress"]');
+
+            elementsToHide.forEach(el => {
+                // Сохраняем классы только если еще не сохраняли
+                if (!el.dataset.originalClasses) {
+                    el.dataset.originalClasses = el.className;
+                }
+
+                // Удаляем все варианты in-progress классов
+                el.className = el.className
+                    .split(' ')
+                    .filter(cls => !cls.includes('in-progress'))
+                    .join(' ')
+                    .trim();
+            });
+        }
+
+        localStorage.setItem('labelsVisible', isChecked);
+    });
+
+    document.querySelector('#toggle-components').addEventListener('change', function(event) {
+        const isChecked = this.checked;
+
+        document.querySelectorAll('[data-original-classes]').forEach(el => {
+            if (!el.classList.contains('in-progress-without')) {
+                el.style.display = isChecked ? '' : 'none';
+            }
+        });
+
+        document.querySelectorAll('.in-progress').forEach(el => {
+            if (!el.classList.contains('in-progress-without')) {
+                el.style.display = isChecked ? '' : 'none';
+            }
+        });
+
+        localStorage.setItem('componentsVisible', isChecked);
+    });
+
+    // Инициализация состояний при загрузке
+    document.addEventListener('DOMContentLoaded', () => {
+        const labelsToggle = document.getElementById('toggle-labels');
+        const componentsToggle = document.getElementById('toggle-components');
+
+        // Восстановление состояния из localStorage
+        const labelsVisible = localStorage.getItem('labelsVisible') !== 'false';
+        const componentsVisible = localStorage.getItem('componentsVisible') !== 'false';
+
+        // Применяем сохраненные состояния
+        labelsToggle.checked = labelsVisible;
+        componentsToggle.checked = componentsVisible;
+
+        // Триггерим события для применения состояний
+        labelsToggle.dispatchEvent(new Event('change'));
+        componentsToggle.dispatchEvent(new Event('change'));
+    });
+</script>
+<script type="module" src="./scripts/QuantumArchDiagram.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const containers = document.querySelectorAll('.scroll-container');
+
+        containers.forEach(container => {
+            let scrollTimeout;
+            let isScrolling = false;
+            let lastScrollPos = container.scrollTop;
+
+            container.addEventListener('scroll', () => {
+                // Проверяем, действительно ли произошла прокрутка
+                if (container.scrollTop !== lastScrollPos) {
+                    if (!isScrolling) {
+                        container.classList.add('scrolling-active');
+                        isScrolling = true;
+                    }
+
+                    clearTimeout(scrollTimeout);
+                    scrollTimeout = setTimeout(() => {
+                        container.classList.remove('scrolling-active');
+                        isScrolling = false;
+                    }, 800);
+                }
+                lastScrollPos = container.scrollTop;
+            });
+        });
+    });
+</script>
+</body>
+</html>

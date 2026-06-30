@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Romance Care v2.0 - Управление отношениями</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #E91E63;
+            --primary-dark: #C2185B;
+            --secondary: #3F51B5;
+            --background: #121212;
+            --surface: #1E1E1E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B0B0;
+            --border: #333333;
+            --success: #4CAF50;
+            --error: #CF6679;
+            --warning: #FFC107;
+            --card-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            --state-output-bg: #252525;
+        }
+
+        [data-theme="light"] {
+            --primary: #E91E63;
+            --primary-dark: #C2185B;
+            --secondary: #3F51B5;
+            --background: #F5F5F5;
+            --surface: #FFFFFF;
+            --text-primary: #212121;
+            --text-secondary: #666666;
+            --border: #E0E0E0;
+            --success: #388E3C;
+            --error: #D32F2F;
+            --warning: #FFA000;
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --state-output-bg: #FAFAFA;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 24px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .title-container {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -0.5px;
+        }
+
+        .system-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background-color: rgba(76, 175, 80, 0.1);
+            font-size: 0.9rem;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .status-active {
+            background-color: var(--success);
+        }
+
+        .status-inactive {
+            background-color: var(--error);
+        }
+
+        .status-warning {
+            background-color: var(--warning);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .theme-switcher {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        .theme-icon {
+            width: 18px;
+            height: 18px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .panel {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border);
+        }
+
+        .panel-title {
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            color: var(--primary);
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(233,30,99,0.2);
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            background: var(--primary);
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .button-secondary {
+            background: var(--secondary);
+        }
+
+        .button-secondary:hover {
+            background: #303F9F;
+        }
+
+        .button[disabled] {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .button-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .button-outline:hover {
+            background: rgba(233,30,99,0.1);
+        }
+
+        .state-panel {
+            grid-column: 1 / -1;
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border);
+        }
+
+        .state-output {
+            background: var(--state-output-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            line-height: 1.5;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-group input {
+            width: auto;
+        }
+
+        .checkbox-group label {
+            margin-bottom: 0;
+        }
+
+        .progress-bar {
+            margin-top: 8px;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar div {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .node-tag {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            display: inline-block;
+        }
+
+        .heart-rate {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .heart-icon {
+            color: var(--primary);
+            animation: heartbeat 1.5s infinite;
+        }
+
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.1); }
+            50% { transform: scale(1); }
+            75% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .compatibility-meter {
+            width: 100%;
+            height: 20px;
+            background: linear-gradient(to right,
+            var(--error) 0%,
+            var(--warning) 50%,
+            var(--success) 100%);
+            border-radius: 10px;
+            margin: 10px 0;
+            position: relative;
+        }
+
+        .compatibility-pointer {
+            position: absolute;
+            top: -5px;
+            width: 10px;
+            height: 30px;
+            background: var(--text-primary);
+            border-radius: 5px;
+            transform: translateX(-50%);
+            left: 85%;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 16px;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .panel, .state-panel {
+                padding: 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <div class="title-container">
+            <h1 class="title">Romance Care v2.0</h1>
+            <div class="system-status" id="systemStatus">
+                <span class="status-indicator status-active"></span>
+                <span id="systemStatusText">Гармония 92%</span>
+            </div>
+        </div>
+        <div class="theme-switcher" id="themeSwitcher">
+            <svg class="theme-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8V16Z" fill="currentColor"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2ZM12 4V20C7.58172 20 4 16.4183 4 12C4 7.58172 7.58172 4 12 4Z" fill="currentColor"/>
+            </svg>
+            <span id="themeText">Светлая тема</span>
+        </div>
+    </header>
+
+    <div class="grid">
+        <!-- Панель состояния отношений -->
+        <div class="panel">
+            <h2 class="panel-title">Состояние отношений</h2>
+            <div class="form-group">
+                <label>Уровень близости</label>
+                <div class="progress-bar">
+                    <div style="width: 88%; background: var(--primary);"></div>
+                </div>
+                <div class="heart-rate">
+                    <span class="heart-icon">❤️</span>
+                    <span>Эмоциональный пульс: сильный</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Совместимость партнеров</label>
+                <div class="compatibility-meter">
+                    <div class="compatibility-pointer"></div>
+                </div>
+                <div style="text-align: center; font-size: 0.9rem; color: var(--success);">
+                    Отличная совместимость
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="timeTogether">Время вместе</label>
+                <input type="text" id="timeTogether" value="1 год 3 месяца" disabled>
+            </div>
+            <button class="button" onclick="updateRelationshipStatus()">Обновить статус</button>
+        </div>
+
+        <!-- Панель романтических идей -->
+        <div class="panel">
+            <h2 class="panel-title">Романтические идеи</h2>
+            <div class="form-group">
+                <label for="romanceLevel">Уровень романтики</label>
+                <select id="romanceLevel">
+                    <option value="simple">Простой</option>
+                    <option value="medium" selected>Средний</option>
+                    <option value="high">Высокий</option>
+                    <option value="extreme">Особенный</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Последние идеи:</label>
+                <div style="border: 1px solid var(--border); border-radius: 8px; padding: 12px;">
+                    <div style="margin-bottom: 8px;">
+                        <span style="color: var(--primary);">★</span> Совместный ужин при свечах
+                    </div>
+                    <div>
+                        <span style="color: var(--primary);">★</span> Прогулка под звездами
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="nextDate">Ближайшее свидание:</label>
+                <input type="text" id="nextDate" value="Пятница, 20:00 - Тематический ужин">
+            </div>
+            <div class="button-group">
+                <button class="button" onclick="generateRomanticIdea()">Новая идея</button>
+                <button class="button button-secondary" onclick="planSurprise()">Запланировать сюрприз</button>
+            </div>
+        </div>
+
+        <!-- Панель анализа отношений -->
+        <div class="panel">
+            <h2 class="panel-title">Анализ отношений</h2>
+            <div class="form-group">
+                <label>Сильные стороны:</label>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <span class="node-tag" style="background: var(--success);">Доверие</span>
+                    <span class="node-tag" style="background: var(--success);">Общение</span>
+                    <span class="node-tag" style="background: var(--success);">Поддержка</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Зоны роста:</label>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <span class="node-tag" style="background: var(--warning);">Совместные решения</span>
+                    <span class="node-tag" style="background: var(--warning);">Личное пространство</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="loveLanguage">Язык любви:</label>
+                <select id="loveLanguage">
+                    <option value="words">Слова поощрения</option>
+                    <option value="time" selected>Время вместе</option>
+                    <option value="gifts">Подарки</option>
+                    <option value="acts">Акты заботы</option>
+                    <option value="touch">Физический контакт</option>
+                </select>
+            </div>
+            <div class="button-group">
+                <button class="button" onclick="analyzeRelationship()">Анализировать</button>
+                <button class="button button-outline" onclick="suggestImprovements()">Советы</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Панель истории отношений -->
+    <div class="state-panel">
+        <h2 class="panel-title">История отношений</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+            <div>
+                <h3 style="font-size: 1rem; margin-bottom: 12px;">Эмоциональный график</h3>
+                <div style="height: 120px; background: var(--background); border-radius: 8px; padding: 12px; display: flex; align-items: flex-end; gap: 4px;">
+                    <div style="flex: 1; background: var(--primary); height: 40%;"></div>
+                    <div style="flex: 1; background: var(--primary); height: 65%;"></div>
+                    <div style="flex: 1; background: var(--primary); height: 80%;"></div>
+                    <div style="flex: 1; background: var(--primary); height: 90%;"></div>
+                    <div style="flex: 1; background: var(--primary); height: 75%;"></div>
+                    <div style="flex: 1; background: var(--primary); height: 85%;"></div>
+                    <div style="flex: 1; background: var(--primary); height: 95%;"></div>
+                </div>
+            </div>
+            <div>
+                <h3 style="font-size: 1rem; margin-bottom: 12px;">Совместные моменты</h3>
+                <div style="height: 120px; display: flex; align-items: center; justify-content: center;">
+                    <div style="width: 80px; height: 80px; border-radius: 50%; background: conic-gradient(
+                            var(--primary) 0% 35%,
+                            var(--secondary) 35% 70%,
+                            var(--success) 70% 100%
+                        );"></div>
+                </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label>Ключевые моменты:</label>
+            <div class="state-output" style="max-height: 200px;">
+                [12.06.2023] Первое свидание в кофейне на берегу
+                [28.07.2023] Совместная поездка на море
+                [14.02.2024] Романтический ужин в День Святого Валентина
+                [08.03.2024] Неожиданный букет и завтрак в постель
+            </div>
+        </div>
+        <div class="button-group" style="margin-top: 16px;">
+            <button class="button" onclick="showMemoryBook()">Книга воспоминаний</button>
+            <button class="button button-secondary" onclick="addSpecialMoment()">Добавить момент</button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    // Инициализация системы
+    function initSystem() {
+        updateSystemStatus('active', 'Гармония 92%');
+        setInterval(checkRelationshipHealth, 30000);
+
+        // Инициализация темы
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        document.documentElement.setAttribute('data-theme', savedTheme === 'light' ? 'light' : '');
+        document.getElementById('themeText').textContent = savedTheme === 'light' ? 'Тёмная тема' : 'Светлая тема';
+
+        // Обработчик переключения темы
+        document.getElementById('themeSwitcher').addEventListener('click', toggleTheme);
+    }
+
+    function toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+
+        if (currentTheme === 'light') {
+            document.documentElement.removeAttribute('data-theme');
+            localStorage.setItem('theme', 'dark');
+            document.getElementById('themeText').textContent = 'Светлая тема';
+        } else {
+            document.documentElement.setAttribute('data-theme', 'light');
+            localStorage.setItem('theme', 'light');
+            document.getElementById('themeText').textContent = 'Тёмная тема';
+        }
+    }
+
+    // Основные функции
+    window.updateRelationshipStatus = function() {
+        setTimeout(() => {
+            updateSystemStatus('active', 'Статус обновлен');
+            addLogEntry('Обновлен статус отношений');
+        }, 800);
+    };
+
+    window.generateRomanticIdea = function() {
+        const ideas = [
+            "Свидание с квестом по памятным местам",
+            "Домашний кинотеатр с любимыми фильмами",
+            "Мастер-класс по танцам вдвоем",
+            "Пикник в необычном месте",
+            "Ночная прогулка по городу"
+        ];
+        const randomIdea = ideas[Math.floor(Math.random() * ideas.length)];
+
+        updateSystemStatus('active', 'Новая идея создана');
+        addLogEntry(`Сгенерирована романтическая идея: "${randomIdea}"`);
+    };
+
+    window.analyzeRelationship = function() {
+        const loveLanguage = document.getElementById('loveLanguage').value;
+        const languages = {
+            'words': 'Слова поощрения',
+            'time': 'Время вместе',
+            'gifts': 'Подарки',
+            'acts': 'Акты заботы',
+            'touch': 'Физический контакт'
+        };
+
+        updateSystemStatus('warning', 'Анализ...');
+
+        setTimeout(() => {
+            updateSystemStatus('active', 'Анализ завершен');
+            addLogEntry(`Определен основной язык любви: ${languages[loveLanguage]}`);
+
+            // Обновляем индикатор совместимости
+            const newCompatibility = 85 + Math.floor(Math.random() * 10);
+            document.querySelector('.compatibility-pointer').style.left = `${newCompatibility}%`;
+            document.querySelector('#systemStatusText').textContent = `Гармония ${newCompatibility}%`;
+        }, 1500);
+    };
+
+    // Вспомогательные функции
+    function updateSystemStatus(status, message) {
+        const indicator = document.querySelector('#systemStatus .status-indicator');
+        const text = document.getElementById('systemStatusText');
+
+        indicator.classList.remove('status-active', 'status-inactive', 'status-warning');
+
+        switch(status) {
+            case 'active':
+                indicator.classList.add('status-active');
+                break;
+            case 'inactive':
+                indicator.classList.add('status-inactive');
+                break;
+            case 'warning':
+                indicator.classList.add('status-warning');
+                break;
+        }
+
+        text.textContent = message;
+    }
+
+    function addLogEntry(message) {
+        const log = document.querySelector('.state-output');
+        log.textContent = `${message}\n${log.textContent}`;
+    }
+
+    function checkRelationshipHealth() {
+        const statuses = [
+            'Отношения в отличном состоянии!',
+            'Небольшие возможности для улучшения',
+            'Все показатели в норме',
+            'Отличная динамика развития'
+        ];
+        const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+        addLogEntry(`Проверка: ${randomStatus}`);
+    }
+
+    // Дополнительные функции
+    window.planSurprise = function() {
+        const surprises = [
+            "Заказать доставку любимых цветов на работу",
+            "Организовать встречу с друзьями",
+            "Подготовить домашний ужин с неожиданным меню",
+            "Написать любовное письмо"
+        ];
+        const randomSurprise = surprises[Math.floor(Math.random() * surprises.length)];
+
+        updateSystemStatus('active', 'Сюрприз запланирован');
+        addLogEntry(`Запланирован сюрприз: "${randomSurprise}"`);
+    };
+
+    window.suggestImprovements = function() {
+        const suggestions = [
+            "Попробуйте новый совместный вид деятельности",
+            "Уделяйте больше времени качественному общению",
+            "Планируйте регулярные свидания",
+            "Экспериментируйте с выражениями любви"
+        ];
+        const randomSuggestion = suggestions[Math.floor(Math.random() * suggestions.length)];
+
+        addLogEntry(`Совет: ${randomSuggestion}`);
+    };
+
+    // Инициализация при загрузке
+    document.addEventListener('DOMContentLoaded', initSystem);
+</script>
+</body>
+</html>

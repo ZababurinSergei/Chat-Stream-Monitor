@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Time Manager v7.4.0</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Тёмная тема по умолчанию */
+            --primary: #0D4CD3;
+            --primary-dark: #0A3AAB;
+            --background: #121212;
+            --surface: #1E1E1E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B0B0;
+            --border: #333333;
+            --success: #4CAF50;
+            --error: #CF6679;
+            --card-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        }
+
+        [data-theme="light"] {
+            --primary: #0D4CD3;
+            --primary-dark: #0A3AAB;
+            --background: #F5F5F5;
+            --surface: #FFFFFF;
+            --text-primary: #212121;
+            --text-secondary: #666666;
+            --border: #E0E0E0;
+            --success: #388E3C;
+            --error: #D32F2F;
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 32px 0;
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+        }
+
+        .theme-switcher {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+        }
+
+        .theme-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 32px;
+        }
+
+        .panel {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border);
+        }
+
+        .panel-title {
+            font-size: 1.5rem;
+            font-weight: 500;
+            margin-bottom: 24px;
+            color: var(--text-primary);
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 14px 20px;
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(13,76,211,0.2);
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 32px;
+            border-radius: 8px;
+            border: none;
+            background: var(--primary);
+            color: white;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .timeline {
+            position: relative;
+            padding: 24px 0;
+        }
+
+        .timeline-item {
+            position: relative;
+            padding: 24px;
+            background: var(--surface);
+            border-radius: 8px;
+            margin-bottom: 24px;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .event-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .event-card {
+            padding: 20px;
+            background: var(--background);
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            transition: transform 0.2s;
+        }
+
+        .event-card:hover {
+            transform: translateX(4px);
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .active {
+            background: var(--success);
+        }
+
+        .inactive {
+            background: var(--error);
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 16px;
+            }
+
+            .header {
+                padding: 24px 0;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+
+            .title {
+                font-size: 2rem;
+            }
+
+            .panel {
+                padding: 24px;
+            }
+
+            .button {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .panel {
+                padding: 16px;
+            }
+
+            .panel-title {
+                font-size: 1.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <h1 class="title">Quantum Time Manager</h1>
+        <div class="theme-switcher" id="themeSwitcher">
+            <svg class="theme-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8V16Z" fill="currentColor"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2ZM12 4V20C7.58172 20 4 16.4183 4 12C4 7.58172 7.58172 4 12 4Z" fill="currentColor"/>
+            </svg>
+            <span id="themeText">Светлая тема</span>
+        </div>
+    </header>
+
+    <div class="dashboard">
+        <!-- Панель управления временными ветками -->
+        <div class="panel">
+            <h2 class="panel-title">Управление временными ветками</h2>
+
+            <div class="form-group">
+                <label>Текущая временная ветка</label>
+                <select class="custom-select">
+                    <option>Основная временная линия (2024)</option>
+                    <option>Альтернативная ветка Alpha</option>
+                    <option>Экспериментальная ветка Beta</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Создать новую ветку</label>
+                <input type="text" placeholder="Название ветки">
+            </div>
+
+            <button class="button">Создать временную ветку</button>
+        </div>
+
+        <!-- Панель временной шкалы -->
+        <div class="panel">
+            <h2 class="panel-title">Временная шкала</h2>
+
+            <div class="timeline">
+                <div class="event-list">
+                    <div class="event-card">
+                        <div class="event-header">
+                            <span class="status-indicator active"></span>
+                            <strong>2024-03-15:</strong> Инициализация системы
+                        </div>
+                        <p class="event-description">Старт временного континуума</p>
+                    </div>
+
+                    <div class="event-card">
+                        <div class="event-header">
+                            <span class="status-indicator inactive"></span>
+                            <strong>2024-03-20:</strong> Эксперимент Alpha
+                        </div>
+                        <p class="event-description">Тестирование квантовых переходов</p>
+                    </div>
+
+                    <div class="event-card">
+                        <div class="event-header">
+                            <span class="status-indicator active"></span>
+                            <strong>2024-04-01:</strong> Обновление протоколов
+                        </div>
+                        <p class="event-description">Оптимизация временных маршрутов</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Панель параметров времени -->
+        <div class="panel">
+            <h2 class="panel-title">Параметры времени</h2>
+
+            <div class="form-group">
+                <label>Текущая временная частота</label>
+                <input type="number" value="42.195" step="0.1">
+            </div>
+
+            <div class="form-group">
+                <label>Квантовая стабилизация</label>
+                <input type="range" min="0" max="100" value="75">
+            </div>
+
+            <div class="form-group">
+                <label>Максимальная глубина</label>
+                <div class="slider-container">
+                    <input type="range" min="1" max="4" value="3">
+                </div>
+            </div>
+
+            <button class="button">Синхронизировать</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Переключение темы
+    const themeSwitcher = document.getElementById('themeSwitcher');
+    const themeText = document.getElementById('themeText');
+    const htmlElement = document.documentElement;
+
+    // Проверяем сохранённую тему в localStorage
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    htmlElement.setAttribute('data-theme', savedTheme === 'light' ? 'light' : '');
+    updateThemeText(savedTheme);
+
+    themeSwitcher.addEventListener('click', () => {
+        const currentTheme = htmlElement.getAttribute('data-theme');
+
+        if (currentTheme === 'light') {
+            htmlElement.removeAttribute('data-theme');
+            localStorage.setItem('theme', 'dark');
+            updateThemeText('dark');
+        } else {
+            htmlElement.setAttribute('data-theme', 'light');
+            localStorage.setItem('theme', 'light');
+            updateThemeText('light');
+        }
+    });
+
+    function updateThemeText(theme) {
+        themeText.textContent = theme === 'light' ? 'Тёмная тема' : 'Светлая тема';
+    }
+</script>
+</body>
+</html>

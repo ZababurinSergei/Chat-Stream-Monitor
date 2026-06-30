@@ -1,0 +1,605 @@
+nk-panel-params {
+    display: block;
+    background-color: var(--bg-color);
+    border-radius: 6px;
+    border-left: 3px solid var(--command-color);
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+nk-panel-params h3 {
+    color: var(--command-color);
+    font-size: 16px;
+    margin-top: 0;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+nk-panel-params .control-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+nk-panel-params .control-group.actions {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
+}
+
+nk-panel-params label {
+    color: var(--directory-color);
+    font-size: 14px;
+    min-width: 200px;
+    display: block;
+    margin-bottom: 5px;
+}
+
+nk-panel-params .input-hint {
+    color: var(--directory-color);
+    font-size: 12px;
+    font-style: italic;
+    opacity: 0.7;
+}
+
+nk-panel-params .tags-control {
+    margin-bottom: 15px;
+}
+
+nk-panel-params .tag-input-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px;
+    background-color: var(--dnd-zone-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+nk-panel-params .tag,
+nk-panel-params .command-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 16px;
+    font-size: 12px;
+    background-color: rgba(76, 175, 80, 0.15);
+    border: 1px solid var(--prompt-color);
+    color: var(--prompt-color);
+}
+
+nk-panel-params .command-tag {
+    background-color: rgba(86, 156, 214, 0.15);
+    border-color: var(--command-color);
+    color: var(--command-color);
+}
+
+nk-panel-params .tag-remove,
+nk-panel-params .command-remove {
+    cursor: pointer;
+    margin-left: 5px;
+    color: #F44747;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+nk-panel-params .tag-remove:hover,
+nk-panel-params .command-remove:hover {
+    color: #ff6b6b;
+    transform: scale(1.1);
+}
+
+nk-panel-params .tag-input,
+nk-panel-params .command-input,
+nk-panel-params .update-command-input,
+nk-panel-params .delete-command-input,
+nk-panel-params .create-command-input,
+nk-panel-params .preset-name-input {
+    flex: 1;
+    min-width: 120px;
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+}
+
+nk-panel-params .tag-input::placeholder,
+nk-panel-params .command-input::placeholder,
+nk-panel-params .update-command-input::placeholder,
+nk-panel-params .delete-command-input::placeholder,
+nk-panel-params .create-command-input::placeholder,
+nk-panel-params .preset-name-input::placeholder {
+    color: var(--directory-color);
+    opacity: 0.6;
+}
+
+nk-panel-params select {
+    flex: 1;
+    min-width: 200px;
+    background: var(--bg-color);
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+nk-panel-params button {
+    background-color: var(--toggle-active-color);
+    color: var(--command-color);
+    border: 1px solid var(--border-color);
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+nk-panel-params button:hover {
+    background-color: rgba(86, 156, 214, 0.3);
+}
+
+nk-panel-params button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+nk-panel-params .app-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
+}
+
+nk-panel-params .app-info span {
+    color: var(--prompt-color);
+    font-weight: bold;
+}
+
+nk-panel-params .preset-creation {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+nk-panel-params .create-preset-btn {
+    background-color: var(--toggle-active-color);
+    color: var(--command-color);
+    border: 1px solid var(--border-color);
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+nk-panel-params .create-preset-btn:hover:not(:disabled) {
+    background-color: rgba(76, 175, 80, 0.3);
+}
+
+nk-panel-params .create-preset-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Новые стили для системы статусов */
+.task-status {
+    padding: 8px;
+    border-radius: 4px;
+    margin: 8px 0;
+    transition: all 0.3s ease;
+}
+
+.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+    border-left: 3px solid #ffc107;
+}
+
+.status-in-progress {
+    background-color: #cce5ff;
+    color: #004085;
+    border-left: 3px solid #007bff;
+}
+
+.status-success {
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 3px solid #28a745;
+}
+
+.status-failed {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left: 3px solid #dc3545;
+}
+
+.status-cancelled {
+    background-color: #e2e3e5;
+    color: #383d41;
+    border-left: 3px solid #6c757d;
+}
+
+.command-progress {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.command-progress progress {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.command-progress progress::-webkit-progress-bar {
+    background-color: #f1f1f1;
+    border-radius: 3px;
+}
+
+.command-progress progress::-webkit-progress-value {
+    background-color: var(--command-color);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.command-progress span {
+    display: block;
+    font-size: 0.8em;
+    color: inherit;
+    font-family: 'Courier New', monospace;
+    word-break: break-all;
+}
+
+.in-progress {
+    color: #ff4757;
+    font-weight: bold;
+    margin-left: 5px;
+    animation: pulse 1.5s infinite;
+}
+
+.in-progress-without {
+    color: #ff4757;
+    font-weight: bold;
+    margin-left: 5px;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+nk-panel-params .loading {
+    animation: pulse 1.5s infinite;
+}
+
+@media (max-width: 768px) {
+    nk-panel-params .control-group {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    nk-panel-params input[type="text"],
+    nk-panel-params select,
+    nk-panel-params button {
+        width: 100%;
+    }
+
+    .command-progress span {
+        font-size: 0.7em;
+    }
+}
+
+
+/* Новые стили для in-progress */
+.in-progress {
+    position: relative;
+    opacity: 0.7;
+}
+
+.in-progress::after {
+    content: 'in progress';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #ffcc00;
+    color: #000;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+.control-menu.in-progress {
+    border-left: 3px solid #ffcc00;
+}
+
+#dnd-zone-left.in-progress {
+    border: 2px dashed #ffcc00;
+}
+
+.left-column #toggle-input-left,
+.left-column #toggle-private-left,
+.left-column .toggle-item[data-tooltip="Показать поле ввода"],
+.left-column .toggle-item[data-tooltip="Показать приватные скрипты"] {
+    display: none !important;
+}
+
+.delete-preset {
+    margin-left: auto;
+    color: #F44747;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.delete-preset:hover {
+    background-color: rgba(244, 71, 71, 0.1);
+    transform: scale(1.1);
+}
+
+@media (max-width: 768px) {
+    .three-column-layout {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .right-column {
+        width: 100%;
+        min-width: auto;
+    }
+
+    .presets-content {
+        max-height: 200px;
+    }
+
+    .terminal-container, .three-column-layout {
+        height: auto;
+        max-height: none;
+    }
+
+    .layout-resize-handle {
+        display: none;
+    }
+
+    .left-column, .right-column {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .toggle-container {
+        flex-direction: column;
+    }
+}
+
+
+.control-group.actions {
+    margin-bottom: 15px;
+    padding: 8px;
+    background-color: var(--dnd-zone-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.control-group.actions label {
+    color: var(--directory-color);
+    font-size: 14px;
+    min-width: 200px;
+    display: block;
+    margin-bottom: 5px;
+    width: 100%;
+}
+
+.control-group.actions .input-hint {
+    color: var(--directory-color);
+    font-size: 12px;
+    font-style: italic;
+    opacity: 0.7;
+}
+
+/* Зеленые теги запроса */
+.tags-control .tag {
+    background-color: rgba(76, 175, 80, 0.15); /* Зеленый с прозрачностью */
+    border: 1px solid #4CAF50; /* Ярко-зеленая граница */
+    color: #4CAF50; /* Зеленый текст */
+}
+
+.tags-control .tag .tag-remove {
+    color: #2E7D32; /* Темно-зеленый для кнопки удаления */
+}
+
+/* Стили для "Создание пресета" - синяя гамма */
+.tags-control label[for^="Создание пресета"] {
+    color: #2196F3; /* Синий цвет текста */
+}
+
+.tags-control .preset-creation {
+    background-color: rgba(33, 150, 243, 0.05); /* Очень светлый синий фон */
+    border-left: 3px solid #2196F3; /* Синяя акцентная полоса */
+    padding: 8px;
+    border-radius: 4px;
+}
+
+.tags-control .preset-creation input {
+    border: 1px solid #90CAF9; /* Светло-синяя граница */
+}
+
+.tags-control .preset-creation button {
+    background-color: #2196F3; /* Синий фон */
+    color: white; /* Белый текст */
+    border: none;
+}
+
+/* Стили для "Действия" - фиолетовая гамма */
+.tags-control.actions label {
+    color: #9C27B0; /* Фиолетовый цвет текста */
+}
+
+.tags-control.actions .preset-creation {
+    background-color: rgba(156, 39, 176, 0.05); /* Очень светлый фиолетовый */
+    border-left: 3px solid #9C27B0; /* Фиолетовая акцентная полоса */
+}
+
+.tags-control.actions select, .tags-control.actions input {
+    border: 1px solid #BA68C8; /* Светло-фиолетовая граница */
+}
+
+.tags-control.actions button {
+    background-color: #9C27B0; /* Фиолетовый фон */
+    color: white; /* Белый текст */
+}
+
+.tags-control.actions button {
+    width: 8dvw;
+}
+
+/* Состояния кнопок */
+.tags-control button:disabled {
+    opacity: 0.6;
+    background-color: #E0E0E0 !important;
+    color: #9E9E9E !important;
+}
+
+.error-state {
+    padding: 1rem;
+    background: #ffebee;
+    border: 1px solid #ef9a9a;
+    border-radius: 4px;
+    color: #c62828;
+}
+.error-state button {
+    margin-top: 0.5rem;
+}
+
+/* Делаем все крестики красными */
+.tag-remove,
+.command-remove {
+    color: #F44336 !important; /* Красный цвет Material Design */
+    cursor: pointer;
+    margin-left: 6px;
+    font-size: 14px;
+    transition: transform 0.2s;
+}
+
+.tag-remove:hover,
+.command-remove:hover {
+    transform: scale(1.2);
+    color: #D32F2F !important; /* Темнее при наведении */
+}
+
+/* Стили для полей ввода */
+.tag-input-container input[type="text"] {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #f0f0f0;
+    padding: 6px 0;
+    outline: none;
+    border-bottom: 1px solid #444;
+    transition: border 0.3s;
+}
+
+.tag-input-container input[type="text"]:focus {
+    border-bottom-color: #4CAF50;
+}
+
+
+/* public/styles/panel-params.css */
+.tag-input-container input[type="text"] {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #f0f0f0;
+    padding: 6px 0;
+    outline: none;
+    border-bottom: 1px solid #444;
+    transition: border 0.3s;
+    font-family: 'Courier New', monospace;
+}
+
+.tag-input-container input[type="text"]:focus {
+    border-bottom-color: #4CAF50;
+}
+
+/* Подсветка активного поля */
+.tag-input-container input[type="text"]:focus {
+    background: rgba(76, 175, 80, 0.1);
+}
+
+.app-info span {
+    margin-bottom: 5px;
+}
+
+[data-tooltip] {
+    position: relative;
+    z-index: 100;
+}
+
+
+/* Стиль для нового пресета */
+.app-info span.new-preset {
+    color: #FFCC00;
+    font-weight: bold;
+}
+
+/* Стиль кнопки создания */
+.create-preset-btn {
+    transition: all 0.3s ease;
+}
+
+.set-app-btn, .create-preset-btn {
+    width: 8dvw;
+}
+
+.create-preset-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background-color: #3A3A3A !important;
+}
+
+.create-preset-btn:not(:disabled) {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.create-preset-btn:not(:disabled):hover {
+    background-color: #3e8e41;
+}
+
+.get-presets-btn {
+    padding: 8px 16px;
+    background-color: rgba(33, 150, 243, 0.1);
+    border: 1px solid #2196F3;
+    color: #2196F3;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 14px;
+}
+
+.get-presets-btn:hover:not(:disabled) {
+    background-color: rgba(33, 150, 243, 0.2);
+}
+
+.get-presets-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}

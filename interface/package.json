@@ -1,0 +1,15 @@
+{
+  "name": "script-manager",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "nodemon server.mjs",
+    "run": "node index.mjs",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "echo \"Building...\"",
+    "lint": "echo \"Linting...\""
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}

@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Git v7.4.0 - Панель управления</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0D4CD3;
+            --primary-dark: #0A3AAB;
+            --background: #121212;
+            --surface: #1E1E1E;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B0B0;
+            --border: #333333;
+            --success: #4CAF50;
+            --error: #CF6679;
+            --warning: #FFC107;
+            --card-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            --state-output-bg: #252525;
+        }
+
+        [data-theme="light"] {
+            --primary: #0D4CD3;
+            --primary-dark: #0A3AAB;
+            --background: #F5F5F5;
+            --surface: #FFFFFF;
+            --text-primary: #212121;
+            --text-secondary: #666666;
+            --border: #E0E0E0;
+            --success: #388E3C;
+            --error: #D32F2F;
+            --warning: #FFA000;
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --state-output-bg: #FAFAFA;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 24px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .title-container {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -0.5px;
+        }
+
+        .system-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            background-color: rgba(76, 175, 80, 0.1);
+            font-size: 0.9rem;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .status-active {
+            background-color: var(--success);
+        }
+
+        .status-inactive {
+            background-color: var(--error);
+        }
+
+        .status-warning {
+            background-color: var(--warning);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .theme-switcher {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            font-size: 0.9rem;
+        }
+
+        .theme-icon {
+            width: 18px;
+            height: 18px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .panel {
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border);
+        }
+
+        .panel-title {
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--background);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(13,76,211,0.2);
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            background: var(--primary);
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .button:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .button[disabled] {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .button-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .button-outline:hover {
+            background: rgba(13,76,211,0.1);
+        }
+
+        .state-panel {
+            grid-column: 1 / -1;
+            background: var(--surface);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--border);
+        }
+
+        .state-output {
+            background: var(--state-output-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            line-height: 1.5;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-group input {
+            width: auto;
+        }
+
+        .checkbox-group label {
+            margin-bottom: 0;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 16px;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .panel, .state-panel {
+                padding: 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <div class="title-container">
+            <h1 class="title">Quantum Git v7.4.0</h1>
+            <div class="system-status" id="systemStatus">
+                <span class="status-indicator status-active"></span>
+                <span id="systemStatusText">Система активна</span>
+            </div>
+        </div>
+        <div class="theme-switcher" id="themeSwitcher">
+            <svg class="theme-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8V16Z" fill="currentColor"/>
+                <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2ZM12 4V20C7.58172 20 4 16.4183 4 12C4 7.58172 7.58172 4 12 4Z" fill="currentColor"/>
+            </svg>
+            <span id="themeText">Светлая тема</span>
+        </div>
+    </header>
+
+    <div class="grid">
+        <div class="panel">
+            <h2 class="panel-title">Квантовые параметры</h2>
+            <div class="form-group">
+                <label for="quantumBits">Квантовые биты</label>
+                <input type="number" id="quantumBits" value="256" disabled>
+            </div>
+            <div class="form-group">
+                <label for="entanglement">Уровень запутанности (≥0.95)</label>
+                <input type="number" id="entanglement" step="0.01" min="0.95" max="1" value="0.95">
+            </div>
+            <div class="form-group">
+                <label for="dimensions">Измерения (макс. 4)</label>
+                <input type="number" id="dimensions" min="1" max="4" value="4">
+            </div>
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="temporalBranches" checked>
+                <label for="temporalBranches">Разрешить временные ветки</label>
+            </div>
+            <button class="button" onclick="updateQuantumConfig()">Обновить конфигурацию</button>
+        </div>
+
+        <div class="panel">
+            <h2 class="panel-title">Управление системой</h2>
+            <div class="form-group">
+                <label for="activeApp">Активное приложение</label>
+                <select id="activeApp" onchange="updateActiveApp()">
+                    <option value="dynamic-parameter-addition">Динамические параметры</option>
+                    <option value="quantum-sync">Квантовая синхронизация</option>
+                    <option value="temporal-manager">Управление временем</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Статус соединения:</label>
+                <div class="status">
+                    <span class="status-indicator disconnected" id="wsStatus"></span>
+                    <span id="wsStatusText">Не подключено</span>
+                </div>
+                <div class="button-group">
+                    <button class="button" id="btnConnect" onclick="connectWS()">Подключить</button>
+                    <button class="button button-outline" id="btnDisconnect" onclick="disconnectWS()" disabled>Отключить</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <h2 class="panel-title">Управление пресетами</h2>
+            <div class="form-group">
+                <label for="presetName">Название пресета</label>
+                <input type="text" id="presetName" placeholder="Введите название">
+            </div>
+            <div class="button-group">
+                <button class="button" onclick="savePreset()">Сохранить пресет</button>
+                <button class="button button-outline" onclick="loadPreset()">Загрузить пресет</button>
+            </div>
+            <div id="presetList" style="margin-top: 16px;">
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">Список сохранённых пресетов появится здесь</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="state-panel">
+        <h2 class="panel-title">Контроль состояния системы</h2>
+        <div class="button-group">
+            <button class="button" onclick="getCurrentState()">Получить текущий стейт</button>
+            <button class="button button-outline" onclick="resetState()">Сбросить состояние</button>
+        </div>
+        <div class="form-group" style="margin-top: 24px;">
+            <label>Текущее состояние системы:</label>
+            <div id="stateOutput" class="state-output">
+                Нажмите кнопку "Получить текущий стейт" для отображения состояния
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import GlobalState from './global-state.mjs';
+
+    GlobalState.initGlobalState();
+
+    const themeSwitcher = document.getElementById('themeSwitcher');
+    const themeText = document.getElementById('themeText');
+    const htmlElement = document.documentElement;
+
+    function updateThemeText(theme) {
+        themeText.textContent = theme === 'light' ? 'Тёмная тема' : 'Светлая тема';
+    }
+
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    htmlElement.setAttribute('data-theme', savedTheme === 'light' ? 'light' : '');
+    updateThemeText(savedTheme);
+
+    themeSwitcher.addEventListener('click', () => {
+        const currentTheme = htmlElement.getAttribute('data-theme');
+
+        if (currentTheme === 'light') {
+            htmlElement.removeAttribute('data-theme');
+            localStorage.setItem('theme', 'dark');
+            updateThemeText('dark');
+        } else {
+            htmlElement.setAttribute('data-theme', 'light');
+            localStorage.setItem('theme', 'light');
+            updateThemeText('light');
+        }
+    });
+
+    function updateSystemStatus(status, message) {
+        const indicator = document.querySelector('#systemStatus .status-indicator');
+        const text = document.getElementById('systemStatusText');
+
+        indicator.classList.remove('status-active', 'status-inactive', 'status-warning');
+
+        switch(status) {
+            case 'active':
+                indicator.classList.add('status-active');
+                break;
+            case 'inactive':
+                indicator.classList.add('status-inactive');
+                break;
+            case 'warning':
+                indicator.classList.add('status-warning');
+                break;
+        }
+
+        text.textContent = message;
+    }
+
+    window.updateQuantumConfig = function() {
+        const config = {
+            entanglementLevel: parseFloat(document.getElementById('entanglement').value),
+            maxDimensions: parseInt(document.getElementById('dimensions').value),
+            allowTemporalBranches: document.getElementById('temporalBranches').checked
+        };
+
+        GlobalState.updateConfig(config);
+        updateSystemStatus('active', 'Конфигурация обновлена');
+        getCurrentState();
+    };
+
+    window.updateActiveApp = function() {
+        const app = document.getElementById('activeApp').value;
+        GlobalState.updateActiveApp(app, {
+            config: {
+                quantumBits: 256,
+                entanglementLevel: GlobalState.getConfig().entanglementLevel
+            }
+        });
+        updateSystemStatus('active', `Активное приложение: ${getAppName(app)}`);
+    };
+
+    function getAppName(appId) {
+        const apps = {
+            'dynamic-parameter-addition': 'Динамические параметры',
+            'quantum-sync': 'Квантовая синхронизация',
+            'temporal-manager': 'Управление временем'
+        };
+        return apps[appId] || appId;
+    }
+
+    window.connectWS = function() {
+        updateSystemStatus('warning', 'Подключение...');
+        const ws = new WebSocket('wss://quantum-git.example.com');
+
+        ws.onopen = () => {
+            GlobalState.setSocket(ws);
+            updateSystemStatus('active', 'Подключено к серверу');
+            updateUI();
+        };
+
+        ws.onerror = () => {
+            updateSystemStatus('inactive', 'Ошибка подключения');
+            updateUI();
+        };
+    };
+
+    window.disconnectWS = function() {
+        const ws = GlobalState.getSocket();
+        if (ws) ws.close();
+        GlobalState.setSocket(null);
+        updateSystemStatus('inactive', 'Отключено от сервера');
+        updateUI();
+    };
+
+    window.savePreset = function() {
+        const name = document.getElementById('presetName').value.trim();
+        if (!name) {
+            updateSystemStatus('warning', 'Введите название пресета');
+            return;
+        }
+
+        const presets = GlobalState.getPresets();
+        presets.push({ name, config: GlobalState.getConfig() });
+        GlobalState.setPresets(presets);
+        updatePresetList();
+        updateSystemStatus('active', `Пресет "${name}" сохранён`);
+    };
+
+    window.loadPreset = function() {
+        const name = document.getElementById('presetName').value.trim();
+        if (!name) {
+            updateSystemStatus('warning', 'Введите название пресета');
+            return;
+        }
+
+        const preset = GlobalState.getPresets().find(p => p.name === name);
+        if (preset) {
+            GlobalState.updateConfig(preset.config);
+            updateUI();
+            updateSystemStatus('active', `Пресет "${name}" загружен`);
+        } else {
+            updateSystemStatus('warning', `Пресет "${name}" не найден`);
+        }
+    };
+
+    window.getCurrentState = function() {
+        const state = GlobalState.getStateSnapshot();
+        const stateOutput = document.getElementById('stateOutput');
+
+        const formattedState = JSON.stringify(state, (key, value) => {
+            if (typeof value === 'function') return 'function';
+            if (value === null) return 'null';
+            return value;
+        }, 2);
+
+        stateOutput.textContent = formattedState;
+        updateSystemStatus('active', 'Текущее состояние получено');
+    };
+
+    window.resetState = function() {
+        GlobalState.resetState(true);
+        updateUI();
+        updatePresetList();
+        document.getElementById('stateOutput').textContent = "Состояние сброшено";
+        updateSystemStatus('active', "Состояние системы сброшено");
+    };
+
+    function updatePresetList() {
+        const presets = GlobalState.getPresets();
+        const listElement = document.getElementById('presetList');
+
+        if (presets.length === 0) {
+            listElement.innerHTML = '<p style="color: var(--text-secondary); font-size: 0.9rem;">Нет сохранённых пресетов</p>';
+            return;
+        }
+
+        let html = '<ul style="list-style: none;">';
+        presets.forEach(preset => {
+            html += `<li style="padding: 8px 0; border-bottom: 1px solid var(--border);">
+                    ${preset.name}
+                    <button class="button" style="padding: 4px 8px; margin-left: 8px;"
+                            onclick="loadPresetByName('${preset.name}')">Загрузить</button>
+                </li>`;
+        });
+        html += '</ul>';
+
+        listElement.innerHTML = html;
+    }
+
+    window.loadPresetByName = function(name) {
+        document.getElementById('presetName').value = name;
+        loadPreset();
+    };
+
+    function updateUI() {
+        const config = GlobalState.getConfig();
+        const ws = GlobalState.getSocket();
+
+        const wsStatus = document.getElementById('wsStatus');
+        const wsStatusText = document.getElementById('wsStatusText');
+
+        if (ws) {
+            wsStatus.className = 'status-indicator connected';
+            wsStatusText.textContent = "Подключено";
+            document.getElementById('btnConnect').disabled = true;
+            document.getElementById('btnDisconnect').disabled = false;
+        } else {
+            wsStatus.className = 'status-indicator disconnected';
+            wsStatusText.textContent = "Не подключено";
+            document.getElementById('btnConnect').disabled = false;
+            document.getElementById('btnDisconnect').disabled = true;
+        }
+    }
+
+    updateUI();
+    updatePresetList();
+    updateSystemStatus('active', 'Система готова к работе');
+</script>
+</body>
+</html>
