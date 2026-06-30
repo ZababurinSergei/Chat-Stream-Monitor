@@ -7,7 +7,7 @@
     url = https://github.com/ZababurinSergei/chrome-extension-deepseek.git
     branch = main
 [submodule "packages/nk-unit"]
-    path = packages/unit
+    path = packages/nk-unit
     url = https://github.com/ZababurinSergei/unit.git
     branch = main
 [submodule "packages/devextreme-migration"]
