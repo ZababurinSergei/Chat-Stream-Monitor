@@ -1,6 +1,6 @@
 import express from 'express';
 import { readFile, writeFile } from 'fs/promises';
-import { spawn } from 'child_process';
+import { spawn, exec } from 'child_process';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
@@ -8,18 +8,26 @@ import cors from 'cors';
 import morgan from 'morgan';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
-import bodyParser from 'body-parser';
-import { exec } from 'child_process';
+import dotenv from 'dotenv';
+
+// Загрузка переменных окружения из .env
+dotenv.config();
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const PROJECT_DIR = path.join(__dirname, '../');
+
+// Определяем корневую директорию проекта из .env или используем стандартный путь
+const PROJECT_DIR = process.env.PROJECT_DIR
+  ? path.resolve(__dirname, process.env.PROJECT_DIR)
+  : path.join(__dirname, '../');
+
+console.log('PROJECT_DIR:', PROJECT_DIR);
 const PRESETS_FILE = path.join(__dirname, 'presets.json');
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3000", "http://localhost:3072"],
-    methods: ["GET", "POST"],
+    origin: ['http://localhost:3000', 'http://localhost:3072'],
+    methods: ['GET', 'POST'],
     credentials: true,
   },
   connectionStateRecovery: {
@@ -30,13 +38,14 @@ const io = new Server(server, {
 const port = process.env.PORT || 3072;
 
 // Middleware
-app.use(cors({
-  origin: 'http://localhost:3000',
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+  }),
+);
 app.use(morgan('dev'));
-app.use(express.json());
-app.use(bodyParser.json());
+app.use(express.json()); // Встроенный парсер JSON вместо body-parser
 app.use(express.static('public'));
 
 // State
@@ -48,11 +57,13 @@ app.get('/api/scripts', async (req, res) => {
     const packagePath = path.join(PROJECT_DIR, 'package.json');
     const packageJson = JSON.parse(await readFile(packagePath, 'utf-8'));
 
+    console.log('--------------------', packageJson);
     res.json({
       status: 'success',
       scripts: packageJson.scripts || {},
       meta: {
         path: packagePath,
+        projectDir: PROJECT_DIR,
       },
     });
   } catch (error) {
@@ -158,7 +169,7 @@ app.post('/api/set-active-app', async (req, res) => {
   console.log(`[set-active-app] Starting migration for app: ${newApp}`);
 
   try {
-    if(isNew) {
+    if (isNew) {
       // Для нового пресета просто устанавливаем activeApp
       activeApp = newApp;
       return res.json({
@@ -191,7 +202,7 @@ app.post('/api/set-active-app', async (req, res) => {
         },
       });
 
-      // Обработка вывода (как в предыдущем примере)
+      // Обработка вывода
       child.stdout.on('data', data => {
         console.log(`[migrate:run] ${data.toString().trim()}`);
       });
@@ -206,7 +217,7 @@ app.post('/api/set-active-app', async (req, res) => {
           res.json({
             status: 'success',
             message: 'Migration completed',
-            activeApp: newApp, // Возвращаем установленное значение
+            activeApp: newApp,
           });
         } else {
           console.error(`[set-active-app] Migration failed with code ${code}`);
@@ -218,7 +229,6 @@ app.post('/api/set-active-app', async (req, res) => {
         }
       });
     }
-
   } catch (error) {
     console.error(`[set-active-app] Unexpected error: ${error.message}`);
     res.status(500).json({
@@ -248,7 +258,9 @@ io.on('connection', socket => {
       }
 
       const actualScriptName = scriptName || command?.replace('npm run ', '');
-      const packageJson = JSON.parse(await readFile(path.join(PROJECT_DIR, 'package.json'), 'utf-8'));
+      const packageJson = JSON.parse(
+        await readFile(path.join(PROJECT_DIR, 'package.json'), 'utf-8'),
+      );
 
       if (!packageJson.scripts || !packageJson.scripts[actualScriptName.trim()]) {
         throw new Error(`Script "${actualScriptName}" not found`);
@@ -276,7 +288,6 @@ io.on('connection', socket => {
         socket.emit('script-completed', code);
         callback?.({ code });
       });
-
     } catch (error) {
       console.error('Script execution error:', error);
       socket.emit('script-error', { error: error.message });

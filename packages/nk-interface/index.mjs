@@ -9,4 +9,4 @@ for (let i = 0; i < 5; i++) {
   console.log(`Шаг ${i + 1} выполнен`);
 }
 
-console.log("Скрипт успешно завершён");
+console.log("Скрипт успеш`nodemonно завершён");

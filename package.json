@@ -6,7 +6,9 @@
   "description": "Monorepo for AST Analyzer and FS Scanner tools",
   "main": "main.mjs",
   "scripts": {
+    "=== public ===": "",
     "scan": "node main.mjs",
+    "=== private ===": "",
     "dev": "turbo dev",
     "build": "turbo build",
     "build:ast": "cd packages/ast-analyzer && pnpm build",
@@ -62,12 +64,20 @@
   },
   "dependencies": {
     "@hpcc-js/wasm-graphviz": "^1.22.0",
+    "body-parser": "^2.3.0",
+    "cors": "^2.8.6",
     "estree-walker": "^3.0.3",
-    "glob": "^13.0.6"
+    "express": "^5.2.1",
+    "glob": "^13.0.6",
+    "morgan": "^1.11.0",
+    "nodemon": "^3.1.14",
+    "socket.io": "^4.8.3"
   },
   "devDependencies": {
     "@changesets/cli": "^2.31.0",
     "@eslint/js": "^10.0.1",
+    "@newkind/eslint-config": "workspace:*",
+    "@newkind/prettier-config": "workspace:*",
     "@types/node": "^25.9.3",
     "@typescript-eslint/eslint-plugin": "^8.61.0",
     "@typescript-eslint/parser": "^8.61.0",
@@ -80,9 +90,7 @@
     "prettier": "^3.8.4",
     "turbo": "^2.9.18",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.61.0",
-    "@newkind/eslint-config": "workspace:*",
-    "@newkind/prettier-config": "workspace:*"
+    "typescript-eslint": "^8.61.0"
   },
   "lint-staged": {
     "Directory/ast-analyzer/**/*.{ts,tsx,js,jsx}": [

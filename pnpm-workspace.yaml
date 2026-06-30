@@ -23,6 +23,7 @@ allowBuilds:
   core-js: false
   esbuild: true
   inferno: false
+  inotify: false
   sharp: false
   sqlite3: false
   tree-sitter-wasms: true

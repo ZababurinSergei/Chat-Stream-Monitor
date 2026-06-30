@@ -14,7 +14,7 @@
       "description": "Пользовательские функции: скрипты, расширения, пользовательские утилиты",
       "description_en": "User functions: scripts, extensions, user utilities",
       "required": false,
-      "excluded": false
+      "excluded": true
     },
     {
       "id": "12",
@@ -50,15 +50,15 @@
     },
     {
       "id": "16",
-      "name": "Directory/callsight-vscode",
+      "name": "packages/ast-analyzer",
       "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
       "description_en": "User files: sources, templates, projects, user data",
       "required": false,
-      "excluded": true
+      "excluded": false
     },
     {
       "id": "17",
-      "name": "packages/unit",
+      "name": "packages/nk-interface",
       "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
       "description_en": "User files: sources, templates, projects, user data",
       "required": false,
