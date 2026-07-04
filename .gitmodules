@@ -26,3 +26,9 @@
 	url = git@gitlab.infoenergo.loc:asuse.ai/front/front-asuse-ai-infoenergo.git
 
 
+[submodule "packages/firmware"]
+	path = packages/firmware
+	url = https://github.com/ZababurinSergei/firmware.git
+[submodule "packages/MTProxy"]
+	path = packages/MTProxy
+	url = https://github.com/ZababurinSergei/MTProxy.git

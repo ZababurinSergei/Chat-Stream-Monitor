@@ -42,15 +42,15 @@
     },
     {
       "id": "15",
-      "name": "Directory/front-asuse-ai-infoenergo",
+      "name": "packages/MTProxy",
       "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
       "description_en": "User files: sources, templates, projects, user data",
       "required": false,
-      "excluded": true
+      "excluded": false
     },
     {
       "id": "16",
-      "name": "packages/ast-analyzer",
+      "name": "packages/mtproto-mqtt-test",
       "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
       "description_en": "User files: sources, templates, projects, user data",
       "required": false,
@@ -58,7 +58,7 @@
     },
     {
       "id": "17",
-      "name": "packages/nk-interface",
+      "name": "Directory/firmware",
       "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
       "description_en": "User files: sources, templates, projects, user data",
       "required": false,
@@ -136,8 +136,13 @@
     ".py",
     ".java",
     ".go",
+    ".h",
     ".c",
-    ".h"
+    ".d",
+    ".ini",
+    ".nix",
+    ".csv",
+    ".rpkg"
   ],
   "specialFiles": [
     "pre-push",
