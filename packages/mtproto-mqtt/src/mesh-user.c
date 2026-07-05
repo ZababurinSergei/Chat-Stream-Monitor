@@ -159,8 +159,9 @@ int mesh_user_create_hybrid(mesh_user_t *user,
     }
 
     // Убеждаемся, что классический флаг установлен
-    if (!user->keypair.classic_initialized) {
-        USER_LOG("create: WARNING: classic_initialized is false, forcing to true");
+    if (user->keypair.classic_initialized != 1) {
+        USER_LOG("create: WARNING: classic_initialized is %d, forcing to 1",
+                 user->keypair.classic_initialized);
         user->keypair.classic_initialized = 1;
     }
 

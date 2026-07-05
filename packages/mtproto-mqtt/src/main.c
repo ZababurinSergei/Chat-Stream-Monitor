@@ -159,6 +159,9 @@ int test_hybrid_crypto(void) {
     printf("   alice at %p, size %zu\n", (void*)alice, sizeof(mesh_user_t));
     printf("   bob at %p, size %zu\n", (void*)bob, sizeof(mesh_user_t));
 
+    // ============================================================
+    // 🔥 ИСПРАВЛЕНИЕ: Правильный порядок параметров
+    // ============================================================
     if (mesh_user_create_hybrid(alice, "@alice", "Alice", "alice_secret_123") < 0) {
         printf("❌ Failed to create Alice\n");
         free(alice);

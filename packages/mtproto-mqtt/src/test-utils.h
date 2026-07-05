@@ -1,6 +1,7 @@
 /*
     Test Utilities - Заголовочный файл
     Вспомогательные функции для тестирования
+    Версия с исправлениями памяти и защиты
 */
 
 #pragma once
@@ -333,7 +334,7 @@ uint32_t test_string_to_ip(const char *str);
 // ============================================================================
 
 /**
- * Создать TCP сервер для тестирования
+ * Структура TCP сервера для тестирования
  */
 typedef struct test_tcp_server {
     int socket_fd;
@@ -369,7 +370,7 @@ int test_tcp_server_send(test_tcp_server_t *server, const void *data, size_t len
 int test_tcp_server_receive(test_tcp_server_t *server, void *buffer, size_t *len, int timeout_ms);
 
 /**
- * Создать TCP клиент для тестирования
+ * Структура TCP клиента для тестирования
  */
 typedef struct test_tcp_client {
     int socket_fd;

@@ -20,6 +20,9 @@ CFLAGS += -fstack-protector-strong
 CFLAGS += -D_FORTIFY_SOURCE=2
 CFLAGS += -Wp,-D_FORTIFY_SOURCE=2
 CFLAGS += -Wp,-D_GLIBCXX_ASSERTIONS
+CFLAGS += -Wformat -Wformat-security
+CFLAGS += -Werror=format-security
+CFLAGS += -fPIE -pie
 
 # 🔥 Увеличение размера стека до 16MB
 CFLAGS += -Wl,-z,stack-size=16777216
@@ -44,6 +47,10 @@ endif
 
 LDFLAGS = -lpthread -lm -lpaho-mqtt3c -lssl -lcrypto
 LDFLAGS += $(LIBOQS_LDFLAGS)
+
+# 🔥 Дополнительные флаги безопасности
+LDFLAGS += -Wl,-z,relro -Wl,-z,now
+LDFLAGS += -Wl,-z,stack-size=16777216
 
 # ============================================================================
 # Каталоги

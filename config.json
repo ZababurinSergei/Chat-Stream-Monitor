@@ -50,7 +50,7 @@
     },
     {
       "id": "16",
-      "name": "packages/mtproto-mqtt-test",
+      "name": "packages/mtproto-mqtt",
       "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
       "description_en": "User files: sources, templates, projects, user data",
       "required": false,
