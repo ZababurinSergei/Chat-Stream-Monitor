@@ -1,4 +1,4 @@
-# Makefile для сборки mtproto-mqtt-test
+# Makefile для сборки mtproto-mqtt-gateway
 # Поддержка гибридной криптографии (ECDH + ML-KEM + ML-DSA)
 # Требуется liboqs для пост-квантовой криптографии
 # С автоматическим управлением памятью
@@ -87,6 +87,7 @@ CFLAGS += -DVERSION=\"$(VERSION)\"
 CFLAGS += -DBUILD_DATE=\"$(BUILD_DATE)\"
 CFLAGS += -DGIT_COMMIT=\"$(GIT_COMMIT)\"
 CFLAGS += -Wno-unused-function
+
 # ============================================================================
 # Цели по умолчанию
 # ============================================================================
@@ -270,13 +271,13 @@ test: test-all
 
 install: all
 	@echo "📦 Installing to /usr/local/bin..."
-	@sudo cp $(TARGET) /usr/local/bin/mtproto-mqtt-test
-	@sudo chmod 755 /usr/local/bin/mtproto-mqtt-test
+	@sudo cp $(TARGET) /usr/local/bin/mtproto-mqtt-gateway
+	@sudo chmod 755 /usr/local/bin/mtproto-mqtt-gateway
 	@echo "✅ Installation complete"
 
 uninstall:
 	@echo "🗑️ Uninstalling..."
-	@sudo rm -f /usr/local/bin/mtproto-mqtt-test
+	@sudo rm -f /usr/local/bin/mtproto-mqtt-gateway
 	@echo "✅ Uninstall complete"
 
 # ============================================================================
@@ -299,6 +300,14 @@ valgrind-verbose: debug
 	         --track-origins=yes --verbose \
 	         --log-file=$(LOG_DIR)/valgrind.log \
 	         $(TARGET) -c SPB -v
+
+test-connect: all
+	@echo "🔌 Testing MQTT connection to OneMesh..."
+	@echo "   Broker: mqtt://mqtt.onemesh.ru:1883"
+	@echo "   User: onemeshd"
+	@echo "   Pass: onecat"
+	@echo ""
+	@./bin/mtproto-mqtt-gateway --test-connect
 
 # ============================================================================
 # Очистка
@@ -589,7 +598,7 @@ help:
 	@echo "  make test-multi           # Test multiple messages"
 	@echo "  make nuke                 # Complete clean"
 	@echo "  make run-custom CITY=SPB  # Custom city"
-	@echo "  ./bin/mtproto-mqtt-test -c SPB -s 'Hello' -r node-123"
+	@echo "  ./bin/mtproto-mqtt-gateway -c SPB -s 'Hello' -r node-123"
 	@echo ""
 	@echo "🧠 Memory Management:"
 	@echo "  - SAFE_MALLOC:  Alloc with NULL check"

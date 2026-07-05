@@ -16,7 +16,7 @@
 ## 🏗️ Архитектура
 
 ```
-mtproto-mqtt-test/
+mtproto-mqtt-gateway/
 ├── src/
 │   ├── main.c                 # Точка входа
 │   ├── mesh-mqtt.h            # Заголовочный файл MQTT модуля
@@ -75,8 +75,8 @@ sudo apt-get install sysstat
 ### 1. Клонирование
 
 ```bash
-git clone https://github.com/your-repo/mtproto-mqtt-test.git
-cd mtproto-mqtt-test
+git clone https://github.com/your-repo/mtproto-mqtt-gateway.git
+cd mtproto-mqtt-gateway
 ```
 
 ### 2. Сборка
@@ -117,44 +117,44 @@ make test
 
 ```bash
 # Запуск с настройками по умолчанию (SPB)
-./bin/mtproto-mqtt-test
+./bin/mtproto-mqtt-gateway
 
 # Запуск для конкретного города
-./bin/mtproto-mqtt-test -c SPB   # Санкт-Петербург
-./bin/mtproto-mqtt-test -c MOS   # Москва
-./bin/mtproto-mqtt-test -c KRD   # Краснодар
-./bin/mtproto-mqtt-test -c EKB   # Екатеринбург
+./bin/mtproto-mqtt-gateway -c SPB   # Санкт-Петербург
+./bin/mtproto-mqtt-gateway -c MOS   # Москва
+./bin/mtproto-mqtt-gateway -c KRD   # Краснодар
+./bin/mtproto-mqtt-gateway -c EKB   # Екатеринбург
 
 # Вербозный режим
-./bin/mtproto-mqtt-test -v
+./bin/mtproto-mqtt-gateway -v
 
 # Отправка тестового сообщения
-./bin/mtproto-mqtt-test -s "Hello Mesh!" -r node-123
+./bin/mtproto-mqtt-gateway -s "Hello Mesh!" -r node-123
 
 # Подключение к другому брокеру
-./bin/mtproto-mqtt-test -b "ssl://custom-broker:8883" -u user -p pass
+./bin/mtproto-mqtt-gateway -b "ssl://custom-broker:8883" -u user -p pass
 
 # Помощь
-./bin/mtproto-mqtt-test -h
+./bin/mtproto-mqtt-gateway -h
 ```
 
 ### Расширенное использование
 
 ```bash
 # Запуск с пользовательским топиком
-./bin/mtproto-mqtt-test -t "msh/RU/SPB/test"
+./bin/mtproto-mqtt-gateway -t "msh/RU/SPB/test"
 
 # Отправка пакета с данными
-./bin/mtproto-mqtt-test -s "Test data" -r "receiver-node"
+./bin/mtproto-mqtt-gateway -s "Test data" -r "receiver-node"
 
 # Запуск с таймаутом
-./bin/mtproto-mqtt-test --timeout 30
+./bin/mtproto-mqtt-gateway --timeout 30
 
 # Многократное выполнение
-./bin/mtproto-mqtt-test --iterations 100
+./bin/mtproto-mqtt-gateway --iterations 100
 
 # Использование конфигурационного файла
-./bin/mtproto-mqtt-test --config config.json
+./bin/mtproto-mqtt-gateway --config config.json
 ```
 
 ## ⚙️ Конфигурация
@@ -174,7 +174,7 @@ export MESH_CITY_CODE="SPB"
 export MESH_LOG_LEVEL=debug  # debug, info, warn, error
 
 # Запуск с переменными окружения
-./bin/mtproto-mqtt-test
+./bin/mtproto-mqtt-gateway
 ```
 
 ### Конфигурационный файл (JSON)
@@ -196,7 +196,7 @@ export MESH_LOG_LEVEL=debug  # debug, info, warn, error
 
 ```bash
 # Использование конфига
-./bin/mtproto-mqtt-test --config config.json
+./bin/mtproto-mqtt-gateway --config config.json
 ```
 
 ## 🧪 Тестирование
@@ -245,10 +245,10 @@ Packet ID: 1234567890
 
 ```bash
 # Во время работы нажмите Ctrl+C для вывода статистики
-./bin/mtproto-mqtt-test -c SPB
+./bin/mtproto-mqtt-gateway -c SPB
 
 # Или используйте отдельную команду
-./bin/mtproto-mqtt-test --stats
+./bin/mtproto-mqtt-gateway --stats
 ```
 
 ### Пример вывода
@@ -275,18 +275,18 @@ Last activity: Tue Jan  1 12:05:00 2024
 
 ```bash
 # Включить подробное логирование
-./bin/mtproto-mqtt-test -v
+./bin/mtproto-mqtt-gateway -v
 
 # Установить уровень логирования
 export MESH_LOG_LEVEL=debug
-./bin/mtproto-mqtt-test
+./bin/mtproto-mqtt-gateway
 ```
 
 ### GDB
 
 ```bash
 # Запуск под GDB
-gdb ./bin/mtproto-mqtt-test
+gdb ./bin/mtproto-mqtt-gateway
 (gdb) run -c SPB -v
 
 # Получение backtrace
@@ -302,10 +302,10 @@ gdb ./bin/mtproto-mqtt-test
 
 ```bash
 # Проверка утечек памяти
-valgrind --leak-check=full ./bin/mtproto-mqtt-test -c SPB
+valgrind --leak-check=full ./bin/mtproto-mqtt-gateway -c SPB
 
 # Проверка с подробным выводом
-valgrind --leak-check=full --show-leak-kinds=all ./bin/mtproto-mqtt-test -c SPB
+valgrind --leak-check=full --show-leak-kinds=all ./bin/mtproto-mqtt-gateway -c SPB
 ```
 
 ## 📝 Примеры кода
@@ -764,13 +764,13 @@ make clean
 make
 
 # 3. Проверка поддержки PQ
-./bin/mtproto-mqtt-test --check-pq
+./bin/mtproto-mqtt-gateway --check-pq
 
 # 4. Тест гибридной криптографии
-./bin/mtproto-mqtt-test --test-hybrid
+./bin/mtproto-mqtt-gateway --test-hybrid
 
 # 5. Запуск
-./bin/mtproto-mqtt-test -c SPB -v
+./bin/mtproto-mqtt-gateway -c SPB -v
 
 
 

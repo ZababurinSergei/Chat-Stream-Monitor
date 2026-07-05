@@ -1,8 +1,10 @@
 /*
     Mesh MQTT Module - Реализация
+    Шлюз для передачи MTProto-трафика через MQTT/Mesh-сети
     Поддерживает Paho MQTT Client
     Настройки для OneMesh (mqtt.onemesh.ru:1883)
     Поддерживает формат Meshtastic Protobuf
+    Исправлена поддержка протокола mqtt://
 */
 
 #include "mesh-mqtt.h"
@@ -65,18 +67,6 @@ static void log_message(const char *level, const char *format, ...) {
 }
 
 /**
- * Формирование полного адреса брокера
- */
-static void build_broker_url(char *buffer, size_t size,
-                             const char *host, int port, int use_tls) {
-    if (use_tls) {
-        snprintf(buffer, size, "ssl://%s:%d", host, port);
-    } else {
-        snprintf(buffer, size, "tcp://%s:%d", host, port);
-    }
-}
-
-/**
  * Проверка, является ли данные Mesh-пакетом
  */
 static int is_mesh_packet(const void *data, int len) {
@@ -105,35 +95,30 @@ static const char* get_topic_type(const char *topic) {
 // ============================================================================
 
 static void handle_public_key_packet(const char *topic, const void *data, int len) {
-    (void)topic; // Подавляем предупреждение
+    (void)topic;
     if (!data || len < (int)sizeof(mesh_public_key_packet_t)) {
         return;
     }
 
     mesh_public_key_packet_t *packet = (mesh_public_key_packet_t*)data;
 
-    // Проверяем магию
     if (packet->magic != 0x4D455350) {
         log_message("WARN", "Invalid magic for public key packet: 0x%08X", packet->magic);
         return;
     }
 
-    // Проверяем версию
     if (packet->version != 1) {
         log_message("WARN", "Unsupported public key packet version: %d", packet->version);
         return;
     }
 
-    // Проверяем подпись
     size_t sig_len = packet->signature_len;
     if (sig_len > 0 && sig_len <= sizeof(packet->signature)) {
-        // Создаем временного пользователя для верификации
         mesh_user_t temp_user;
         memset(&temp_user, 0, sizeof(temp_user));
         memcpy(temp_user.keypair.classic_public_key, packet->public_key, 32);
         temp_user.keypair.classic_initialized = 1;
 
-        // Верифицируем подпись
         if (mesh_hybrid_verify(&temp_user.keypair,
                                (unsigned char*)packet,
                                offsetof(mesh_public_key_packet_t, signature),
@@ -143,8 +128,6 @@ static void handle_public_key_packet(const char *topic, const void *data, int le
         }
     }
 
-    // Сохраняем в кэш публичных ключей
-    // Здесь нужно добавить сохранение в локальный кэш
     log_message("INFO", "Received public key for %s (PQ: %s, sig: %s)",
                 packet->user_id,
                 packet->pq_public_key_len > 0 ? "yes" : "no",
@@ -152,7 +135,7 @@ static void handle_public_key_packet(const char *topic, const void *data, int le
 }
 
 static void handle_public_key_request(const char *topic, const void *data, int len) {
-    (void)topic; // Подавляем предупреждение
+    (void)topic;
     if (!data || len < (int)sizeof(mesh_public_key_request_t)) {
         return;
     }
@@ -169,7 +152,6 @@ static void handle_public_key_request(const char *topic, const void *data, int l
         return;
     }
 
-    // Получаем пользователя из реестра
     mesh_user_t *user = mesh_registry_get_user(request->user_id);
     if (!user) {
         log_message("WARN", "User %s not found for key request from %s",
@@ -177,7 +159,6 @@ static void handle_public_key_request(const char *topic, const void *data, int l
         return;
     }
 
-    // Проверяем подпись запроса
     size_t sig_len = request->signature_len;
     if (sig_len > 0 && sig_len <= sizeof(request->signature)) {
         if (mesh_hybrid_verify(&user->keypair,
@@ -190,7 +171,6 @@ static void handle_public_key_request(const char *topic, const void *data, int l
         }
     }
 
-    // Отправляем ответ с публичным ключом
     mesh_public_key_response_t response;
     memset(&response, 0, sizeof(response));
     response.magic = 0x4D455341;
@@ -203,7 +183,6 @@ static void handle_public_key_request(const char *topic, const void *data, int l
     memcpy(response.request_nonce, request->nonce, 32);
     response.signature_len = 0;
 
-    // Подписываем ответ
     size_t sig_len_out = sizeof(response.signature);
     if (mesh_hybrid_sign(&user->keypair,
                          (unsigned char*)&response,
@@ -212,7 +191,6 @@ static void handle_public_key_request(const char *topic, const void *data, int l
         response.signature_len = (uint16_t)sig_len_out;
     }
 
-    // Отправляем ответ
     char response_topic[256];
     snprintf(response_topic, sizeof(response_topic),
              MESH_TOPIC_KEY_RESPONSE, request->requester_id);
@@ -223,7 +201,7 @@ static void handle_public_key_request(const char *topic, const void *data, int l
 }
 
 static void handle_public_key_response(const char *topic, const void *data, int len) {
-    (void)topic; // Подавляем предупреждение
+    (void)topic;
     if (!data || len < (int)sizeof(mesh_public_key_response_t)) {
         return;
     }
@@ -240,14 +218,12 @@ static void handle_public_key_response(const char *topic, const void *data, int 
         return;
     }
 
-    // Получаем пользователя из реестра
     mesh_user_t *user = mesh_registry_get_user(response->user_id);
     if (!user) {
         log_message("WARN", "User %s not found for key response", response->user_id);
         return;
     }
 
-    // Проверяем подпись ответа
     size_t sig_len = response->signature_len;
     if (sig_len > 0 && sig_len <= sizeof(response->signature)) {
         if (mesh_hybrid_verify(&user->keypair,
@@ -387,7 +363,6 @@ static int mqtt_message_callback(void *context, char *topicName,
     if (message->payloadlen >= 4) {
         uint32_t magic = *(uint32_t*)message->payload;
 
-        // Проверяем, является ли пакет пакетом с ключами
         if (magic == 0x4D455350) {
             handle_public_key_packet(topicName, message->payload, message->payloadlen);
             MQTTClient_freeMessage(&message);
@@ -406,11 +381,9 @@ static int mqtt_message_callback(void *context, char *topicName,
         }
     }
 
-    // Проверяем Mesh-пакет
     int is_mesh = is_mesh_packet(message->payload, message->payloadlen);
 
     if (is_mesh) {
-        // === Это наш Mesh-пакет ===
         if (message->payloadlen < (int)sizeof(mesh_packet_t)) {
             log_message("WARN", "Mesh packet too small: %d bytes (expected at least %zu)",
                         message->payloadlen, sizeof(mesh_packet_t));
@@ -442,7 +415,6 @@ static int mqtt_message_callback(void *context, char *topicName,
                         (unsigned long long)packet->packet_id);
         }
 
-        // Вызываем пользовательский колбэк
         if (g_callbacks.on_message) {
             g_callbacks.on_message(packet);
         }
@@ -453,7 +425,6 @@ static int mqtt_message_callback(void *context, char *topicName,
 
         free(packet);
     } else {
-        // === Это сообщение от Meshtastic (Protobuf) ===
         g_stats.packets_received++;
         g_stats.bytes_received += message->payloadlen;
         g_stats.last_activity = time(NULL);
@@ -464,7 +435,6 @@ static int mqtt_message_callback(void *context, char *topicName,
             log_message("INFO", "Received Meshtastic [%s] from %s, size: %d bytes (Protobuf)",
                         type, topicName ? topicName : "unknown", message->payloadlen);
 
-            // Выводим превью данных для отладки
             if (g_config.log_packets && message->payloadlen > 0) {
                 char hex[128] = {0};
                 int show_bytes = message->payloadlen > 32 ? 32 : message->payloadlen;
@@ -477,7 +447,6 @@ static int mqtt_message_callback(void *context, char *topicName,
                 if (message->payloadlen > 32) strcat(hex, "...");
                 log_message("DEBUG", "Data preview: %s", hex);
 
-                // Попытка интерпретировать как текст
                 char text[65] = {0};
                 int text_len = 0;
                 for (int i = 0; i < message->payloadlen && text_len < 64; i++) {
@@ -494,7 +463,6 @@ static int mqtt_message_callback(void *context, char *topicName,
             }
         }
 
-        // Вызываем колбэк для Protobuf сообщений
         if (g_callbacks.on_protobuf_message) {
             g_callbacks.on_protobuf_message(topicName, message->payload,
                                             message->payloadlen, 0);
@@ -550,7 +518,6 @@ static void* receive_thread_func(void *arg) {
     g_receive_thread_running = 1;
 
     while (g_running && !g_should_exit) {
-        // Проверяем состояние соединения
         if (!g_stats.is_connected && g_running) {
             log_message("WARN", "Not connected, attempting reconnect...");
             int rc = mesh_mqtt_connect();
@@ -563,7 +530,6 @@ static void* receive_thread_func(void *arg) {
             }
         }
 
-        // Спим и проверяем состояние
         for (int i = 0; i < 10 && g_running && !g_should_exit; i++) {
             sleep(1);
         }
@@ -594,92 +560,98 @@ int mesh_mqtt_init(const mesh_mqtt_config_t *config) {
     // Копируем конфигурацию
     memcpy(&g_config, config, sizeof(mesh_mqtt_config_t));
 
-    // Если broker не задан, но host и port заданы - формируем
-    if (g_config.broker[0] == '\0' && g_config.host[0] != '\0') {
-        build_broker_url(g_config.broker, sizeof(g_config.broker),
-                        g_config.host, g_config.port, g_config.use_tls);
-    }
-
-    // Если host не задан, но broker задан - извлекаем host
-    if (g_config.host[0] == '\0' && g_config.broker[0] != '\0') {
-        char *start = strstr(g_config.broker, "://");
-        if (start) {
-            strncpy(g_config.host, start + 3, sizeof(g_config.host) - 1);
-            // Убираем порт если есть
-            char *colon = strchr(g_config.host, ':');
-            if (colon) *colon = '\0';
-        } else {
-            strncpy(g_config.host, g_config.broker, sizeof(g_config.host) - 1);
-        }
-    }
-
-    // Генерируем client_id если не задан
+    // Генерируем Client ID если пустой
     if (g_config.client_id[0] == '\0') {
         snprintf(g_config.client_id, sizeof(g_config.client_id),
-                 "mesh-%d-%ld", getpid(), (long)time(NULL));
+                 "mesh-gateway-%d-%ld", getpid(), (long)time(NULL));
+        log_message("INFO", "Generated client ID: %s", g_config.client_id);
     }
 
-    // Валидация конфигурации
+    // 🔥 КОНВЕРТАЦИЯ mqtt:// в tcp:// для Paho
+    if (strncmp(g_config.broker, "mqtt://", 7) == 0) {
+        char new_broker[256];
+        snprintf(new_broker, sizeof(new_broker), "tcp://%s", g_config.broker + 7);
+        strcpy(g_config.broker, new_broker);
+        log_message("INFO", "Converted mqtt:// to tcp://: %s", g_config.broker);
+    }
+
+    // Строим broker URL если пустой
+    if (g_config.broker[0] == '\0' && g_config.host[0] != '\0') {
+        snprintf(g_config.broker, sizeof(g_config.broker),
+                 "tcp://%s:%d", g_config.host, g_config.port);
+        log_message("INFO", "Built broker URL: %s", g_config.broker);
+    }
+
+    // Проверка конфигурации
     if (!mesh_mqtt_config_valid(&g_config)) {
         log_message("ERROR", "Invalid configuration");
         return -1;
     }
 
 #ifdef USE_PAHO_MQTT
-    // Создаем клиент Paho
+    // Создаем клиент
     int rc = MQTTClient_create(&g_client, g_config.broker,
                                g_config.client_id,
                                MQTTCLIENT_PERSISTENCE_NONE, NULL);
+
     if (rc != MQTTCLIENT_SUCCESS) {
         log_message("ERROR", "Failed to create MQTT client: %s",
                     MQTTClient_strerror(rc));
         return -2;
     }
 
+    if (!g_client) {
+        log_message("ERROR", "MQTT client is NULL after creation");
+        return -3;
+    }
+
     // Устанавливаем колбэки
-    rc = MQTTClient_setCallbacks(g_client, &g_stats, mqtt_connection_lost,
-                                mqtt_message_callback, mqtt_delivery_complete);
+    rc = MQTTClient_setCallbacks(g_client, &g_stats,
+                                 mqtt_connection_lost,
+                                 mqtt_message_callback,
+                                 mqtt_delivery_complete);
     if (rc != MQTTCLIENT_SUCCESS) {
         log_message("ERROR", "Failed to set callbacks: %s",
                     MQTTClient_strerror(rc));
         MQTTClient_destroy(&g_client);
-        return -3;
+        g_client = NULL;
+        return -4;
     }
 
-    log_message("INFO", "MQTT client created: %s", g_config.client_id);
+    log_message("INFO", "MQTT client created: %s (broker: %s)",
+                g_config.client_id, g_config.broker);
 #else
     log_message("ERROR", "No MQTT library support compiled (USE_PAHO_MQTT not defined)");
-    return -4;
+    return -5;
 #endif
 
     g_initialized = 1;
     g_status = MESH_STATUS_DISCONNECTED;
     g_stats.start_time = time(NULL);
 
-    log_message("INFO", "MQTT initialized: %s", g_config.broker);
     return 0;
 }
 
 int mesh_mqtt_init_default(void) {
     mesh_mqtt_config_t config = {0};
 
-    // Настройки как в MQTT Explorer
-    snprintf(config.broker, sizeof(config.broker), "%s", ONEMESH_BROKER_DEFAULT);
-    snprintf(config.host, sizeof(config.host), "%s", ONEMESH_HOST_DEFAULT);
-    config.port = ONEMESH_PORT_DEFAULT;
-    snprintf(config.username, sizeof(config.username), "%s", ONEMESH_USERNAME_DEFAULT);
-    snprintf(config.password, sizeof(config.password), "%s", ONEMESH_PASSWORD_DEFAULT);
-    snprintf(config.topic_root, sizeof(config.topic_root), "%s", ONEMESH_TOPIC_ROOT_DEFAULT);
-    snprintf(config.city_code, sizeof(config.city_code), "%s", ONEMESH_CITY_CODE_DEFAULT);
+    // 🔥 ИСПРАВЛЕНО: используем mqtt:// протокол
+    snprintf(config.broker, sizeof(config.broker), "mqtt://mqtt.onemesh.ru:1883");
+    snprintf(config.host, sizeof(config.host), "mqtt.onemesh.ru");
+    config.port = 1883;
+    snprintf(config.username, sizeof(config.username), "onemeshd");
+    snprintf(config.password, sizeof(config.password), "onecat");
+    snprintf(config.topic_root, sizeof(config.topic_root), "msh/RU/SPB");
+    snprintf(config.city_code, sizeof(config.city_code), "SPB");
 
     config.use_tls = 0;
-    config.keepalive = ONEMESH_KEEPALIVE_INTERVAL;
-    config.qos = ONEMESH_DEFAULT_QOS;
+    config.keepalive = 60;
+    config.qos = 1;
     config.retain = 0;
     config.clean_session = 1;
-    config.connect_timeout = ONEMESH_CONNECT_TIMEOUT;
-    config.max_reconnect = ONEMESH_MAX_RECONNECT;
-    config.reconnect_delay = ONEMESH_RECONNECT_DELAY;
+    config.connect_timeout = 30;
+    config.max_reconnect = 5;
+    config.reconnect_delay = 5;
     config.verbose = 0;
     config.log_messages = 0;
     config.log_packets = 0;
@@ -700,31 +672,56 @@ int mesh_mqtt_connect(void) {
     }
 
 #ifdef USE_PAHO_MQTT
+    if (!g_client) {
+        log_message("ERROR", "MQTT client is NULL - call mesh_mqtt_init first");
+        return -1;
+    }
+
+    // 🔥 ИСПОЛЬЗУЕМ СТАНДАРТНЫЙ ИНИЦИАЛИЗАТОР
     MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
     MQTTClient_SSLOptions ssl_opts = MQTTClient_SSLOptions_initializer;
 
-    // Настройки подключения
+    // 🔥 Проверяем структуру
+    log_message("DEBUG", "conn_opts struct_id: %.4s, version: %d",
+                conn_opts.struct_id, conn_opts.struct_version);
+
+    // 🔥 Устанавливаем параметры
+    conn_opts.keepAliveInterval = g_config.keepalive;
+    conn_opts.cleansession = g_config.clean_session ? 1 : 0;
     conn_opts.username = g_config.username;
     conn_opts.password = g_config.password;
-    conn_opts.keepAliveInterval = g_config.keepalive;
-    conn_opts.cleansession = g_config.clean_session;
-    conn_opts.MQTTVersion = MQTTVERSION_3_1_1;
     conn_opts.connectTimeout = g_config.connect_timeout;
+    conn_opts.retryInterval = g_config.reconnect_delay;
 
-    // SSL/TLS настройки
-    if (g_config.use_tls) {
-        ssl_opts.enableServerCertAuth = 1;
-        conn_opts.ssl = &ssl_opts;
-    }
+    // 🔥 Для совместимости со старыми версиями
+    conn_opts.reliable = 0;
+    conn_opts.will = NULL;
+    conn_opts.ssl = NULL;
 
     log_message("INFO", "Connecting to %s as %s...",
                 g_config.broker, g_config.username);
 
     g_status = MESH_STATUS_CONNECTING;
+
+    // 🔥 Проверяем broker
+    if (g_config.broker[0] == '\0') {
+        log_message("ERROR", "Broker address is empty");
+        g_status = MESH_STATUS_ERROR;
+        return -1;
+    }
+
+    log_message("DEBUG", "Connect options: keepalive=%d, cleansession=%d, timeout=%d",
+                conn_opts.keepAliveInterval, conn_opts.cleansession, conn_opts.connectTimeout);
+    log_message("DEBUG", "Username: '%s', Password: '%s'",
+                conn_opts.username ? conn_opts.username : "(null)",
+                conn_opts.password ? "***" : "(null)");
+
+    // 🔥 САМО ПОДКЛЮЧЕНИЕ
     int rc = MQTTClient_connect(g_client, &conn_opts);
+
     if (rc != MQTTCLIENT_SUCCESS) {
-        log_message("ERROR", "Failed to connect: %s",
-                    MQTTClient_strerror(rc));
+        log_message("ERROR", "Failed to connect: %s (code: %d)",
+                    MQTTClient_strerror(rc), rc);
         g_status = MESH_STATUS_ERROR;
         g_stats.last_error_code = rc;
         snprintf(g_stats.last_error_msg, sizeof(g_stats.last_error_msg),
@@ -740,14 +737,12 @@ int mesh_mqtt_connect(void) {
     g_stats.reconnect_count = 0;
     g_status = MESH_STATUS_CONNECTED;
 
-    log_message("INFO", "Connected to %s (client: %s)",
-                g_config.broker, g_config.client_id);
+    log_message("INFO", "✅ Connected to %s", g_config.broker);
 
     if (g_callbacks.on_connect) {
         g_callbacks.on_connect(1, "Connected successfully");
     }
 
-    // Запускаем поток приема если еще не запущен
     if (!g_running) {
         g_running = 1;
         g_should_exit = 0;
@@ -774,7 +769,6 @@ int mesh_mqtt_disconnect(void) {
 
     log_message("INFO", "Disconnecting...");
 
-    // Останавливаем поток приема
     g_running = 0;
     g_should_exit = 1;
 
@@ -830,7 +824,6 @@ int mesh_mqtt_send(const mesh_packet_t *packet) {
         return -3;
     }
 
-    // Формируем топик
     char topic[256];
     if (packet->receiver_id[0] != '\0' &&
         strcmp(packet->receiver_id, "broadcast") != 0) {
@@ -861,7 +854,6 @@ int mesh_mqtt_send(const mesh_packet_t *packet) {
         return -4;
     }
 
-    // Ждем подтверждения
     rc = MQTTClient_waitForCompletion(g_client, token, 5000);
     if (rc != MQTTCLIENT_SUCCESS) {
         log_message("WARN", "Publish completed but wait failed: %s",
@@ -919,7 +911,6 @@ int mesh_mqtt_subscribe(const char *topic) {
     }
 
     char full_topic[256];
-    // Если топик уже содержит корневой путь, используем как есть
     if (strstr(topic, g_config.topic_root) == topic) {
         snprintf(full_topic, sizeof(full_topic), "%s", topic);
     } else if (topic[0] == '/') {
@@ -1048,7 +1039,6 @@ int mesh_mqtt_ping(void) {
     }
 
 #ifdef USE_PAHO_MQTT
-    // Проверяем соединение
     if (MQTTClient_isConnected(g_client)) {
         g_stats.last_activity = time(NULL);
         log_message("DEBUG", "Ping (connection check) successful");
@@ -1259,7 +1249,6 @@ void mesh_mqtt_set_log_packets(int enable) {
 void mesh_mqtt_cleanup(void) {
     log_message("INFO", "Cleaning up...");
 
-    // Останавливаем поток приема
     g_running = 0;
     g_should_exit = 1;
 
@@ -1268,7 +1257,6 @@ void mesh_mqtt_cleanup(void) {
         g_receive_thread = 0;
     }
 
-    // Отключаемся от брокера
     mesh_mqtt_disconnect();
 
 #ifdef USE_PAHO_MQTT
@@ -1278,7 +1266,6 @@ void mesh_mqtt_cleanup(void) {
     }
 #endif
 
-    // Сбрасываем состояние
     g_initialized = 0;
     g_receive_thread_running = 0;
     g_status = MESH_STATUS_DISCONNECTED;
@@ -1294,7 +1281,10 @@ void mesh_mqtt_cleanup(void) {
 // ============================================================================
 
 int mesh_mqtt_config_valid(const mesh_mqtt_config_t *config) {
-    if (!config) return 0;
+    if (!config) {
+        log_message("ERROR", "Config is NULL");
+        return 0;
+    }
 
     if (config->broker[0] == '\0') {
         log_message("ERROR", "Broker address is empty");
@@ -1307,8 +1297,7 @@ int mesh_mqtt_config_valid(const mesh_mqtt_config_t *config) {
     }
 
     if (config->password[0] == '\0') {
-        log_message("ERROR", "Password is empty");
-        return 0;
+        log_message("WARN", "Password is empty");
     }
 
     if (config->topic_root[0] == '\0') {
@@ -1331,6 +1320,7 @@ int mesh_mqtt_config_valid(const mesh_mqtt_config_t *config) {
         return 0;
     }
 
+    log_message("DEBUG", "Config is valid");
     return 1;
 }
 
@@ -1365,7 +1355,6 @@ int mesh_mqtt_parse_topic(const char *topic, char *root,
                           char *subtopic, size_t buffer_size) {
     if (!topic || !root) return -1;
 
-    // Ищем разделитель
     const char *slash = strchr(topic, '/');
     if (slash) {
         size_t root_len = slash - topic;

@@ -1,0 +1,28 @@
+--- a/src/mesh-mqtt.c
++++ b/src/mesh-mqtt.c
+@@ -69,16 +69,6 @@
+}
+
+/**
+- * Формирование полного адреса брокера
+- */
+  -static void build_broker_url(char *buffer, size_t size,const char *host, int port, int use_tls) {
+-    if (use_tls) {
+-        snprintf(buffer, size, "ssl://%s:%d", host, port);
+-    } else {
+-        snprintf(buffer, size, "tcp://%s:%d", host, port);
+-    }
+     -}
+-
+-/**
+* Проверка, является ли данные Mesh-пакетом
+  */
+  static int is_mesh_packet(const void *data, int len) {
+  @@ -690,7 +680,6 @@
+
+  // 🔥 ИСПОЛЬЗУЕМ СТАНДАРТНЫЙ ИНИЦИАЛИЗАТОР
+  MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
+-    MQTTClient_SSLOptions ssl_opts = MQTTClient_SSLOptions_initializer;
+
+     // 🔥 Проверяем структуру
+     log_message("DEBUG", "conn_opts struct_id: %.4s, version: %d",
