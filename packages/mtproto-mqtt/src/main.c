@@ -18,6 +18,7 @@
 #include "mesh-packet.h"
 #include "mesh-crypto.h"
 #include "mesh-user.h"
+#include "mesh-registry.h"
 
 static int g_running = 1;
 static char g_city_code[16] = "SPB";
@@ -130,6 +131,13 @@ int test_hybrid_crypto(void) {
     printf("   Max packet size: %zu bytes\n", (size_t)MESH_HYBRID_PACKET_MAX_SIZE);
     printf("   Buffer size: %zu bytes\n", (size_t)MESH_TEST_BUFFER_SIZE);
 
+    // 🔥 Инициализируем реестр ПЕРЕД созданием пользователей
+    if (mesh_registry_ensure_initialized() < 0) {
+        printf("❌ Failed to initialize registry\n");
+        return 1;
+    }
+    printf("✅ Registry initialized\n");
+
     mesh_hybrid_init();
 
     if (!mesh_hybrid_is_pq_supported()) {
@@ -176,6 +184,10 @@ int test_hybrid_crypto(void) {
         free(bob);
         return 1;
     }
+
+    // 🔥 ДОБАВЛЯЕМ ПОЛЬЗОВАТЕЛЕЙ В РЕЕСТР
+    mesh_registry_add_user(alice);
+    mesh_registry_add_user(bob);
 
     printf("\n👤 Alice:\n");
     mesh_user_print_hybrid(alice);
@@ -309,6 +321,12 @@ int test_hybrid_crypto(void) {
 int test_hybrid_multi_message(void) {
     printf("\n📨 Testing multiple messages with heap allocation...\n");
 
+    // 🔥 Инициализируем реестр
+    if (mesh_registry_ensure_initialized() < 0) {
+        printf("❌ Failed to initialize registry\n");
+        return 1;
+    }
+
     mesh_user_t *alice = calloc(1, sizeof(mesh_user_t));
     mesh_user_t *bob = calloc(1, sizeof(mesh_user_t));
 
@@ -330,6 +348,9 @@ int test_hybrid_multi_message(void) {
         free(bob);
         return 1;
     }
+
+    mesh_registry_add_user(alice);
+    mesh_registry_add_user(bob);
 
     const char *messages[] = {
         "Hello Bob!",
@@ -418,6 +439,12 @@ int test_hybrid_multi_message(void) {
 int test_hybrid_stress(void) {
     printf("\n🔥 Stress test: 100 messages with heap allocation...\n");
 
+    // 🔥 Инициализируем реестр
+    if (mesh_registry_ensure_initialized() < 0) {
+        printf("❌ Failed to initialize registry\n");
+        return 1;
+    }
+
     mesh_user_t *alice = calloc(1, sizeof(mesh_user_t));
     mesh_user_t *bob = calloc(1, sizeof(mesh_user_t));
 
@@ -439,6 +466,9 @@ int test_hybrid_stress(void) {
         free(bob);
         return 1;
     }
+
+    mesh_registry_add_user(alice);
+    mesh_registry_add_user(bob);
 
     char message[256];
     int success_count = 0;
@@ -563,6 +593,14 @@ int main(int argc, char *argv[]) {
     // ============================================================
     increase_stack_size();
 
+    // ============================================================
+    // 🔥 ИНИЦИАЛИЗИРУЕМ РЕЕСТР ПРИ СТАРТЕ
+    // ============================================================
+    if (mesh_registry_ensure_initialized() < 0) {
+        fprintf(stderr, "❌ Failed to initialize user registry\n");
+        return 1;
+    }
+
     signal(SIGINT, signal_handler);
     signal(SIGTERM, signal_handler);
 
@@ -577,19 +615,28 @@ int main(int argc, char *argv[]) {
                 printf("Max packet size: %zu bytes\n", (size_t)MESH_HYBRID_PACKET_MAX_SIZE);
                 printf("Test buffer size: %zu bytes\n", (size_t)MESH_TEST_BUFFER_SIZE);
             }
+            mesh_registry_cleanup();
             return 0;
         }
         if (strcmp(argv[i], "--test-crypto") == 0) {
-            return crypto_basic();
+            int result = crypto_basic();
+            mesh_registry_cleanup();
+            return result;
         }
         if (strcmp(argv[i], "--test-hybrid") == 0) {
-            return test_hybrid_crypto();
+            int result = test_hybrid_crypto();
+            mesh_registry_cleanup();
+            return result;
         }
         if (strcmp(argv[i], "--test-multi") == 0) {
-            return test_hybrid_multi_message();
+            int result = test_hybrid_multi_message();
+            mesh_registry_cleanup();
+            return result;
         }
         if (strcmp(argv[i], "--test-stress") == 0) {
-            return test_hybrid_stress();
+            int result = test_hybrid_stress();
+            mesh_registry_cleanup();
+            return result;
         }
     }
 
@@ -695,6 +742,7 @@ int main(int argc, char *argv[]) {
             case 'h':
             default:
                 print_help(argv[0]);
+                mesh_registry_cleanup();
                 return (opt == 'h') ? 0 : 1;
         }
     }
@@ -732,6 +780,7 @@ int main(int argc, char *argv[]) {
     // Инициализация MQTT
     if (mesh_mqtt_init(&config) < 0) {
         fprintf(stderr, "❌ Failed to initialize MQTT\n");
+        mesh_registry_cleanup();
         return 1;
     }
 
@@ -739,6 +788,7 @@ int main(int argc, char *argv[]) {
     if (mesh_mqtt_connect() < 0) {
         fprintf(stderr, "❌ Failed to connect\n");
         mesh_mqtt_cleanup();
+        mesh_registry_cleanup();
         return 1;
     }
 
@@ -763,7 +813,11 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    // ============================================================
+    // 🔥 ОЧИСТКА РЕСУРСОВ
+    // ============================================================
     mesh_mqtt_cleanup();
+    mesh_registry_cleanup();
     mesh_hybrid_cleanup();
     printf("✅ Done.\n");
 

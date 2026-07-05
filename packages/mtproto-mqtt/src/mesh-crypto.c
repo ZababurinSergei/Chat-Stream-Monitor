@@ -12,60 +12,6 @@
 #include <time.h>
 
 // ============================================================================
-// Отладочное логирование
-// ============================================================================
-
-#define CRYPTO_DEBUG 1
-
-#define CRYPTO_LOG(fmt, ...) \
-    do { if (CRYPTO_DEBUG) { \
-        fprintf(stderr, "[CRYPTO] " fmt "\n", ##__VA_ARGS__); \
-        fflush(stderr); \
-    } } while(0)
-
-#define CRYPTO_HEX(label, data, len) \
-    do { if (CRYPTO_DEBUG) { \
-        fprintf(stderr, "[CRYPTO] %s: ", label); \
-        for (int i = 0; i < (len) && i < 32; i++) { \
-            fprintf(stderr, "%02x", ((unsigned char*)(data))[i]); \
-        } \
-        if ((len) > 32) fprintf(stderr, "..."); \
-        fprintf(stderr, " (%d bytes)\n", (len)); \
-        fflush(stderr); \
-    } } while(0)
-
-// Дебаг-функция для вывода содержимого структуры
-static void debug_print_keypair(const char *label, const mesh_hybrid_keypair_t *kp, const char *caller) {
-    if (!kp) {
-        fprintf(stderr, "[DEBUG] %s: %s keypair is NULL (from %s)\n",
-                label, label, caller);
-        return;
-    }
-
-    fprintf(stderr, "[DEBUG] %s: keypair at %p (from %s)\n", label, (void*)kp, caller);
-    fprintf(stderr, "[DEBUG] %s: sizeof(mesh_hybrid_keypair_t)=%zu\n",
-            label, sizeof(mesh_hybrid_keypair_t));
-    fprintf(stderr, "[DEBUG] %s: expected size=%d\n", label, MESH_HYBRID_KEYPAIR_SIZE);
-    fprintf(stderr, "[DEBUG] %s: classic_initialized=%d\n", label, kp->classic_initialized);
-    fprintf(stderr, "[DEBUG] %s: pq_initialized=%d\n", label, kp->pq_initialized);
-    fprintf(stderr, "[DEBUG] %s: sig_initialized=%d\n", label, kp->sig_initialized);
-
-    // Проверяем, что флаги имеют нормальные значения
-    if (kp->classic_initialized != 0 && kp->classic_initialized != 1) {
-        fprintf(stderr, "[DEBUG] %s: WARNING - classic_initialized has abnormal value: %d\n",
-                label, kp->classic_initialized);
-    }
-    if (kp->pq_initialized != 0 && kp->pq_initialized != 1) {
-        fprintf(stderr, "[DEBUG] %s: WARNING - pq_initialized has abnormal value: %d\n",
-                label, kp->pq_initialized);
-    }
-    if (kp->sig_initialized != 0 && kp->sig_initialized != 1) {
-        fprintf(stderr, "[DEBUG] %s: WARNING - sig_initialized has abnormal value: %d\n",
-                label, kp->sig_initialized);
-    }
-}
-
-// ============================================================================
 // Глобальное состояние
 // ============================================================================
 
@@ -202,11 +148,31 @@ void mesh_hybrid_cleanup(void) {
 // ============================================================================
 
 int mesh_crypto_random(unsigned char *key, size_t len) {
-    if (!key || len == 0) return -1;
-    if (RAND_bytes(key, (int)len) != 1) {
-        CRYPTO_LOG("  ERROR: RAND_bytes failed");
+    if (!key || len == 0) {
+        CRYPTO_LOG("mesh_crypto_random: invalid parameters");
         return -1;
     }
+
+    // Используем RAND_bytes для генерации криптостойких случайных чисел
+    if (RAND_bytes(key, (int)len) != 1) {
+        CRYPTO_LOG("  ERROR: RAND_bytes failed");
+
+        // Fallback: используем RAND_priv_bytes
+        if (RAND_priv_bytes(key, (int)len) != 1) {
+            CRYPTO_LOG("  ERROR: RAND_priv_bytes also failed");
+
+            // Последний fallback: комбинируем время и PID
+            time_t t = time(NULL);
+            pid_t pid = getpid();
+            for (size_t i = 0; i < len; i++) {
+                key[i] = (unsigned char)((t >> (i % 8)) ^ (pid >> ((i * 3) % 8)) ^ rand());
+            }
+            CRYPTO_LOG("  WARNING: Using fallback random generator");
+            return -1;
+        }
+    }
+
+    CRYPTO_HEX("  random data", key, len > 16 ? 16 : len);
     return 0;
 }
 
@@ -234,6 +200,25 @@ int ecdh_shared_secret(const unsigned char *private_key,
     CRYPTO_LOG("ecdh_shared_secret: private_key=%p, public_key=%p", private_key, public_key);
     CRYPTO_HEX("  private_key", private_key, 32);
     CRYPTO_HEX("  public_key", public_key, 32);
+
+    // Проверяем, что ключи не нулевые
+    int is_zero = 1;
+    for (int i = 0; i < 32; i++) {
+        if (private_key[i] != 0) { is_zero = 0; break; }
+    }
+    if (is_zero) {
+        CRYPTO_LOG("  ERROR: private_key is all zeros");
+        return -1;
+    }
+
+    is_zero = 1;
+    for (int i = 0; i < 32; i++) {
+        if (public_key[i] != 0) { is_zero = 0; break; }
+    }
+    if (is_zero) {
+        CRYPTO_LOG("  ERROR: public_key is all zeros");
+        return -1;
+    }
 
     // Создаем ключи с правильным типом EVP_PKEY_X25519
     EVP_PKEY *priv = EVP_PKEY_new_raw_private_key(EVP_PKEY_X25519, NULL, private_key, 32);
@@ -293,6 +278,10 @@ int ecdh_shared_secret(const unsigned char *private_key,
     return 0;
 }
 
+// ============================================================================
+// HKDF (исправленная версия)
+// ============================================================================
+
 static int hkdf_derive(const unsigned char *secret, int secret_len,
                        unsigned char *key, int key_len,
                        unsigned char *iv, int iv_len) {
@@ -304,29 +293,37 @@ static int hkdf_derive(const unsigned char *secret, int secret_len,
     CRYPTO_LOG("hkdf_derive: secret_len=%d, key_len=%d, iv_len=%d", secret_len, key_len, iv_len);
     CRYPTO_HEX("  secret", secret, secret_len);
 
+    // Используем фиксированную соль для детерминизма
+    unsigned char salt[32] = {
+        0x4D, 0x65, 0x73, 0x68, 0x43, 0x72, 0x79, 0x70,  // "MeshCryp"
+        0x74, 0x6F, 0x48, 0x79, 0x62, 0x72, 0x69, 0x64,  // "toHybrid"
+        0x53, 0x61, 0x6C, 0x74, 0x32, 0x30, 0x32, 0x34,  // "Salt2024"
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00   // Padding
+    };
+
     unsigned char prk[32];
-    unsigned char zero_salt[32] = {0};
 
     // HKDF-Extract
-    HMAC(EVP_sha256(), zero_salt, 32, secret, secret_len, prk, NULL);
+    HMAC(EVP_sha256(), salt, 32, secret, secret_len, prk, NULL);
     CRYPTO_HEX("  prk", prk, 32);
 
-    unsigned char t[32];
-    unsigned char counter = 1;
-
     // HKDF-Expand для ключа
-    HMAC(EVP_sha256(), prk, 32, (unsigned char*)&counter, 1, t, NULL);
-    memcpy(key, t, key_len > 32 ? 32 : key_len);
+    char key_label[128];
+    snprintf(key_label, sizeof(key_label), "MeshKey:%d", secret_len);
+
+    unsigned char key_output[32];
+    HMAC(EVP_sha256(), prk, 32, (unsigned char*)key_label, strlen(key_label), key_output, NULL);
+    memcpy(key, key_output, key_len > 32 ? 32 : key_len);
     CRYPTO_HEX("  derived key", key, key_len > 32 ? 32 : key_len);
 
     // HKDF-Expand для IV
     if (iv && iv_len > 0) {
-        unsigned char iv_input[33];
-        memcpy(iv_input, t, 32);
-        iv_input[32] = 2;
-        unsigned char iv_hash[32];
-        HMAC(EVP_sha256(), prk, 32, iv_input, 33, iv_hash, NULL);
-        memcpy(iv, iv_hash, iv_len > 32 ? 32 : iv_len);
+        char iv_label[128];
+        snprintf(iv_label, sizeof(iv_label), "MeshIV:%d", secret_len);
+
+        unsigned char iv_output[32];
+        HMAC(EVP_sha256(), prk, 32, (unsigned char*)iv_label, strlen(iv_label), iv_output, NULL);
+        memcpy(iv, iv_output, iv_len > 32 ? 32 : iv_len);
         CRYPTO_HEX("  derived iv", iv, iv_len > 32 ? 32 : iv_len);
     }
 
@@ -461,7 +458,7 @@ void mesh_hybrid_free_keypair(mesh_hybrid_keypair_t *keypair) {
 }
 
 // ============================================================================
-// Сессии
+// Сессии (исправленные версии)
 // ============================================================================
 
 int mesh_hybrid_create_session(const mesh_hybrid_keypair_t *receiver_pk,
@@ -525,23 +522,33 @@ int mesh_hybrid_create_session(const mesh_hybrid_keypair_t *receiver_pk,
         free(ephemeral_private);
         return -1;
     }
+    CRYPTO_HEX("  classic_shared_secret (Alice)", session->classic_shared_secret, session->classic_secret_len);
 
     free(ephemeral_private);
 
     // PQ часть
     if (receiver_pk->pq_initialized && g_crypto_state.kem) {
-        CRYPTO_LOG("  Encapsulating with PQ...");
-        if (OQS_KEM_encaps(g_crypto_state.kem,
-                           session->pq_ciphertext,
-                           session->pq_shared_secret,
-                           receiver_pk->pq_public_key) == OQS_SUCCESS) {
-            session->pq_secret_len = MESH_PQ_SHARED_SECRET_LEN;
-            session->pq_ciphertext_len = MESH_PQ_CIPHERTEXT_LEN;
-            CRYPTO_LOG("  PQ encaps success");
-            CRYPTO_HEX("  pq_ciphertext", session->pq_ciphertext, 16);
-            CRYPTO_HEX("  pq_shared_secret", session->pq_shared_secret, 16);
+        // Проверяем, что публичный ключ не нулевой
+        int is_zero = 1;
+        for (int i = 0; i < MESH_PQ_PUBLIC_KEY_LEN; i++) {
+            if (receiver_pk->pq_public_key[i] != 0) { is_zero = 0; break; }
+        }
+        if (is_zero) {
+            CRYPTO_LOG("  ERROR: PQ public key is all zeros");
         } else {
-            CRYPTO_LOG("  PQ encaps FAILED");
+            CRYPTO_LOG("  Encapsulating with PQ...");
+            if (OQS_KEM_encaps(g_crypto_state.kem,
+                               session->pq_ciphertext,
+                               session->pq_shared_secret,
+                               receiver_pk->pq_public_key) == OQS_SUCCESS) {
+                session->pq_secret_len = MESH_PQ_SHARED_SECRET_LEN;
+                session->pq_ciphertext_len = MESH_PQ_CIPHERTEXT_LEN;
+                CRYPTO_LOG("  PQ encaps success");
+                CRYPTO_HEX("  pq_ciphertext", session->pq_ciphertext, 16);
+                CRYPTO_HEX("  pq_shared_secret (Alice)", session->pq_shared_secret, 16);
+            } else {
+                CRYPTO_LOG("  PQ encaps FAILED");
+            }
         }
     } else {
         CRYPTO_LOG("  PQ not available or not initialized");
@@ -560,10 +567,18 @@ int mesh_hybrid_create_session(const mesh_hybrid_keypair_t *receiver_pk,
     session->hybrid_secret_len = offset;
 
     CRYPTO_LOG("  hybrid_secret_len=%d", session->hybrid_secret_len);
-    CRYPTO_HEX("  hybrid_secret", session->hybrid_secret, session->hybrid_secret_len);
+    CRYPTO_HEX("  hybrid_secret (Alice)", session->hybrid_secret, session->hybrid_secret_len);
 
-    // Получаем ключ AES
-    CRYPTO_LOG("  Deriving AES key from hybrid secret...");
+    // Генерируем случайный IV
+    CRYPTO_LOG("  Generating random IV...");
+    if (mesh_crypto_random(session->aes_iv, 16) < 0) {
+        CRYPTO_LOG("  ERROR: failed to generate IV");
+        return -1;
+    }
+    CRYPTO_HEX("  aes_iv (generated)", session->aes_iv, 16);
+
+    // Получаем ключ AES из гибридного секрета с использованием IV
+    CRYPTO_LOG("  Deriving AES key from hybrid secret with IV...");
     if (hkdf_derive(session->hybrid_secret, session->hybrid_secret_len,
                     session->aes_key, 32,
                     session->aes_iv, 16) < 0) {
@@ -572,8 +587,8 @@ int mesh_hybrid_create_session(const mesh_hybrid_keypair_t *receiver_pk,
     }
 
     CRYPTO_LOG("  AES key and IV generated");
-    CRYPTO_HEX("  aes_key", session->aes_key, 32);
-    CRYPTO_HEX("  aes_iv", session->aes_iv, 16);
+    CRYPTO_HEX("  aes_key (Alice)", session->aes_key, 32);
+    CRYPTO_HEX("  aes_iv (Alice)", session->aes_iv, 16);
 
     session->initialized = 1;
     CRYPTO_LOG("=== session created successfully ===");
@@ -616,21 +631,33 @@ int mesh_hybrid_restore_session(const unsigned char *packet,
         CRYPTO_LOG("  ERROR: ecdh_shared_secret failed");
         return -1;
     }
+    CRYPTO_HEX("  classic_shared_secret (Bob)", session->classic_shared_secret, session->classic_secret_len);
 
     // PQ часть
     if (receiver_sk->pq_initialized && g_crypto_state.kem && pkt->pq_ciphertext_len > 0) {
-        CRYPTO_LOG("  Decapsulating with PQ...");
-        if (OQS_KEM_decaps(g_crypto_state.kem,
-                           session->pq_shared_secret,
-                           pkt->pq_ciphertext,
-                           receiver_sk->pq_secret_key) == OQS_SUCCESS) {
-            session->pq_secret_len = MESH_PQ_SHARED_SECRET_LEN;
-            session->pq_ciphertext_len = pkt->pq_ciphertext_len;
-            CRYPTO_LOG("  PQ decaps success");
-            CRYPTO_HEX("  pq_shared_secret", session->pq_shared_secret, 16);
-        } else {
-            CRYPTO_LOG("  PQ decaps FAILED");
+        // Проверяем, что приватный ключ не нулевой
+        int is_zero = 1;
+        for (int i = 0; i < MESH_PQ_SECRET_KEY_LEN; i++) {
+            if (receiver_sk->pq_secret_key[i] != 0) { is_zero = 0; break; }
         }
+        if (is_zero) {
+            CRYPTO_LOG("  ERROR: PQ secret key is all zeros");
+        } else {
+            CRYPTO_LOG("  Decapsulating with PQ...");
+            if (OQS_KEM_decaps(g_crypto_state.kem,
+                               session->pq_shared_secret,
+                               pkt->pq_ciphertext,
+                               receiver_sk->pq_secret_key) == OQS_SUCCESS) {
+                session->pq_secret_len = MESH_PQ_SHARED_SECRET_LEN;
+                session->pq_ciphertext_len = pkt->pq_ciphertext_len;
+                CRYPTO_LOG("  PQ decaps success");
+                CRYPTO_HEX("  pq_shared_secret (Bob)", session->pq_shared_secret, 16);
+            } else {
+                CRYPTO_LOG("  PQ decaps FAILED");
+            }
+        }
+    } else {
+        CRYPTO_LOG("  PQ not available or not initialized");
     }
 
     // Комбинируем секреты
@@ -646,21 +673,23 @@ int mesh_hybrid_restore_session(const unsigned char *packet,
     session->hybrid_secret_len = offset;
 
     CRYPTO_LOG("  hybrid_secret_len=%d", session->hybrid_secret_len);
-    CRYPTO_HEX("  hybrid_secret", session->hybrid_secret, session->hybrid_secret_len);
+    CRYPTO_HEX("  hybrid_secret (Bob)", session->hybrid_secret, session->hybrid_secret_len);
 
-    // Получаем ключ AES из гибридного секрета (используем IV из пакета)
+    // ВАЖНО: Копируем IV из пакета
     memcpy(session->aes_iv, pkt->iv, 16);
-    CRYPTO_LOG("  Deriving AES key from hybrid secret...");
+
+    // Получаем ключ AES из гибридного секрета с использованием IV
+    CRYPTO_LOG("  Deriving AES key from hybrid secret with IV...");
     if (hkdf_derive(session->hybrid_secret, session->hybrid_secret_len,
                     session->aes_key, 32,
-                    NULL, 0) < 0) {
+                    session->aes_iv, 16) < 0) {
         CRYPTO_LOG("  ERROR: hkdf_derive failed");
         return -1;
     }
 
     CRYPTO_LOG("  AES key generated");
-    CRYPTO_HEX("  aes_key", session->aes_key, 32);
-    CRYPTO_HEX("  aes_iv (from packet)", session->aes_iv, 16);
+    CRYPTO_HEX("  aes_key (Bob)", session->aes_key, 32);
+    CRYPTO_HEX("  aes_iv (Bob)", session->aes_iv, 16);
 
     session->initialized = 1;
     CRYPTO_LOG("=== session restored successfully ===");
@@ -818,6 +847,10 @@ int mesh_hybrid_encrypt(mesh_hybrid_session_t *session,
 
     return 0;
 }
+
+// ============================================================================
+// Дешифрование
+// ============================================================================
 
 int mesh_hybrid_decrypt(mesh_hybrid_session_t *session,
                         const unsigned char *packet,

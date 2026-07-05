@@ -7,6 +7,8 @@
 
 #include "mesh-mqtt.h"
 #include "mesh-packet.h"
+#include "mesh-registry.h"
+#include "mesh-crypto.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -99,18 +101,280 @@ static const char* get_topic_type(const char *topic) {
 }
 
 // ============================================================================
+// Обработчики пакетов с ключами
+// ============================================================================
+
+static void handle_public_key_packet(const char *topic, const void *data, int len) {
+    (void)topic; // Подавляем предупреждение
+    if (!data || len < (int)sizeof(mesh_public_key_packet_t)) {
+        return;
+    }
+
+    mesh_public_key_packet_t *packet = (mesh_public_key_packet_t*)data;
+
+    // Проверяем магию
+    if (packet->magic != 0x4D455350) {
+        log_message("WARN", "Invalid magic for public key packet: 0x%08X", packet->magic);
+        return;
+    }
+
+    // Проверяем версию
+    if (packet->version != 1) {
+        log_message("WARN", "Unsupported public key packet version: %d", packet->version);
+        return;
+    }
+
+    // Проверяем подпись
+    size_t sig_len = packet->signature_len;
+    if (sig_len > 0 && sig_len <= sizeof(packet->signature)) {
+        // Создаем временного пользователя для верификации
+        mesh_user_t temp_user;
+        memset(&temp_user, 0, sizeof(temp_user));
+        memcpy(temp_user.keypair.classic_public_key, packet->public_key, 32);
+        temp_user.keypair.classic_initialized = 1;
+
+        // Верифицируем подпись
+        if (mesh_hybrid_verify(&temp_user.keypair,
+                               (unsigned char*)packet,
+                               offsetof(mesh_public_key_packet_t, signature),
+                               packet->signature, sig_len) != 1) {
+            log_message("WARN", "Invalid signature for public key of %s", packet->user_id);
+            return;
+        }
+    }
+
+    // Сохраняем в кэш публичных ключей
+    // Здесь нужно добавить сохранение в локальный кэш
+    log_message("INFO", "Received public key for %s (PQ: %s, sig: %s)",
+                packet->user_id,
+                packet->pq_public_key_len > 0 ? "yes" : "no",
+                sig_len > 0 ? "yes" : "no");
+}
+
+static void handle_public_key_request(const char *topic, const void *data, int len) {
+    (void)topic; // Подавляем предупреждение
+    if (!data || len < (int)sizeof(mesh_public_key_request_t)) {
+        return;
+    }
+
+    mesh_public_key_request_t *request = (mesh_public_key_request_t*)data;
+
+    if (request->magic != 0x4D455352) {
+        log_message("WARN", "Invalid magic for key request: 0x%08X", request->magic);
+        return;
+    }
+
+    if (request->version != 1) {
+        log_message("WARN", "Unsupported key request version: %d", request->version);
+        return;
+    }
+
+    // Получаем пользователя из реестра
+    mesh_user_t *user = mesh_registry_get_user(request->user_id);
+    if (!user) {
+        log_message("WARN", "User %s not found for key request from %s",
+                    request->user_id, request->requester_id);
+        return;
+    }
+
+    // Проверяем подпись запроса
+    size_t sig_len = request->signature_len;
+    if (sig_len > 0 && sig_len <= sizeof(request->signature)) {
+        if (mesh_hybrid_verify(&user->keypair,
+                               (unsigned char*)request,
+                               offsetof(mesh_public_key_request_t, signature),
+                               request->signature, sig_len) != 1) {
+            log_message("WARN", "Invalid signature for key request from %s",
+                        request->requester_id);
+            return;
+        }
+    }
+
+    // Отправляем ответ с публичным ключом
+    mesh_public_key_response_t response;
+    memset(&response, 0, sizeof(response));
+    response.magic = 0x4D455341;
+    response.version = 1;
+    response.timestamp = time(NULL);
+    snprintf(response.user_id, sizeof(response.user_id), "%s", request->user_id);
+    memcpy(response.public_key, user->keypair.classic_public_key, 32);
+    memcpy(response.pq_public_key, user->keypair.pq_public_key, MESH_PQ_PUBLIC_KEY_LEN);
+    response.pq_public_key_len = MESH_PQ_PUBLIC_KEY_LEN;
+    memcpy(response.request_nonce, request->nonce, 32);
+    response.signature_len = 0;
+
+    // Подписываем ответ
+    size_t sig_len_out = sizeof(response.signature);
+    if (mesh_hybrid_sign(&user->keypair,
+                         (unsigned char*)&response,
+                         offsetof(mesh_public_key_response_t, signature),
+                         response.signature, &sig_len_out) == 0) {
+        response.signature_len = (uint16_t)sig_len_out;
+    }
+
+    // Отправляем ответ
+    char response_topic[256];
+    snprintf(response_topic, sizeof(response_topic),
+             MESH_TOPIC_KEY_RESPONSE, request->requester_id);
+    mesh_mqtt_send_data(response_topic, &response, sizeof(response));
+
+    log_message("INFO", "Sent public key response for %s to %s",
+                request->user_id, request->requester_id);
+}
+
+static void handle_public_key_response(const char *topic, const void *data, int len) {
+    (void)topic; // Подавляем предупреждение
+    if (!data || len < (int)sizeof(mesh_public_key_response_t)) {
+        return;
+    }
+
+    mesh_public_key_response_t *response = (mesh_public_key_response_t*)data;
+
+    if (response->magic != 0x4D455341) {
+        log_message("WARN", "Invalid magic for key response: 0x%08X", response->magic);
+        return;
+    }
+
+    if (response->version != 1) {
+        log_message("WARN", "Unsupported key response version: %d", response->version);
+        return;
+    }
+
+    // Получаем пользователя из реестра
+    mesh_user_t *user = mesh_registry_get_user(response->user_id);
+    if (!user) {
+        log_message("WARN", "User %s not found for key response", response->user_id);
+        return;
+    }
+
+    // Проверяем подпись ответа
+    size_t sig_len = response->signature_len;
+    if (sig_len > 0 && sig_len <= sizeof(response->signature)) {
+        if (mesh_hybrid_verify(&user->keypair,
+                               (unsigned char*)response,
+                               offsetof(mesh_public_key_response_t, signature),
+                               response->signature, sig_len) != 1) {
+            log_message("WARN", "Invalid signature for key response from %s",
+                        response->user_id);
+            return;
+        }
+    }
+
+    log_message("INFO", "Received public key response for %s", response->user_id);
+}
+
+// ============================================================================
+// Функции публикации и запроса ключей
+// ============================================================================
+
+int mesh_mqtt_publish_public_key(const char *user_id,
+                                 const unsigned char *public_key,
+                                 const uint8_t *pq_public_key,
+                                 uint16_t pq_len,
+                                 const unsigned char *signature,
+                                 size_t sig_len) {
+    if (!user_id || !public_key) {
+        log_message("ERROR", "Invalid parameters for publish_public_key");
+        return -1;
+    }
+
+    if (!g_initialized || !g_stats.is_connected) {
+        log_message("ERROR", "Not connected or initialized");
+        return -1;
+    }
+
+    mesh_public_key_packet_t packet;
+    memset(&packet, 0, sizeof(packet));
+    packet.magic = 0x4D455350;
+    packet.version = 1;
+    packet.timestamp = time(NULL);
+    snprintf(packet.user_id, sizeof(packet.user_id), "%s", user_id);
+    memcpy(packet.public_key, public_key, 32);
+
+    if (pq_public_key && pq_len > 0) {
+        size_t copy_len = pq_len;
+        if (copy_len > sizeof(packet.pq_public_key)) {
+            copy_len = sizeof(packet.pq_public_key);
+        }
+        memcpy(packet.pq_public_key, pq_public_key, copy_len);
+        packet.pq_public_key_len = (uint16_t)copy_len;
+    }
+
+    if (signature && sig_len > 0) {
+        size_t copy_len = sig_len;
+        if (copy_len > sizeof(packet.signature)) {
+            copy_len = sizeof(packet.signature);
+        }
+        memcpy(packet.signature, signature, copy_len);
+        packet.signature_len = (uint16_t)copy_len;
+    }
+
+    char topic[256];
+    snprintf(topic, sizeof(topic), MESH_TOPIC_PUBLIC_KEY, user_id);
+
+    int result = mesh_mqtt_send_data(topic, &packet, sizeof(packet));
+    if (result == 0) {
+        log_message("INFO", "Published public key for %s", user_id);
+    }
+    return result;
+}
+
+int mesh_mqtt_request_public_key(const char *user_id,
+                                 const char *requester_id,
+                                 const unsigned char *nonce,
+                                 const unsigned char *signature,
+                                 size_t sig_len) {
+    if (!user_id || !requester_id || !nonce) {
+        log_message("ERROR", "Invalid parameters for request_public_key");
+        return -1;
+    }
+
+    if (!g_initialized || !g_stats.is_connected) {
+        log_message("ERROR", "Not connected or initialized");
+        return -1;
+    }
+
+    mesh_public_key_request_t request;
+    memset(&request, 0, sizeof(request));
+    request.magic = 0x4D455352;
+    request.version = 1;
+    request.timestamp = time(NULL);
+    snprintf(request.user_id, sizeof(request.user_id), "%s", user_id);
+    snprintf(request.requester_id, sizeof(request.requester_id), "%s", requester_id);
+    memcpy(request.nonce, nonce, 32);
+
+    if (signature && sig_len > 0) {
+        size_t copy_len = sig_len;
+        if (copy_len > sizeof(request.signature)) {
+            copy_len = sizeof(request.signature);
+        }
+        memcpy(request.signature, signature, copy_len);
+        request.signature_len = (uint16_t)copy_len;
+    }
+
+    char topic[256];
+    snprintf(topic, sizeof(topic), MESH_TOPIC_KEY_REQUEST, user_id);
+
+    int result = mesh_mqtt_send_data(topic, &request, sizeof(request));
+    if (result == 0) {
+        log_message("INFO", "Requested public key for %s from %s", user_id, requester_id);
+    }
+    return result;
+}
+
+// ============================================================================
 // Колбэки MQTT (Paho)
 // ============================================================================
 
 #ifdef USE_PAHO_MQTT
 
 /**
- * Колбэк получения сообщения - поддерживает Mesh и Meshtastic Protobuf
+ * Колбэк получения сообщения
  */
 static int mqtt_message_callback(void *context, char *topicName,
                                   int topicLen, MQTTClient_message *message) {
-    (void)topicLen;
     (void)context;
+    (void)topicLen;
 
     if (!message || !message->payload) {
         log_message("WARN", "Invalid message received (NULL payload)");
@@ -119,7 +383,30 @@ static int mqtt_message_callback(void *context, char *topicName,
         return 1;
     }
 
-    // Проверяем, что это наш Mesh-пакет (magic = 0x4D455348)
+    // Проверяем формат пакета
+    if (message->payloadlen >= 4) {
+        uint32_t magic = *(uint32_t*)message->payload;
+
+        // Проверяем, является ли пакет пакетом с ключами
+        if (magic == 0x4D455350) {
+            handle_public_key_packet(topicName, message->payload, message->payloadlen);
+            MQTTClient_freeMessage(&message);
+            MQTTClient_free(topicName);
+            return 1;
+        } else if (magic == 0x4D455352) {
+            handle_public_key_request(topicName, message->payload, message->payloadlen);
+            MQTTClient_freeMessage(&message);
+            MQTTClient_free(topicName);
+            return 1;
+        } else if (magic == 0x4D455341) {
+            handle_public_key_response(topicName, message->payload, message->payloadlen);
+            MQTTClient_freeMessage(&message);
+            MQTTClient_free(topicName);
+            return 1;
+        }
+    }
+
+    // Проверяем Mesh-пакет
     int is_mesh = is_mesh_packet(message->payload, message->payloadlen);
 
     if (is_mesh) {
@@ -777,6 +1064,57 @@ int mesh_mqtt_ping(void) {
 }
 
 // ============================================================================
+// Отправка сырых данных
+// ============================================================================
+
+int mesh_mqtt_send_data(const char *topic, const void *data, size_t len) {
+    if (!g_initialized) {
+        log_message("ERROR", "Not initialized");
+        return -1;
+    }
+
+    if (!g_stats.is_connected) {
+        log_message("ERROR", "Not connected");
+        return -2;
+    }
+
+    if (!topic || !data || len == 0) {
+        log_message("ERROR", "Invalid parameters");
+        return -3;
+    }
+
+#ifdef USE_PAHO_MQTT
+    MQTTClient_message pubmsg = MQTTClient_message_initializer;
+    pubmsg.payload = (void*)data;
+    pubmsg.payloadlen = len;
+    pubmsg.qos = g_config.qos;
+    pubmsg.retained = g_config.retain;
+
+    MQTTClient_deliveryToken token;
+    int rc = MQTTClient_publishMessage(g_client, topic, &pubmsg, &token);
+
+    if (rc != MQTTCLIENT_SUCCESS) {
+        log_message("ERROR", "Failed to publish to %s: %s",
+                    topic, MQTTClient_strerror(rc));
+        g_stats.errors++;
+        return -4;
+    }
+
+    MQTTClient_waitForCompletion(g_client, token, 5000);
+#endif
+
+    g_stats.packets_sent++;
+    g_stats.bytes_sent += len;
+    g_stats.last_activity = time(NULL);
+
+    if (g_config.verbose) {
+        log_message("DEBUG", "Sent %zu bytes to %s", len, topic);
+    }
+
+    return 0;
+}
+
+// ============================================================================
 // Отладка и диагностика
 // ============================================================================
 
@@ -915,57 +1253,6 @@ void mesh_mqtt_set_log_packets(int enable) {
 }
 
 // ============================================================================
-// Отправка сырых данных (новая функция)
-// ============================================================================
-
-int mesh_mqtt_send_data(const char *topic, const void *data, size_t len) {
-    if (!g_initialized) {
-        log_message("ERROR", "Not initialized");
-        return -1;
-    }
-
-    if (!g_stats.is_connected) {
-        log_message("ERROR", "Not connected");
-        return -2;
-    }
-
-    if (!topic || !data || len == 0) {
-        log_message("ERROR", "Invalid parameters");
-        return -3;
-    }
-
-#ifdef USE_PAHO_MQTT
-    MQTTClient_message pubmsg = MQTTClient_message_initializer;
-    pubmsg.payload = (void*)data;
-    pubmsg.payloadlen = len;
-    pubmsg.qos = g_config.qos;
-    pubmsg.retained = g_config.retain;
-
-    MQTTClient_deliveryToken token;
-    int rc = MQTTClient_publishMessage(g_client, topic, &pubmsg, &token);
-
-    if (rc != MQTTCLIENT_SUCCESS) {
-        log_message("ERROR", "Failed to publish to %s: %s",
-                    topic, MQTTClient_strerror(rc));
-        g_stats.errors++;
-        return -4;
-    }
-
-    MQTTClient_waitForCompletion(g_client, token, 5000);
-#endif
-
-    g_stats.packets_sent++;
-    g_stats.bytes_sent += len;
-    g_stats.last_activity = time(NULL);
-
-    if (g_config.verbose) {
-        log_message("DEBUG", "Sent %zu bytes to %s", len, topic);
-    }
-
-    return 0;
-}
-
-// ============================================================================
 // Освобождение ресурсов
 // ============================================================================
 
@@ -1000,20 +1287,6 @@ void mesh_mqtt_cleanup(void) {
     memset(&g_callbacks, 0, sizeof(g_callbacks));
 
     log_message("INFO", "Cleanup complete");
-}
-
-// ============================================================================
-// Обработка сигналов
-// ============================================================================
-
-void mesh_mqtt_handle_signal(int sig) {
-    if (sig == SIGINT || sig == SIGTERM) {
-        log_message("INFO", "Signal %d received, shutting down...", sig);
-        g_should_exit = 1;
-        g_running = 0;
-        mesh_mqtt_cleanup();
-        exit(0);
-    }
 }
 
 // ============================================================================

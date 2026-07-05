@@ -24,7 +24,7 @@
 #include "mesh-packet.h"
 
 // ============================================================================
-// Константы
+// Константы - каждая определяется отдельно
 // ============================================================================
 
 /** Длина классического ключа (ECDH) */
@@ -36,12 +36,38 @@
 /** Длина общего секрета */
 #define MESH_SECRET_LEN             32
 
-// Убеждаемся, что константы для PQ определены
+/** Длина публичного ключа ML-KEM (1184 байта) */
 #ifndef MESH_PQ_PUBLIC_KEY_LEN
 #define MESH_PQ_PUBLIC_KEY_LEN      1184
+#endif
+
+/** Длина секретного ключа ML-KEM (2400 байт) */
+#ifndef MESH_PQ_SECRET_KEY_LEN
+#define MESH_PQ_SECRET_KEY_LEN      2400
+#endif
+
+/** Длина шифротекста ML-KEM (1088 байт) */
+#ifndef MESH_PQ_CIPHERTEXT_LEN
 #define MESH_PQ_CIPHERTEXT_LEN      1088
+#endif
+
+/** Длина общего секрета ML-KEM (32 байта) */
+#ifndef MESH_PQ_SHARED_SECRET_LEN
 #define MESH_PQ_SHARED_SECRET_LEN   32
+#endif
+
+/** Длина публичного ключа ML-DSA (1952 байта) */
+#ifndef MESH_SIG_PUBLIC_KEY_LEN
 #define MESH_SIG_PUBLIC_KEY_LEN     1952
+#endif
+
+/** Длина секретного ключа ML-DSA (4032 байта) */
+#ifndef MESH_SIG_SECRET_KEY_LEN
+#define MESH_SIG_SECRET_KEY_LEN     4032
+#endif
+
+/** Длина подписи ML-DSA (3309 байт) */
+#ifndef MESH_SIG_SIGNATURE_LEN
 #define MESH_SIG_SIGNATURE_LEN      3309
 #endif
 
@@ -53,6 +79,9 @@
 
 /** Алгоритм ML-DSA по умолчанию */
 #define MESH_PQ_SIG_ALG             OQS_SIG_alg_ml_dsa_65
+
+/** Размер структуры mesh_hybrid_keypair_t для проверки */
+#define MESH_HYBRID_KEYPAIR_SIZE    (32+32+1184+2400+1952+4032+4+4+4)
 
 // ============================================================================
 // Управление памятью
@@ -115,6 +144,31 @@ static inline void crypto_auto_free(void *ptr) {
 } while(0)
 
 // ============================================================================
+// Отладочные макросы
+// ============================================================================
+
+#define CRYPTO_DEBUG 1
+
+#define CRYPTO_LOG(fmt, ...) \
+    do { if (CRYPTO_DEBUG) { \
+        fprintf(stderr, "[CRYPTO] " fmt "\n", ##__VA_ARGS__); \
+        fflush(stderr); \
+    } } while(0)
+
+#define CRYPTO_HEX(label, data, len) \
+    do { if (CRYPTO_DEBUG) { \
+        fprintf(stderr, "[CRYPTO] %s: ", label); \
+        size_t _len = (size_t)(len); \
+        size_t _show = _len > 32 ? 32 : _len; \
+        for (size_t i = 0; i < _show; i++) { \
+            fprintf(stderr, "%02x", ((unsigned char*)(data))[i]); \
+        } \
+        if (_len > 32) fprintf(stderr, "..."); \
+        fprintf(stderr, " (%zu bytes)\n", _len); \
+        fflush(stderr); \
+    } } while(0)
+
+// ============================================================================
 // Структуры
 // ============================================================================
 
@@ -123,17 +177,7 @@ static inline void crypto_auto_free(void *ptr) {
  * ВАЖНО: Все поля должны быть выровнены правильно!
  * Размер структуры должен быть одинаковым во всем коде
  *
- * Расчет размера:
- * - classic_public_key: 32 байта
- * - classic_private_key: 32 байта
- * - pq_public_key: 1184 байта
- * - pq_secret_key: 2400 байт
- * - sig_public_key: 1952 байта
- * - sig_secret_key: 4032 байта
- * - classic_initialized: 4 байта (int)
- * - pq_initialized: 4 байта (int)
- * - sig_initialized: 4 байта (int)
- * Итого: 32+32+1184+2400+1952+4032+4+4+4 = 9644 байта
+ * Размер: 32+32+1184+2400+1952+4032+4+4+4 = 9644 байта
  */
 typedef struct {
     // Классические ключи (ECDH) - 32 байта каждый
@@ -141,12 +185,12 @@ typedef struct {
     unsigned char classic_private_key[32];
 
     // Квантово-безопасные ключи (ML-KEM)
-    uint8_t pq_public_key[1184];
-    uint8_t pq_secret_key[2400];
+    uint8_t pq_public_key[MESH_PQ_PUBLIC_KEY_LEN];
+    uint8_t pq_secret_key[MESH_PQ_SECRET_KEY_LEN];
 
     // Ключи для подписи (ML-DSA)
-    uint8_t sig_public_key[1952];
-    uint8_t sig_secret_key[4032];
+    uint8_t sig_public_key[MESH_SIG_PUBLIC_KEY_LEN];
+    uint8_t sig_secret_key[MESH_SIG_SECRET_KEY_LEN];
 
     // Флаги инициализации - ИСПОЛЬЗУЕМ int для совместимости
     int classic_initialized;
@@ -154,24 +198,21 @@ typedef struct {
     int sig_initialized;
 } mesh_hybrid_keypair_t;
 
-// Проверка размера структуры (должно быть 9644 байта)
-#define MESH_HYBRID_KEYPAIR_SIZE (32+32+1184+2400+1952+4032+4+4+4)
-
 /**
  * Гибридная сессия для шифрования
  * Содержит оба секрета: классический и квантовый
  */
 typedef struct {
     // Классический секрет (ECDH)
-    unsigned char classic_shared_secret[32];
+    unsigned char classic_shared_secret[MESH_SECRET_LEN];
     int classic_secret_len;
 
     // Квантовый секрет (ML-KEM)
-    uint8_t pq_shared_secret[32];
+    uint8_t pq_shared_secret[MESH_PQ_SHARED_SECRET_LEN];
     int pq_secret_len;
 
     // Гибридный секрет (комбинированный)
-    unsigned char hybrid_secret[64];
+    unsigned char hybrid_secret[MESH_HYBRID_SECRET_LEN];
     int hybrid_secret_len;
 
     // Итоговые ключи для шифрования
@@ -180,7 +221,7 @@ typedef struct {
 
     // Временные ключи отправителя
     unsigned char ephemeral_public[32];
-    uint8_t pq_ciphertext[1088];
+    uint8_t pq_ciphertext[MESH_PQ_CIPHERTEXT_LEN];
     int pq_ciphertext_len;
 
     /** Флаг инициализации сессии */
@@ -442,6 +483,46 @@ int ecdh_shared_secret(const unsigned char *private_key,
                        const unsigned char *public_key,
                        unsigned char *shared_secret,
                        int *secret_len);
+
+// ----------------------------------------------------------------------------
+// Безопасные функции с автоматическим выделением памяти
+// ----------------------------------------------------------------------------
+
+/**
+ * Зашифровать с автоматическим выделением памяти
+ * @param session Гибридная сессия
+ * @param plaintext Открытый текст
+ * @param plaintext_len Длина открытого текста
+ * @param packet Выходной указатель на пакет (будет выделен)
+ * @param packet_len Выходная длина пакета
+ * @return 0 при успехе, -1 при ошибке
+ */
+int mesh_hybrid_encrypt_auto(mesh_hybrid_session_t *session,
+                             const unsigned char *plaintext,
+                             size_t plaintext_len,
+                             mesh_hybrid_packet_t **packet,
+                             size_t *packet_len);
+
+/**
+ * Расшифровать с автоматическим выделением памяти
+ * @param session Гибридная сессия
+ * @param packet Пакет с зашифрованными данными
+ * @param packet_len Длина пакета
+ * @param plaintext Выходной указатель на открытый текст (будет выделен)
+ * @param plaintext_len Выходная длина открытого текста
+ * @return 0 при успехе, -1 при ошибке
+ */
+int mesh_hybrid_decrypt_auto(mesh_hybrid_session_t *session,
+                             const unsigned char *packet,
+                             size_t packet_len,
+                             unsigned char **plaintext,
+                             size_t *plaintext_len);
+
+/**
+ * Очистить сессию (обнулить чувствительные данные)
+ * @param session Сессия для очистки
+ */
+void mesh_hybrid_session_clear(mesh_hybrid_session_t *session);
 
 #ifdef __cplusplus
 }

@@ -138,6 +138,14 @@ int mesh_user_save_hybrid(const mesh_user_t *user, const char *filename);
  */
 void mesh_user_free_hybrid(mesh_user_t *user);
 
+/**
+ * Зарегистрировать пользователя в реестре
+ *
+ * @param user Указатель на пользователя
+ * @return 0 при успехе, -1 при ошибке
+ */
+int mesh_user_register(mesh_user_t *user);
+
 // ============================================================================
 // Функции кэша публичных ключей
 // ============================================================================
@@ -147,10 +155,12 @@ void mesh_user_free_hybrid(mesh_user_t *user);
  *
  * @param user_id ID пользователя
  * @param keypair Гибридный ключ для кэширования
+ * @param ttl_seconds Время жизни в секундах (0 = бесконечно)
  * @return 0 при успехе, -1 при ошибке
  */
 int mesh_user_cache_add_hybrid(const char *user_id,
-                               const mesh_hybrid_keypair_t *keypair);
+                               const mesh_hybrid_keypair_t *keypair,
+                               int ttl_seconds);
 
 /**
  * Получить публичный ключ из кэша

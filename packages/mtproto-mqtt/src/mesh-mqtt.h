@@ -13,6 +13,7 @@
 #include <time.h>
 #include <stdbool.h>
 #include "mesh-packet.h"
+#include "mesh-user.h"
 
 // ============================================================================
 // Настройки OneMesh (как в MQTT Explorer)
@@ -58,6 +59,17 @@
 #define ONEMESH_MIN_PACKET_SIZE    sizeof(mesh_packet_t)
 
 // ============================================================================
+// Топики MQTT для ключей
+// ============================================================================
+
+#define MESH_TOPIC_PUBLIC_KEY      "mesh/users/%s/public"
+#define MESH_TOPIC_PQ_PUBLIC_KEY   "mesh/users/%s/pq-public"
+#define MESH_TOPIC_INBOX           "mesh/users/%s/inbox"
+#define MESH_TOPIC_KEY_REQUEST     "mesh/users/%s/request-key"
+#define MESH_TOPIC_KEY_RESPONSE    "mesh/users/%s/public-response"
+#define MESH_TOPIC_BROADCAST       "mesh/broadcast"
+
+// ============================================================================
 // Типы сообщений (дополнительные к mesh-packet.h)
 // ============================================================================
 
@@ -98,6 +110,55 @@ typedef enum {
     MESH_STATUS_RECONNECTING,
     MESH_STATUS_ERROR
 } mesh_connection_status_t;
+
+// ============================================================================
+// Пакеты для обмена ключами
+// ============================================================================
+
+/**
+ * Пакет публичного ключа
+ */
+typedef struct {
+    uint32_t magic;              // 0x4D455350 "MESP"
+    uint32_t version;
+    uint32_t timestamp;
+    char user_id[64];
+    unsigned char public_key[32];
+    uint16_t pq_public_key_len;
+    uint8_t pq_public_key[1184];
+    uint16_t signature_len;
+    uint8_t signature[3309];
+} mesh_public_key_packet_t;
+
+/**
+ * Запрос публичного ключа
+ */
+typedef struct {
+    uint32_t magic;              // 0x4D455352 "MESR"
+    uint32_t version;
+    uint32_t timestamp;
+    char user_id[64];
+    char requester_id[64];
+    unsigned char nonce[32];
+    uint16_t signature_len;
+    uint8_t signature[3309];
+} mesh_public_key_request_t;
+
+/**
+ * Ответ с публичным ключом
+ */
+typedef struct {
+    uint32_t magic;              // 0x4D455341 "MESA"
+    uint32_t version;
+    uint32_t timestamp;
+    char user_id[64];
+    unsigned char public_key[32];
+    uint16_t pq_public_key_len;
+    uint8_t pq_public_key[1184];
+    unsigned char request_nonce[32];
+    uint16_t signature_len;
+    uint8_t signature[3309];
+} mesh_public_key_response_t;
 
 // ============================================================================
 // Структуры данных
@@ -304,15 +365,6 @@ int mesh_mqtt_send_to(const char *receiver_id, uint32_t type,
                       const void *data, uint32_t data_len);
 
 /**
- * Отправить Protobuf сообщение (Meshtastic)
- * @param topic Топик для отправки
- * @param data Указатель на Protobuf данные
- * @param data_len Длина данных
- * @return 0 при успехе, отрицательное значение при ошибке
- */
-int mesh_mqtt_send_protobuf(const char *topic, const void *data, int data_len);
-
-/**
  * Отправить широковещательное сообщение
  * @param type Тип сообщения
  * @param data Указатель на данные
@@ -328,6 +380,51 @@ int mesh_mqtt_broadcast(uint32_t type, const void *data, uint32_t data_len);
  * @return 0 при успехе, отрицательное значение при ошибке
  */
 int mesh_mqtt_receive(mesh_packet_t **packet, int timeout_ms);
+
+/**
+ * Отправить сырые данные в топик
+ * @param topic Топик для отправки
+ * @param data Указатель на данные
+ * @param len Длина данных
+ * @return 0 при успехе, отрицательное значение при ошибке
+ */
+int mesh_mqtt_send_data(const char *topic, const void *data, size_t len);
+
+// ============================================================================
+// Публикация и запрос ключей
+// ============================================================================
+
+/**
+ * Опубликовать публичный ключ пользователя
+ * @param user_id ID пользователя
+ * @param public_key Классический публичный ключ (32 байта)
+ * @param pq_public_key PQ публичный ключ
+ * @param pq_len Длина PQ публичного ключа
+ * @param signature Подпись пакета
+ * @param sig_len Длина подписи
+ * @return 0 при успехе, -1 при ошибке
+ */
+int mesh_mqtt_publish_public_key(const char *user_id,
+                                 const unsigned char *public_key,
+                                 const uint8_t *pq_public_key,
+                                 uint16_t pq_len,
+                                 const unsigned char *signature,
+                                 size_t sig_len);
+
+/**
+ * Запросить публичный ключ пользователя
+ * @param user_id ID запрашиваемого пользователя
+ * @param requester_id ID запрашивающего
+ * @param nonce Nonce для верификации
+ * @param signature Подпись запроса
+ * @param sig_len Длина подписи
+ * @return 0 при успехе, -1 при ошибке
+ */
+int mesh_mqtt_request_public_key(const char *user_id,
+                                 const char *requester_id,
+                                 const unsigned char *nonce,
+                                 const unsigned char *signature,
+                                 size_t sig_len);
 
 // ============================================================================
 // Подписка на топики
@@ -352,13 +449,6 @@ int mesh_mqtt_subscribe_all(void);
  * @return 0 при успехе, отрицательное значение при ошибке
  */
 int mesh_mqtt_subscribe_city(const char *city_code);
-
-/**
- * Подписаться только на топики позиции (GPS)
- * @param city_code Код города
- * @return 0 при успехе, отрицательное значение при ошибке
- */
-int mesh_mqtt_subscribe_position(const char *city_code);
 
 /**
  * Отписаться от топика
@@ -438,12 +528,6 @@ void mesh_mqtt_set_verbose(int enable);
 void mesh_mqtt_set_log_packets(int enable);
 
 /**
- * Включить/отключить парсинг Protobuf
- * @param enable 1 для включения, 0 для отключения
- */
-void mesh_mqtt_set_parse_protobuf(int enable);
-
-/**
  * Определить формат сообщения по данным
  * @param data Указатель на данные
  * @param len Длина данных
@@ -514,12 +598,3 @@ int mesh_mqtt_build_topic(const char *root, const char *subtopic,
  */
 int mesh_mqtt_parse_topic(const char *topic, char *root,
                           char *subtopic, size_t buffer_size);
-
-/**
- * Получить имя пользователя для режима downlink
- * @param mode Режим: "onemesh" (без downlink), "onemeshz" (zero-hop), "onemeshd" (downlink)
- * @return Имя пользователя
- */
-const char* mesh_mqtt_get_username_for_mode(const char *mode);
-
-int mesh_mqtt_send_data(const char *topic, const void *data, size_t len);

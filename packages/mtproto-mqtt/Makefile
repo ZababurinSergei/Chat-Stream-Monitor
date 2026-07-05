@@ -86,7 +86,7 @@ GIT_COMMIT = $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 CFLAGS += -DVERSION=\"$(VERSION)\"
 CFLAGS += -DBUILD_DATE=\"$(BUILD_DATE)\"
 CFLAGS += -DGIT_COMMIT=\"$(GIT_COMMIT)\"
-
+CFLAGS += -Wno-unused-function
 # ============================================================================
 # Цели по умолчанию
 # ============================================================================
