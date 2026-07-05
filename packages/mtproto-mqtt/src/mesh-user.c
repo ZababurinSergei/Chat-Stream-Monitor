@@ -186,17 +186,68 @@ int mesh_user_create_hybrid(mesh_user_t *user,
 
     USER_LOG("create: generating keypair for %s", user_id);
 
-    // Генерируем гибридные ключи
-    if (mesh_hybrid_generate_keypair(&user->keypair, user_id, secret_phrase) < 0) {
-        USER_LOG("create: failed to generate keypair");
+    // ============================================================
+    // 🔥 ИСПРАВЛЕНИЕ: Генерируем ПАРУ ключей (приватный + публичный)
+    // ============================================================
+
+    // 1. Генерируем приватный ключ из секретной фразы
+    unsigned char hash[SHA256_DIGEST_LENGTH];
+    unsigned char combined[1024];
+
+    snprintf((char*)combined, sizeof(combined), "%s:%s:%s",
+             user_id, "MeshID_SALT", secret_phrase);
+    SHA256(combined, strlen((char*)combined), hash);
+    memcpy(user->keypair.classic_private_key, hash, 32);
+    user->keypair.classic_private_key[0] &= 0xF8;
+    user->keypair.classic_private_key[31] &= 0x7F;
+    user->keypair.classic_private_key[31] |= 0x40;
+
+    // 2. Вычисляем публичный ключ из приватного
+    EVP_PKEY *priv = EVP_PKEY_new_raw_private_key(EVP_PKEY_X25519, NULL,
+                                                   user->keypair.classic_private_key, 32);
+    if (priv) {
+        size_t len = 32;
+        if (EVP_PKEY_get_raw_public_key(priv, user->keypair.classic_public_key, &len) <= 0) {
+            USER_LOG("create: failed to get public key from private");
+            EVP_PKEY_free(priv);
+            return -1;
+        }
+        EVP_PKEY_free(priv);
+        user->keypair.classic_initialized = 1;
+        USER_LOG("create: classic keypair generated from private key");
+    } else {
+        USER_LOG("create: failed to create EVP_PKEY from private key");
         return -1;
     }
 
-    // Проверяем флаги
-    if (user->keypair.classic_initialized != 1) {
-        USER_LOG("create: WARNING: classic_initialized is %d, forcing to 1",
-                 user->keypair.classic_initialized);
-        user->keypair.classic_initialized = 1;
+    USER_HEX("  classic_public", user->keypair.classic_public_key, 32);
+    USER_HEX("  classic_private", user->keypair.classic_private_key, 32);
+
+    // 3. Генерируем PQ ключи (если доступны)
+    mesh_crypto_state_t *state = mesh_get_crypto_state();
+    if (state && state->kem) {
+        if (OQS_KEM_keypair(state->kem,
+                           user->keypair.pq_public_key,
+                           user->keypair.pq_secret_key) == OQS_SUCCESS) {
+            user->keypair.pq_initialized = 1;
+            USER_LOG("create: PQ keys generated");
+        } else {
+            USER_LOG("create: PQ key generation FAILED");
+            user->keypair.pq_initialized = 0;
+        }
+    }
+
+    // 4. Генерируем ключи подписи
+    if (state && state->sig) {
+        if (OQS_SIG_keypair(state->sig,
+                           user->keypair.sig_public_key,
+                           user->keypair.sig_secret_key) == OQS_SUCCESS) {
+            user->keypair.sig_initialized = 1;
+            USER_LOG("create: SIG keys generated");
+        } else {
+            USER_LOG("create: SIG key generation FAILED");
+            user->keypair.sig_initialized = 0;
+        }
     }
 
     // Формируем топики
@@ -295,7 +346,7 @@ int mesh_user_get_hybrid_keypair(const char *user_id,
         return -1;
     }
 
-    // 🔥 СНАЧАЛА проверяем реестр - главный источник правды
+    // 1. СНАЧАЛА проверяем реестр (главный источник правды)
     USER_LOG("get_keypair: checking registry first...");
     mesh_user_t *user = mesh_registry_get_user(user_id);
     if (user && user->keypair.classic_initialized) {
@@ -306,23 +357,18 @@ int mesh_user_get_hybrid_keypair(const char *user_id,
         mesh_user_cache_add_hybrid(user_id, keypair, MESH_CACHE_DEFAULT_TTL);
 
         USER_LOG("get_keypair: returning keys from registry");
-        USER_LOG("  classic_initialized=%d", keypair->classic_initialized);
-        USER_LOG("  pq_initialized=%d", keypair->pq_initialized);
-        USER_LOG("  sig_initialized=%d", keypair->sig_initialized);
         return 0;
     }
 
-    // ПОТОМ проверяем кэш
+    // 2. Проверяем кэш
     USER_LOG("get_keypair: checking cache...");
     if (mesh_user_cache_get_hybrid(user_id, keypair) == 0) {
         USER_LOG("get_keypair: found in cache");
-        USER_LOG("  classic_initialized=%d", keypair->classic_initialized);
-        USER_LOG("  pq_initialized=%d", keypair->pq_initialized);
         return 0;
     }
 
-    // ТОЛЬКО ЕСЛИ ПОЛЬЗОВАТЕЛЬ НЕ НАЙДЕН - генерируем новые ключи
-    USER_LOG("get_keypair: user not found in registry or cache, generating new keys");
+    // 3. Если пользователь не найден - генерируем новые ключи
+    USER_LOG("get_keypair: user not found, generating new keys");
 
     // Временный ключ на HEAP
     mesh_hybrid_keypair_t *temp = calloc(1, sizeof(mesh_hybrid_keypair_t));
@@ -338,14 +384,36 @@ int mesh_user_get_hybrid_keypair(const char *user_id,
     USER_LOG("get_keypair: after calloc - pq_initialized=%d", temp->pq_initialized);
     USER_LOG("get_keypair: after calloc - sig_initialized=%d", temp->sig_initialized);
 
-    // Генерируем классические ключи из ID
+    // Генерируем ПАРУ классических ключей (приватный + публичный)
     unsigned char hash[SHA256_DIGEST_LENGTH];
-    SHA256((unsigned char*)user_id, strlen(user_id), hash);
-    memcpy(temp->classic_public_key, hash, 32);
-    temp->classic_public_key[0] &= 0xF8;
-    temp->classic_public_key[31] &= 0x7F;
-    temp->classic_public_key[31] |= 0x40;
-    temp->classic_initialized = 1;
+    unsigned char combined[1024];
+
+    snprintf((char*)combined, sizeof(combined), "%s:%s:%s",
+             user_id, "MeshID_SALT", "default_secret");
+    SHA256(combined, strlen((char*)combined), hash);
+    memcpy(temp->classic_private_key, hash, 32);
+    temp->classic_private_key[0] &= 0xF8;
+    temp->classic_private_key[31] &= 0x7F;
+    temp->classic_private_key[31] |= 0x40;
+
+    EVP_PKEY *priv = EVP_PKEY_new_raw_private_key(EVP_PKEY_X25519, NULL,
+                                                   temp->classic_private_key, 32);
+    if (priv) {
+        size_t len = 32;
+        if (EVP_PKEY_get_raw_public_key(priv, temp->classic_public_key, &len) <= 0) {
+            USER_LOG("get_keypair: failed to get public key from private");
+            EVP_PKEY_free(priv);
+            free(temp);
+            return -1;
+        }
+        EVP_PKEY_free(priv);
+        temp->classic_initialized = 1;
+        USER_LOG("get_keypair: classic keypair generated");
+    } else {
+        USER_LOG("get_keypair: failed to create EVP_PKEY from private key");
+        free(temp);
+        return -1;
+    }
 
     USER_HEX("  classic_public", temp->classic_public_key, 32);
     USER_LOG("  classic_initialized=%d", temp->classic_initialized);
@@ -490,32 +558,29 @@ int mesh_user_send_hybrid(mesh_user_t *sender,
     }
     USER_LOG("send_hybrid: sender is valid");
 
-    // 🔥 Получаем получателя из реестра
+    // Получаем получателя из реестра
     USER_LOG("send_hybrid: getting receiver from registry");
     mesh_user_t *receiver = mesh_registry_get_user(receiver_id);
     if (!receiver) {
         USER_LOG("send_hybrid: receiver %s not found in registry", receiver_id);
         return -1;
     }
-
     if (!receiver->keypair.classic_initialized) {
         USER_LOG("send_hybrid: receiver has no keys");
         return -1;
     }
-
     USER_LOG("send_hybrid: receiver found in registry, classic_initialized=%d",
              receiver->keypair.classic_initialized);
 
-    // Создаем сессию с ключами получателя из реестра
-    USER_LOG("send_hybrid: creating hybrid session with receiver keys...");
+    // Используем ключи из реестра
     mesh_hybrid_session_t session;
     memset(&session, 0, sizeof(session));
 
+    USER_LOG("send_hybrid: creating hybrid session with receiver keys...");
     if (mesh_hybrid_create_session(&receiver->keypair, &session) < 0) {
         USER_LOG("send_hybrid: failed to create session");
         return -1;
     }
-
     USER_LOG("send_hybrid: mesh_hybrid_create_session result=0");
     USER_LOG("send_hybrid: session->initialized=%d", session.initialized);
 
@@ -541,13 +606,14 @@ int mesh_user_send_hybrid(mesh_user_t *sender,
     int encrypt_result = mesh_hybrid_encrypt(&session, message, message_len, packet, packet_len);
     USER_LOG("send_hybrid: mesh_hybrid_encrypt result=%d", encrypt_result);
 
-    // Очищаем сессию
-    mesh_hybrid_session_clear(&session);
-
     if (encrypt_result < 0) {
         USER_LOG("send_hybrid: mesh_hybrid_encrypt FAILED with code %d", encrypt_result);
+        mesh_hybrid_session_clear(&session);
         return -1;
     }
+
+    // Очищаем сессию
+    mesh_hybrid_session_clear(&session);
 
     USER_LOG("send_hybrid: SUCCESS");
     USER_LOG("========================================");
