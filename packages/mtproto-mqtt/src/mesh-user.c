@@ -214,11 +214,6 @@ int mesh_user_create_hybrid(mesh_user_t *user,
     user->is_trusted = 1;
     user->is_pq_enabled = user->keypair.pq_initialized ? 1 : 0;
 
-    // Регистрируем пользователя в реестре
-    if (mesh_registry_add_user(user) < 0) {
-        USER_LOG("create: failed to register user in registry (non-fatal)");
-    }
-
     USER_LOG("create: successfully created user %s (PQ: %s, classic: %s)",
              user_id,
              user->is_pq_enabled ? "YES" : "NO",
@@ -285,20 +280,6 @@ void mesh_user_free_hybrid(mesh_user_t *user) {
 }
 
 // ============================================================================
-// Регистрация пользователя
-// ============================================================================
-
-int mesh_user_register(mesh_user_t *user) {
-    if (!user || !user->user_id[0]) {
-        USER_LOG("register: invalid user");
-        return -1;
-    }
-
-    USER_LOG("register: registering user %s", user->user_id);
-    return mesh_registry_add_user(user);
-}
-
-// ============================================================================
 // Работа с ID и ключами
 // ============================================================================
 
@@ -314,28 +295,34 @@ int mesh_user_get_hybrid_keypair(const char *user_id,
         return -1;
     }
 
-    // Проверяем кэш
+    // 🔥 СНАЧАЛА проверяем реестр - главный источник правды
+    USER_LOG("get_keypair: checking registry first...");
+    mesh_user_t *user = mesh_registry_get_user(user_id);
+    if (user && user->keypair.classic_initialized) {
+        USER_LOG("get_keypair: found in registry, copying keys");
+        memcpy(keypair, &user->keypair, sizeof(mesh_hybrid_keypair_t));
+
+        // Добавляем в кэш для будущих запросов
+        mesh_user_cache_add_hybrid(user_id, keypair, MESH_CACHE_DEFAULT_TTL);
+
+        USER_LOG("get_keypair: returning keys from registry");
+        USER_LOG("  classic_initialized=%d", keypair->classic_initialized);
+        USER_LOG("  pq_initialized=%d", keypair->pq_initialized);
+        USER_LOG("  sig_initialized=%d", keypair->sig_initialized);
+        return 0;
+    }
+
+    // ПОТОМ проверяем кэш
     USER_LOG("get_keypair: checking cache...");
     if (mesh_user_cache_get_hybrid(user_id, keypair) == 0) {
         USER_LOG("get_keypair: found in cache");
         USER_LOG("  classic_initialized=%d", keypair->classic_initialized);
         USER_LOG("  pq_initialized=%d", keypair->pq_initialized);
-        USER_LOG("get_keypair: RETURN from cache");
         return 0;
     }
 
-    // Проверяем реестр пользователей
-    USER_LOG("get_keypair: checking registry...");
-    mesh_user_t *user = mesh_registry_get_user(user_id);
-    if (user && user->keypair.classic_initialized) {
-        USER_LOG("get_keypair: found in registry");
-        memcpy(keypair, &user->keypair, sizeof(mesh_hybrid_keypair_t));
-        mesh_user_cache_add_hybrid(user_id, keypair, MESH_CACHE_DEFAULT_TTL);
-        USER_LOG("get_keypair: RETURN from registry");
-        return 0;
-    }
-
-    USER_LOG("get_keypair: not in cache, generating new keys");
+    // ТОЛЬКО ЕСЛИ ПОЛЬЗОВАТЕЛЬ НЕ НАЙДЕН - генерируем новые ключи
+    USER_LOG("get_keypair: user not found in registry or cache, generating new keys");
 
     // Временный ключ на HEAP
     mesh_hybrid_keypair_t *temp = calloc(1, sizeof(mesh_hybrid_keypair_t));
@@ -503,7 +490,7 @@ int mesh_user_send_hybrid(mesh_user_t *sender,
     }
     USER_LOG("send_hybrid: sender is valid");
 
-    // Получаем получателя из реестра
+    // 🔥 Получаем получателя из реестра
     USER_LOG("send_hybrid: getting receiver from registry");
     mesh_user_t *receiver = mesh_registry_get_user(receiver_id);
     if (!receiver) {
@@ -515,22 +502,22 @@ int mesh_user_send_hybrid(mesh_user_t *sender,
         USER_LOG("send_hybrid: receiver has no keys");
         return -1;
     }
+
     USER_LOG("send_hybrid: receiver found in registry, classic_initialized=%d",
              receiver->keypair.classic_initialized);
 
-    // Создаем сессию с ключами получателя
+    // Создаем сессию с ключами получателя из реестра
+    USER_LOG("send_hybrid: creating hybrid session with receiver keys...");
     mesh_hybrid_session_t session;
     memset(&session, 0, sizeof(session));
 
-    USER_LOG("send_hybrid: creating hybrid session with receiver keys...");
-    int create_result = mesh_hybrid_create_session(&receiver->keypair, &session);
-    USER_LOG("send_hybrid: mesh_hybrid_create_session result=%d", create_result);
-    USER_LOG("send_hybrid: session->initialized=%d", session.initialized);
-
-    if (create_result < 0) {
-        USER_LOG("send_hybrid: failed to create hybrid session");
+    if (mesh_hybrid_create_session(&receiver->keypair, &session) < 0) {
+        USER_LOG("send_hybrid: failed to create session");
         return -1;
     }
+
+    USER_LOG("send_hybrid: mesh_hybrid_create_session result=0");
+    USER_LOG("send_hybrid: session->initialized=%d", session.initialized);
 
     // Проверяем размер буфера
     size_t header_size = sizeof(mesh_hybrid_packet_t);

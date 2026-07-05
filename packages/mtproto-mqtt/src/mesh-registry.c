@@ -87,7 +87,7 @@ void mesh_registry_cleanup(void) {
 
     for (int i = 0; i < g_registry.count; i++) {
         if (g_registry.entries[i].user) {
-            mesh_user_free_hybrid(g_registry.entries[i].user);
+            // Освобождаем копию пользователя
             free(g_registry.entries[i].user);
             g_registry.entries[i].user = NULL;
         }
@@ -176,10 +176,20 @@ int mesh_registry_add_user(mesh_user_t *user) {
         }
     }
 
-    // Добавляем пользователя
+    // Добавляем пользователя (КОПИРУЕМ, а не храним указатель)
     mesh_registry_entry_t *entry = &g_registry.entries[g_registry.count++];
     snprintf(entry->user_id, sizeof(entry->user_id), "%s", user->user_id);
-    entry->user = user;
+
+    // Создаем копию пользователя
+    entry->user = malloc(sizeof(mesh_user_t));
+    if (!entry->user) {
+        REGISTRY_LOG("ERROR: Failed to allocate memory for user copy");
+        g_registry.count--;
+        pthread_rwlock_unlock(&g_registry.lock);
+        return -5;
+    }
+    memcpy(entry->user, user, sizeof(mesh_user_t));
+
     entry->registered_at = time(NULL);
     entry->last_active = time(NULL);
     entry->is_online = user->is_online;
@@ -240,8 +250,8 @@ int mesh_registry_remove_user(const char *user_id) {
     for (int i = 0; i < g_registry.count; i++) {
         if (strcmp(g_registry.entries[i].user_id, user_id) == 0) {
             if (g_registry.entries[i].user) {
-                mesh_user_free_hybrid(g_registry.entries[i].user);
                 free(g_registry.entries[i].user);
+                g_registry.entries[i].user = NULL;
             }
 
             // Сдвигаем остальные записи
@@ -372,8 +382,8 @@ int mesh_registry_cleanup_inactive(int max_age_seconds) {
                         now - g_registry.entries[i].last_active);
 
             if (g_registry.entries[i].user) {
-                mesh_user_free_hybrid(g_registry.entries[i].user);
                 free(g_registry.entries[i].user);
+                g_registry.entries[i].user = NULL;
             }
 
             // Сдвигаем

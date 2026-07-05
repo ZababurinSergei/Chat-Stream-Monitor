@@ -132,7 +132,7 @@ int test_hybrid_crypto(void) {
     printf("   Buffer size: %zu bytes\n", (size_t)MESH_TEST_BUFFER_SIZE);
 
     // 🔥 Инициализируем реестр ПЕРЕД созданием пользователей
-    if (mesh_registry_ensure_initialized() < 0) {
+    if (mesh_registry_init(1024) < 0) {
         printf("❌ Failed to initialize registry\n");
         return 1;
     }
@@ -295,15 +295,16 @@ int test_hybrid_crypto(void) {
     }
 
     // ============================================================
-    // Очистка памяти
+    // Очистка памяти - ТОЛЬКО ЧЕРЕЗ РЕЕСТР
     // ============================================================
     printf("\n🧹 Cleaning up memory...\n");
+
+    // Освобождаем буферы
     free(packet);
     free(decrypted);
-    mesh_user_free_hybrid(alice);
-    mesh_user_free_hybrid(bob);
-    free(alice);
-    free(bob);
+
+    // Реестр владеет памятью пользователей - освобождаем через него
+    mesh_registry_cleanup();
 
     if (!match) {
         return 1;
@@ -321,8 +322,8 @@ int test_hybrid_crypto(void) {
 int test_hybrid_multi_message(void) {
     printf("\n📨 Testing multiple messages with heap allocation...\n");
 
-    // 🔥 Инициализируем реестр
-    if (mesh_registry_ensure_initialized() < 0) {
+    // Инициализируем реестр
+    if (mesh_registry_init(1024) < 0) {
         printf("❌ Failed to initialize registry\n");
         return 1;
     }
@@ -416,10 +417,8 @@ int test_hybrid_multi_message(void) {
         free(decrypted);
     }
 
-    mesh_user_free_hybrid(alice);
-    mesh_user_free_hybrid(bob);
-    free(alice);
-    free(bob);
+    // Очистка через реестр
+    mesh_registry_cleanup();
 
     printf("\n📊 Results: %d/%d messages succeeded\n", success_count, total_count);
 
@@ -439,8 +438,8 @@ int test_hybrid_multi_message(void) {
 int test_hybrid_stress(void) {
     printf("\n🔥 Stress test: 100 messages with heap allocation...\n");
 
-    // 🔥 Инициализируем реестр
-    if (mesh_registry_ensure_initialized() < 0) {
+    // Инициализируем реестр
+    if (mesh_registry_init(1024) < 0) {
         printf("❌ Failed to initialize registry\n");
         return 1;
     }
@@ -525,10 +524,8 @@ int test_hybrid_stress(void) {
     time_t end_time = time(NULL);
     double elapsed = difftime(end_time, start_time);
 
-    mesh_user_free_hybrid(alice);
-    mesh_user_free_hybrid(bob);
-    free(alice);
-    free(bob);
+    // Очистка через реестр
+    mesh_registry_cleanup();
 
     printf("\n📊 Stress test results:\n");
     printf("   Total messages: %d\n", total_count);
@@ -593,14 +590,6 @@ int main(int argc, char *argv[]) {
     // ============================================================
     increase_stack_size();
 
-    // ============================================================
-    // 🔥 ИНИЦИАЛИЗИРУЕМ РЕЕСТР ПРИ СТАРТЕ
-    // ============================================================
-    if (mesh_registry_ensure_initialized() < 0) {
-        fprintf(stderr, "❌ Failed to initialize user registry\n");
-        return 1;
-    }
-
     signal(SIGINT, signal_handler);
     signal(SIGTERM, signal_handler);
 
@@ -615,28 +604,19 @@ int main(int argc, char *argv[]) {
                 printf("Max packet size: %zu bytes\n", (size_t)MESH_HYBRID_PACKET_MAX_SIZE);
                 printf("Test buffer size: %zu bytes\n", (size_t)MESH_TEST_BUFFER_SIZE);
             }
-            mesh_registry_cleanup();
             return 0;
         }
         if (strcmp(argv[i], "--test-crypto") == 0) {
-            int result = crypto_basic();
-            mesh_registry_cleanup();
-            return result;
+            return crypto_basic();
         }
         if (strcmp(argv[i], "--test-hybrid") == 0) {
-            int result = test_hybrid_crypto();
-            mesh_registry_cleanup();
-            return result;
+            return test_hybrid_crypto();
         }
         if (strcmp(argv[i], "--test-multi") == 0) {
-            int result = test_hybrid_multi_message();
-            mesh_registry_cleanup();
-            return result;
+            return test_hybrid_multi_message();
         }
         if (strcmp(argv[i], "--test-stress") == 0) {
-            int result = test_hybrid_stress();
-            mesh_registry_cleanup();
-            return result;
+            return test_hybrid_stress();
         }
     }
 
@@ -742,7 +722,6 @@ int main(int argc, char *argv[]) {
             case 'h':
             default:
                 print_help(argv[0]);
-                mesh_registry_cleanup();
                 return (opt == 'h') ? 0 : 1;
         }
     }
@@ -764,6 +743,14 @@ int main(int argc, char *argv[]) {
     printf("  Memory:      HEAP (max %zu bytes)\n", (size_t)MESH_TEST_BUFFER_SIZE);
     printf("  Verbose:     %s\n", verbose ? "Yes" : "No");
     printf("\n");
+
+    // ============================================================
+    // 🔥 ИНИЦИАЛИЗИРУЕМ РЕЕСТР
+    // ============================================================
+    if (mesh_registry_init(1024) < 0) {
+        fprintf(stderr, "❌ Failed to initialize user registry\n");
+        return 1;
+    }
 
     // Настройка колбэков
     mesh_mqtt_callbacks_t callbacks = {
