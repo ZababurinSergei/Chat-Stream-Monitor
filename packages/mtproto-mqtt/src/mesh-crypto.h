@@ -55,7 +55,7 @@
 #define MESH_PQ_SIG_ALG             OQS_SIG_alg_ml_dsa_65
 
 // ============================================================================
-// Управление памятью (без дублирования с mesh-packet.h)
+// Управление памятью
 // ============================================================================
 
 /**
@@ -66,34 +66,12 @@
 #define CRYPTO_AUTO_FREE __attribute__((cleanup(crypto_auto_free)))
 
 /**
- * Автоматическое освобождение нескольких указателей
- */
-#define CRYPTO_AUTO_FREE_ARRAY __attribute__((cleanup(crypto_auto_free_array)))
-
-/**
  * Функция для автоматического освобождения памяти
  */
 static inline void crypto_auto_free(void *ptr) {
     if (ptr) {
         void **p = (void**)ptr;
         if (*p) {
-            free(*p);
-            *p = NULL;
-        }
-    }
-}
-
-/**
- * Функция для автоматического освобождения массива указателей
- */
-static inline void crypto_auto_free_array(void *ptr) {
-    if (ptr) {
-        void ***p = (void***)ptr;
-        if (*p) {
-            for (int i = 0; (*p)[i]; i++) {
-                free((*p)[i]);
-                (*p)[i] = NULL;
-            }
             free(*p);
             *p = NULL;
         }
@@ -127,19 +105,6 @@ static inline void crypto_auto_free_array(void *ptr) {
 })
 
 /**
- * Безопасное перевыделение памяти
- */
-#define SAFE_REALLOC(ptr, size) ({ \
-    void *__ptr = realloc(ptr, size); \
-    if (!__ptr) { \
-        fprintf(stderr, "FATAL: Failed to reallocate %zu bytes at %s:%d\n", \
-                (size_t)(size), __FILE__, __LINE__); \
-        exit(1); \
-    } \
-    __ptr; \
-})
-
-/**
  * Освобождение памяти с обнулением указателя
  */
 #define SAFE_FREE(ptr) do { \
@@ -155,26 +120,42 @@ static inline void crypto_auto_free_array(void *ptr) {
 
 /**
  * Пара ключей для гибридной криптографии
- * Содержит классические (ECDH) и квантово-безопасные (ML-KEM) ключи
+ * ВАЖНО: Все поля должны быть выровнены правильно!
+ * Размер структуры должен быть одинаковым во всем коде
+ *
+ * Расчет размера:
+ * - classic_public_key: 32 байта
+ * - classic_private_key: 32 байта
+ * - pq_public_key: 1184 байта
+ * - pq_secret_key: 2400 байт
+ * - sig_public_key: 1952 байта
+ * - sig_secret_key: 4032 байта
+ * - classic_initialized: 4 байта (int)
+ * - pq_initialized: 4 байта (int)
+ * - sig_initialized: 4 байта (int)
+ * Итого: 32+32+1184+2400+1952+4032+4+4+4 = 9644 байта
  */
 typedef struct {
     // Классические ключи (ECDH) - 32 байта каждый
-    unsigned char classic_public_key[MESH_CLASSIC_KEY_LEN];
-    unsigned char classic_private_key[MESH_CLASSIC_KEY_LEN];
+    unsigned char classic_public_key[32];
+    unsigned char classic_private_key[32];
 
     // Квантово-безопасные ключи (ML-KEM)
-    uint8_t pq_public_key[MESH_PQ_PUBLIC_KEY_LEN];
-    uint8_t pq_secret_key[MESH_PQ_CIPHERTEXT_LEN];
+    uint8_t pq_public_key[1184];
+    uint8_t pq_secret_key[2400];
 
     // Ключи для подписи (ML-DSA)
-    uint8_t sig_public_key[MESH_SIG_PUBLIC_KEY_LEN];
-    uint8_t sig_secret_key[MESH_SIG_SIGNATURE_LEN];
+    uint8_t sig_public_key[1952];
+    uint8_t sig_secret_key[4032];
 
-    // Флаги инициализации
-    bool classic_initialized;
-    bool pq_initialized;
-    bool sig_initialized;
+    // Флаги инициализации - ИСПОЛЬЗУЕМ int для совместимости
+    int classic_initialized;
+    int pq_initialized;
+    int sig_initialized;
 } mesh_hybrid_keypair_t;
+
+// Проверка размера структуры (должно быть 9644 байта)
+#define MESH_HYBRID_KEYPAIR_SIZE (32+32+1184+2400+1952+4032+4+4+4)
 
 /**
  * Гибридная сессия для шифрования
@@ -182,24 +163,24 @@ typedef struct {
  */
 typedef struct {
     // Классический секрет (ECDH)
-    unsigned char classic_shared_secret[MESH_SECRET_LEN];
+    unsigned char classic_shared_secret[32];
     int classic_secret_len;
 
     // Квантовый секрет (ML-KEM)
-    uint8_t pq_shared_secret[MESH_PQ_SHARED_SECRET_LEN];
+    uint8_t pq_shared_secret[32];
     int pq_secret_len;
 
     // Гибридный секрет (комбинированный)
-    unsigned char hybrid_secret[MESH_HYBRID_SECRET_LEN];
+    unsigned char hybrid_secret[64];
     int hybrid_secret_len;
 
     // Итоговые ключи для шифрования
-    unsigned char aes_key[MESH_CLASSIC_KEY_LEN];
-    unsigned char aes_iv[MESH_IV_LEN];
+    unsigned char aes_key[32];
+    unsigned char aes_iv[16];
 
     // Временные ключи отправителя
-    unsigned char ephemeral_public[MESH_CLASSIC_KEY_LEN];
-    uint8_t pq_ciphertext[MESH_PQ_CIPHERTEXT_LEN];
+    unsigned char ephemeral_public[32];
+    uint8_t pq_ciphertext[1088];
     int pq_ciphertext_len;
 
     /** Флаг инициализации сессии */
@@ -351,46 +332,6 @@ int mesh_hybrid_decrypt(mesh_hybrid_session_t *session,
                         size_t packet_len,
                         unsigned char *plaintext,
                         size_t *plaintext_len);
-
-// ----------------------------------------------------------------------------
-// Автоматическое выделение памяти
-// ----------------------------------------------------------------------------
-
-/**
- * Зашифровать сообщение с автоматическим выделением памяти
- * @param session Гибридная сессия
- * @param plaintext Открытый текст
- * @param plaintext_len Длина открытого текста
- * @param packet Выходной указатель на пакет (будет выделен автоматически)
- * @param packet_len Выходная длина пакета
- * @return 0 при успехе, -1 при ошибке
- */
-int mesh_hybrid_encrypt_auto(mesh_hybrid_session_t *session,
-                             const unsigned char *plaintext,
-                             size_t plaintext_len,
-                             mesh_hybrid_packet_t **packet,
-                             size_t *packet_len);
-
-/**
- * Расшифровать сообщение с автоматическим выделением памяти
- * @param session Гибридная сессия
- * @param packet Зашифрованный пакет
- * @param packet_len Длина пакета
- * @param plaintext Выходной указатель на текст (будет выделен автоматически)
- * @param plaintext_len Выходная длина текста
- * @return 0 при успехе, -1 при ошибке
- */
-int mesh_hybrid_decrypt_auto(mesh_hybrid_session_t *session,
-                             const unsigned char *packet,
-                             size_t packet_len,
-                             unsigned char **plaintext,
-                             size_t *plaintext_len);
-
-/**
- * Очистить гибридную сессию (обнулить чувствительные данные)
- * @param session Сессия для очистки
- */
-void mesh_hybrid_session_clear(mesh_hybrid_session_t *session);
 
 // ----------------------------------------------------------------------------
 // Упрощенные функции для пользователей

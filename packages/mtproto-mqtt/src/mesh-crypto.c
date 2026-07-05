@@ -30,9 +30,40 @@
             fprintf(stderr, "%02x", ((unsigned char*)(data))[i]); \
         } \
         if ((len) > 32) fprintf(stderr, "..."); \
-        fprintf(stderr, " (%zu bytes)\n", (size_t)(len)); \
+        fprintf(stderr, " (%d bytes)\n", (len)); \
         fflush(stderr); \
     } } while(0)
+
+// Дебаг-функция для вывода содержимого структуры
+static void debug_print_keypair(const char *label, const mesh_hybrid_keypair_t *kp, const char *caller) {
+    if (!kp) {
+        fprintf(stderr, "[DEBUG] %s: %s keypair is NULL (from %s)\n",
+                label, label, caller);
+        return;
+    }
+
+    fprintf(stderr, "[DEBUG] %s: keypair at %p (from %s)\n", label, (void*)kp, caller);
+    fprintf(stderr, "[DEBUG] %s: sizeof(mesh_hybrid_keypair_t)=%zu\n",
+            label, sizeof(mesh_hybrid_keypair_t));
+    fprintf(stderr, "[DEBUG] %s: expected size=%d\n", label, MESH_HYBRID_KEYPAIR_SIZE);
+    fprintf(stderr, "[DEBUG] %s: classic_initialized=%d\n", label, kp->classic_initialized);
+    fprintf(stderr, "[DEBUG] %s: pq_initialized=%d\n", label, kp->pq_initialized);
+    fprintf(stderr, "[DEBUG] %s: sig_initialized=%d\n", label, kp->sig_initialized);
+
+    // Проверяем, что флаги имеют нормальные значения
+    if (kp->classic_initialized != 0 && kp->classic_initialized != 1) {
+        fprintf(stderr, "[DEBUG] %s: WARNING - classic_initialized has abnormal value: %d\n",
+                label, kp->classic_initialized);
+    }
+    if (kp->pq_initialized != 0 && kp->pq_initialized != 1) {
+        fprintf(stderr, "[DEBUG] %s: WARNING - pq_initialized has abnormal value: %d\n",
+                label, kp->pq_initialized);
+    }
+    if (kp->sig_initialized != 0 && kp->sig_initialized != 1) {
+        fprintf(stderr, "[DEBUG] %s: WARNING - sig_initialized has abnormal value: %d\n",
+                label, kp->sig_initialized);
+    }
+}
 
 // ============================================================================
 // Глобальное состояние
@@ -309,16 +340,23 @@ static int hkdf_derive(const unsigned char *secret, int secret_len,
 int mesh_hybrid_generate_keypair(mesh_hybrid_keypair_t *keypair,
                                  const char *user_id,
                                  const char *secret_phrase) {
+    CRYPTO_LOG("=== mesh_hybrid_generate_keypair ===");
+    CRYPTO_LOG("  user_id=%s", user_id);
+    CRYPTO_LOG("  keypair=%p", (void*)keypair);
+    CRYPTO_LOG("  sizeof(mesh_hybrid_keypair_t)=%zu", sizeof(mesh_hybrid_keypair_t));
+    CRYPTO_LOG("  expected size=%d", MESH_HYBRID_KEYPAIR_SIZE);
+
     if (!keypair || !user_id || !secret_phrase) {
-        CRYPTO_LOG("generate_keypair: invalid parameters");
+        CRYPTO_LOG("  ERROR: invalid parameters");
         return -1;
     }
 
-    CRYPTO_LOG("=== mesh_hybrid_generate_keypair ===");
-    CRYPTO_LOG("  user_id=%s", user_id);
-
     mesh_hybrid_init();
+
+    // ОБНУЛЯЕМ ВСЮ СТРУКТУРУ
+    CRYPTO_LOG("  Zeroing keypair structure...");
     memset(keypair, 0, sizeof(mesh_hybrid_keypair_t));
+    CRYPTO_LOG("  After memset: classic_initialized=%d", keypair->classic_initialized);
 
     unsigned char hash[SHA256_DIGEST_LENGTH];
     unsigned char combined[1024];
@@ -339,7 +377,6 @@ int mesh_hybrid_generate_keypair(mesh_hybrid_keypair_t *keypair,
     keypair->classic_private_key[31] &= 0x7F;
     keypair->classic_private_key[31] |= 0x40;
 
-    // ЯВНО УСТАНАВЛИВАЕМ ФЛАГ В 1
     keypair->classic_initialized = 1;
     CRYPTO_LOG("  classic_initialized set to %d", keypair->classic_initialized);
 
@@ -378,7 +415,25 @@ int mesh_hybrid_generate_keypair(mesh_hybrid_keypair_t *keypair,
         keypair->sig_initialized = 0;
     }
 
+    // Проверка целостности
+    if (keypair->classic_initialized != 0 && keypair->classic_initialized != 1) {
+        CRYPTO_LOG("  WARNING: classic_initialized has abnormal value: %d",
+                   keypair->classic_initialized);
+        keypair->classic_initialized = 1;
+    }
+    if (keypair->pq_initialized != 0 && keypair->pq_initialized != 1) {
+        CRYPTO_LOG("  WARNING: pq_initialized has abnormal value: %d",
+                   keypair->pq_initialized);
+        keypair->pq_initialized = keypair->pq_initialized ? 1 : 0;
+    }
+    if (keypair->sig_initialized != 0 && keypair->sig_initialized != 1) {
+        CRYPTO_LOG("  WARNING: sig_initialized has abnormal value: %d",
+                   keypair->sig_initialized);
+        keypair->sig_initialized = keypair->sig_initialized ? 1 : 0;
+    }
+
     CRYPTO_LOG("=== mesh_hybrid_generate_keypair complete ===");
+    CRYPTO_LOG("  keypair at %p", (void*)keypair);
     CRYPTO_LOG("  classic_initialized=%d", keypair->classic_initialized);
     CRYPTO_LOG("  pq_initialized=%d", keypair->pq_initialized);
     CRYPTO_LOG("  sig_initialized=%d", keypair->sig_initialized);
@@ -387,9 +442,22 @@ int mesh_hybrid_generate_keypair(mesh_hybrid_keypair_t *keypair,
 }
 
 void mesh_hybrid_free_keypair(mesh_hybrid_keypair_t *keypair) {
+    CRYPTO_LOG("=== mesh_hybrid_free_keypair ===");
+    CRYPTO_LOG("  keypair at %p", (void*)keypair);
+
     if (keypair) {
+        CRYPTO_LOG("  Before free: classic_initialized=%d", keypair->classic_initialized);
+        CRYPTO_LOG("  Before free: pq_initialized=%d", keypair->pq_initialized);
+        CRYPTO_LOG("  Before free: sig_initialized=%d", keypair->sig_initialized);
+
+        // Просто обнуляем, не освобождаем указатели
         memset(keypair, 0, sizeof(mesh_hybrid_keypair_t));
+
+        CRYPTO_LOG("  After memset: classic_initialized=%d", keypair->classic_initialized);
+    } else {
+        CRYPTO_LOG("  keypair is NULL, nothing to free");
     }
+    CRYPTO_LOG("=== mesh_hybrid_free_keypair complete ===");
 }
 
 // ============================================================================

@@ -37,10 +37,14 @@
     } } while(0)
 
 // ============================================================================
-// Кэш публичных ключей
+// Константы
 // ============================================================================
 
-#define MESH_CACHE_SIZE 64
+#define MESH_CACHE_SIZE 64  // Размер кэша публичных ключей
+
+// ============================================================================
+// Кэш публичных ключей
+// ============================================================================
 
 static mesh_hybrid_cache_t g_cache[MESH_CACHE_SIZE];
 static int g_cache_count = 0;
@@ -57,13 +61,11 @@ int mesh_user_cache_add_hybrid(const char *user_id,
     }
 
     USER_LOG("cache_add: user_id=%s", user_id);
-    USER_LOG("cache_add: keypair at %p", (const void*)keypair);
 
     // Проверяем существующую запись
     for (int i = 0; i < g_cache_count; i++) {
         if (strcmp(g_cache[i].user_id, user_id) == 0) {
             USER_LOG("cache_add: updating existing entry for %s", user_id);
-            // Безопасно копируем
             memcpy(&g_cache[i].keypair, keypair, sizeof(mesh_hybrid_keypair_t));
             g_cache[i].cached_at = time(NULL);
             g_cache[i].is_valid = 1;
@@ -78,25 +80,25 @@ int mesh_user_cache_add_hybrid(const char *user_id,
         return -1;
     }
 
-    USER_LOG("cache_add: adding new entry for %s (index %d)", user_id, g_cache_count);
+    USER_LOG("cache_add: adding new entry for %s (index %d)",
+             user_id, g_cache_count);
 
-    // Копируем строку безопасно
     snprintf(g_cache[g_cache_count].user_id,
              sizeof(g_cache[g_cache_count].user_id), "%s", user_id);
 
-    // Копируем ключ
-    memcpy(&g_cache[g_cache_count].keypair, keypair, sizeof(mesh_hybrid_keypair_t));
+    memcpy(&g_cache[g_cache_count].keypair, keypair,
+           sizeof(mesh_hybrid_keypair_t));
     g_cache[g_cache_count].cached_at = time(NULL);
     g_cache[g_cache_count].is_valid = 1;
     g_cache_count++;
 
-    USER_LOG("cache_add: added new entry for %s (total: %d)", user_id, g_cache_count);
-    USER_LOG("cache_add: classic_initialized=%d",
-             g_cache[g_cache_count-1].keypair.classic_initialized);
+    USER_LOG("cache_add: added new entry for %s (total: %d)",
+             user_id, g_cache_count);
     return 0;
 }
 
-int mesh_user_cache_get_hybrid(const char *user_id, mesh_hybrid_keypair_t *keypair) {
+int mesh_user_cache_get_hybrid(const char *user_id,
+                               mesh_hybrid_keypair_t *keypair) {
     if (!user_id || !keypair) {
         USER_LOG("cache_get: invalid parameters");
         return -1;
@@ -106,7 +108,8 @@ int mesh_user_cache_get_hybrid(const char *user_id, mesh_hybrid_keypair_t *keypa
 
     for (int i = 0; i < g_cache_count; i++) {
         if (strcmp(g_cache[i].user_id, user_id) == 0 && g_cache[i].is_valid) {
-            memcpy(keypair, &g_cache[i].keypair, sizeof(mesh_hybrid_keypair_t));
+            memcpy(keypair, &g_cache[i].keypair,
+                   sizeof(mesh_hybrid_keypair_t));
             USER_LOG("cache_get: found %s in cache", user_id);
             USER_LOG("  classic_initialized=%d", keypair->classic_initialized);
             USER_LOG("  pq_initialized=%d", keypair->pq_initialized);
@@ -137,14 +140,13 @@ int mesh_user_create_hybrid(mesh_user_t *user,
         return -1;
     }
 
-    USER_LOG("create: user_id=%s, display_name=%s", user_id, display_name ? display_name : "NULL");
+    USER_LOG("create: user_id=%s, display_name=%s",
+             user_id, display_name ? display_name : "NULL");
 
     mesh_hybrid_init();
 
-    // Очищаем структуру
     memset(user, 0, sizeof(mesh_user_t));
 
-    // Копируем ID и имя
     snprintf(user->user_id, sizeof(user->user_id), "%s", user_id);
     snprintf(user->display_name, sizeof(user->display_name), "%s",
              display_name ? display_name : user_id);
@@ -152,20 +154,17 @@ int mesh_user_create_hybrid(mesh_user_t *user,
 
     USER_LOG("create: generating keypair for %s", user_id);
 
-    // Генерируем гибридные ключи
     if (mesh_hybrid_generate_keypair(&user->keypair, user_id, secret_phrase) < 0) {
         USER_LOG("create: failed to generate keypair");
         return -1;
     }
 
-    // Убеждаемся, что классический флаг установлен
     if (user->keypair.classic_initialized != 1) {
         USER_LOG("create: WARNING: classic_initialized is %d, forcing to 1",
                  user->keypair.classic_initialized);
         user->keypair.classic_initialized = 1;
     }
 
-    // Формируем топики
     snprintf(user->inbox_topic, sizeof(user->inbox_topic),
              "mesh/users/%s/inbox", user_id);
     snprintf(user->public_topic, sizeof(user->public_topic),
@@ -173,7 +172,6 @@ int mesh_user_create_hybrid(mesh_user_t *user,
     snprintf(user->pq_public_topic, sizeof(user->pq_public_topic),
              "mesh/users/%s/pq-public", user_id);
 
-    // Инициализируем состояние
     user->created_at = time(NULL);
     user->last_active = time(NULL);
     user->is_online = 0;
@@ -239,11 +237,8 @@ void mesh_user_free_hybrid(mesh_user_t *user) {
 
     USER_LOG("free: freeing user %s", user->user_id);
 
-    // Очищаем чувствительные данные
     memset(user->secret_phrase, 0, sizeof(user->secret_phrase));
     mesh_hybrid_free_keypair(&user->keypair);
-
-    // Сбрасываем состояние
     memset(user, 0, sizeof(mesh_user_t));
 }
 
@@ -251,17 +246,18 @@ void mesh_user_free_hybrid(mesh_user_t *user) {
 // Работа с ID и ключами
 // ============================================================================
 
-int mesh_user_get_hybrid_keypair(const char *user_id, mesh_hybrid_keypair_t *keypair) {
+int mesh_user_get_hybrid_keypair(const char *user_id,
+                                 mesh_hybrid_keypair_t *keypair) {
     USER_LOG("get_keypair: START");
     USER_LOG("  user_id=%s", user_id ? user_id : "NULL");
     USER_LOG("  keypair=%p", (void*)keypair);
+    USER_LOG("  sizeof(mesh_hybrid_keypair_t)=%zu", sizeof(mesh_hybrid_keypair_t));
 
     if (!user_id || !keypair) {
         USER_LOG("get_keypair: invalid parameters");
         return -1;
     }
 
-    // Проверяем кэш
     USER_LOG("get_keypair: checking cache...");
     if (mesh_user_cache_get_hybrid(user_id, keypair) == 0) {
         USER_LOG("get_keypair: found in cache");
@@ -273,18 +269,14 @@ int mesh_user_get_hybrid_keypair(const char *user_id, mesh_hybrid_keypair_t *key
 
     USER_LOG("get_keypair: not in cache, generating new keys");
 
-    // ============================================================
-    // ВСЕ НА HEAP!
-    // ============================================================
-    // Временный ключ на HEAP
     mesh_hybrid_keypair_t *temp = calloc(1, sizeof(mesh_hybrid_keypair_t));
     if (!temp) {
         USER_LOG("get_keypair: failed to allocate temp keypair");
         return -1;
     }
-    USER_LOG("get_keypair: temp allocated at %p", (void*)temp);
+    USER_LOG("get_keypair: temp allocated at %p, size %zu",
+             (void*)temp, sizeof(mesh_hybrid_keypair_t));
 
-    // Генерируем классические ключи из ID
     unsigned char hash[SHA256_DIGEST_LENGTH];
     SHA256((unsigned char*)user_id, strlen(user_id), hash);
     memcpy(temp->classic_public_key, hash, 32);
@@ -294,11 +286,10 @@ int mesh_user_get_hybrid_keypair(const char *user_id, mesh_hybrid_keypair_t *key
     temp->classic_initialized = 1;
 
     USER_HEX("  classic_public", temp->classic_public_key, 32);
+    USER_LOG("  classic_initialized=%d", temp->classic_initialized);
 
-    // Получаем состояние криптографии
     mesh_crypto_state_t *state = mesh_get_crypto_state();
 
-    // Генерируем PQ ключи
     USER_LOG("get_keypair: generating PQ keys...");
     if (state && state->kem) {
         if (OQS_KEM_keypair(state->kem,
@@ -316,7 +307,6 @@ int mesh_user_get_hybrid_keypair(const char *user_id, mesh_hybrid_keypair_t *key
         temp->pq_initialized = 0;
     }
 
-    // Генерируем ключи подписи
     USER_LOG("get_keypair: generating SIG keys...");
     if (state && state->sig) {
         if (OQS_SIG_keypair(state->sig,
@@ -333,22 +323,24 @@ int mesh_user_get_hybrid_keypair(const char *user_id, mesh_hybrid_keypair_t *key
         temp->sig_initialized = 0;
     }
 
-    // Копируем результат в выходной буфер
+    USER_LOG("get_keypair: temp structure:");
+    USER_LOG("  classic_initialized=%d", temp->classic_initialized);
+    USER_LOG("  pq_initialized=%d", temp->pq_initialized);
+    USER_LOG("  sig_initialized=%d", temp->sig_initialized);
+
     USER_LOG("get_keypair: copying result to output buffer");
     memcpy(keypair, temp, sizeof(mesh_hybrid_keypair_t));
 
-    // Добавляем в кэш
     USER_LOG("get_keypair: adding to cache...");
     mesh_user_cache_add_hybrid(user_id, temp);
 
-    // Очищаем временный ключ
     USER_LOG("get_keypair: freeing temp at %p", (void*)temp);
     free(temp);
 
-    USER_LOG("get_keypair: done (classic: %s, PQ: %s, SIG: %s)",
-             keypair->classic_initialized ? "YES" : "NO",
-             keypair->pq_initialized ? "YES" : "NO",
-             keypair->sig_initialized ? "YES" : "NO");
+    USER_LOG("get_keypair: done");
+    USER_LOG("  classic_initialized=%d", keypair->classic_initialized);
+    USER_LOG("  pq_initialized=%d", keypair->pq_initialized);
+    USER_LOG("  sig_initialized=%d", keypair->sig_initialized);
     USER_LOG("get_keypair: RETURN");
     return 0;
 }
@@ -397,7 +389,6 @@ bool mesh_user_valid_hybrid(const mesh_user_t *user) {
         return false;
     }
 
-    // Проверяем, что публичный ключ не нулевой
     int is_classic_valid = 0;
     for (int i = 0; i < 32; i++) {
         if (user->keypair.classic_public_key[i] != 0) {
@@ -447,24 +438,12 @@ int mesh_user_send_hybrid(mesh_user_t *sender,
         return -1;
     }
 
-    USER_LOG("send_hybrid: checking if sender is valid...");
-    USER_LOG("  sender->user_id=%s", sender->user_id);
-    USER_LOG("  sender->keypair.classic_initialized=%d", sender->keypair.classic_initialized);
-    USER_LOG("  sender->keypair.pq_initialized=%d", sender->keypair.pq_initialized);
-
     if (!mesh_user_valid_hybrid(sender)) {
         USER_LOG("send_hybrid: sender is not valid!");
-        USER_LOG("  classic_initialized=%d", sender->keypair.classic_initialized);
-        USER_LOG("  pq_initialized=%d", sender->keypair.pq_initialized);
-        USER_HEX("  classic_public", sender->keypair.classic_public_key, 32);
         return -1;
     }
     USER_LOG("send_hybrid: sender is valid");
 
-    // ============================================================
-    // ВЫДЕЛЯЕМ НА HEAP
-    // ============================================================
-    USER_LOG("send_hybrid: allocating receiver_pk on heap (%zu bytes)...", sizeof(mesh_hybrid_keypair_t));
     mesh_hybrid_keypair_t *receiver_pk = calloc(1, sizeof(mesh_hybrid_keypair_t));
     if (!receiver_pk) {
         USER_LOG("send_hybrid: failed to allocate receiver_pk");
@@ -476,23 +455,17 @@ int mesh_user_send_hybrid(mesh_user_t *sender,
 
     int get_result = mesh_user_get_hybrid_keypair(receiver_id, receiver_pk);
     USER_LOG("send_hybrid: mesh_user_get_hybrid_keypair result=%d", get_result);
-    USER_LOG("send_hybrid: receiver_pk->classic_initialized=%d", receiver_pk->classic_initialized);
-    USER_LOG("send_hybrid: receiver_pk->pq_initialized=%d", receiver_pk->pq_initialized);
+    USER_LOG("send_hybrid: receiver_pk->classic_initialized=%d",
+             receiver_pk->classic_initialized);
+    USER_LOG("send_hybrid: receiver_pk->pq_initialized=%d",
+             receiver_pk->pq_initialized);
 
     if (get_result < 0) {
         USER_LOG("send_hybrid: failed to get receiver keypair");
         free(receiver_pk);
         return -1;
     }
-    USER_LOG("send_hybrid: receiver keypair obtained (PQ: %s)",
-             receiver_pk->pq_initialized ? "YES" : "NO");
 
-    USER_HEX("  receiver classic_pk", receiver_pk->classic_public_key, 32);
-
-    // ============================================================
-    // СЕССИЯ НА HEAP
-    // ============================================================
-    USER_LOG("send_hybrid: allocating session on heap (%zu bytes)...", sizeof(mesh_hybrid_session_t));
     mesh_hybrid_session_t *session = calloc(1, sizeof(mesh_hybrid_session_t));
     if (!session) {
         USER_LOG("send_hybrid: failed to allocate session");
@@ -512,9 +485,7 @@ int mesh_user_send_hybrid(mesh_user_t *sender,
         free(session);
         return -1;
     }
-    USER_LOG("send_hybrid: session created successfully");
 
-    // Проверяем размер буфера
     size_t header_size = sizeof(mesh_hybrid_packet_t);
     size_t total_size = header_size + message_len + 64;
     USER_LOG("send_hybrid: message_len=%zu, header_size=%zu, total_size=%zu, buffer_size=%zu",
@@ -529,17 +500,9 @@ int mesh_user_send_hybrid(mesh_user_t *sender,
         return -2;
     }
 
-    // Обнуляем пакет
-    USER_LOG("send_hybrid: zeroing packet buffer...");
     memset(packet, 0, *packet_len);
-    USER_LOG("send_hybrid: packet zeroed");
 
-    // Шифруем
     USER_LOG("send_hybrid: calling mesh_hybrid_encrypt...");
-    USER_LOG("  session=%p", (void*)session);
-    USER_LOG("  message=%p, message_len=%zu", (const void*)message, message_len);
-    USER_LOG("  packet=%p, packet_len=%zu", (void*)packet, *packet_len);
-
     int encrypt_result = mesh_hybrid_encrypt(session, message, message_len, packet, packet_len);
     USER_LOG("send_hybrid: mesh_hybrid_encrypt result=%d", encrypt_result);
 
@@ -549,37 +512,8 @@ int mesh_user_send_hybrid(mesh_user_t *sender,
         free(session);
         return -1;
     }
-    USER_LOG("send_hybrid: encryption successful, packet_len=%zu", *packet_len);
-    USER_LOG("send_hybrid: packet[0..15] hex: %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x %02x",
-             packet[0], packet[1], packet[2], packet[3], packet[4], packet[5], packet[6], packet[7],
-             packet[8], packet[9], packet[10], packet[11], packet[12], packet[13], packet[14], packet[15]);
 
-    // Подписываем (опционально)
-    if (*packet_len >= sizeof(mesh_hybrid_packet_t)) {
-        USER_LOG("send_hybrid: signing packet...");
-        mesh_hybrid_packet_t *pkt = (mesh_hybrid_packet_t*)packet;
-        size_t sig_len = sizeof(pkt->signature);
-        USER_LOG("  sig_len=%zu", sig_len);
-
-        int sign_result = mesh_hybrid_sign(&sender->keypair,
-                                           packet, *packet_len - sig_len,
-                                           pkt->signature, &sig_len);
-        USER_LOG("  mesh_hybrid_sign result=%d", sign_result);
-
-        if (sign_result == 0) {
-            pkt->signature_len = (uint16_t)sig_len;
-            USER_LOG("send_hybrid: packet signed, sig_len=%zu", sig_len);
-        } else {
-            USER_LOG("send_hybrid: signing failed (ignored)");
-        }
-    }
-
-    // ============================================================
-    // ОЧИСТКА ПАМЯТИ
-    // ============================================================
-    USER_LOG("send_hybrid: freeing receiver_pk at %p", (void*)receiver_pk);
     free(receiver_pk);
-    USER_LOG("send_hybrid: freeing session at %p", (void*)session);
     free(session);
 
     USER_LOG("send_hybrid: SUCCESS");
@@ -603,28 +537,17 @@ int mesh_user_receive_hybrid(mesh_user_t *user,
         return -1;
     }
 
-    USER_LOG("receive_hybrid: checking if user is valid...");
     if (!mesh_user_valid_hybrid(user)) {
         USER_LOG("receive_hybrid: user is not valid!");
         return -1;
     }
-    USER_LOG("receive_hybrid: user is valid");
 
-    // Проверяем минимальный размер пакета
     if (packet_len < sizeof(mesh_hybrid_packet_t)) {
         USER_LOG("receive_hybrid: packet too small! Need %zu, have %zu",
                  sizeof(mesh_hybrid_packet_t), packet_len);
         return -1;
     }
 
-    const mesh_hybrid_packet_t *pkt = (const mesh_hybrid_packet_t*)packet;
-    USER_LOG("receive_hybrid: packet magic=0x%08X, version=%d, crypto_type=%d",
-             pkt->magic, pkt->version, pkt->crypto_type);
-    USER_LOG("receive_hybrid: pq_ciphertext_len=%d, payload_len=%d",
-             pkt->pq_ciphertext_len, pkt->payload_len);
-
-    // Расшифровываем
-    USER_LOG("receive_hybrid: calling mesh_hybrid_decrypt_message...");
     int result = mesh_hybrid_decrypt_message(&user->keypair, packet, packet_len,
                                              decrypted, decrypted_len);
 
@@ -634,10 +557,6 @@ int mesh_user_receive_hybrid(mesh_user_t *user,
     }
 
     USER_LOG("receive_hybrid: decryption successful, decrypted_len=%zu", *decrypted_len);
-    if (*decrypted_len > 0) {
-        USER_LOG("receive_hybrid: decrypted text: '%s'", decrypted);
-    }
-
     USER_LOG("receive_hybrid: SUCCESS");
     USER_LOG("========================================");
     return 0;
