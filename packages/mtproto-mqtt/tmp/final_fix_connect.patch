@@ -1,0 +1,38 @@
+cd ~/Desktop/system/packages/mtproto-mqtt
+
+# Создаем финальный патч
+cat > /tmp/final_fix_connect.patch << 'EOF'
+--- a/src/mesh-mqtt.c
++++ b/src/mesh-mqtt.c
+@@ -688,6 +688,9 @@
+     // 🔥 ИСПОЛЬЗУЕМ СТАНДАРТНЫЙ ИНИЦИАЛИЗАТОР
+     MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
+
++    // 🔥 ФИКС: устанавливаем правильную версию структуры
++    conn_opts.struct_version = 0;
++
+     // 🔥 Проверяем структуру
+     log_message("DEBUG", "conn_opts struct_id: %.4s, version: %d",
+                 conn_opts.struct_id, conn_opts.struct_version);
+@@ -722,6 +725,10 @@
+                 conn_opts.username ? conn_opts.username : "(null)",
+                 conn_opts.password ? "***" : "(null)");
+
++    // 🔥 Дополнительная проверка перед вызовом
++    log_message("DEBUG", "Calling MQTTClient_connect with g_client=%p", (void*)g_client);
++    fflush(stderr);
++
+     // 🔥 САМО ПОДКЛЮЧЕНИЕ
+     int rc = MQTTClient_connect(g_client, &conn_opts);
+
+EOF
+
+# Применяем патч
+patch src/mesh-mqtt.c /tmp/final_fix_connect.patch
+
+# Пересобираем
+make clean
+make
+
+# Запускаем с GDB для диагностики
+gdb ./bin/mtproto-mqtt-gateway

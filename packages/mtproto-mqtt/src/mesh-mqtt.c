@@ -677,9 +677,12 @@ int mesh_mqtt_connect(void) {
         return -1;
     }
 
-    // 🔥 ИСПОЛЬЗУЕМ СТАНДАРТНЫЙ ИНИЦИАЛИЗАТОР
-    MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
-    MQTTClient_SSLOptions ssl_opts = MQTTClient_SSLOptions_initializer;
+    // 🔥 ПОЛНАЯ ИНИЦИАЛИЗАЦИЯ структуры
+    MQTTClient_connectOptions conn_opts;
+    memset(&conn_opts, 0, sizeof(conn_opts));
+    strcpy(conn_opts.struct_id, "MQTC");
+    conn_opts.struct_version = 0;
+    // MQTTClient_SSLOptions ssl_opts = MQTTClient_SSLOptions_initializer;
 
     // 🔥 Проверяем структуру
     log_message("DEBUG", "conn_opts struct_id: %.4s, version: %d",
@@ -687,20 +690,16 @@ int mesh_mqtt_connect(void) {
 
     // 🔥 Устанавливаем параметры
     conn_opts.keepAliveInterval = g_config.keepalive;
-    conn_opts.cleansession = g_config.clean_session ? 1 : 0;
+    conn_opts.cleansession = 1;
     conn_opts.username = g_config.username;
     conn_opts.password = g_config.password;
     conn_opts.connectTimeout = g_config.connect_timeout;
     conn_opts.retryInterval = g_config.reconnect_delay;
 
-    // 🔥 Для совместимости со старыми версиями
-    conn_opts.reliable = 0;
-    conn_opts.will = NULL;
-    conn_opts.ssl = NULL;
-
     log_message("INFO", "Connecting to %s as %s...",
                 g_config.broker, g_config.username);
 
+    // 🔥 Устанавливаем статус
     g_status = MESH_STATUS_CONNECTING;
 
     // 🔥 Проверяем broker
@@ -715,6 +714,12 @@ int mesh_mqtt_connect(void) {
     log_message("DEBUG", "Username: '%s', Password: '%s'",
                 conn_opts.username ? conn_opts.username : "(null)",
                 conn_opts.password ? "***" : "(null)");
+
+    // 🔥 Проверяем, что g_client не NULL
+    if (!g_client) {
+        log_message("ERROR", "g_client is NULL!");
+        return -1;
+    }
 
     // 🔥 САМО ПОДКЛЮЧЕНИЕ
     int rc = MQTTClient_connect(g_client, &conn_opts);
