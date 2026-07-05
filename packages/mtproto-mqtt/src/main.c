@@ -727,10 +727,11 @@ int main(int argc, char *argv[]) {
     }
 
     printf("\n╔═══════════════════════════════════════════════════════════════╗\n");
-    printf("║     MTProto MQTT Test Module v2.0 (Hybrid Crypto)           ║\n");
-    printf("║     ECDH + ML-KEM + ML-DSA (Quantum-Safe)                   ║\n");
-    printf("║     Memory: HEAP allocation + auto-cleanup                  ║\n");
-    printf("╚═══════════════════════════════════════════════════════════════╝\n");
+    printf("║     MTProto MQTT Gateway v2.0 (Hybrid Crypto)                   ║\n");
+    printf("║     MTProto ↔ MQTT Mesh Gateway                                 ║\n");
+    printf("║     ECDH + ML-KEM + ML-DSA (Quantum-Safe)                       ║\n");
+    printf("║     Memory: HEAP allocation + auto-cleanup                      ║\n");
+    printf("╚═════════════════════════════════════════════════════════════════╝\n");
     printf("\nConfiguration:\n");
     printf("  Broker:      %s\n", config.broker);
     printf("  Host:        %s\n", config.host);

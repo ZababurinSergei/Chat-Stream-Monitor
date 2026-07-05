@@ -99,7 +99,7 @@ mesh_packet_t* mesh_packet_create(uint32_t type, const char *receiver_id,
     snprintf(packet->sender_id, sizeof(packet->sender_id),
              "node-%d-%ld", getpid(), (long)time(NULL));
     snprintf(packet->sender_name, sizeof(packet->sender_name),
-             "MTProxy-%d", getpid());
+            "MTProto-MQTT-Gateway-%d", getpid());
 
     // Получатель
     if (receiver_id) {
@@ -436,7 +436,7 @@ mesh_hybrid_packet_t* mesh_hybrid_packet_create(uint32_t type,
     snprintf(packet->sender_id, sizeof(packet->sender_id),
              "node-%d-%ld", getpid(), (long)time(NULL));
     snprintf(packet->sender_name, sizeof(packet->sender_name),
-             "MTProxy-%d", getpid());
+             "MTProto-MQTT-Gateway-%d", getpid());
 
     // Получатель
     if (receiver_id) {
@@ -644,7 +644,7 @@ mesh_hybrid_packet_t* mesh_hybrid_packet_alloc(uint32_t type,
     snprintf(packet->sender_id, sizeof(packet->sender_id),
              "node-%d-%ld", getpid(), (long)time(NULL));
     snprintf(packet->sender_name, sizeof(packet->sender_name),
-             "MTProxy-%d", getpid());
+           "MTProto-MQTT-Gateway-%d", getpid());
 
     // Устанавливаем получателя
     if (receiver_id) {

@@ -1,6 +1,7 @@
 /*
     Mesh MQTT Module - Заголовочный файл
-    Для интеграции с MTProto Proxy
+    Шлюз для передачи MTProto-трафика через MQTT/Mesh-сети
+    Интеграция с MTProto Proxy в качестве бэкенда
     Поддерживает Paho MQTT Client
     Настройки для OneMesh (mqtt.onemesh.ru:1883)
     С поддержкой Meshtastic Protobuf сообщений

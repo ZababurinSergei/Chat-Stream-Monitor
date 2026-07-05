@@ -69,7 +69,7 @@ CONFIG_DIR = config
 
 SOURCES = $(wildcard $(SRC_DIR)/*.c)
 OBJECTS = $(SOURCES:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
-TARGET = $(BIN_DIR)/mtproto-mqtt-test
+TARGET = $(BIN_DIR)/mtproto-mqtt-gateway
 
 # Дополнительные исходники для тестов
 TEST_SOURCES = $(wildcard $(TEST_DIR)/*.c)
