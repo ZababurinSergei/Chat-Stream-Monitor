@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Демонстрация компонентов</title>
+    <link href="./index.css" rel="stylesheet"/>
+    <script type="module" src="./index.js"></script>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()" id="themeToggle">
+    <span id="themeIcon">🌙</span>
+</button>
+
+<h1>Демо компоненты</h1>
+
+<div class="components-container">
+    <div class="component-wrapper">
+        <test-component-a id="test-component-a-1" title="Test Component A"></test-component-a>
+    </div>
+</div>
+
+<script>
+    function toggleTheme() {
+        const html = document.documentElement;
+        const currentTheme = html.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+        html.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+
+        const themeIcon = document.getElementById('themeIcon');
+        themeIcon.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+    }
+
+    // Load saved theme
+    document.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        const themeIcon = document.getElementById('themeIcon');
+        themeIcon.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    });
+
+    // Export functions for testing
+    window.toggleTheme = toggleTheme;
+    window.getComponentA = () => document.querySelector('test-component-a#test-component-a-1');
+    window.getComponentB = () => document.querySelector('test-component-b#test-component-b-1');
+</script>
+</body>
+</html>

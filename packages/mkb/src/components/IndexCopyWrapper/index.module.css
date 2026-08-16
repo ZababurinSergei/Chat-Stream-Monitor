@@ -1,0 +1,32 @@
+@charset "utf-8";
+
+.wrapper {
+	position: relative;
+	z-index: 50;
+	cursor: pointer;
+}
+
+.wrapper:hover::before {
+	position: absolute;
+	width: 170px;
+	height: 45px;
+	content: 'Скопировать результат декодирования';
+	top: -50px;
+	left: -72px;
+	font-family: 'Golos 14pt Regular 14x20';
+	font-style: normal;
+	font-weight: 400;
+	font-size: 14px;
+	line-height: 20px;
+	/* or 150% */
+	letter-spacing: -0.01em;
+
+	background: var(--white-100per);
+	box-shadow: 0px 2px 8px rgba(0, 31, 141, 0.14);
+	border-radius: 8px;
+
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+}

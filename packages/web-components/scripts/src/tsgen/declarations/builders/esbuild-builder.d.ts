@@ -1,0 +1,58 @@
+import { BaseBuilder } from './base-builder';
+import type { BuilderConfig, PackageType } from '../types/config.types';
+export declare class EsbuildBuilder extends BaseBuilder {
+    readonly name = "esbuild";
+    readonly supportedPackageTypes: PackageType[];
+    generateConfig(): BuilderConfig;
+    private generateBuildScript;
+    private generateWatchScript;
+    protected getIncludePatterns(): string[];
+    protected getExcludePatterns(): string[];
+    protected getBaseCompilerOptions(): {
+        allowSyntheticDefaultImports: boolean;
+        esModuleInterop: boolean;
+        sourceMap: boolean;
+        declarationMap: boolean;
+        target: string;
+        lib?: string[] | undefined;
+        module: string;
+        moduleResolution: string;
+        allowImportingTsExtensions?: boolean | undefined;
+        resolveJsonModule?: boolean | undefined;
+        allowJs?: boolean | undefined;
+        checkJs?: boolean | undefined;
+        strict: boolean;
+        noImplicitAny?: boolean | undefined;
+        noImplicitReturns?: boolean | undefined;
+        noImplicitThis?: boolean | undefined;
+        noImplicitOverride?: boolean | undefined;
+        noUncheckedIndexedAccess?: boolean | undefined;
+        exactOptionalPropertyTypes?: boolean | undefined;
+        noUnusedLocals?: boolean | undefined;
+        noUnusedParameters?: boolean | undefined;
+        noFallthroughCasesInSwitch?: boolean | undefined;
+        noUncheckedSideEffectImports?: boolean | undefined;
+        useUnknownInCatchVariables?: boolean | undefined;
+        noPropertyAccessFromIndexSignature?: boolean | undefined;
+        forceConsistentCasingInFileNames?: boolean | undefined;
+        isolatedModules?: boolean | undefined;
+        verbatimModuleSyntax?: boolean | undefined;
+        skipLibCheck?: boolean | undefined;
+        declaration?: boolean | undefined;
+        removeComments?: boolean | undefined;
+        outDir?: string | undefined;
+        rootDir?: string | undefined;
+        composite?: boolean | undefined;
+        incremental?: boolean | undefined;
+        noEmit?: boolean | undefined;
+        baseUrl?: string | undefined;
+        paths?: Record<string, string[]> | undefined;
+        jsx?: "preserve" | "react-jsx" | "react-jsxdev" | "react" | undefined;
+        types?: string[] | undefined;
+        preserveWatchOutput?: boolean | undefined;
+        inlineSources?: boolean | undefined;
+        inlineSourceMap?: boolean | undefined;
+        tsBuildInfoFile?: string | undefined;
+    };
+}
+//# sourceMappingURL=esbuild-builder.d.ts.map

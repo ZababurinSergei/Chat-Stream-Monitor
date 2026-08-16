@@ -1,0 +1,94 @@
+.mainWrapper {
+  width: 484px;
+  padding: 8px 0 8px;
+  background: #ffffff;
+  box-shadow: 0px 2px 8px rgba(0, 31, 141, 0.14);
+  border-radius: 8px;
+  position: absolute;
+  top: 55px;
+  left: 0px;
+  z-index: 12;
+  overflow: auto;
+  height: min-content;
+  max-height: 405px;;
+}
+
+.extendWrapper {
+  width: 416px;
+  height: 330px;
+  padding: 8px 0 8px;
+  background: #ffffff;
+  box-shadow: 0px 2px 8px rgba(0, 31, 141, 0.14);
+  border-radius: 8px;
+  position: absolute;
+  top: 55px;
+  left: 0px;
+  z-index: 12;
+  overflow: auto;
+}
+
+.extendWrapper {
+  width: 416px;
+  height: 330px;
+  padding: 8px 0 8px;
+  background: #ffffff;
+  box-shadow: 0px 2px 8px rgba(0, 31, 141, 0.14);
+  border-radius: 8px;
+  position: absolute;
+  top: 55px;
+  left: 0px;
+  z-index: 12;
+  overflow: auto;
+}
+
+.postcoordinationWrapper {
+  height: auto;
+  width: 100%;
+  max-height: 330px;
+  padding: 8px 0 8px;
+  background: #ffffff;
+  box-shadow: 0px 2px 8px rgba(0, 31, 141, 0.14);
+  border-radius: 8px;
+  position: absolute;
+  top: 410px;
+  left: 0px;
+  z-index: 12;
+  overflow: auto;
+}
+
+.iTerm {
+  color: var(--black-100per);
+  font-family: 'Golos 14pt Regular 14x20';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 20px;
+  letter-spacing: -0.01em;
+  margin-right: 9px;
+  width: 350px;
+  display: inline-block;
+  align-items: start;
+  background: rgba(221, 128, 0, 0.1);
+  border-radius: 4px;
+  border-bottom: 1px solid rgb(255, 255, 255);
+  padding-left: 20px;
+}
+
+.infoSearchText {
+  font-family: 'Golos 11pt Regular 11x14';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 11px;
+  line-height: 14px;
+  display: flex;
+  align-items: center;
+  color: var(--red-100per);
+  margin: 0;
+  padding: 0 0 0 16px;
+}
+
+@media all and (min-width: 768px) and (max-width: 1368px) {
+  .mainWrapper {
+    width: 100%;
+  }
+}

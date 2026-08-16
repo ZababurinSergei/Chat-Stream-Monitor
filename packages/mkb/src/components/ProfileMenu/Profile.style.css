@@ -1,0 +1,11 @@
+.profile-menu__wrapper {
+	width: 171px;
+	padding: 8px 0 8px;
+	background: #ffffff;
+	box-shadow: 0px 2px 8px rgba(0, 31, 141, 0.14);
+	border-radius: 8px;
+  	position: absolute;
+  	top: 35px;
+  	right: 14px;
+	z-index: 12;
+}

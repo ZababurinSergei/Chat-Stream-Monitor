@@ -1,0 +1,9 @@
+.icon_wrapper {
+    display: flex;
+    width: 24px;
+    height: 24px;
+}
+
+.isOpen {
+    transform: rotate(180deg);
+}

@@ -1,0 +1,15 @@
+version: '3.1'
+
+services:
+  rules-front:
+    container_name: metamart-subscription-service-ui
+    build: ./
+    ports:
+      - 8888:80
+    networks:
+      - net
+
+networks:
+  net:
+    driver: bridge
+

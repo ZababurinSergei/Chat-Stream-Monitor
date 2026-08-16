@@ -1,0 +1,86 @@
+{
+  "name": "@newkind/vendor-scripts",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Vendor bundle generation scripts with maximum TypeScript strictness",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "vendor-gen": "./dist/cli/index.js",
+    "nk-vendor": "./dist/cli/index.js"
+  },
+  "scripts": {
+    "build:dist": "node scripts/build.js --copy",
+    "build:bundle": "node scripts/bundle.js --esm-only  -o vendor",
+    "build:node": "tsc --module commonjs --target es2020 --outDir ./dist/node",
+    "build:browser": "tsc --module es2020 --target es2020 --outDir ./dist/browser",
+    "build:all": "npm run build",
+    "bundle:all": "node scripts/bundle-all.js",
+    "bundle:core": "node scripts/bundle-all.js --core",
+    "bundle:utils": "node scripts/bundle-all.js --utils",
+    "bundle:cli": "node scripts/bundle-all.js --cli",
+    "bundle:builders": "node scripts/bundle-all.js --builders",
+    "bundle:single": "node scripts/bundle-single-file.js",
+    "bundle:single-concat": "node scripts/bundle-single-file.js concat",
+    "bundle:watch": "node scripts/bundle-watch.js",
+    "dev": "npm run build:watch",
+    "clean": "rm -rf dist",
+    "start": "node dist/index.js",
+    "cli": "node dist/cli/index.js",
+    "test:build": "npm run build && npm run vendor:analyze",
+    "prepublishOnly": "npm run build && npm run test:build",
+    "build:watch": "esbuild src/index.ts --bundle --outdir=dist --platform=browser --watch",
+    "build": "esbuild src/index.ts --bundle --outdir=dist --platform=browser",
+    "declarations:collect": "node scripts/declarations.js",
+    "bundle:all-in-one": "node scripts/bundle.js -o vendor --esm-only",
+    "vendor:build": "node bundle/Vendor.mjs build",
+    "vendor:build:node": "node bundle/Vendor.mjs build --platform node",
+    "vendor:build:browser": "node bundle/Vendor.mjs build --platform browser",
+    "vendor:importmap": "node bundle/Vendor.mjs importmap",
+    "vendor:importmap:node": "node bundle/Vendor.mjs importmap --platform node",
+    "vendor:importmap:browser": "node bundle/Vendor.mjs importmap --platform browser",
+    "vendor:analyze": "node bundle/Vendor.mjs analyze",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "vendor",
+    "bundle",
+    "typescript",
+    "esbuild",
+    "importmap",
+    "monorepo",
+    "newkind"
+  ],
+  "author": "NewKind Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/newkind/tsgen",
+    "directory": "scripts"
+  },
+  "homepage": "https://github.com/newkind/tsgen#readme",
+  "bugs": {
+    "url": "https://github.com/newkind/tsgen/issues"
+  },
+  "files": [
+    "dist/**/*",
+    "src/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.0",
+    "esbuild": "^0.19.0"
+  },
+  "dependencies": {
+    "esbuild": "^0.19.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
+}

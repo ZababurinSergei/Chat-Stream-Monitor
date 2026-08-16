@@ -1,0 +1,109 @@
+{
+  "$schema": "./panel-config.schema.json",
+  "version": "7.4.0",
+  "meta": {
+    "created": "2025-04-04T10:00:00Z",
+    "modified": "2025-04-04T10:00:00Z",
+    "author": "Quantum Git System"
+  },
+  "defaultPreset": "standard",
+  "presets": [
+    {
+      "name": "standard",
+      "label": "Стандартная конфигурация",
+      "description": "Баланс между панелями для общего использования",
+      "layout": {
+        "leftPanel": {
+          "width": 350,
+          "minWidth": 200,
+          "maxWidth": 500,
+          "visible": true,
+          "defaultScripts": []
+        },
+        "rightPanel": {
+          "width": 350,
+          "minWidth": 200,
+          "maxWidth": 500,
+          "visible": true,
+          "defaultScripts": []
+        }
+      },
+      "features": {
+        "dragAndDrop": true,
+        "quickAccess": true,
+        "animation": "smooth"
+      }
+    },
+    {
+      "name": "minimal",
+      "label": "Минималистичная",
+      "description": "Максимальное рабочее пространство",
+      "layout": {
+        "leftPanel": {
+          "width": 250,
+          "minWidth": 150,
+          "maxWidth": 300,
+          "visible": false,
+          "defaultScripts": ["status", "log"]
+        },
+        "rightPanel": {
+          "width": 250,
+          "minWidth": 150,
+          "maxWidth": 300,
+          "visible": false,
+          "defaultScripts": ["run", "commit"]
+        }
+      },
+      "features": {
+        "dragAndDrop": false,
+        "quickAccess": false,
+        "animation": "none"
+      }
+    },
+    {
+      "name": "developer",
+      "label": "Для разработки",
+      "description": "Оптимизировано для работы с кодом",
+      "layout": {
+        "leftPanel": {
+          "width": 400,
+          "minWidth": 300,
+          "maxWidth": 600,
+          "visible": true,
+          "defaultScripts": ["status", "diff", "branch"]
+        },
+        "rightPanel": {
+          "width": 300,
+          "minWidth": 200,
+          "maxWidth": 400,
+          "visible": true,
+          "defaultScripts": ["commit", "push", "pull"]
+        }
+      },
+      "features": {
+        "dragAndDrop": true,
+        "quickAccess": true,
+        "animation": "fast"
+      }
+    }
+  ],
+  "settings": {
+    "autosave": {
+      "enabled": true,
+      "interval": 300
+    },
+    "validation": {
+      "strictMode": false,
+      "maxPresets": 10
+    },
+    "appearance": {
+      "theme": "dark",
+      "accentColor": "#4CAF50"
+    }
+  },
+  "quantumParameters": {
+    "entanglementLevel": 0.95,
+    "maxDimensions": 4,
+    "allowTemporalBranches": true
+  }
+}

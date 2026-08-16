@@ -1,0 +1,520 @@
+/* Модальные окна YATO Framework v5.0.1 */
+/* Базовые стили для модальных окон компонентов */
+
+.yato-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10000;
+    animation: yato-fade-in 0.3s ease-out forwards;
+    /*backdrop-filter: blur(4px);*/
+}
+
+.yato-modal-wrapper {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 12px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1);
+    max-width: 90vw;
+    max-height: 90vh;
+    width: auto;
+    min-width: 300px;
+    overflow: hidden;
+    transform: scale(0.9) translateY(20px);
+    animation: yato-modal-appear 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.yato-modal-content {
+    display: flex;
+    flex-direction: column;
+    max-height: inherit;
+}
+
+.yato-modal-header {
+    padding: 24px 24px 16px 24px;
+    border-bottom: 1px solid #e9ecef;
+    background: linear-gradient(to bottom, #ffffff 0%, #fafbfc 100%);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    position: relative;
+}
+
+.yato-modal-title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+    line-height: 1.3;
+    flex: 1;
+    padding-right: 16px;
+}
+
+.yato-modal-close-button {
+    background: none;
+    border: none;
+    font-size: 2rem;
+    font-weight: 300;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    position: relative;
+    top: -4px;
+    right: -4px;
+}
+
+.yato-modal-close-button:hover {
+    background-color: #f8f9fa;
+    color: #495057;
+    transform: scale(1.1);
+}
+
+.yato-modal-close-button:active {
+    transform: scale(0.95);
+}
+
+.yato-modal-body {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+    color: var(--cosmic-primary);
+    line-height: 1.6;
+    font-size: 1rem;
+}
+
+.yato-modal-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.yato-modal-body::-webkit-scrollbar-track {
+    background: #f1f3f5;
+    border-radius: 4px;
+}
+
+.yato-modal-body::-webkit-scrollbar-thumb {
+    background: #ced4da;
+    border-radius: 4px;
+}
+
+.yato-modal-body::-webkit-scrollbar-thumb:hover {
+    background: #adb5bd;
+}
+
+.yato-modal-footer {
+    padding: 20px 24px 24px 24px;
+    border-top: 1px solid #e9ecef;
+    background: #f8f9fa;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+.yato-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 80px;
+    text-align: center;
+    line-height: 1.4;
+}
+
+.yato-button.primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+}
+
+.yato-button.primary:hover {
+    background: linear-gradient(135deg, #0056b3 0%, #004085 100%);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.4);
+    transform: translateY(-1px);
+}
+
+.yato-button.primary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3);
+}
+
+.yato-button.secondary {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+}
+
+.yato-button.secondary:hover {
+    background: linear-gradient(135deg, #495057 0%, #343a40 100%);
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4);
+    transform: translateY(-1px);
+}
+
+.yato-button.secondary:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(108, 117, 125, 0.3);
+}
+
+.yato-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* Анимации */
+@keyframes yato-fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes yato-modal-appear {
+    from {
+        transform: scale(0.9) translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .yato-modal-wrapper {
+        max-width: 95vw;
+        max-height: 95vh;
+        margin: 16px;
+    }
+
+    .yato-modal-header {
+        padding: 20px 20px 16px 20px;
+    }
+
+    .yato-modal-title {
+        font-size: 1.3rem;
+    }
+
+    .yato-modal-body {
+        padding: 20px;
+    }
+
+    .yato-modal-footer {
+        padding: 16px 20px 20px 20px;
+        flex-direction: column;
+    }
+
+    .yato-button {
+        width: 100%;
+        margin: 4px 0;
+    }
+
+    .yato-modal-close-button {
+        top: -2px;
+        right: -2px;
+    }
+}
+
+@media (max-width: 480px) {
+    .yato-modal-header {
+        padding: 16px 16px 12px 16px;
+    }
+
+    .yato-modal-title {
+        font-size: 1.2rem;
+    }
+
+    .yato-modal-body {
+        padding: 16px;
+        font-size: 0.95rem;
+    }
+
+    .yato-modal-footer {
+        padding: 12px 16px 16px 16px;
+    }
+
+    .yato-button {
+        padding: 12px 16px;
+        font-size: 0.9rem;
+    }
+}
+
+/* Темная тема */
+@media (prefers-color-scheme: dark) {
+    .yato-modal-wrapper {
+        background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+
+    .yato-modal-header {
+        background: linear-gradient(to bottom, #2d3748 0%, #242a36 100%);
+        border-bottom-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .yato-modal-title {
+        color: #e2e8f0;
+    }
+
+    .yato-modal-close-button {
+        color: #a0aec0;
+    }
+
+    .yato-modal-close-button:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #e2e8f0;
+    }
+
+    .yato-modal-body {
+        color: var(--cosmic-primary);
+    }
+
+    .yato-modal-body::-webkit-scrollbar-track {
+        background: #2d3748;
+    }
+
+    .yato-modal-body::-webkit-scrollbar-thumb {
+        background: #4a5568;
+    }
+
+    .yato-modal-body::-webkit-scrollbar-thumb:hover {
+        background: #718096;
+    }
+
+    .yato-modal-footer {
+        background: #242a36;
+        border-top-color: rgba(255, 255, 255, 0.1);
+    }
+}
+
+/* Анимация закрытия */
+.yato-modal-backdrop.yato-closing {
+    animation: yato-fade-out 0.2s ease-in forwards;
+}
+
+.yato-modal-wrapper.yato-closing {
+    animation: yato-modal-disappear 0.2s ease-in forwards;
+}
+
+@keyframes yato-fade-out {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes yato-modal-disappear {
+    from {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: scale(0.9) translateY(20px);
+        opacity: 0;
+    }
+}
+
+/* Специфичные стили для разных типов модальных окон */
+.yato-modal-backdrop.info .yato-modal-title {
+    color: #17a2b8;
+}
+
+.yato-modal-backdrop.warning .yato-modal-title {
+    color: #ffc107;
+}
+
+.yato-modal-backdrop.error .yato-modal-title {
+    color: #dc3545;
+}
+
+.yato-modal-backdrop.success .yato-modal-title {
+    color: #28a745;
+}
+
+/* Утилитарные классы для контента */
+.yato-modal-content-centered {
+    text-align: center;
+}
+
+.yato-modal-content-scrollable {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+
+.yato-modal-content-no-padding .yato-modal-body {
+    padding: 0;
+}
+
+.yato-modal-content-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+}
+
+/* Поддержка RTL */
+[dir="rtl"] .yato-modal-header {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .yato-modal-title {
+    padding-right: 0;
+    padding-left: 16px;
+}
+
+[dir="rtl"] .yato-modal-footer {
+    flex-direction: row-reverse;
+}
+
+/* Высококонтрастный режим */
+@media (prefers-contrast: high) {
+    .yato-modal-wrapper {
+        border: 2px solid #000000;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
+    }
+
+    .yato-modal-header {
+        border-bottom: 2px solid #000000;
+    }
+
+    .yato-modal-footer {
+        border-top: 2px solid #000000;
+    }
+
+    .yato-button {
+        border: 1px solid #000000;
+    }
+}
+
+/* Уменьшение движения для accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .yato-modal-backdrop,
+    .yato-modal-wrapper,
+    .yato-modal-close-button,
+    .yato-button {
+        animation: none;
+        transition: none;
+    }
+
+    .yato-modal-wrapper {
+        transform: none;
+    }
+}
+
+/* Стили для модального окна */
+.yato-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+}
+
+.yato-modal-wrapper {
+    background: white;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow: hidden;
+}
+
+.yato-modal-content {
+    display: flex;
+    flex-direction: column;
+}
+
+.yato-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.yato-modal-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+}
+
+.yato-modal-close-button {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.yato-modal-close-button:hover {
+    background: var(--surface-100);
+}
+
+.yato-modal-body {
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+}
+
+.yato-modal-footer {
+    padding: 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.yato-button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: var(--transition);
+}
+
+.yato-button.primary {
+    background: var(--primary);
+    color: white;
+}
+
+.yato-button.primary:hover {
+    background: var(--primary-dark);
+}
+
+.yato-button.secondary {
+    background: var(--surface);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+}
+
+.yato-button.secondary:hover {
+    background: var(--surface-50);
+    color: var(--text-primary);
+}

@@ -1,0 +1,101 @@
+### get info
+POST http://127.0.0.1:3333/v1/executor/info
+Content-Type: application/json
+
+### get info about concrete instance of rule-executro
+POST http://127.0.0.1:3333/v1/executor/info
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiJhOGU5NmQ4Yy1jYmRiLTQ2M2YtOGI4ZC03MmRhYmFkMWVlNjYiLCJleHAiOjE2ODYyMjMxNDcsIm5iZiI6MCwiaWF0IjoxNjg2MjIyNTQ3LCJpc3MiOiJodHRwczovL2lhLXRlc3QuZWdpc3oucm9zbWluemRyYXYucnUvcmVhbG1zL2RldiIsImF1ZCI6ImZlci1mbXZyLWRldiIsInN1YiI6IjgwMTVlMThhLWNhMjMtNGNlOS04ZjI3LTlhNGE0NjFiYWM0NCIsInR5cCI6IkJlYXJlciIsImF6cCI6ImZlci1mbXZyLWRldiIsInNlc3Npb25fc3RhdGUiOiJmNGJhNTUzNi02ZDllLTRkY2ItOWE1MC1lOGM3MzM4MDA0ZWYiLCJjbGllbnRfc2Vzc2lvbiI6IjI0ZmMwZDUyLTdjZjktNGFmZC04MTlkLWRkYTFiM2UxY2RhNCIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vZmVyLWZtdnItZGV2LmhlbHBtcy5ydSJdLCJyZXNvdXJjZV9hY2Nlc3MiOnsiZmVyLWZtdnItZGV2Ijp7InJvbGVzIjpbImZlcl9mbXZyX2FkbWluICJdfX0sIm5hbWUiOiLQn9GA0LjQvNC10YAg0J_RgNC40LzQtdGA0L7QstC40Ycg0J_RgNC40LzQtdGA0L7QsiIsInByZWZlcnJlZF91c2VybmFtZSI6IjI3MC02NTktMTIzIDgwIiwiZ2l2ZW5fbmFtZSI6ItCf0YDQuNC80LXRgCIsIm1pZGRsZV9uYW1lIjoi0J_RgNC40LzQtdGA0L7QstC40YciLCJmYW1pbHlfbmFtZSI6ItCf0YDQuNC80LXRgNC-0LIiLCJlbWFpbCI6ImV4YW1wbGUtMzU2MTQxOEBleGFtcGxlLnJ1In0.IAUmSq4NE5ph7e5hsycPTl0WZdQkYlSYUwkCpqnrj2P2M4cHQ2ggEvbp2RheM4YgFcZ6kJJH66ImPkUkjoqfsRnseWBr0aXs4A5uvh26120I7IyJZQwo6QgAOa4Vh8HwWXbEH-nbrhI4aylNHK3guAlSimJ32McvogpYLZMOHhvxYXp6ofYduWZ7mD74rQrX53fgWpDB1S5ZfjI_3MfORjgmJVJ0qN6sONuooYYZKkyshkYp9OmJ-c7fuHJ0ayRqD_iX91tBWF3qpqB-uIrLmfLk7Td8BCzXT4A9WsnopliHdWGv9xiw3E4_Ds0KqERb6C7TBGp-Bd_zUXnRvOZXyQ
+
+{
+  "current": false
+}
+
+### apply schema and manifest
+POST http://127.0.0.1:3333/v1/executor/apply
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiJhOGU5NmQ4Yy1jYmRiLTQ2M2YtOGI4ZC03MmRhYmFkMWVlNjYiLCJleHAiOjE2ODYyMjMxNDcsIm5iZiI6MCwiaWF0IjoxNjg2MjIyNTQ3LCJpc3MiOiJodHRwczovL2lhLXRlc3QuZWdpc3oucm9zbWluemRyYXYucnUvcmVhbG1zL2RldiIsImF1ZCI6ImZlci1mbXZyLWRldiIsInN1YiI6IjgwMTVlMThhLWNhMjMtNGNlOS04ZjI3LTlhNGE0NjFiYWM0NCIsInR5cCI6IkJlYXJlciIsImF6cCI6ImZlci1mbXZyLWRldiIsInNlc3Npb25fc3RhdGUiOiJmNGJhNTUzNi02ZDllLTRkY2ItOWE1MC1lOGM3MzM4MDA0ZWYiLCJjbGllbnRfc2Vzc2lvbiI6IjI0ZmMwZDUyLTdjZjktNGFmZC04MTlkLWRkYTFiM2UxY2RhNCIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vZmVyLWZtdnItZGV2LmhlbHBtcy5ydSJdLCJyZXNvdXJjZV9hY2Nlc3MiOnsiZmVyLWZtdnItZGV2Ijp7InJvbGVzIjpbImZlcl9mbXZyX2FkbWluICJdfX0sIm5hbWUiOiLQn9GA0LjQvNC10YAg0J_RgNC40LzQtdGA0L7QstC40Ycg0J_RgNC40LzQtdGA0L7QsiIsInByZWZlcnJlZF91c2VybmFtZSI6IjI3MC02NTktMTIzIDgwIiwiZ2l2ZW5fbmFtZSI6ItCf0YDQuNC80LXRgCIsIm1pZGRsZV9uYW1lIjoi0J_RgNC40LzQtdGA0L7QstC40YciLCJmYW1pbHlfbmFtZSI6ItCf0YDQuNC80LXRgNC-0LIiLCJlbWFpbCI6ImV4YW1wbGUtMzU2MTQxOEBleGFtcGxlLnJ1In0.IAUmSq4NE5ph7e5hsycPTl0WZdQkYlSYUwkCpqnrj2P2M4cHQ2ggEvbp2RheM4YgFcZ6kJJH66ImPkUkjoqfsRnseWBr0aXs4A5uvh26120I7IyJZQwo6QgAOa4Vh8HwWXbEH-nbrhI4aylNHK3guAlSimJ32McvogpYLZMOHhvxYXp6ofYduWZ7mD74rQrX53fgWpDB1S5ZfjI_3MfORjgmJVJ0qN6sONuooYYZKkyshkYp9OmJ-c7fuHJ0ayRqD_iX91tBWF3qpqB-uIrLmfLk7Td8BCzXT4A9WsnopliHdWGv9xiw3E4_Ds0KqERb6C7TBGp-Bd_zUXnRvOZXyQ
+
+{
+  "eventSnapshotId": "1ca4c137-cec4-4404-8de9-4b5c02437342",
+  "manifestSnapshotId": "f75cd21c-73b5-430b-adfa-5e24f84e2edd",
+  "validatorVersion": "0.8",
+  "force": true
+}
+
+### apply schema and manifest
+POST http://svc-fer-dev.helpms.ru:3333/v1/executor/apply
+Content-Type: application/json
+
+{
+  "eventSnapshotId": "ae77c263-cd4c-4560-a0ab-bab289bf430b",
+  "manifestSnapshotId": "4798f625-71ca-40a0-9081-b08b8e31a0f4",
+  "validatorVersion": "0.10",
+  "force": false
+}
+### apply manifest
+POST http://127.0.0.1:3333/v1/executor/apply
+Content-Type: application/json
+
+{
+  "manifestSnapshotId": "f75cd21c-73b5-430b-adfa-5e24f84e2edd",
+  "validatorVersion": "0.8",
+  "force": true
+}
+
+
+### verify manifest (a lot of schema check errors)
+POST http://127.0.0.1:3333/v1/executor/verify
+Content-Type: application/json
+
+{
+  "manifestSnapshotId": "7e4b22e0-f755-4781-8116-a0abdc49a5ab",
+  "theFact": {
+    "field": "val"
+  }
+}
+
+### verify manifest
+POST http://svc-fer-dev.helpms.ru:3333/v1/executor/verify
+Content-Type: application/json
+
+{
+  "manifestSnapshotId": "4798f625-71ca-40a0-9081-b08b8e31a0f4",
+  "theFact": {
+    "parent_oid": "1.2.643.5.1.13.13.12.2.89.9047",
+    "parent_name": "государственное бюджетное учреждение здравоохранения Ямало-Ненецкого автономного округа \"Центр общественного здоровья и медицинской профилактики\""
+  }
+}
+
+### remove schema and all assiciated mainfests from executor
+POST http://127.0.0.1:3333/v1/executor/remove
+Content-Type: application/json
+
+{
+  "type": 2,
+  "schemaId": "showcase.booking.mo.1.0.0"
+}
+
+
+### remove mainfest from executor
+POST http://127.0.0.1:3333/v1/executor/remove
+Content-Type: application/json
+
+{
+  "type": 1,
+  "schemaId": "showcase.booking.mo.1.0.0",
+  "region": "federal"
+}
+
+### get validators list
+POST http://127.0.0.1:3333/v1/executor/validators
+Content-Type: application/json
+
+
+### set maping for schema
+POST http://127.0.0.1:3333/v1/executor/mapping/set
+Content-Type: application/json
+
+{
+  "mappingId": "c94749df-5436-4b16-a855-c55f473305a7"
+}

@@ -1,0 +1,61 @@
+
+.form {
+	border: 0.1vw solid gray;
+	display: flex;
+	flex-direction: column;
+	padding-left: 0.31vw;
+	width: 13.54vw;
+}
+
+.form__title {
+	font-size: 0.89vw;
+	font-weight: bold;
+	border-bottom: 0.21vw solid rgba(0, 0, 0, 0.3);
+	margin-bottom: 0.52vw;
+}
+
+.form__input {
+	margin-bottom: 0.52vw;
+}
+
+.form__input-label {
+	font-size: 0.78vw;
+	font-weight: bold;
+	display: block;
+}
+
+.form__input-input {
+}
+
+.form__textarea {
+	margin-bottom: 0.52vw;
+}
+
+.form__textarea-label {
+	font-size: 0.78vw;
+	font-weight: bold;
+	display: block;
+}
+
+.form__textarea-textarea {
+}
+
+.form__buttons {
+	margin-bottom: 0.52vw;
+}
+
+.buttons__cancellation {
+	background-color: white;
+	color: blue;
+	border-color: blue;
+	border-radius: 0.21vw;
+	outline: none;
+}
+
+.buttons__save {
+	background-color: blue;
+	border-color: blue;
+	color: white;
+	border-radius: 0.21vw;
+	outline: none;
+}

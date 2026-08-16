@@ -1,0 +1,10 @@
+.check__wrapper-img {
+	width: 20px;
+	height: 20px;
+	background: var(--blue-50per);
+	border-radius: 4px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+  margin: 2px;
+}

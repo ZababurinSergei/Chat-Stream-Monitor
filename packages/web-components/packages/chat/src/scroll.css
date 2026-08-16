@@ -1,0 +1,66 @@
+/* Стили для скроллбара */
+:root {
+    --scrollbar-opacity: 0;
+    --scrollbar-visibility: hidden;
+    --scrollbar-transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Для вебкит браузеров */
+::-webkit-scrollbar {
+    width: 12px;
+    opacity: var(--scrollbar-opacity);
+    visibility: var(--scrollbar-visibility);
+    transition: var(--scrollbar-transition);
+}
+
+/*!* Прозрачный трек - будет виден фон страницы *!*/
+/*::-webkit-scrollbar-track {*/
+/*    background: black;*/
+/*}*/
+
+/*::-webkit-scrollbar-thumb {*/
+/*    background: chartreuse;*/
+/*    border-radius: 6px;*/
+/*    border: 2px solid transparent;*/
+/*    background-clip: padding-box;*/
+/*    opacity: var(--scrollbar-opacity);*/
+/*    transition: var(--scrollbar-transition);*/
+/*}*/
+
+/*::-webkit-scrollbar-thumb:hover {*/
+/*    background: darkblue;*/
+/*}*/
+
+/* Для Firefox - делаем трек прозрачным */
+html {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(100, 116, 139, 0) transparent;
+    transition: scrollbar-color 0.3s ease;
+    background: #1e293b;
+}
+
+/* Состояние при прокрутке */
+html.scrolling {
+    --scrollbar-opacity: 1;
+    --scrollbar-visibility: visible;
+}
+
+html.scrolling::-webkit-scrollbar {
+    opacity: 1;
+    visibility: visible;
+}
+
+html.scrolling::-webkit-scrollbar-thumb {
+    opacity: 1;
+}
+
+html.scrolling {
+    scrollbar-color: rgba(100, 116, 139, 0.8) transparent;
+}
+
+/* Дополнительно: убедимся что контент имеет правильный фон */
+body {
+    margin: 0;
+    padding: 0;
+    background: transparent; /* Убираем фон у body, оставляя только у html */
+}

@@ -1,0 +1,162 @@
+<div class="chart-container">
+    <div class="chart-header">
+        <h3>Измерения за {{ selectedTimeRange() }}</h3>
+
+        <div class="controls">
+            <div class="measurement-type-selector">
+                <span>Тип данных:</span>
+                <select [(ngModel)]="selectedType" (change)="onTypeChange()">
+                    <option value="all">Все показатели</option>
+                    <option value="temperature">Температура</option>
+                    <option value="humidity">Влажность</option>
+                    <option value="acidity">Кислотность почвы</option>
+                </select>
+            </div>
+
+            <div class="time-range-selector">
+                <span>Период:</span>
+                @for (range of timeRanges; track range.value) {
+                <button
+                  type="button"
+                  class="time-range-btn"
+                  [class.active]="selectedTimeRange() === range.value"
+                  (click)="selectTimeRange(range.value)"
+                  [title]="range.description"
+                >
+                {{ range.label }}
+                </button>
+                }
+            </div>
+
+            @if (lastUpdateTime()) {
+            <div class="last-update">
+              <span class="update-label">Обновлено:</span>
+              <span class="update-time">{{ lastUpdateTime() | date:'dd.MM.yyyy HH:mm:ss' }}</span>
+            </div>
+            }
+        </div>
+    </div>
+
+    <div class="chart-wrapper">
+        <!-- Контейнер для графика (можно подключить Chart.js) -->
+        <div class="chart-canvas">
+            <div class="chart-legend">
+                <div class="legend-item temperature">
+                    <span class="legend-color"></span>
+                    <span class="legend-label">Температура (°C)</span>
+                </div>
+                <div class="legend-item humidity">
+                    <span class="legend-color"></span>
+                    <span class="legend-label">Влажность (%)</span>
+                </div>
+                <div class="legend-item acidity">
+                    <span class="legend-color"></span>
+                    <span class="legend-label">Кислотность (pH)</span>
+                </div>
+            </div>
+
+            <div class="chart-grid">
+                @for (hour of displayedHours(); track hour) {
+                <div class="grid-line">
+                  <span class="grid-label">{{ hour }}</span>
+              </div>
+                }
+
+                @for (measurement of filteredMeasurements(); track measurement.id || $index) {
+                <div
+                  class="data-point"
+                  [style.left.px]="calculatePosition(measurement)"
+                  [style.bottom.px]="calculateValuePosition(measurement)"
+                  [class]="getPointClass(measurement)"
+                  (click)="onPointClick(measurement)"
+                  [class.editable]="isEditable"
+                  [title]="getPointTooltip(measurement)"
+                >
+                  <div class="point-value">{{ formatValue(measurement) }}</div>
+                <div class="point-time">{{ measurement.timestamp | date:'HH:mm' }}</div>
+              </div>
+                }
+            </div>
+
+            <div class="y-axis">
+                <div class="y-label min">{{ getMinValue() }}</div>
+                <div class="y-label max">{{ getMaxValue() }}</div>
+            </div>
+        </div>
+
+        <!-- Таблица данных для мобильных устройств -->
+        <div class="data-table">
+            <table>
+                <thead>
+                <tr>
+                    <th>Время</th>
+                    <th>Температура</th>
+                    <th>Влажность</th>
+                    <th>Кислотность</th>
+                </tr>
+                </thead>
+                <tbody>
+                @for (hour of tableData(); track hour.time) {
+                <tr>
+                  <td>{{ hour.time }}</td>
+                  <td>{{ hour.temperature || '—' }}</td>
+                  <td>{{ hour.humidity || '—' }}</td>
+                  <td>{{ hour.acidity || '—' }}</td>
+                </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Диалог редактирования -->
+    @if (isEditing()) {
+    <div class="edit-dialog-overlay" (click)="cancelEdit()">
+      <div class="edit-dialog" (click)="$event.stopPropagation()">
+        <h4>Редактирование измерения</h4>
+        <div class="edit-form">
+          <div class="form-group">
+            <label>Тип:</label>
+            <span class="edit-value">{{ editingMeasurement()?.type || '' }}</span>
+              </div>
+              <div class="form-group">
+                <label>Время:</label>
+                <span class="edit-value">{{ editingMeasurement()?.timestamp | date:'dd.MM.yyyy HH:mm:ss' }}</span>
+              </div>
+              <div class="form-group">
+                <label>Новое значение:</label>
+                <input 
+                  type="number" 
+                  [(ngModel)]="editValue"
+                  step="0.01"
+                  [min]="getMinAllowedValue()"
+                  [max]="getMaxAllowedValue()"
+                  class="edit-input"
+                />
+                <span class="unit">{{ getUnit(editingMeasurement()?.type) }}</span>
+              </div>
+              <div class="form-actions">
+                <button type="button" class="btn-cancel" (click)="cancelEdit()">Отмена</button>
+                <button type="button" class="btn-save" (click)="saveEdit()">Сохранить</button>
+              </div>
+            </div>
+          </div>
+        </div>
+    }
+
+    <!-- Статистика -->
+    <div class="statistics">
+        <div class="stat-item">
+            <span class="stat-label">Средняя температура:</span>
+            <span class="stat-value">{{ avgTemperature() | number:'1.1-1' }}°C</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Средняя влажность:</span>
+            <span class="stat-value">{{ avgHumidity() | number:'1.1-1' }}%</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Средняя кислотность:</span>
+            <span class="stat-value">{{ avgAcidity() | number:'1.2-2' }} pH</span>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,19 @@
+
+/* .link__navigation:visited,  */
+.link__navigation {
+    font-family: 'Golos 14pt Medium 14x20';
+    color: var(--white-60per);
+    text-decoration: none;
+    padding-right: 40px;
+    position: relative;
+    cursor: pointer;
+}
+
+.link__navigation:hover,
+.link__navigation:focus {
+    color: var(--white-100per);
+}
+
+.isActiveLink {
+    color: var(--white-100per);
+}

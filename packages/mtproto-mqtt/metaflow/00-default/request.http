@@ -1,0 +1,297 @@
+### 1. Авторизация - получение токена
+# Команда: Авторизация
+# Соответствует: INTERFACE.md - Тестирование подключения
+# Метод: POST /common
+POST http://localhost:3100/common
+Content-Type: application/json
+
+{
+  "api": "auth./auth/user/login",
+  "args": {
+    "login": "developer",
+    "password": "123456"
+  }
+}
+> {%
+    client.global.set("token", response.body.token);
+%}
+
+### 2. Получение активных сессий пользователя
+# Команда: Получение данных из функции f_get_active
+# Соответствует: INTERFACE.md - Проверка состояния
+# Метод: POST /api
+POST http://localhost:3100/api
+Content-Type: application/json
+
+{
+  "api": "auth./active-user/get",
+  "args": {
+    "params": {},
+    "token": "{{token}}",
+    "appId": 10
+  }
+}
+
+### 3. Получение времени последнего успешного входа
+# Команда: Время последнего входа пользователя developer
+# Соответствует: INTERFACE.md - Диагностика проблем
+# Метод: POST /api
+POST http://localhost:3100/api
+Content-Type: application/json
+
+{
+  "api": "auth./login-attempt/last-success/get",
+  "args": {
+    "login": "developer",
+    "token": "{{token}}",
+    "appId": 10
+  }
+}
+
+### 4. Получение информации о последнем входе для всех активных пользователей
+# Команда: Информация о всех активных пользователях
+# Соответствует: INTERFACE.md - Сводка по командам
+# Метод: POST /api
+POST http://localhost:3100/api
+Content-Type: application/json
+
+{
+  "api": "auth./active-users-with-last-login/get",
+  "args": {
+    "token": "{{token}}",
+    "appId": 10
+  }
+}
+
+### 5. Тест подключения к MQTT брокеру
+# Команда: Проверка подключения
+# Соответствует: INTERFACE.md - Тестирование подключения
+# Метод: GET (имитация)
+GET http://localhost:3100/health
+Content-Type: application/json
+
+{
+  "action": "test-connect",
+  "broker": "tcp://mqtt.onemesh.ru:1883",
+  "user": "onemeshd"
+}
+
+### 6. Проверка поддержки пост-квантовой криптографии
+# Команда: Проверка PQ алгоритмов
+# Соответствует: INTERFACE.md - Проверка liboqs
+# Метод: GET /pq-check
+GET http://localhost:3100/pq-check
+Content-Type: application/json
+
+{
+  "action": "check-pq",
+  "algorithms": ["ML-KEM", "Kyber", "FrodoKEM", "NTRU"]
+}
+
+### 7. Тест гибридной криптографии (ECDH + ML-KEM)
+# Команда: Тест криптографии
+# Соответствует: INTERFACE.md - Тестирование криптографии
+# Метод: POST /crypto-test
+POST http://localhost:3100/crypto-test
+Content-Type: application/json
+
+{
+  "action": "test-hybrid",
+  "algorithm": "ML-KEM-768",
+  "message": "Hello Bob! This is Alice with hybrid crypto!",
+  "sender": "Alice",
+  "receiver": "Bob"
+}
+
+### 8. Отправка тестового сообщения в MQTT
+# Команда: Отправка сообщения
+# Соответствует: INTERFACE.md - Отправка тестового сообщения
+# Метод: POST /mqtt/send
+POST http://localhost:3100/mqtt/send
+Content-Type: application/json
+
+{
+  "action": "send-message",
+  "topic": "msh/RU/SPB",
+  "message": "Hello Mesh World!",
+  "recipient": "@broadcast",
+  "city": "SPB"
+}
+
+### 9. Стресс-тест MQTT сообщений
+# Команда: Стресс-тест
+# Соответствует: INTERFACE.md - Стресс-тест
+# Метод: POST /mqtt/stress-test
+POST http://localhost:3100/mqtt/stress-test
+Content-Type: application/json
+
+{
+  "action": "stress-test",
+  "count": 100,
+  "message": "Test message",
+  "city": "SPB",
+  "delay_ms": 10
+}
+
+### 10. Получение статуса шлюза
+# Команда: Проверка состояния шлюза
+# Соответствует: INTERFACE.md - Проверка состояния
+# Метод: GET /status
+GET http://localhost:3100/status
+Content-Type: application/json
+
+{
+  "action": "get-status",
+  "token": "{{token}}",
+  "appId": 10
+}
+
+### 11. Получение списка доступных городов
+# Команда: Список городов
+# Соответствует: INTERFACE.md - Запуск для городов
+# Метод: GET /cities
+GET http://localhost:3100/cities
+Content-Type: application/json
+
+{
+  "action": "list-cities"
+}
+
+### 12. Очистка кэша и логов
+# Команда: Очистка
+# Соответствует: INTERFACE.md - Очистка
+# Метод: POST /cleanup
+POST http://localhost:3100/cleanup
+Content-Type: application/json
+
+{
+  "action": "cleanup",
+  "token": "{{token}}",
+  "clean_logs": true,
+  "clean_cache": true
+}
+
+### 13. Получение версии и информации о сборке
+# Команда: Информация о сборке
+# Соответствует: INTERFACE.md - Проверка сборки
+# Метод: GET /version
+GET http://localhost:3100/version
+Content-Type: application/json
+
+{
+  "action": "get-version",
+  "include_dependencies": true
+}
+
+### 14. Тест множественных сообщений
+# Команда: Тест множественных сообщений
+# Соответствует: INTERFACE.md - Множественные сообщения
+# Метод: POST /mqtt/multi-test
+POST http://localhost:3100/mqtt/multi-test
+Content-Type: application/json
+
+{
+  "action": "test-multi",
+  "count": 5,
+  "messages": [
+    "Hello Bob!",
+    "How are you?",
+    "This is Alice",
+    "Testing crypto",
+    "Goodbye!"
+  ],
+  "city": "SPB"
+}
+
+### 15. Отладка и логирование
+# Команда: Отладка
+# Соответствует: INTERFACE.md - Отладка
+# Метод: POST /debug
+POST http://localhost:3100/debug
+Content-Type: application/json
+
+{
+  "action": "debug",
+  "token": "{{token}}",
+  "enable_verbose": true,
+  "log_packets": true,
+  "log_level": "DEBUG"
+}
+
+### 16. Получение статистики по пользователям
+# Команда: Статистика пользователей
+# Соответствует: INTERFACE.md - Статистика
+# Метод: GET /users/stats
+GET http://localhost:3100/users/stats
+Content-Type: application/json
+
+{
+  "action": "get-user-stats",
+  "token": "{{token}}",
+  "appId": 10,
+  "period": "24h"
+}
+
+### 17. Изменение пароля пользователя
+# Команда: Смена пароля
+# Соответствует: INTERFACE.md - Безопасность
+# Метод: POST /user/change-password
+POST http://localhost:3100/user/change-password
+Content-Type: application/json
+
+{
+  "api": "auth./user/change-password",
+  "args": {
+    "login": "developer",
+    "old_password": "123456",
+    "new_password": "new_password_123",
+    "token": "{{token}}",
+    "appId": 10
+  }
+}
+
+### 18. Выход из системы (logout)
+# Команда: Завершение сессии
+# Соответствует: INTERFACE.md - Безопасность
+# Метод: POST /auth/logout
+POST http://localhost:3100/auth/logout
+Content-Type: application/json
+
+{
+  "api": "auth./auth/user/logout",
+  "args": {
+    "token": "{{token}}",
+    "appId": 10
+  }
+}
+
+### 19. Получение истории входов пользователя
+# Команда: История входов
+# Соответствует: INTERFACE.md - Диагностика
+# Метод: POST /user/login-history
+POST http://localhost:3100/user/login-history
+Content-Type: application/json
+
+{
+  "api": "auth./login-history/get",
+  "args": {
+    "login": "developer",
+    "token": "{{token}}",
+    "appId": 10,
+    "limit": 10
+  }
+}
+
+### 20. Проверка здоровья сервиса
+# Команда: Health check
+# Соответствует: INTERFACE.md - Проверка зависимостей
+# Метод: GET /health
+GET http://localhost:3100/health
+Content-Type: application/json
+
+{
+  "action": "health-check",
+  "check_mqtt": true,
+  "check_crypto": true,
+  "check_database": true
+}

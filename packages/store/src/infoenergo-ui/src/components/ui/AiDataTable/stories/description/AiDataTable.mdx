@@ -1,0 +1,432 @@
+import { Meta, Title } from '@storybook/addon-docs/blocks';
+import ArchitectureImage from '~/docs/architecture/AiDataTable/AiDataTable.png';
+
+<Meta title="Компоненты/AiDataTable (в разработке)/Документация" />
+
+<Title>AiDataTable (в разработке)</Title>
+
+`AiDataTable` — таблица данных на базе `NDataTable` из `naive-ui` с тулбаром, футером, редактированием ячеек, выбором строк, фильтрацией и сортировкой в заголовках, сохранением пользовательских настроек и опциональной подкачкой данных по скроллу.
+
+Компонент принимает плоские пропсы типа `TableProps`. Источник типов: `src/components/ui/AiDataTable/types.ts`.
+
+Запросы к API выполняются через `tableApi` из глобальных настроек (`initGlobalSettings` в `AiAppProviders` приложения-потребителя). В `api` передаются **строковые эндпоинты**, а не функции.
+
+export const tablePropsTable = {
+    headers: ['Поле', 'Тип', 'По умолчанию', 'Описание'],
+    data: [
+        { prop: 'columns', type: 'UserOnlyColumn[]', default: '-', description: 'Обязательный массив описаний колонок' },
+        { prop: 'api', type: '{ get: string, set?: string }', default: '-', description: 'Эндпоинты загрузки и сохранения данных (см. раздел API)' },
+        { prop: 'keyExpr', type: 'string', default: "'id'", description: 'Имя поля в строке данных, используемое как идентификатор строки' },
+        { prop: 'isEditable', type: 'boolean', default: 'false', description: 'Разрешить редактирование ячеек глобально (совместно с `allowEditing` у колонок)' },
+        { prop: 'selectionMode', type: "'multiple' | 'single' | 'none'", default: "'multiple'", description: 'Режим колонки выбора строк' },
+        { prop: 'showFooter', type: 'boolean', default: 'true', description: 'Показывать футер с количеством записей' },
+        { prop: 'isPopover', type: 'boolean', default: 'false', description: 'Таблица внутри popover — тулбар скрывается' },
+        { prop: 'cellHeight', type: 'number', default: '29', description: 'Высота ячейки в пикселях; задаёт CSS-переменную `--ai-cell-height`' },
+        { prop: 'title', type: 'string', default: '-', description: 'Заголовок таблицы в тулбаре' },
+        { prop: 'viewId', type: 'string', default: '-', description: 'Идентификатор таблицы для загрузки и сохранения пользовательских настроек; без него настройки не сохраняются' },
+        { prop: 'toolbarItems', type: 'ToolbarItem[]', default: '-', description: 'Дополнительные элементы тулбара; отображаются перед стандартными кнопками' },
+        { prop: 'config', type: 'Partial<DataTableProps>', default: '-', description: 'Дополнительные пропсы `NDataTable`; сливаются поверх внутренних значений по умолчанию' },
+        { prop: 'pageSize', type: 'number', default: '-', description: 'Размер страницы для режима виртуального скролла; при задании включается кастомная подкачка данных' },
+    ],
+};
+
+export const userOnlyColumnTable = {
+    headers: ['Поле', 'Тип', 'По умолчанию', 'Описание'],
+    data: [
+        { prop: 'dataField', type: 'string', default: '-', description: 'Имя поля в объекте строки / ключ колонки (становится `key` у naive-ui)' },
+        { prop: 'caption', type: 'string', default: '-', description: 'Текст заголовка колонки (становится `title` у naive-ui)' },
+        { prop: 'allowEditing', type: 'boolean', default: '-', description: 'Явное разрешение или запрет редактирования колонки; если не задано — используется `isEditable` таблицы' },
+        { prop: 'dataType', type: 'DataType', default: "'string'", description: 'Тип данных: `string`, `number`, `date`, `datetime`, `boolean`; влияет на дефолтные размеры, выравнивание и редактор' },
+        { prop: 'displayField', type: 'string', default: '-', description: 'Отдельное поле для отображаемого значения, если оно отличается от `dataField`' },
+        { prop: 'component', type: 'Component', default: '-', description: 'Компонент отображения значения в ячейке (см. `@/interfaces/common.ts`)' },
+        { prop: 'editor', type: 'Editor', default: '-', description: 'Редактор ячейки: `selector`, `popover` или `modal`' },
+        { prop: 'children', type: 'UserOnlyColumn[]', default: '-', description: 'Вложенные колонки для иерархического заголовка' },
+        { prop: 'visible', type: 'boolean', default: 'true', description: 'Видимость колонки' },
+        { prop: 'showInColumnChooser', type: 'boolean', default: 'true', description: 'Показывать колонку в выборе колонок тулбара' },
+    ],
+};
+
+export const emitsTable = {
+    headers: ['Событие', 'Аргументы', 'Описание'],
+    data: [
+        { prop: 'row-click', type: 'row: DataTableRowData', description: 'Клик по строке; строка получает фокус' },
+        { prop: 'row-doubleclick', type: 'row: DataTableRowData', description: 'Двойной клик по строке' },
+        { prop: 'toolbar-action', type: 'id: string', description: 'Клик по кнопке тулбара (включая пользовательские из `toolbarItems`) после выполнения встроенного действия' },
+        { prop: 'create-filter', type: '-', description: 'Клик по кнопке «Создать фильтр» в футере' },
+    ],
+};
+
+export const exposeTable = {
+    headers: ['Свойство / метод', 'Тип', 'Описание'],
+    data: [
+        { prop: 'focusedRowKey', type: 'Readonly<Ref<RowKey | null>>', description: 'Ключ сфокусированной строки' },
+        { prop: 'checkedRowKeys', type: 'Readonly<Ref<RowKey[]>>', description: 'Ключи выбранных строк' },
+        { prop: 'refreshData', type: '() => Promise<void>', description: 'Перезагрузка данных (аналог действия refresh в тулбаре)' },
+    ],
+};
+
+export const infoCalloutStyle = {
+    margin: '16px 0',
+    padding: '2px 12px',
+    borderLeft: '4px solid #64B5F6',
+    background: '#E3F2FD',
+    borderRadius: '6px',
+    color: '#0D47A1',
+    fontWeight: 600,
+};
+
+export const warningCalloutStyle = {
+    margin: '16px 0',
+    padding: '2px 12px',
+    borderLeft: '4px solid #FFB74D',
+    background: '#FFF3E0',
+    borderRadius: '6px',
+    color: '#E65100',
+    fontWeight: 600,
+};
+
+export const PropsTable = ({ table }) => (
+    <table style={{ margin: '20px auto', width: '100%', maxWidth: '900px', tableLayout: 'fixed' }}>
+        <thead>
+        <tr>
+            {table.headers.map((caption, idx) => (
+                <th key={idx}>{caption}</th>
+            ))}
+        </tr>
+        </thead>
+        <tbody>
+        {table.data.map((row, idx) => (
+            <tr key={idx}>
+                <td><code>{row.prop}</code></td>
+                <td><code>{row.type}</code></td>
+                <td><code>{row.default ?? '-'}</code></td>
+                <td>{row.description}</td>
+            </tr>
+        ))}
+        </tbody>
+    </table>
+);
+
+export const EmitsTable = ({ table }) => (
+    <table style={{ margin: '20px auto', width: '100%', maxWidth: '900px', tableLayout: 'fixed' }}>
+        <thead>
+        <tr>
+            {table.headers.map((caption, idx) => (
+                <th key={idx}>{caption}</th>
+            ))}
+        </tr>
+        </thead>
+        <tbody>
+        {table.data.map((row, idx) => (
+            <tr key={idx}>
+                <td><code>{row.prop}</code></td>
+                <td><code>{row.type}</code></td>
+                <td>{row.description}</td>
+            </tr>
+        ))}
+        </tbody>
+    </table>
+);
+
+export const ExposeTable = ({ table }) => (
+    <table style={{ margin: '20px auto', width: '100%', maxWidth: '900px', tableLayout: 'fixed' }}>
+        <thead>
+        <tr>
+            {table.headers.map((caption, idx) => (
+                <th key={idx}>{caption}</th>
+            ))}
+        </tr>
+        </thead>
+        <tbody>
+        {table.data.map((row, idx) => (
+            <tr key={idx}>
+                <td><code>{row.prop}</code></td>
+                <td><code>{row.type}</code></td>
+                <td>{row.description}</td>
+            </tr>
+        ))}
+        </tbody>
+    </table>
+);
+
+## Пропсы компонента
+
+<PropsTable table={tablePropsTable} />
+
+<div style={infoCalloutStyle}>
+    Если <code>pageSize</code> не задан, таблица загружает все данные одним запросом.
+    Если <code>pageSize</code> задан, включается кастомный виртуальный скролл с подкачкой страниц.
+</div>
+
+### Тип `TableProps`
+
+```ts
+export interface TableProps {
+    cellHeight?: number;
+    pageSize?: number;
+    title?: string;
+    isPopover?: boolean;
+    isEditable?: boolean;
+    selectionMode?: 'multiple' | 'single' | 'none';
+    keyExpr?: string;
+    viewId?: string;
+    config?: Partial<DataTableProps>;
+    columns: UserOnlyColumn[];
+    showFooter?: boolean;
+    toolbarItems?: ToolbarItem[];
+    api: {
+        get: string;
+        set?: string;
+    };
+}
+```
+
+### Тип `UserOnlyColumn`
+
+Колонка в `columns` — доменные поля `UserOnlyColumn` плюс любые подходящие поля `DataTableBaseColumn` (ширина, `align`, `fixed`, `sorter` и т.д.), **кроме** `key` и `title`: они выставляются из `dataField` и `caption`.
+
+<PropsTable table={userOnlyColumnTable} />
+
+```ts
+export interface UserOnlyColumn {
+    allowEditing?: boolean;
+    caption?: string;
+    component?: Component;
+    editor?: Editor;
+    dataField: string;
+    displayField?: string;
+    dataType?: DataType;
+    children?: UserOnlyColumn[];
+    visible?: boolean;
+    showInColumnChooser?: boolean;
+}
+
+export type BaseColumn = UserOnlyColumn & DataTableBaseColumn;
+```
+
+Типы `Component`, `Editor`, `DataType` — в `@/interfaces/common.ts`. Редакторы: `selector`, `popover`, `modal`.
+
+## API
+
+Все запросы идут через `tableApi.data(endpoint, body?)`, настроенный в `initGlobalSettings`. Эндпоинты в `api` — строки (например, `'api/table/data/get'`).
+
+### Загрузка данных (обычная таблица)
+
+**Запрос:** `tableApi.data(api.get)`
+
+**Ответ при успехе:**
+
+```ts
+{ success: true, data: DataTableRowData[] }
+```
+
+### Загрузка данных (виртуальный скролл)
+
+**Запрос:** `tableApi.data(api.get, { skip, take })`
+
+**Ответ при успехе:**
+
+```ts
+{ result: true, data: DataTableRowData[], totalCount: number }
+```
+
+### Сохранение изменений
+
+**Запрос:** `tableApi.data(api.set, body)`
+
+```ts
+{
+    insertDataArgs: DataTableRowData[];  // новые строки
+    updateDataArgs: DataTableRowData[];  // изменённые строки
+    deleteDataArgs: [];                  // удаление — отдельный запрос (см. delete)
+}
+```
+
+**Ответ при успехе:** `{ success: true }`
+
+**Ответ при ошибках валидации:**
+
+```ts
+{
+    success: false,
+    validationErrors: Array<{
+        item: Record<string, RowKey>;  // объект строки с ключом keyExpr
+        field: string;                  // имя поля (dataField)
+        message: string[];              // тексты ошибок
+    }>;
+}
+```
+
+При `validationErrors` соответствующие ячейки подсвечиваются, при наведении показывается первая строка из `message`. Ошибка снимается при редактировании поля. Список ошибок очищается при успешной загрузке или повторной попытке сохранения.
+
+### Удаление строк
+
+Для существующих на сервере строк отправляется запрос на `api.set`:
+
+```ts
+{
+    insertDataArgs: [],
+    updateDataArgs: [],
+    deleteDataArgs: DataTableRowData[];
+}
+```
+
+Несохранённые новые строки (`isNewRow: true`) удаляются локально без запроса.
+
+### Редактор `selector`
+
+Опции для выпадающего списка загружаются через `tableApi.data(editor.api)` при фокусе поля. Эндпоинт задаётся в `editor.api` колонки (например, `'api/table/selector/data/get'`).
+
+### Пользовательские настройки таблицы
+
+Если задан `viewId`, при монтировании таблица загружает сохранённые настройки через `tableApi.userChanges(tableApi.userSettingsApi.get, { viewId })`.
+
+Сохраняются:
+
+- порядок, видимость и ширина колонок;
+- режим автосохранения;
+- видимость области группировки;
+- сфокусированная строка.
+
+Сохранение выполняется через `tableApi.userChanges(tableApi.userSettingsApi.set, { viewId, settings })`.
+
+Без `viewId` загрузка и сохранение настроек не выполняются.
+
+## Поведение
+
+### Тулбар
+
+Отображается, если `isPopover` равен `false`. Стандартные действия:
+
+- **refresh** — перезагрузка данных (с подтверждением при несохранённых изменениях)
+- **add** — добавление строки ниже сфокусированной (или в начало, если фокуса нет)
+- **delete** — удаление выбранных строк (с подтверждением); после удаления данные перезагружаются, несохранённые изменения в остальных строках сохраняются
+- **copy** — копирование сфокусированной строки
+- **save** — сохранение изменений через `api.set`
+- **column-chooser** — управление видимостью колонок (нельзя скрыть все колонки)
+- **settings** — меню настроек: автосохранение, сохранение, сброс, показ области группировки
+
+В режиме `isEditable: false` доступны только действия без изменения данных (refresh, column-chooser, settings).
+
+Пользовательские кнопки из `toolbarItems` отображаются перед стандартными. По клику сначала выполняется встроенное действие (если `id` совпадает со стандартным), затем эмитится `toolbar-action`.
+
+### Автосохранение настроек
+
+При включённом автосохранении (по умолчанию включено) изменения колонок, фокуса строки и видимости группировки отправляются на сервер с задержкой **1000 мс**.
+
+Переключение чекбокса «Автоматически сохранять настройки» сохраняется сразу.
+
+### Футер
+
+Отображается при `showFooter: true` (по умолчанию). Показывает количество выбранных и общее количество записей. В режиме виртуального скролла общее количество берётся из `totalCount` ответа API. Кнопка «Создать фильтр» эмитит `create-filter`.
+
+### Строки и ячейки
+
+- Клик по строке устанавливает фокус и эмитит `row-click`
+- Двойной клик эмитит `row-doubleclick`
+- У последней строки таблицы отображается нижняя граница
+- Заголовки колонок поддерживают сортировку, фильтрацию и перетаскивание для изменения порядка
+
+**Приоритет подсветки ячеек** (от высшего к низшему):
+
+1. Ошибка валидации — красный фон, индикатор в углу, tooltip при наведении
+2. Изменённое значение относительно данных с сервера — зелёный фон
+3. Сфокусированная или выбранная строка — голубой фон
+
+В режиме `pageSize` (класс `virtual-scroll`) ячейки имеют фиксированную высоту `cellHeight`, длинный текст в нередактируемых полях обрезается с многоточием.
+
+### Редактирование полей
+
+Редактирование определяется так:
+
+1. `allowEditing: true` у колонки — колонка редактируема
+2. `allowEditing: false` у колонки — колонка только для чтения
+3. иначе — используется глобальный `isEditable` таблицы
+
+<div style={warningCalloutStyle}>
+    В режиме виртуального скролла редактирование не отключается глобально.
+    Чтобы запретить редактирование отдельной колонки, задайте <code>allowEditing: false</code>.
+</div>
+
+Дополнительно:
+
+- пустая строка в текстовых полях сохраняется как `null`, а не `''`
+- редактирование по клику на ячейку (кроме `boolean`, который редактируется сразу)
+- в режиме virtual scroll локальные несохранённые изменения применяются к подгружаемым данным
+
+### Ресайз колонок
+
+Колонки можно менять по ширине перетаскиванием разделителя в заголовке. Область захвата и позиционирование разделителя настроены для удобного использования.
+
+### Дефолты `NDataTable`
+
+Внутренние значения по умолчанию (`defaults.ts`): `singleLine: false`, `flexHeight: true`, `scrollX: 'min-content'`.
+
+При заданном `pageSize` дополнительно выставляются `virtualScroll: false`, `remote: true`.
+
+## События
+
+<EmitsTable table={emitsTable} />
+
+## Методы и свойства ref
+
+Через ref на компонент доступны:
+
+<ExposeTable table={exposeTable} />
+
+```ts
+const tableRef = ref<InstanceType<typeof AiDataTable> | null>(null);
+
+tableRef.value?.refreshData();
+const focused = tableRef.value?.focusedRowKey;
+const selected = tableRef.value?.checkedRowKeys;
+```
+
+## Пример использования
+
+```html
+<AiDataTable
+    is-editable
+    title="Справочник"
+    key-expr="rowId"
+    view-id="dictionary-table"
+    :api="{
+        get: 'api/table/data/get',
+        set: 'api/table/data/set',
+    }"
+    :columns="[
+        { caption: 'Название', dataField: 'name' },
+        { caption: 'Возраст', dataField: 'age', dataType: 'number' },
+        {
+            caption: 'Справочник',
+            dataField: 'refId',
+            displayField: 'refName',
+            editor: {
+                type: 'selector',
+                api: 'api/table/selector/data/get',
+                id: 'id',
+                text: 'name',
+            },
+        },
+    ]"
+    :toolbar-items="[
+        {
+            itemType: 'button',
+            id: 'export',
+            buttonType: 'icon',
+            hint: 'Экспорт',
+            icon: ExportIcon,
+            canModifyData: false,
+        },
+    ]"
+    @row-click="onRowClick"
+    @toolbar-action="onToolbarAction"
+    @create-filter="onCreateFilter"
+/>
+```
+
+Перед использованием таблицы в приложении необходимо инициализировать глобальные настройки с реализацией `tableApi.data` и `tableApi.userChanges`, которые выполняют HTTP-запросы к переданным эндпоинтам.
+
+## Архитектура
+
+<img src={ArchitectureImage} alt="Архитектура AiDataTable" />

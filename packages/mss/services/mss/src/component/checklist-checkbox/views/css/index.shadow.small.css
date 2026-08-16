@@ -1,0 +1,46 @@
+@media only screen and (max-width: 427px) {
+    /*.custom-checkbox + label:before {*/
+    /*    content: "";*/
+    /*    margin-right: 5.87vw;*/
+    /*    display: flex;*/
+    /*    align-self: center;*/
+    /*    width: 6.4vw;*/
+    /*    min-width: 6.4vw;*/
+    /*    min-height: 6.4vw;*/
+    /*    height: 6.4vw;*/
+    /*    background: white;*/
+    /*}*/
+
+    .custom-checkbox + label, .custom-checkbox + label[for="checkbox-5"], .custom-checkbox + label[for="checkbox-7"] {
+        color: var(--unnamed, #000);
+        /* Text Phone Small */
+        font-family: 'Raleway', serif;
+        font-size: 3.73vw;
+        font-style: normal;
+        font-weight: 400;
+        line-height: normal;
+    }
+
+    /*.custom-checkbox:checked + label:after {*/
+    /*    width: 6.4vw;*/
+    /*    height: 6.4vw;*/
+    /*}*/
+
+    .custom-checkbox + label:before {
+        border-radius: 1.6vw;
+    }
+
+    .custom-checkbox + label[for="checkbox-6"]:before, .custom-checkbox + label[for="checkbox-4"]:before, .custom-checkbox + label[for="checkbox-5"]:before, .custom-checkbox + label[for="checkbox-7"]:before {
+        content: "";
+        align-self: flex-start;
+    }
+
+    :host([data-id="checkbox_2"]) .container, :host([data-id="checkbox_1"]) .container, :host([data-id="checkbox_3"]) .container {
+        gap: 6.4vw
+    }
+
+    .custom-checkbox+label::before {
+        width: 5.87vw;
+        height: 5.87vw;
+    }
+}

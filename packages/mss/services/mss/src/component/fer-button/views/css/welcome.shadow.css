@@ -1,0 +1,30 @@
+:host {
+    align-self: center;
+}
+
+p.save {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0.36vw 0.57vw;
+
+    width: 7.81vw;
+    height: 2.34vw;
+    background: #00A0A8;
+    border-radius: 0.42vw;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+p.cancel {
+    font-family: 'Raleway', serif;
+    font-style: normal;
+    font-weight: 700;
+    font-size: 0.63vw;
+    line-height: 0.73vw;
+    text-transform: uppercase;
+    color: #00A0A8;
+    margin: 0;
+    box-sizing: border-box;
+}

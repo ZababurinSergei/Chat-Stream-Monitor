@@ -1,0 +1,42 @@
+.wrapper {
+	width: 100%;
+	position: relative;
+}
+
+.modalWrapper {
+	height: 100%;
+	width: 100%;
+}
+
+.modalWrapperHeader {
+	background-color: var(--white-100per);
+	height: 60px;
+	box-shadow: 0px 2px 8px rgba(0, 31, 141, 0.40);
+	border-radius: 4px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 9px 0;
+}
+
+.modalText {
+margin-left: 8px;
+}
+
+/* .crossDeleteWrapper {
+	display: flex;
+	position: relative;
+}
+.crossDeleteContainer {
+	display: flex;
+	position: absolute;
+	z-index: 40;
+	top: -15px;
+	left: -30px;
+	cursor: pointer;
+} */
+
+.modalResultSearchNullWrapper {
+	position: relative;
+	top: -60px;
+}

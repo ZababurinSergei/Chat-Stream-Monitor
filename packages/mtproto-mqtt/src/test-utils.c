@@ -1,7 +1,6 @@
 /*
     Test Utilities - Реализация
     Вспомогательные функции для тестирования
-    Версия с исправлениями памяти и защиты
 */
 
 #include "test-utils.h"
@@ -60,7 +59,6 @@ void test_log(log_level_t level, const char *file, int line,
             break;
     }
 
-    // Получаем имя файла без пути
     const char *filename = strrchr(file, '/');
     if (filename) {
         filename++;
@@ -124,7 +122,6 @@ void test_generate_mesh_id(char *buffer, size_t size) {
 
     char random_str[64];
     test_generate_random_string(random_str, sizeof(random_str));
-
     snprintf(buffer, size, "@%s", random_str);
 }
 
@@ -132,9 +129,8 @@ uint32_t test_generate_random_ip(void) {
     unsigned char ip[4];
     test_generate_random_data(ip, 4);
 
-    // Избегаем зарезервированных адресов
-    ip[0] = (ip[0] % 223) + 1;  // 1-223
-    if (ip[0] == 127) ip[0] = 10; // Избегаем localhost
+    ip[0] = (ip[0] % 223) + 1;
+    if (ip[0] == 127) ip[0] = 10;
     if (ip[0] == 0) ip[0] = 192;
 
     return (uint32_t)ip[0] << 24 | (uint32_t)ip[1] << 16 |
@@ -146,7 +142,6 @@ uint16_t test_generate_random_port(void) {
     test_generate_random_data(port, 2);
 
     uint16_t p = (uint16_t)port[0] << 8 | (uint16_t)port[1];
-    // Избегаем привилегированных портов
     return (p % 60000) + 1024;
 }
 
@@ -243,7 +238,6 @@ char* create_temp_file(const char *prefix) {
     static char filename[256];
     char template_path[256];
 
-    // Используем /tmp
     const char *tmpdir = getenv("TMPDIR");
     if (!tmpdir) tmpdir = "/tmp";
 
@@ -302,14 +296,12 @@ void test_delete_temp_dir(const char *dirname) {
 
 int test_is_valid_ipv4(const char *ip) {
     if (!ip) return 0;
-
     struct in_addr addr;
     return inet_pton(AF_INET, ip, &addr) == 1;
 }
 
 int test_is_valid_ipv6(const char *ip) {
     if (!ip) return 0;
-
     struct in6_addr addr;
     return inet_pton(AF_INET6, ip, &addr) == 1;
 }
@@ -338,7 +330,6 @@ int test_is_valid_mesh_id(const char *id) {
 
 const char* test_ip_to_string(uint32_t ip, char *buffer, size_t size) {
     if (!buffer || size < 16) return "invalid";
-
     snprintf(buffer, size, "%d.%d.%d.%d",
              (ip >> 24) & 0xFF,
              (ip >> 16) & 0xFF,
@@ -370,7 +361,6 @@ void test_hex_dump(const char *label, const unsigned char *data, size_t len) {
             printf("%02x ", data[i + j]);
             if (j == 7) printf(" ");
         }
-        // Выравнивание
         if (len - i < 16) {
             for (size_t j = len - i; j < 16; j++) {
                 printf("   ");
@@ -488,7 +478,6 @@ void test_tcp_server_stop(test_tcp_server_t *server) {
 int test_tcp_server_accept(test_tcp_server_t *server, int timeout_ms) {
     if (!server || !server->running) return -1;
 
-    // Устанавливаем таймаут
     struct timeval tv;
     tv.tv_sec = timeout_ms / 1000;
     tv.tv_usec = (timeout_ms % 1000) * 1000;
@@ -517,8 +506,7 @@ int test_tcp_server_accept(test_tcp_server_t *server, int timeout_ms) {
         return -1;
     }
 
-    LOG_DEBUG("Accepted connection from %s:%d",
-              inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
+    LOG_DEBUG("Accepted connection");
     return 0;
 }
 
@@ -667,95 +655,6 @@ int test_tcp_client_receive(test_tcp_client_t *client,
 }
 
 // ============================================================================
-// Мок-очередь сообщений
-// ============================================================================
-
-void test_mock_queue_init(test_mock_queue_t *queue) {
-    if (!queue) return;
-    memset(queue, 0, sizeof(test_mock_queue_t));
-    queue->capacity = 64;
-    queue->messages = calloc(queue->capacity, sizeof(test_mock_message_t));
-}
-
-void test_mock_queue_destroy(test_mock_queue_t *queue) {
-    if (!queue) return;
-    test_mock_queue_clear(queue);
-    free(queue->messages);
-    memset(queue, 0, sizeof(test_mock_queue_t));
-}
-
-int test_mock_queue_push(test_mock_queue_t *queue, const char *topic,
-                        const void *payload, size_t payload_len,
-                        int qos, int retained) {
-    if (!queue || !topic || !payload) return -1;
-
-    if (queue->count >= queue->capacity) {
-        // Увеличиваем емкость
-        size_t new_capacity = queue->capacity * 2;
-        test_mock_message_t *new_messages = realloc(queue->messages,
-                                                    new_capacity * sizeof(test_mock_message_t));
-        if (!new_messages) {
-            LOG_ERROR("Failed to reallocate mock queue");
-            return -1;
-        }
-        queue->messages = new_messages;
-        queue->capacity = new_capacity;
-    }
-
-    test_mock_message_t *msg = &queue->messages[queue->count];
-    snprintf(msg->topic, sizeof(msg->topic), "%s", topic);
-
-    msg->payload = malloc(payload_len);
-    if (!msg->payload) {
-        LOG_ERROR("Failed to allocate payload");
-        return -1;
-    }
-    memcpy(msg->payload, payload, payload_len);
-    msg->payload_len = payload_len;
-    msg->qos = qos;
-    msg->retained = retained;
-    msg->timestamp = time(NULL);
-
-    queue->count++;
-    return 0;
-}
-
-int test_mock_queue_pop(test_mock_queue_t *queue, test_mock_message_t *msg) {
-    if (!queue || !msg) return -1;
-
-    if (queue->count == 0) return -2;
-
-    *msg = queue->messages[0];
-
-    // Сдвигаем очередь
-    for (size_t i = 1; i < queue->count; i++) {
-        queue->messages[i - 1] = queue->messages[i];
-    }
-    queue->count--;
-
-    return 0;
-}
-
-void test_mock_queue_clear(test_mock_queue_t *queue) {
-    if (!queue) return;
-
-    for (size_t i = 0; i < queue->count; i++) {
-        free(queue->messages[i].payload);
-    }
-    queue->count = 0;
-}
-
-int test_mock_queue_empty(test_mock_queue_t *queue) {
-    if (!queue) return 1;
-    return queue->count == 0;
-}
-
-size_t test_mock_queue_count(test_mock_queue_t *queue) {
-    if (!queue) return 0;
-    return queue->count;
-}
-
-// ============================================================================
 // Бенчмаркинг
 // ============================================================================
 
@@ -865,141 +764,40 @@ void test_print_usage(const char *progname) {
 }
 
 // ============================================================================
-// OneMesh утилиты
-// ============================================================================
-
-int onemesh_parse_topic(const char *topic, onemesh_topic_t *result) {
-    if (!topic || !result) return -1;
-
-    memset(result, 0, sizeof(onemesh_topic_t));
-
-    // Формат: msh/RU/CITY/TYPE/SUBTYPE/DEVICE_ID
-    char copy[256];
-    snprintf(copy, sizeof(copy), "%s", topic);
-
-    char *parts[6];
-    int num_parts = 0;
-    char *saveptr;
-    char *token = strtok_r(copy, "/", &saveptr);
-
-    while (token && num_parts < 6) {
-        parts[num_parts++] = token;
-        token = strtok_r(NULL, "/", &saveptr);
-    }
-
-    if (num_parts < 3) return -1;
-
-    snprintf(result->network, sizeof(result->network), "%s", parts[0]);
-    snprintf(result->region, sizeof(result->region), "%s", parts[1]);
-    snprintf(result->city, sizeof(result->city), "%s", parts[2]);
-
-    if (num_parts > 3) {
-        snprintf(result->type, sizeof(result->type), "%s", parts[3]);
-    }
-    if (num_parts > 4) {
-        snprintf(result->subtype, sizeof(result->subtype), "%s", parts[4]);
-    }
-    if (num_parts > 5) {
-        snprintf(result->device_id, sizeof(result->device_id), "%s", parts[5]);
-    }
-
-    return 0;
-}
-
-void onemesh_print_topic(const onemesh_topic_t *topic) {
-    if (!topic) return;
-
-    printf("\n📋 OneMesh Topic:\n");
-    printf("  Network:  %s\n", topic->network);
-    printf("  Region:   %s\n", topic->region);
-    printf("  City:     %s\n", topic->city);
-    printf("  Type:     %s\n", topic->type);
-    printf("  Subtype:  %s\n", topic->subtype);
-    printf("  Device:   %s\n", topic->device_id);
-}
-
-int onemesh_build_topic(char *buffer, size_t buffer_size,
-                       const char *city, const char *type,
-                       const char *device_id, const char *subtype) {
-    if (!buffer || !city || !type) return -1;
-
-    if (subtype && subtype[0] != '\0') {
-        if (device_id && device_id[0] != '\0') {
-            snprintf(buffer, buffer_size, "msh/RU/%s/%s/%s/%s",
-                     city, type, subtype, device_id);
-        } else {
-            snprintf(buffer, buffer_size, "msh/RU/%s/%s/%s",
-                     city, type, subtype);
-        }
-    } else {
-        if (device_id && device_id[0] != '\0') {
-            snprintf(buffer, buffer_size, "msh/RU/%s/%s/%s",
-                     city, type, device_id);
-        } else {
-            snprintf(buffer, buffer_size, "msh/RU/%s/%s",
-                     city, type);
-        }
-    }
-
-    return 0;
-}
-
-const char** onemesh_get_cities(void) {
-    static const char *cities[] = {
-        "SPB", "MOS", "KRD", "EKB", "NSK",
-        "KZN", "VVO", "SOCH", "CRM", NULL
-    };
-    return cities;
-}
-
-int onemesh_get_city_count(void) {
-    const char **cities = onemesh_get_cities();
-    int count = 0;
-    while (cities[count]) count++;
-    return count;
-}
-
-// ============================================================================
 // Валидация пакетов
 // ============================================================================
 
 int test_validate_mesh_packet(const unsigned char *data, size_t len) {
     if (!data || len < 4) return -1;
 
-    // Проверяем magic
     uint32_t magic = *(uint32_t*)data;
     if (magic != 0x4D455348) {
         LOG_DEBUG("Invalid magic: 0x%08X", magic);
         return -2;
     }
 
-    // Проверяем минимальный размер
     if (len < sizeof(mesh_packet_t)) {
         LOG_DEBUG("Packet too small: %zu < %zu",
                   len, sizeof(mesh_packet_t));
         return -3;
     }
 
-    // Проверяем версию
     const mesh_packet_t *packet = (const mesh_packet_t*)data;
     if (packet->version != MESH_PACKET_VERSION) {
         LOG_DEBUG("Unsupported version: %u", packet->version);
         return -4;
     }
 
-    // Проверяем тип
     if (packet->type > MESH_MSG_TYPE_MAX) {
         LOG_DEBUG("Invalid type: %u", packet->type);
         return -5;
     }
 
-    // Проверяем payload
     if (packet->payload_len > MESH_PAYLOAD_MAX) {
         LOG_DEBUG("Payload too large: %u", packet->payload_len);
         return -6;
     }
 
-    // Проверяем хопы
     if (packet->hop_count > packet->max_hops) {
         LOG_DEBUG("Hops exceeded: %u > %u",
                   packet->hop_count, packet->max_hops);
@@ -1012,27 +810,23 @@ int test_validate_mesh_packet(const unsigned char *data, size_t len) {
 int test_validate_mtproto_packet(const unsigned char *data, size_t len) {
     if (!data || len < 4) return -1;
 
-    // Проверяем минимальный размер
     if (len < 20) {
         LOG_DEBUG("MTProto packet too small: %zu", len);
         return -2;
     }
 
-    // Проверяем auth_key_id
     uint64_t auth_key_id = *(uint64_t*)data;
     if (auth_key_id == 0) {
-        // Unencrypted - проверяем функцию
         if (len >= 24) {
             uint32_t func = *(uint32_t*)(data + 20);
             if (func == 0x60469778 || func == 0xbe7e8ef1) {
-                return 0; // req_pq или req_pq_multi
+                return 0;
             }
         }
         LOG_DEBUG("Unknown unencrypted MTProto packet");
         return -3;
     }
 
-    // Проверяем msg_key
     int has_nonzero = 0;
     for (int i = 8; i < 24; i++) {
         if (data[i] != 0) {
@@ -1072,14 +866,13 @@ void create_test_packet(uint32_t type, const char *receiver,
 void create_mtproto_packet(unsigned char *output, size_t *output_len) {
     if (!output || !output_len) return;
 
-    // Простой req_pq
     uint32_t packet[] = {
-        0x00000000,  // auth_key_id (0 для unencrypted)
-        0x60469778,  // req_pq
-        0x12345678,  // nonce (первые 4 байта)
-        0x9ABCDEF0,  // nonce (следующие 4 байта)
-        0x00000000,  // padding
-        0x00000000   // padding
+        0x00000000,
+        0x60469778,
+        0x12345678,
+        0x9ABCDEF0,
+        0x00000000,
+        0x00000000
     };
 
     *output_len = sizeof(packet);

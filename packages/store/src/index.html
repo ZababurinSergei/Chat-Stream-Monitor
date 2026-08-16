@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏢 Enterprise Store Admin — 100% СИМВОЛЫ</title>
+    <link rel="stylesheet" href="./styles.css">
+    <!-- ============================================================
+    100% СИМВОЛЫ — полная изоляция и безопасность
+    Версия: 4.0.8
+    Дата: 2026-07-28
+    ============================================================ -->
+</head>
+<body>
+
+<div class="app" id="app">
+    <!-- ============================================================
+    HEADER
+    ============================================================ -->
+    <header class="header">
+        <div class="header-left">
+            <h1>🏢 Enterprise Store Admin</h1>
+            <span class="badge info" id="versionBadge">v4.0.8</span>
+            <span class="badge success" id="statusBadge">● Готов</span>
+            <span class="badge purple" id="symbolsBadge">🔑 100% СИМВОЛЫ</span>
+        </div>
+        <div class="header-right">
+            <button class="btn btn-secondary btn-sm" id="refreshBtn">🔄 Обновить</button>
+            <button class="btn btn-success btn-sm" id="saveBtn">💾 Сохранить</button>
+            <button class="btn btn-warning btn-sm" id="loadBtn">📂 Загрузить</button>
+            <button class="btn btn-danger btn-sm" id="clearBtn">🧹 Очистить</button>
+            <button class="btn btn-secondary btn-sm" id="symbolsInfoBtn">🔑 Символы</button>
+        </div>
+    </header>
+
+    <!-- ============================================================
+    СТАТИСТИКА
+    ============================================================ -->
+    <div class="stats-grid" id="statsGrid">
+        <div class="stat-card">
+            <div class="label">📊 Таблиц</div>
+            <div class="value blue" id="tablesCount">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">📝 Записей</div>
+            <div class="value green" id="recordsCount">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">🔗 Связей</div>
+            <div class="value purple" id="relationsCount">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">📡 Подписчиков</div>
+            <div class="value yellow" id="subscribersCount">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">↩️ Undo</div>
+            <div class="value" id="undoCount">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">↪️ Redo</div>
+            <div class="value" id="redoCount">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">💾 Кэш</div>
+            <div class="value" id="cacheCount">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">📋 Аудит</div>
+            <div class="value" id="auditCount">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="label">🔑 Символы</div>
+            <div class="value" id="symbolsCount">0</div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    ТАБЫ ★★★ ИСПРАВЛЕНО ★★★
+    ============================================================ -->
+    <div class="tabs" id="tabs">
+        <button class="tab active" data-tab="data">📊 Данные</button>
+        <button class="tab" data-tab="relations">🔗 Связи</button>
+        <button class="tab" data-tab="broker">📨 Брокер</button>
+        <button class="tab" data-tab="audit">📋 Аудит</button>
+        <button class="tab" data-tab="schema">📐 Схемы</button>
+        <button class="tab" data-tab="console">💻 Консоль</button>
+        <button class="tab" data-tab="plugins">🔌 Плагины</button>
+        <button class="tab" data-tab="settings">⚙️ Настройки</button>
+        <button class="tab" data-tab="symbols">🔑 Символы</button>
+        <button class="tab" data-tab="logs">📋 Логи</button>
+    </div>
+
+    <!-- ============================================================
+    ТАБ: ДАННЫЕ ★★★ АКТИВНЫЙ ★★★
+    ============================================================ -->
+    <div class="tab-content active" id="tab-data">
+        <div class="main-grid">
+            <!-- Левая панель: Таблицы -->
+            <div class="panel" id="tablesPanel">
+                <div class="panel-header">
+                    <h2>📋 Таблицы</h2>
+                    <div>
+                        <button class="btn btn-success btn-xs" id="createTableBtn">➕</button>
+                        <button class="btn btn-secondary btn-xs" id="createTableWithSchemaBtn">📐</button>
+                    </div>
+                </div>
+                <div class="panel-body" id="tablesList">
+                    <div class="empty-state">
+                        <span class="emoji">📭</span>
+                        Нет таблиц
+                    </div>
+                </div>
+                <div class="panel-footer" style="padding:6px 10px;border-top:1px solid #1e2633;font-size:10px;color:#4a5a7a;">
+                    <span id="tablesInfo">Кликните для выбора</span>
+                    <span style="float:right;" id="symbolsInfo">🔑 0 символов</span>
+                </div>
+            </div>
+
+            <!-- Центральная панель: Данные -->
+            <div class="panel" id="dataPanel">
+                <div class="panel-header">
+                    <h2 id="currentTableTitle">📊 Данные</h2>
+                    <div>
+                        <button class="btn btn-success btn-xs" id="addRowBtn" disabled>➕ Добавить</button>
+                        <button class="btn btn-secondary btn-xs" id="refreshDataBtn">🔄</button>
+                        <button class="btn btn-secondary btn-xs" id="exportDataBtn">📤</button>
+                    </div>
+                </div>
+                <div class="panel-body" id="dataContainer">
+                    <div class="empty-state">
+                        <span class="emoji">📋</span>
+                        Выберите таблицу из списка слева
+                    </div>
+                </div>
+            </div>
+
+            <!-- Правая панель: Инспектор -->
+            <div class="panel" id="inspectorPanel">
+                <div class="panel-header">
+                    <h2>🔍 Инспектор</h2>
+                    <div>
+                        <button class="btn btn-secondary btn-xs" id="inspectorRefresh">🔄</button>
+                        <span class="badge info" id="inspectorSymbols">🔑 0</span>
+                    </div>
+                </div>
+                <div class="panel-body" id="inspectorContent">
+                    <div class="empty-state">
+                        <span class="emoji">🔍</span>
+                        Выберите строку для просмотра
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    ТАБ: СВЯЗИ
+    ============================================================ -->
+    <div class="tab-content" id="tab-relations">
+        <div class="panel" style="height:100%;">
+            <div class="panel-header">
+                <h2>🔗 Мастер-Детейл связи</h2>
+                <div>
+                    <button class="btn btn-success btn-xs" id="linkTablesBtn">➕ Связать</button>
+                    <button class="btn btn-secondary btn-xs" id="unlinkTablesBtn">✕ Развязать</button>
+                </div>
+            </div>
+            <div class="panel-body" id="relationsContainer">
+                <div class="empty-state">Нет связей</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    ТАБ: БРОКЕР
+    ============================================================ -->
+    <div class="tab-content" id="tab-broker">
+        <div class="broker-grid">
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>📨 Публикация</h2>
+                    <span class="badge info" id="brokerSymbols">🔑 0</span>
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label>Топик</label>
+                        <input type="text" id="brokerTopic" value="test:event" placeholder="topic:name">
+                    </div>
+                    <div class="form-group">
+                        <label>Данные (JSON)</label>
+                        <textarea id="brokerData" rows="4" style="width:100%;background:#0b0e14;border:1px solid #1e2633;border-radius:4px;color:#c8d0e0;font-size:12px;font-family:monospace;padding:8px;">{"message": "Hello World", "timestamp": "now"}</textarea>
+                    </div>
+                    <button class="btn btn-primary" id="publishBtn">📨 Опубликовать</button>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>📡 Подписки</h2>
+                    <div>
+                        <button class="btn btn-secondary btn-xs" id="addSubscriptionBtn">➕</button>
+                    </div>
+                </div>
+                <div class="panel-body" id="subscriptionsList">
+                    <div class="empty-state">Нет подписок</div>
+                </div>
+            </div>
+
+            <div class="panel" style="grid-column:1/-1;">
+                <div class="panel-header">
+                    <h2>📨 Сообщения</h2>
+                    <div>
+                        <button class="btn btn-secondary btn-xs" id="clearMessagesBtn">🗑</button>
+                        <span class="badge info" id="messagesCount">0</span>
+                    </div>
+                </div>
+                <div class="panel-body" id="messagesContainer" style="max-height:200px;overflow-y:auto;">
+                    <div class="empty-state">Нет сообщений</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    ТАБ: АУДИТ
+    ============================================================ -->
+    <div class="tab-content" id="tab-audit">
+        <div class="panel" style="height:100%;">
+            <div class="panel-header">
+                <h2>📋 Аудит-лог</h2>
+                <div>
+                    <button class="btn btn-secondary btn-xs" id="clearAuditBtn">🗑</button>
+                    <button class="btn btn-secondary btn-xs" id="exportAuditBtn">📤</button>
+                    <span class="badge info" id="auditSymbols">🔑 0</span>
+                </div>
+            </div>
+            <div class="panel-body" id="auditContainer" style="max-height:400px;overflow-y:auto;">
+                <div class="empty-state">Нет записей аудита</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    ТАБ: СХЕМЫ
+    ============================================================ -->
+    <div class="tab-content" id="tab-schema">
+        <div class="panel" style="height:100%;">
+            <div class="panel-header">
+                <h2>📐 Схемы таблиц</h2>
+                <span class="badge info" id="schemaSymbols">🔑 0</span>
+            </div>
+            <div class="panel-body" id="schemasContainer">
+                <div class="empty-state">Нет схем</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    ТАБ: КОНСОЛЬ
+    ============================================================ -->
+    <div class="tab-content" id="tab-console">
+        <div class="panel" style="height:100%;">
+            <div class="panel-header">
+                <h2>💻 Интерактивная консоль</h2>
+                <div>
+                    <button class="btn btn-secondary btn-xs" id="clearConsoleBtn">🗑</button>
+                    <span class="badge info" id="consoleSymbols">🔑 0</span>
+                </div>
+            </div>
+            <div class="panel-body" id="consoleOutput" style="font-family:monospace;font-size:12px;max-height:300px;overflow-y:auto;background:#0b0e14;border-radius:6px;padding:12px;margin-bottom:8px;">
+                <div style="color:#4a5a7a;">💡 Введите команду ниже...</div>
+            </div>
+            <div style="display:flex;gap:8px;padding:0 12px 12px;">
+                <input type="text" id="consoleInput" placeholder="Введите JavaScript команду..." style="flex:1;padding:6px 10px;background:#0b0e14;border:1px solid #1e2633;border-radius:4px;color:#c8d0e0;font-size:13px;font-family:monospace;outline:none;">
+                <button class="btn btn-primary" id="consoleExecBtn">▶ Выполнить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    ТАБ: ПЛАГИНЫ
+    ============================================================ -->
+    <div class="tab-content" id="tab-plugins">
+        <div class="panel" style="height:100%;">
+            <div class="panel-header">
+                <h2>🔌 Плагины</h2>
+                <div>
+                    <button class="btn btn-success btn-xs" id="pluginManagerBtn">⚙️ Управление</button>
+                    <span class="badge info" id="pluginSymbols">🔑 0</span>
+                </div>
+            </div>
+            <div class="panel-body" id="pluginsContainer">
+                <div class="empty-state">Нет плагинов</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    ТАБ: НАСТРОЙКИ
+    ============================================================ -->
+    <div class="tab-content" id="tab-settings">
+        <div class="settings-grid">
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>⚙️ Общие настройки</h2>
+                </div>
+                <div class="panel-body">
+                    <div class="form-group">
+                        <label>Авто-создание таблиц</label>
+                        <input type="checkbox" id="autoCreate" checked>
+                    </div>
+                    <div class="form-group">
+                        <label>Авто-сохранение</label>
+                        <input type="checkbox" id="autoSave">
+                    </div>
+                    <div class="form-group">
+                        <label>Интервал авто-сохранения (мс)</label>
+                        <input type="number" id="saveInterval" value="5000" min="1000" step="1000">
+                    </div>
+                    <div class="form-group">
+                        <label>Максимум записей</label>
+                        <input type="number" id="maxRecords" value="10000" min="100" step="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Максимум таблиц</label>
+                        <input type="number" id="maxTables" value="50" min="1" step="1">
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>📊 Квоты</h2>
+                    <span class="badge info" id="quotaSymbols">🔑 0</span>
+                </div>
+                <div class="panel-body" id="quotasDisplay">
+                    <div class="empty-state">Загрузка...</div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>📦 Информация</h2>
+                    <span class="badge info" id="infoSymbols">🔑 0</span>
+                </div>
+                <div class="panel-body" id="infoDisplay">
+                    <div class="empty-state">Загрузка...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    ТАБ: СИМВОЛЫ
+    ============================================================ -->
+    <div class="tab-content" id="tab-symbols">
+        <div class="panel" style="height:100%;">
+            <div class="panel-header">
+                <h2>🔑 100% СИМВОЛЫ — Полная изоляция</h2>
+                <div>
+                    <button class="btn btn-secondary btn-xs" id="refreshSymbolsBtn">🔄</button>
+                    <span class="badge success" id="symbolsTotalBadge">0 символов</span>
+                </div>
+            </div>
+            <div class="panel-body" id="symbolsContainer" style="font-family:monospace;font-size:12px;overflow-y:auto;">
+                <div class="empty-state">Загрузка символов...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    ТАБ: ЛОГИ
+    ============================================================ -->
+    <div class="tab-content" id="tab-logs">
+        <div class="panel" style="height:100%;">
+            <div class="panel-header">
+                <h2>📋 Логи приложения</h2>
+                <div>
+                    <button class="btn btn-secondary btn-xs" id="clearLogsBtn">🗑 Очистить</button>
+                    <button class="btn btn-secondary btn-xs" id="pauseLogsBtn">⏸ Пауза</button>
+                    <span class="badge info" id="logCount">0</span>
+                </div>
+            </div>
+            <div class="panel-body" id="logContainer" style="font-family:monospace;font-size:11px;max-height:400px;overflow-y:auto;background:#0b0e14;border-radius:6px;padding:8px;">
+                <div class="empty-state">Нет событий</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    МОДАЛЬНОЕ ОКНО
+    ============================================================ -->
+    <div class="modal-overlay hidden" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modalTitle">Заголовок</h3>
+                <button class="modal-close" id="modalCloseBtn">✕</button>
+            </div>
+            <div class="modal-body" id="modalBody"></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="modalCancelBtn">Отмена</button>
+                <button class="btn btn-primary" id="modalConfirmBtn">Подтвердить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+IMPORT MAP
+============================================================ -->
+<script type="importmap">
+    {
+        "imports": {
+            "immer": "https://cdn.jsdelivr.net/npm/immer@11.1.15/+esm",
+            "zustand": "https://cdn.jsdelivr.net/npm/zustand@4.5.2/+esm",
+            "zustand/middleware": "https://cdn.jsdelivr.net/npm/zustand@4.5.2/middleware/+esm",
+            "zustand/middleware/immer": "https://cdn.jsdelivr.net/npm/zustand@4.5.2/middleware/immer/+esm"
+        }
+    }
+</script>
+
+<!-- ============================================================
+MAIN SCRIPT — 100% СИМВОЛЫ
+============================================================ -->
+<script type="module" src="./app.mjs"></script>
+
+</body>
+</html>

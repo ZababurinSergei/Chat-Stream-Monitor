@@ -1,0 +1,143 @@
+.input-search__wrapper {
+	/*min-width: 416px;*/
+	/*min-height: 52px;*/
+	width: 416px;
+	height: 52px;
+	display: inline-flex;
+	border: 1px solid var(--black-10per);
+	border-radius: 4px;
+	padding: 0 16px;
+	align-items: center;
+	outline: none;
+	cursor: pointer;
+	box-sizing: border-box;
+	outline: none;
+}
+
+.input-search {
+	width: 100%;
+	height: 24px;
+	font-family: 'Golos 14pt Regular 14x20';
+	font-weight: 400;
+	letter-spacing: -0.01em;
+	font-size: 14px;
+	outline: none;
+	border: none;
+}
+
+.input-search__icon {
+	width: 15px;
+	height: 15px;
+	margin-right: 12px;
+	order: -1;
+}
+
+.input-search:hover,
+.input-search:focus {
+	cursor: text;
+}
+
+.input-search::placeholder {
+	font-family: 'Golos 14pt Regular 14x20';
+	color: var(--black-35per);
+}
+
+.input-search__wrapper:hover {
+	border: 1px solid var(--black-15per);
+	outline: none;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+/* .input-search__wrapper:focus {
+	border: 1px solid var(--blue-50per);
+	outline: none;
+	border-radius: 4px;
+	cursor: text;
+} */
+
+.input-search__wrapper:focus-within {
+	border: 1px solid var(--blue-50per);
+	outline: none;
+	border-radius: 4px;
+	cursor: text;
+}
+/* start disabled */
+.input-search__wrapper.input-search__wrapper_disabled {
+	display: inline-flex;
+	border-radius: 4px;
+	padding: 14px 16px;
+	align-items: center;
+	outline: none;
+	background: var(--black-5per);
+	box-sizing: border-box;
+	border: none;
+	outline: none;
+}
+
+.input-search__wrapper_disabled:hover,
+.input-search__wrapper_disabled:focus,
+.input-search_disabled:hover,
+.input-search_disabled:focus {
+	cursor: pointer;
+}
+
+.input-search.input-search_disabled {
+	width: 357px;
+	height: 24px;
+	border: none;
+	font-family: 'Golos 14pt Regular 14x20';
+	font-weight: 400;
+	letter-spacing: -0.01em;
+	font-size: 14px;
+	outline: none;
+	background: var(--black-5per);
+}
+
+.input-search__icon.input-search__icon_disabled {
+	width: 15px;
+	height: 15px;
+	margin-right: 12px;
+	order: -1;
+}
+
+.input-search__icon.input-search__icon_disabled path {
+	fill: var(--black-15per);
+}
+
+/* end disabled */
+
+/* start error */
+.input-search__wrapper.input-search__wrapper_error {
+	border: 1px solid var(--red-100per);
+	outline: none;
+	border-radius: 4px;
+	position: relative;
+}
+
+.input-search__wrapper.input-search__wrapper_error::after {
+	content: 'Это значение некорректно';
+	color: var(--red-100per);
+	font-family: 'Golos 12pt Medium 12x18';
+	font-size: 12px;
+	font-weight: 500;
+	margin-top: 5px;
+	position: absolute;
+	bottom: -20px;
+	left: -1px;
+}
+
+.input-search__signature_error {
+	color: var(--red-100per);
+	font-family: 'Golos 12pt Medium 12x18';
+	font-size: 12px;
+	font-weight: 500;
+	margin-top: 5px;
+}
+
+/* end error */
+
+.input-search__icon,
+.input-delete__icon {
+	cursor: pointer;
+}

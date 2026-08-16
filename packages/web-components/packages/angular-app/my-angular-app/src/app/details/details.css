@@ -1,0 +1,97 @@
+.listing-photo {
+    height: 600px;
+    width: 50%;
+    object-fit: cover;
+    border-radius: 30px;
+    float: right;
+}
+.listing-heading {
+    font-size: 48pt;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+.listing-location::before {
+    content: url('/assets/location-pin.svg') / '';
+}
+.listing-location {
+    font-size: 24pt;
+    margin-bottom: 15px;
+}
+.listing-features > .section-heading {
+    color: var(--secondary-color);
+    font-size: 24pt;
+    margin-bottom: 15px;
+}
+.listing-features {
+    margin-bottom: 20px;
+}
+.listing-features li {
+    font-size: 14pt;
+}
+li {
+    list-style-type: none;
+}
+.listing-apply .section-heading {
+    font-size: 18pt;
+    margin-bottom: 15px;
+}
+label, input {
+    display: block;
+}
+label {
+    color: var(--secondary-color);
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 12pt;
+}
+input {
+    font-size: 16pt;
+    margin-bottom: 15px;
+    padding: 10px;
+    width: 400px;
+    border-top: none;
+    border-right: none;
+    border-left: none;
+    border-bottom: solid .3px;
+}
+@media (max-width: 1024px) {
+    .listing-photo {
+        width: 100%;
+        height: 400px;
+    }
+}
+/* Добавлено: Стили для состояний загрузки, ошибок и "не найдено" */
+.loading, .error, .not-found {
+    text-align: center;
+    padding: 50px;
+}
+.loading {
+    color: #3498db;
+}
+.error {
+    color: #e74c3c;
+}
+.error button {
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+.error button:hover {
+    background-color: #c0392b;
+}
+.not-found a {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    background-color: #3498db;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+}
+.not-found a:hover {
+    background-color: #2980b9;
+}

@@ -1,0 +1,258 @@
+<div [class]="themeClass()">
+    <h2>Theme Manager with Effects</h2>
+
+    <div class="controls">
+        <button (click)="toggleTheme()">
+            Switch to
+            @if (theme() === 'light') {
+                Dark
+            } @else {
+                Light
+            } Theme
+        </button>
+
+        @if (!isLoggedIn()) {
+            <button (click)="login()">Login</button>
+        } @else {
+            <button (click)="logout()">Logout</button>
+        }
+    </div>
+
+    <div class="info">
+        <p>Current theme: {{ theme() }}</p>
+        <p>User: {{ username() }}</p>
+        <p>Status:
+            @if (isLoggedIn()) {
+                Logged in
+            } @else {
+                Logged out
+            }
+        </p>
+    </div>
+
+    <div class="demo">
+        <p>Open the browser console to see the effects in action!</p>
+        <p>Effects are automatically:</p>
+        <ul>
+            <li>Saving theme to localStorage</li>
+            <li>Logging user activity changes</li>
+            <li>Running a timer every 5 seconds</li>
+        </ul>
+    </div>
+</div>
+
+<div class="shopping-app">
+    <h1>Advanced Shopping Cart</h1>
+
+    <div class="controls">
+        <button (click)="showFirstProductDetails()">Show First Product Details</button>
+        <button (click)="initiateCheckout()">Initiate Checkout</button>
+    </div>
+
+    <div class="products">
+        <product-card
+                [name]="'Laptop'"
+                [price]="999"
+                [description]="'High-performance laptop'"
+                [available]="true"
+                [productId]="'LAP001'"
+                [category]="'Electronics'"
+        />
+    </div>
+
+    <div class="cart-section">
+        <cart-summary
+                [itemCount]="cartQuantity()"
+                [total]="totalPrice()"
+        />
+
+        <div class="cart-controls">
+            <label>Quantity:</label>
+            <button (click)="updateQuantity(-1)" [disabled]="cartQuantity() <= 0">-</button>
+            <span class="quantity">{{ cartQuantity() }}</span>
+            <button (click)="updateQuantity(1)" [disabled]="cartQuantity() >= 10">+</button>
+        </div>
+    </div>
+</div>
+
+<div>
+    <h1>Directive with Signals</h1>
+    <div highlight color="yellow" [intensity]="0.2">
+        Hover me - Yellow highlight
+    </div>
+    <div highlight color="blue" [intensity]="0.4">
+        Hover me - Blue highlight
+    </div>
+    <div highlight color="green" [intensity]="0.6">
+        Hover me - Green highlight
+    </div>
+</div>
+
+<div class="shopping-app">
+    <header>
+        <h1>Signals with Services Demo</h1>
+        <div class="cart-badge">
+            Cart: {{ cartStore.totalQuantity() }} items (\${{ cartStore.totalPrice() }})
+        </div>
+    </header>
+    <main>
+        <cart-display />
+    </main>
+</div>
+
+<div>
+    <h2>User Profile Loader</h2>
+
+    <div>
+        <button (click)="loadUser(1)">Load User 1</button>
+        <button (click)="loadUser(2)">Load User 2</button>
+        <button (click)="loadUser(999)">Load Invalid User</button>
+        <button (click)="reloadUser()">Reload</button>
+    </div>
+
+    <!-- Two-way binding with custom components -->
+    <custom-checkbox
+            [(checked)]="agreedToTerms"
+            label="I agree to the terms"
+    />
+
+    <custom-checkbox
+            [(checked)]="enableNotifications"
+            label="Enable notifications"
+    />
+
+    <div class="status">
+        @if (isLoading()) {
+            <p>Loading user...</p>
+        } @else if (hasError()) {
+            <p class="error">Error: {{ userResource.error()?.message }}</p>
+        } @else if (userResource.hasValue()) {
+            <div class="user-info">
+                <h3>{{ userResource.value().name }}</h3>
+                <p>{{ userResource.value().email }}</p>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="shopping-app">
+    <h1>Input Signals Demo</h1>
+
+    <div class="demo-section">
+        <h2>Signal Inputs (Parent → Child)</h2>
+        <p>Data flows down from parent to child via signal inputs:</p>
+
+        <product-card
+                [name]="productName()"
+                [price]="productPrice()"
+                [available]="productAvailable()"
+        />
+
+        <div class="controls">
+            <button (click)="updateProduct()">Update Product Data</button>
+            <button (click)="toggleAvailability()">Toggle Availability</button>
+        </div>
+    </div>
+</div>
+
+<div class="shopping-app">
+    <h1>Custom Checkbox Example</h1>
+
+
+    <div class="demo-section">
+        <!-- Two-way binding with custom components -->
+        <custom-checkbox
+                [(checked)]="agreedToTerms"
+                label="I agree to the terms"
+        />
+
+        <custom-checkbox
+                [(checked)]="enableNotifications"
+                label="Enable notifications"
+        />
+
+        <!-- Controls to test two-way binding -->
+        <div class="controls">
+            <p>Terms agreed:
+                @if (agreedToTerms()) {
+                    Yes
+                } @else {
+                    No
+                }
+            </p>
+            <p>Notifications:
+                @if (enableNotifications()) {
+                    Enabled
+                } @else {
+                    Disabled
+                }
+            </p>
+            <button (click)="toggleTermsFromParent()">Toggle Terms from Parent</button>
+            <button (click)="resetAll()">Reset All</button>
+        </div>
+    </div>
+</div>
+
+<div class="user-profile">
+    <h1>User Dashboard</h1>
+    <div class="status-indicator" [class]="userStatus()">
+        <span class="status-dot"></span>
+        Status: {{ userStatus() }}
+    </div>
+
+    <div class="status-info">
+        <div class="notifications">
+            <strong>Notifications:</strong>
+            @if (notificationsEnabled()) {
+                Enabled
+            } @else {
+                Disabled
+            }
+            <button (click)="toggleNotifications()" class="override-btn">
+                @if (notificationsEnabled()) {
+                    Disable
+                } @else {
+                    Enable
+                }
+            </button>
+        </div>
+        <div class="message">
+            <strong>Message:</strong> {{ statusMessage() }}
+        </div>
+        <div class="working-hours">
+            <strong>Within Working Hours:</strong>
+            @if (isWithinWorkingHours()) {
+                Yes
+            } @else {
+                No
+            }
+        </div>
+    </div>
+
+    <div class="status-controls">
+        <button (click)="goOnline()" [disabled]="userStatus() === 'online'">
+            Go Online
+        </button>
+        <button (click)="goAway()" [disabled]="userStatus() === 'away'">
+            Set Away
+        </button>
+        <button (click)="goOffline()" [disabled]="userStatus() === 'offline'">
+            Go Offline
+        </button>
+        <button (click)="toggleStatus()" class="toggle-btn">
+            Cycle Status
+        </button>
+    </div>
+</div>
+
+<div class="container">
+    <h1>Welcome to Angular's Signal Tutorial!</h1>
+    <h2>{{ count() }}</h2>
+    <div class="even-odd-indicator {{ isEven() ? 'even' : 'odd' }}">
+        @if (isEven()) { Even } @else { Odd }
+    </div>
+    <div class="buttons">
+        <button (click)="decrement()">-</button>
+        <button (click)="increment()">+</button>
+    </div>
+</div>

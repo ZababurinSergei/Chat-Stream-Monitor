@@ -1,0 +1,31 @@
+### get one manifest
+POST http://127.0.0.1:3333/v1/manifest
+Content-Type: application/json
+
+{
+  "condition": {
+    "snapshotIds": [
+      "f167a07d-6327-4de0-a606-d0f86076c2a3"
+    ]
+  }
+}
+
+### verify manifest
+POST http://127.0.0.1:3333/v1/executor/verify
+Content-Type: application/json
+
+{
+  "manifestSnapshotId": "f167a07d-6327-4de0-a606-d0f86076c2a3",
+  "theFact": {
+    "filed1": ""
+  }
+}
+
+
+### get verification results
+POST http://127.0.0.1:3333/v1/manifest/verify/results
+Content-Type: application/json
+
+{
+  "snapshotId": "f167a07d-6327-4de0-a606-d0f86076c2a3"
+}

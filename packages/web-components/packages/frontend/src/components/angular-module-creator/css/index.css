@@ -1,0 +1,310 @@
+/* Test Component A CSS - Демонстрационная версия для спецификации */
+
+/* Базовые стили компонента */
+:host {
+    display: block;
+    position: relative;
+}
+
+.test-component-a {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    margin: var(--space-lg) 0;
+    box-shadow: var(--shadow-md);
+    transition: var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.test-component-a::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--accent));
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+.test-component-a:hover {
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary);
+    transform: translateY(-2px);
+}
+
+/* Заголовок */
+.test-component-a .title {
+    color: var(--text);
+    margin: 0 0 var(--space-lg) 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    position: relative;
+    padding-bottom: var(--space);
+}
+
+.test-component-a .title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: var(--primary);
+    border-radius: var(--radius-sm);
+}
+
+/* Счетчик */
+.test-component-a .counter {
+    background: var(--primary-50);
+    color: var(--primary-dark);
+    padding: var(--space) var(--space-lg);
+    border-radius: var(--radius);
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: var(--space-xl);
+    border: 1px solid var(--primary-100);
+    font-size: 1.2rem;
+    transition: var(--transition);
+    display: inline-block;
+}
+
+.test-component-a .counter::before {
+    content: '📊';
+    margin-right: var(--space-sm);
+    font-size: 1.1em;
+}
+
+.test-component-a .counter:hover {
+    background: var(--primary-100);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+}
+
+/* Кнопки */
+.test-component-a .btn-increment,
+.test-component-a .btn-add {
+    padding: 12px 24px;
+    border: none;
+    border-radius: var(--radius);
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: var(--font-main);
+    margin: var(--space-sm);
+    min-width: 140px;
+}
+
+.test-component-a .btn-increment {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    border: 1px solid var(--primary-dark);
+}
+
+.test-component-a .btn-increment:hover {
+    background: linear-gradient(135deg, var(--primary-dark), var(--primary-darker));
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    color: var(--text);
+}
+
+.test-component-a .btn-add {
+    background: linear-gradient(135deg, var(--surface-100), var(--surface-200));
+    color: var(--text);
+    border: 1px solid var(--border);
+}
+
+.test-component-a .btn-add:hover {
+    background: linear-gradient(135deg, var(--surface-200), var(--surface-300));
+    transform: translateY(-2px);
+    border-color: var(--border-dark);
+}
+
+/* Список элементов */
+.test-component-a .items-list {
+    margin-top: var(--space-xl);
+    padding: var(--space-lg);
+    background: var(--surface-50);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+}
+
+.test-component-a .item {
+    display: flex;
+    align-items: center;
+    padding: var(--space) var(--space-lg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: var(--space-sm);
+    background: var(--surface);
+    transition: var(--transition);
+}
+
+.test-component-a .item:hover {
+    background: var(--surface-50);
+    border-color: var(--border-dark);
+    transform: translateX(8px);
+}
+
+.test-component-a .item:last-child {
+    margin-bottom: 0;
+}
+
+/* Темная тема */
+[data-theme="dark"] .test-component-a {
+    background: var(--surface);
+    border-color: var(--border);
+}
+
+[data-theme="dark"] .test-component-a .counter {
+    background: var(--primary-50);
+    color: var(--primary-100);
+    border-color: var(--primary);
+}
+
+[data-theme="dark"] .test-component-a .item {
+    background: var(--surface-100);
+    border-color: var(--border);
+}
+
+[data-theme="dark"] .test-component-a .item:hover {
+    background: var(--surface-200);
+    border-color: var(--border-dark);
+}
+
+/* Состояние загрузки */
+.test-component-a.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+/* Анимации */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.test-component-a .item {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .test-component-a {
+        padding: var(--space-lg);
+    }
+
+    .test-component-a .title {
+        font-size: 1.3rem;
+    }
+
+    .test-component-a .counter {
+        font-size: 1rem;
+        padding: var(--space) var(--space);
+    }
+
+    .test-component-a .btn-increment,
+    .test-component-a .btn-add {
+        padding: 10px 20px;
+        min-width: 120px;
+    }
+}
+
+@media (max-width: 480px) {
+    .test-component-a {
+        padding: var(--space);
+        border-radius: var(--radius);
+    }
+
+    .test-component-a .title {
+        font-size: 1.2rem;
+        text-align: center;
+    }
+
+    .test-component-a .title::after {
+        left: 50%;
+        transform: translateX(-50%);
+    }
+
+    .test-component-a .btn-increment,
+    .test-component-a .btn-add {
+        width: 100%;
+        margin: var(--space-sm) 0;
+    }
+}
+
+/* Состояния фокуса для доступности */
+.test-component-a button:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* Состояние disabled */
+.test-component-a button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Уменьшение движения */
+@media (prefers-reduced-motion: reduce) {
+    .test-component-a,
+    .test-component-a .item,
+    .test-component-a .counter,
+    .test-component-a .btn-increment,
+    .test-component-a .btn-add {
+        transition: none;
+        animation: none;
+    }
+
+    .test-component-a .item:hover {
+        transform: none;
+    }
+
+    .test-component-a .btn-increment:hover,
+    .test-component-a .btn-add:hover {
+        transform: none;
+    }
+
+    .test-component-a .counter:hover {
+        transform: none;
+    }
+}
+
+/* Скелетон-эффект */
+.skeleton-container * {
+    pointer-events: none !important;
+    user-select: none !important;
+}
+
+.skeleton-container :not(style, script, link, meta) {
+    color: transparent !important;
+    background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%) !important;
+    background-size: 200% 100% !important;
+    animation: skeleton-loading 1.5s infinite !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+[data-theme="dark"] .skeleton-container :not(style, script, link, meta) {
+    background: linear-gradient(90deg, #2d3748 25%, #4a5568 50%, #2d3748 75%) !important;
+}

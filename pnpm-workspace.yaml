@@ -18,15 +18,33 @@ packages:
 
 # Настройки для pnpm
 allowBuilds:
+  '@abandonware/bluetooth-hci-socket': set this to true or false
+  '@abandonware/noble': set this to true or false
   '@infoenergo/asuse-reports-ui': false
+  '@meshtastic/core': set this to true or false
+  '@meshtastic/transport-http': set this to true or false
+  '@meshtastic/transport-node': set this to true or false
+  '@meshtastic/transport-node-serial': set this to true or false
+  '@meshtastic/transport-web-bluetooth': set this to true or false
   '@parcel/watcher': false
+  '@scarf/scarf': set this to true or false
+  '@serialport/bindings-cpp': set this to true or false
+  '@tree-sitter-grammars/tree-sitter-yaml': set this to true or false
   core-js: false
+  core-js-pure: set this to true or false
   esbuild: true
   inferno: false
   inotify: false
+  node-datachannel: set this to true or false
+  protobufjs: set this to true or false
   sharp: false
   sqlite3: false
+  tree-sitter: set this to true or false
+  tree-sitter-json: set this to true or false
   tree-sitter-wasms: true
+  unrs-resolver: set this to true or false
+  usb: set this to true or false
+  usocket: set this to true or false
   vue-demi: false
   yorkie: false
 

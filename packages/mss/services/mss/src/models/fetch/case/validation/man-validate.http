@@ -1,0 +1,88 @@
+### new event
+POST http://127.0.0.1:3333/v1/event/save
+Content-Type: application/json
+
+{
+  "event": {
+    "slug": "super.domain",
+    "name": "validate.test",
+    "title": "тестовая схема для проверки валидации схем и манифестов",
+    "description": "тестовая схема для проверки валидации схем и манифестов",
+    "errors": [
+      {
+        "code": "1",
+        "message": "ошибка 1",
+        "howToFix": "как исправить ошибка 1"
+      }
+    ],
+    "jsonSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "title": "Схем для проверки события newevt",
+      "properties": {
+        "filed1": {
+          "description": "описание поля filed1",
+          "type": "string"
+        }
+      },
+      "required": ["filed1" ]
+    }
+  }
+}
+
+//event snap 5430ddef-7b1e-4ba2-b858-6553c6ec9aab
+
+### save rule
+### POST http://svc-fer-dev.helpms.ru:3333/v1/rule/save
+POST http://127.0.0.1:3333/v1/rule/save
+Content-Type: application/json
+
+{
+  "rule": {
+    "eventSnapshotId": "5430ddef-7b1e-4ba2-b858-6553c6ec9aab",
+    "version": "1.0.2",
+    "functionBase64Encoded": "ZnVuY3Rpb24gcnVsZShjdHgsIGV2ZW50KXsKICAgIGNvbnNvbGUubG9nKGV2ZW50KTsKICAgIGlmIChldmVudC5maWxlZDEubGVuZ3RoID09PSAwKSB7CiAgICAgICAgdGhyb3coMSk7CiAgICB9Cn0=",
+    "description": "validation test updated"
+  }
+}
+
+// rule snap 8ed00834-70ee-424a-9071-acbdd00cd990
+
+### save new manifest
+### POST http://svc-fer-dev.helpms.ru:3333/v1/manifest/save
+POST http://127.0.0.1:3333/v1/manifest/save
+Content-Type: application/json
+
+{
+  "manifest": {
+    "eventSnapshotId": "5430ddef-7b1e-4ba2-b858-6553c6ec9aab",
+    "regionId": "451f532b-8637-42b1-a341-2f2b27f7e528",
+    "version": "1.0.2",
+    "ruleSnapshotIds": [
+      "8ed00834-70ee-424a-9071-acbdd00cd990"
+    ],
+    "description": "validation test man upd"
+  }
+}
+
+//man snap 2e52409f-6a7c-4a05-972d-5e1c74970786
+
+
+### verify manifest
+POST http://127.0.0.1:3333/v1/executor/verify
+Content-Type: application/json
+
+{
+  "manifestSnapshotId": "f167a07d-6327-4de0-a606-d0f86076c2a3",
+  "theFact": {
+    "filed1": ""
+  }
+}
+
+
+### get verification results
+POST http://127.0.0.1:3333/v1/manifest/verify/results
+Content-Type: application/json
+
+{
+  "snapshotId": "6d671ed9-08d6-4c43-9af9-02fad70d2eb0"
+}

@@ -1,0 +1,207 @@
+:host {
+    display: flex;
+    cursor: pointer;
+}
+
+svg {
+    width: 100%;
+    height: 100%;
+}
+
+:host(._read) {
+    opacity: 0;
+    transition: opacity  100ms ease-in;
+    display: none;
+}
+
+:host(._read._edit), :host(._read._delete), :host(._read._edit._delete) {
+    opacity: 1;
+    transition: opacity  100ms ease-in;
+    display: flex;
+}
+
+.container {
+    position: relative;
+    display: flex;
+    min-width: 24px;
+    width: 24px;
+    height: 24px;
+    align-self: center;
+}
+
+.menu {
+    position: absolute;
+    width: 240px;
+    top: 28px;
+    /*display: flex;*/
+    flex-direction: column;
+    left: -235px;
+
+    border-radius: 12px;
+    background: var(--White, #FFF);
+
+    /* Shadow Pop-up */
+    box-shadow: 0px 12px 32px 0px rgba(11, 31, 51, 0.18);
+    padding: 24px;
+    gap: 16px;
+    box-sizing: border-box;
+    display: none;
+    z-index: 5;
+}
+
+.menu.active, .open, .active {
+    display: flex;
+}
+
+button {
+     border: none;
+     margin: 0;
+     padding: 0;
+     width: auto;
+     overflow: visible;
+
+     background: transparent;
+
+     /* inherit font & color from ancestor */
+     color: inherit;
+     font: inherit;
+
+     /* Normalize `line-height`. Cannot be changed from `normal` in Firefox 4+. */
+     line-height: normal;
+
+     /* Corrects font smoothing for webkit */
+     -webkit-font-smoothing: inherit;
+     -moz-osx-font-smoothing: inherit;
+
+     /* Corrects inability to style clickable `input` types in iOS */
+     -webkit-appearance: none;
+     cursor: pointer;
+ }
+
+/* Remove excess padding and border in Firefox 4+ */
+&::-moz-focus-inner {
+    border: 0;
+    padding: 0;
+}
+
+.button {
+    color: var(--Gosblue, #0D4CD3);
+    font-family: 'Lato', serif;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 150%;
+    text-align: start;
+    display: none;
+}
+
+.button.restore.restore._read {
+    display: none;
+}
+
+.button.restore.restore._recover {
+    display: flex;
+}
+
+.button.delete._delete {
+    display: flex;
+}
+
+.button.update._edit {
+    display: flex;
+}
+
+:host(.button.registry.array._read) {
+    display: none;
+}
+
+:host(.button.registry.array._delete) {
+    display: unset;
+}
+
+:host(.button.registry.array._edit) {
+    display: unset;
+}
+
+:host(.button.-restore.registry.array._delete) {
+    display: none;
+}
+
+:host(.button.-restore.registry.array._edit) {
+    display: none;
+}
+
+:host(.button.-restore.registry.array._read) {
+    display: none;
+}
+
+:host(.button.-restore.registry.array._recover) {
+    display: unset;
+}
+
+.icon.close {
+    width: 24px;
+    height: 24px;
+    position: absolute;
+    right: 24px;
+    top: 24px;
+    cursor: pointer;
+}
+
+.filter.title, .filter_item.title {
+    color: var(--Summer-night, #0B1F33);
+
+    /* H6 */
+    font-family: 'Lato', sans-serif;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 24px; /* 150% */
+}
+
+.filter.menu.open, .filter_item.menu.open, .filter.menu.active, .filter_item.menu.active {
+    width: 383px;
+    left: -338px;
+    top: -25px;
+    gap: 24px;
+}
+
+.filter.items, .filter.items {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.filter.footer.clean, .filter_item.footer.clean, .filter.footer.execute, .filter_item.footer.execute {
+    color: var(--Gosblue, #0D4CD3);
+    text-align: right;
+
+    /* Plain Text */
+    font-family: 'Lato', sans-serif;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 24px; /* 150% */
+}
+
+.mss-button.datapicker h2 {
+    margin: 0;
+    color: var(--Summer-night, #0B1F33);
+    font-family: 'Lato', serif;
+    font-size: 12px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 142.857%;
+    text-align: start;
+}
+
+.filter.footer, .filter_item.footer {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.containerForDate {
+    display: flex;
+    gap: 14px;
+}

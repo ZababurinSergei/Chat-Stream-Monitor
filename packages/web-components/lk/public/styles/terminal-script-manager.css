@@ -1,0 +1,1316 @@
+:root {
+    --bg-color: #1e1e1e;
+    --text-color: #f0f0f0;
+    --prompt-color: #4CAF50;
+    --command-color: #569CD6;
+    --error-color: #F44747;
+    --warning-color: #FFCC00;
+    --directory-color: #9CDCFE;
+    --border-color: #333;
+    --scrollbar-color: #444;
+    --scrollbar-thumb-color: #666;
+    --public-color: #4CAF50;
+    --private-color: #F44747;
+    --dnd-zone-color: #2A2D2E;
+    --preset-color: #9CDCFE;
+    --success-color: #4CAF50;
+    --toggle-active-color: rgba(86, 156, 214, 0.2);
+    --resize-handle-color: rgba(86, 156, 214, 0.3);
+}
+
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+    background-color: transparent;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(108, 122, 137, 0.5);
+    border-radius: 2px;
+    transition: background-color 0.3s ease;
+}
+
+.scrolling::-webkit-scrollbar,
+.scrolling:hover::-webkit-scrollbar,
+:active::-webkit-scrollbar,
+:hover::-webkit-scrollbar {
+    opacity: 1;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(108, 122, 137, 0.8);
+}
+
+* {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(108, 122, 137, 0.5) transparent;
+}
+
+*:hover {
+    scrollbar-color: rgba(108, 122, 137, 0.8) transparent;
+    transition: scrollbar-color 0.3s ease;
+}
+
+body {
+    font-family: 'Courier New', monospace;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+#main-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.terminal-header {
+    padding: 8px 12px;
+    background-color: #252526;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.terminal-title {
+    color: var(--prompt-color);
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.terminal-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.terminal-controls button {
+    background: none;
+    border: none;
+    color: var(--text-color);
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.terminal-container {
+    flex: 1;
+    padding: 8px 12px;
+    overflow-y: auto;
+    font-size: 13px;
+    background-color: var(--bg-color);
+    height: 40vh;
+    min-height: 100px;
+    max-height: calc(100vh - 200px);
+}
+
+.terminal-line {
+    margin: 0;
+    padding: 2px 0;
+    line-height: 1.3;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.prompt {
+    color: var(--prompt-color);
+}
+
+.command {
+    color: var(--command-color);
+    font-weight: bold;
+}
+
+.error {
+    color: var(--error-color);
+}
+
+.warning {
+    color: var(--warning-color);
+}
+
+.directory {
+    color: var(--directory-color);
+}
+
+.success {
+    color: var(--success-color);
+}
+
+.layout-resize-handle {
+    position: relative;
+    height: 10px;
+    background: var(--resize-handle-color);
+    cursor: row-resize;
+    margin: 0;
+    transition: background 0.2s;
+}
+
+.layout-resize-handle:hover {
+    background: rgba(76, 175, 80, 0.3);
+}
+
+.layout-resize-handle::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 2px;
+    background: var(--prompt-color);
+    border-radius: 2px;
+    opacity: 0.5;
+    transition: all 0.2s;
+}
+
+.layout-resize-handle:hover::before {
+    width: 80px;
+    opacity: 0.8;
+    background: var(--command-color);
+}
+
+.three-column-layout {
+    display: flex;
+    height: 50vh;
+    min-height: 200px;
+    max-height: calc(100vh - 150px);
+    border-top: 1px solid var(--border-color);
+    overflow-y: auto;
+}
+
+.left-column {
+    width: 350px;
+    min-width: 200px;
+    max-width: 500px;
+    transition: width 0.3s ease;
+}
+
+.center-column {
+    flex: 1;
+    overflow: auto;
+    padding: 8px;
+    background-color: var(--bg-color);
+    position: relative;
+}
+
+.right-column {
+    width: 350px;
+    min-width: 200px;
+    max-width: 500px;
+    border-left: 1px solid var(--border-color);
+    background-color: #252526;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: width 0.3s ease;
+}
+
+.input-area {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    background-color: #252526;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+.input-prompt {
+    color: var(--prompt-color);
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+#command-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-color);
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    outline: none;
+    padding: 5px 0;
+}
+
+#command-input::placeholder {
+    color: #666;
+}
+
+#scripts-panel {
+    padding: 8px;
+    background-color: #252526;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    overflow-y: auto;
+    margin-bottom: 8px;
+    position: relative;
+    flex-grow: 1;
+}
+
+.script-group {
+    margin-bottom: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.public-group {
+    border-left: 3px solid var(--public-color);
+}
+
+.private-group {
+    border-left: 3px solid var(--private-color);
+}
+
+.subgroup {
+    margin-left: 15px;
+    border-left: 2px solid var(--border-color);
+}
+
+.group-header {
+    padding: 6px 10px;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+    background-color: #2A2D2E;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.group-header:hover {
+    background-color: #323537;
+}
+
+.group-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px;
+    background-color: #252526;
+}
+
+.script-btn {
+    background-color: #2D2D2D;
+    color: var(--text-color);
+    border: none;
+    padding: 6px 10px;
+    cursor: pointer;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 3px;
+    font-size: 13px;
+    width: 100%;
+}
+
+.script-btn:hover {
+    background-color: #3D3D3D;
+}
+
+.script-name {
+    font-weight: bold;
+    margin-right: 8px;
+    color: var(--command-color);
+    min-width: 120px;
+}
+
+.script-command {
+    color: #aaa;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 11px;
+    flex-grow: 1;
+}
+
+#dnd-zone {
+    min-height: 100px;
+    border: 2px dashed transparent;
+    border-radius: 6px;
+    margin: 10px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background-color: var(--dnd-zone-color);
+    flex: 1;
+    transition: border-color 0.2s;
+    overflow-y: auto;
+}
+
+.dnd-script {
+    position: relative;
+    background: linear-gradient(90deg, #3a3d3e, #2d2f30);
+    padding: 12px 15px;
+    padding-right: 40px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.dnd-script.dragging {
+    opacity: 0.8;
+    transform: scale(0.98);
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.3);
+    z-index: 100;
+}
+
+.remove-btn {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    color: var(--error-color);
+    cursor: pointer;
+    font-size: 14px;
+    background: none;
+    border: none;
+    padding: 5px;
+}
+
+.dnd-script:hover .remove-btn {
+    opacity: 1;
+}
+
+.right-column .dnd-script .remove-btn {
+    right: 10px;
+    opacity: 1;
+    color: #ff6b6b;
+    background-color: rgba(255, 107, 107, 0.1);
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.right-column .dnd-script .remove-btn:hover {
+    background-color: rgba(255, 107, 107, 0.2);
+    color: #ff4757;
+}
+
+.toggle-checkbox {
+    display: none;
+}
+
+.toggle-container {
+    padding: 8px;
+    background: #2a2d2e;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.toggle-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.toggle-icon {
+    width: 12px;
+    height: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5%;
+    background-color: #2a2d2e;
+    color: #9cdcfe;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.toggle-checkbox:checked + .toggle-icon {
+    background-color: var(--toggle-active-color);
+    color: var(--command-color);
+    box-shadow: 0 0 0 2px rgba(86, 156, 214, 0.3);
+}
+
+.toggle-item::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 50%;
+    bottom: -30px;
+    transform: translateX(-50%);
+    background-color: #252526;
+    color: #f0f0f0;
+    border-radius: 4px;
+    font-size: 12px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    pointer-events: none;
+    border: 1px solid #333;
+    z-index: 100;
+}
+
+.toggle-item:hover::after {
+    opacity: 1;
+    visibility: visible;
+    bottom: -35px;
+}
+
+.control-menu {
+    padding: 8px;
+    background: #2A2D2E;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.control-menu .control-btn {
+    background-color: #3A3A3A;
+    border: 1px solid var(--border-color);
+    color: var(--text-color);
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background-color 0.2s;
+}
+
+.control-menu .control-btn:hover {
+    background-color: #4A4A4A;
+}
+
+.control-menu .control-btn i {
+    font-size: 14px;
+}
+
+#presets-container {
+    margin: 0 0 15px 0;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    position: relative;
+    z-index: 10;
+    cursor: pointer;
+    user-select: none;
+}
+
+.presets-header {
+    padding: 6px 10px;
+    background-color: #2A2D2E;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 36px;
+    position: relative;
+    z-index: 11;
+}
+
+.presets-header:hover {
+    background-color: #323537;
+}
+
+.presets-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background-color: #252526;
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    padding: 8px;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    width: calc(100% - 2px);
+    box-sizing: border-box;
+}
+
+.presets-content.show {
+    display: flex;
+}
+
+.preset-item {
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--border-color);
+    background-color: #2D2D2D;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.preset-item:last-child {
+    border-bottom: none;
+}
+
+.preset-item:hover {
+    background-color: #2A2D2E;
+}
+
+.preset-header {
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #3D3D3D;
+    cursor: pointer;
+}
+
+.preset-name {
+    font-weight: bold;
+    color: var(--preset-color);
+}
+
+.preset-scripts {
+    display: none;
+    padding: 8px;
+    background-color: #252526;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.delete-preset {
+    color: var(--error-color);
+    cursor: pointer;
+    margin-left: auto;
+}
+
+.panel-configurator {
+    display: block;
+    width: 100%;
+    background-color: #252526;
+    border-radius: 6px;
+    overflow: hidden;
+    transition: height 0.3s ease;
+}
+
+.panel-configurator .panel-config {
+    padding: 15px;
+    height: 200px;
+    overflow-y: auto;
+    transition: height 0.3s ease, opacity 0.2s ease;
+}
+
+.panel-configurator.collapsed .panel-config {
+    height: 0;
+    opacity: 0;
+    padding: 0;
+    overflow: hidden;
+}
+
+.panel-configurator .config-resize-handle {
+    height: 10px;
+    background: var(--resize-handle-color);
+    cursor: ns-resize;
+    position: relative;
+    margin: 0;
+    transition: background 0.2s;
+}
+
+.panel-configurator .config-resize-handle:hover {
+    background: rgba(86, 156, 214, 0.4);
+}
+
+.panel-configurator .config-resize-handle::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 2px;
+    background: var(--command-color);
+    border-radius: 2px;
+    opacity: 0.7;
+}
+
+.context-menu {
+    position: fixed;
+    background-color: #252526;
+    border: 1px solid #333;
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    padding: 5px 0;
+    min-width: 180px;
+    z-index: 10000;
+}
+
+.context-menu-item {
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    color: #f0f0f0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s;
+}
+
+.context-menu-item:hover {
+    background-color: #2A2D2E;
+}
+
+.context-menu-item i {
+    width: 16px;
+    text-align: center;
+}
+
+.context-menu-separator {
+    height: 1px;
+    background-color: #333;
+    margin: 5px 0;
+}
+
+.params-panel {
+    padding: 15px;
+    margin-bottom: 20px;
+    background: #252526;
+    border-radius: 6px;
+    border-left: 3px solid #569CD6;
+}
+
+.params-panel h3 {
+    margin-top: 0;
+    color: #9CDCFE;
+    font-size: 16px;
+}
+
+.app-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.app-selector label {
+    font-size: 14px;
+}
+
+.app-selector select {
+    flex: 1;
+    background: #1E1E1E;
+    border: 1px solid #333;
+    color: #F0F0F0;
+    padding: 5px;
+    border-radius: 4px;
+}
+
+@media (max-width: 768px) {
+    .three-column-layout {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .right-column {
+        width: 100%;
+        min-width: auto;
+    }
+
+    .presets-content {
+        max-height: 200px;
+    }
+
+    .terminal-container, .three-column-layout {
+        height: auto;
+        max-height: none;
+    }
+
+    .layout-resize-handle {
+        display: none;
+    }
+
+    .left-column, .right-column {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .toggle-container {
+        flex-direction: column;
+    }
+}
+
+.left-column #toggle-input-left,
+.left-column #toggle-private-left,
+.left-column .toggle-item[data-tooltip="Показать поле ввода"],
+.left-column .toggle-item[data-tooltip="Показать приватные скрипты"] {
+    display: none !important;
+}
+
+.delete-preset {
+    margin-left: auto;
+    color: #F44747;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.delete-preset:hover {
+    background-color: rgba(244, 71, 71, 0.1);
+    transform: scale(1.1);
+}
+
+/* Основные переменные */
+:root {
+    --bg-color: #1e1e1e;
+    --text-color: #f0f0f0;
+    --prompt-color: #4CAF50;
+    --command-color: #569CD6;
+    --error-color: #F44747;
+    --warning-color: #FFCC00;
+    --directory-color: #9CDCFE;
+    --border-color: #333;
+    --scrollbar-color: #444;
+    --scrollbar-thumb-color: #666;
+    --public-color: #4CAF50;
+    --private-color: #F44747;
+    --dnd-zone-color: #2A2D2E;
+    --preset-color: #9CDCFE;
+    --success-color: #4CAF50;
+    --toggle-active-color: rgba(86, 156, 214, 0.2);
+    --resize-handle-color: rgba(86, 156, 214, 0.3);
+}
+
+/* Базовые стили */
+body {
+    font-family: 'Courier New', monospace;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+}
+
+/* Стили терминала */
+.terminal-header {
+    padding: 8px 12px;
+    background-color: #252526;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.terminal-container {
+    flex: 1;
+    padding: 8px 12px;
+    overflow-y: auto;
+    font-size: 13px;
+    background-color: var(--bg-color);
+    height: 40vh;
+    min-height: 100px;
+    max-height: calc(100vh - 200px);
+}
+
+/* Стили панели параметров */
+.params-panel {
+    background-color: #252526;
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-left: 3px solid var(--command-color);
+}
+
+.params-panel h3 {
+    color: var(--directory-color);
+    font-size: 16px;
+    margin-top: 0;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* Стили in-progress */
+.params-panel .in-progress {
+    opacity: 0.8;
+    filter: grayscale(30%);
+}
+
+.params-panel .control-group.in-progress {
+    border-left: 2px solid var(--warning-color);
+    padding-left: 10px;
+}
+
+.params-panel .tags-control.in-progress label {
+    color: var(--warning-color);
+}
+
+.left-column .in-progress::after {
+    content: 'in progress';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: var(--warning-color);
+    color: #000;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+/* Стили активного приложения */
+.app-info {
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+}
+
+.app-info label {
+    font-weight: bold;
+    margin-right: 8px;
+    color: var(--directory-color);
+}
+
+.app-info span {
+    color: var(--prompt-color);
+    font-family: monospace;
+}
+
+/* Остальные стили (скроллбар, кнопки и т.д.) */
+::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+    background-color: transparent;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(108, 122, 137, 0.5);
+    border-radius: 2px;
+    transition: background-color 0.3s ease;
+}
+
+.scrolling::-webkit-scrollbar,
+.scrolling:hover::-webkit-scrollbar,
+:active::-webkit-scrollbar,
+:hover::-webkit-scrollbar {
+    opacity: 1;
+}
+
+/* Адаптивные стили */
+@media (max-width: 768px) {
+    .three-column-layout {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .left-column, .right-column {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .terminal-container, .three-column-layout {
+        height: auto;
+        max-height: none;
+    }
+}
+
+/* Дополнительные компоненты */
+.control-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.tags-control {
+    margin-bottom: 15px;
+}
+
+.tag-input-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px;
+    background-color: var(--dnd-zone-color);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+}
+
+.tag, .command-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 16px;
+    font-size: 12px;
+}
+
+.tag {
+    background-color: rgba(76, 175, 80, 0.15);
+    border: 1px solid var(--prompt-color);
+    color: var(--prompt-color);
+}
+
+.command-tag {
+    background-color: rgba(86, 156, 214, 0.15);
+    border: 1px solid var(--command-color);
+    color: var(--command-color);
+}
+
+.tag-remove, .command-remove {
+    cursor: pointer;
+    margin-left: 5px;
+    color: var(--error-color);
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.tag-remove:hover, .command-remove:hover {
+    color: #ff6b6b;
+    transform: scale(1.1);
+}
+
+/* Стили для статусов задач */
+.task-status {
+    padding: 8px;
+    border-radius: 4px;
+    margin: 8px 0;
+    transition: all 0.3s ease;
+}
+
+.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+    border-left: 3px solid #ffc107;
+}
+
+.status-in-progress {
+    background-color: #cce5ff;
+    color: #004085;
+    border-left: 3px solid #007bff;
+}
+
+.status-success {
+    background-color: #d4edda;
+    color: #155724;
+    border-left: 3px solid #28a745;
+}
+
+.status-failed {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-left: 3px solid #dc3545;
+}
+
+.status-cancelled {
+    background-color: #e2e3e5;
+    color: #383d41;
+    border-left: 3px solid #6c757d;
+}
+
+.command-progress {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.command-progress progress {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.command-progress progress::-webkit-progress-bar {
+    background-color: #f1f1f1;
+    border-radius: 3px;
+}
+
+.command-progress progress::-webkit-progress-value {
+    background-color: var(--command-color);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.command-progress span {
+    display: block;
+    font-size: 0.8em;
+    color: inherit;
+    font-family: 'Courier New', monospace;
+    word-break: break-all;
+}
+
+/* Добавляем в terminal-script-manager.css */
+.in-progress {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.in-progress::after {
+    content: 'in progress';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #ffcc00;
+    color: #000;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: bold;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.in-progress-hidden::after {
+    opacity: 0;
+}
+
+/* Для кнопки переключения */
+.toggle-item[data-tooltip="Скрыть/показать компоненты in-progress"] .toggle-icon.active {
+    background-color: rgba(86, 156, 214, 0.2);
+    box-shadow: 0 0 0 2px rgba(86, 156, 214, 0.3);
+}
+
+/* Добавляем в terminal-script-manager.css */
+[class*="in-progress"] {
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.in-progress::after {
+    content: 'in progress';
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #ffcc00;
+    color: #000;
+    padding: 2px 5px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: bold;
+}
+
+/* Стиль для кнопки */
+#toggle-components:checked + .toggle-icon {
+    background-color: rgba(76, 175, 80, 0.2);
+}
+
+/* Гарантированные стили для маркировки */
+.in-progress {
+    position: relative !important;
+}
+
+.in-progress::after {
+    content: 'in progress' !important;
+    position: absolute !important;
+    top: 5px !important;
+    right: 5px !important;
+    background: #ffcc00 !important;
+    color: #000 !important;
+    padding: 2px 5px !important;
+    border-radius: 3px !important;
+    font-size: 10px !important;
+    font-weight: bold !important;
+    display: inline-block !important;
+}
+
+/* Стиль для активной кнопки */
+#toggle-components:checked + .toggle-icon {
+    color: #4CAF50 !important;
+    background-color: rgba(76, 175, 80, 0.2) !important;
+}
+
+.in-progress {
+    transition: opacity 0.3s ease;
+}
+.in-progress[hidden] {
+    display: none !important;
+}
+
+.in-progress::after {
+    display: block; /* По умолчанию видим */
+    transition: opacity 0.3s ease;
+}
+
+.in-progress.hide-label::after {
+    display: none !important;
+}
+
+.in-progress.hide-component {
+    display: none !important;
+}
+
+
+/* Современные стили для адаптивного tooltip */
+.tooltip-container {
+    position: relative;
+    display: inline-block;
+}
+
+.tooltip {
+    /* Позиционирование и базовая стилизация */
+    position: absolute;
+    z-index: 1000;
+    max-width: 300px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    line-height: 1.4;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+
+    /* Тема (можно менять) */
+    background: linear-gradient(135deg, #2b2d3a 0%, #1e2029 100%);
+    color: #f0f0f0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+
+    /* Стрелка */
+    &::after {
+        content: '';
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background: inherit;
+        transform: rotate(45deg);
+    }
+
+    /* Адаптивное позиционирование */
+    &[data-position="top"] {
+        bottom: calc(100% + 8px);
+        left: 50%;
+        transform: translateX(-50%) translateY(5px);
+        &::after {
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%) rotate(45deg);
+            margin-top: -5px;
+        }
+    }
+
+    &[data-position="bottom"] {
+        top: calc(100% + 8px);
+        left: 50%;
+        transform: translateX(-50%) translateY(-5px);
+        &::after {
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%) rotate(45deg);
+            margin-bottom: -5px;
+        }
+    }
+
+    &[data-position="left"] {
+        right: calc(100% + 8px);
+        top: 50%;
+        transform: translateY(-50%) translateX(5px);
+        &::after {
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%) rotate(45deg);
+            margin-left: -5px;
+        }
+    }
+
+    &[data-position="right"] {
+        left: calc(100% + 8px);
+        top: 50%;
+        transform: translateY(-50%) translateX(-5px);
+        &::after {
+            right: 100%;
+            top: 50%;
+            transform: translateY(-50%) rotate(45deg);
+            margin-right: -5px;
+        }
+    }
+}
+
+/* Анимация появления */
+.tooltip-container:hover .tooltip {
+    opacity: 1;
+    transform:
+            translateX(-50%) translateY(0) /* для top/bottom */
+            translateY(-50%) translateX(0); /* для left/right */
+}
+
+/* Гарантия видимости на экране */
+.tooltip {
+    @media (max-width: 600px) {
+        max-width: 200px;
+        font-size: 12px;
+    }
+
+    /* Автокоррекция позиции при выходе за границы */
+    &[data-out-of-view="true"] {
+        &[data-original-position="top"] {
+            bottom: auto;
+            top: calc(100% + 8px);
+            &::after {
+                top: auto;
+                bottom: 100%;
+            }
+        }
+        /* Аналогично для других позиций */
+    }
+}
+
+/* Основной контейнер */
+.scroll-container {
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+
+    /* Для Firefox */
+    scrollbar-width: thin;
+}
+
+
+/* Гарантия, что скроллбар поверх контента */
+.scroll-container {
+    position: relative;
+    z-index: 1;
+}
+
+.scroll-container.scrolling-active::-webkit-scrollbar-thumb {
+    background-color: rgba(100, 100, 100, 0.7);
+}
+
+/* Для WebKit (Chrome, Safari) */
+.scroll-container::-webkit-scrollbar {
+    width: 10px;
+    background-color: transparent;
+}
+
+.scroll-container::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius: 10px;
+    transition: background-color 0.3s ease;
+}

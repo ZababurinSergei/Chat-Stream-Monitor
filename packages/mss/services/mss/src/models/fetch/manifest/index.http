@@ -1,0 +1,40 @@
+
+### save new manifest
+### POST http://svc-fer-dev.helpms.ru:3333/v1/manifest/save
+POST http://127.0.0.1:3333/v1/manifest/save
+Content-Type: application/json
+
+{
+  "manifest": {
+    "eventSnapshotId": "",
+    "snapshotId": "a7fbf78e-38b0-467c-9d12-c5309b5f2ce4",
+    "version": "1.1.5",
+    "schemaId": "showcase.booking.mo.1.0.0",
+    "region": "federal",
+    "regionId": "d2136a0a-56ff-44e5-ae73-75e914efc40b",
+    "description": "Я тебя изменил",
+    "errors": [
+      {
+        "code": "1",
+        "message": "OID не соответствует формату OID медицинской организации",
+        "howToFix": "Исправить OID"
+      },
+      {
+        "code": "2",
+        "message": "OID организации не найден в ФРМО",
+        "howToFix": "Проверить OID организации"
+      },
+      {
+        "code": "3",
+        "message": "Название организации не соответствует названию fullName в ФРМО",
+        "howToFix": "Исправить название организации"
+      }
+    ],
+    "created": "2023-06-15T20:48:40.182323Z",
+    "validatorVersions": [],
+    "ruleSnapshotIds": [
+      "9c48e7dc-bb97-4cf3-aba5-1a8222cf2f9d",
+      "e749c4f8-6bcc-42e3-b303-e26335828774"
+    ]
+  }
+}

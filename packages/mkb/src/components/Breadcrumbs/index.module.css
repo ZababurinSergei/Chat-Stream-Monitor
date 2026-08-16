@@ -1,0 +1,13 @@
+.container {
+	display: flex;
+	flex-direction: row;
+}
+
+.container a, .container span {
+	font-style: normal;
+	font-weight: 400;
+	font-size: 12px;
+	line-height: 18px;
+	letter-spacing: -0.004em;
+	color: var(--black-35per);
+}

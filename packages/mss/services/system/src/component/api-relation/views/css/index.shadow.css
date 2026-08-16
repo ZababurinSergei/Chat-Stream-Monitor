@@ -1,0 +1,73 @@
+:host {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    flex-grow: 1;
+}
+
+section#api-relation {
+    padding: 0;
+    width: 100%
+}
+
+section#api-relation div.api-relation {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    padding: 0;
+    width: auto;
+    gap: 12px;
+}
+
+section#api-relation div.api-relation div.relation {
+    align-self: center;
+    box-sizing: border-box;
+    width: 100%;
+    margin-bottom: 0;
+    padding: 0.99vw 0 0 0.99vw;
+}
+
+section#api-relation div.api-relation div.relation div.api-matcher {
+    width: 100%
+}
+
+section#api-relation div.api-relation div.relation div.api-matcher label.api-matcher {
+    width: 100%;
+    font-family: Roboto, serif;
+    position: relative;
+    text-align: left;
+    color: #fff;
+    margin-bottom: 0.99vw;
+    cursor: text
+}
+
+section#api-relation div.api-relation div.relation div.api-matcher input.api-matcher {
+    border: none;
+    /*min-height: 4vw;*/
+    margin-top: 0.31vw;
+    outline: none;
+    padding: 0.16vw;
+    margin-bottom: 0.16vw;
+    width: 100%;
+    font-family: Roboto, serif;
+    cursor: pointer
+}
+
+section#api-relation div.api-relation div.relation div.api-matcher input.api-matcher:focus {
+    border-color: gray;
+    border-radius: 0.52vw
+}
+
+section#api-relation div.api-relation-wallet {
+    display: flex;
+    flex-grow: 1
+}
+
+.header{
+    border-bottom: solid rgba(118, 148, 244, 0.45);
+    box-sizing: border-box;
+    padding-bottom: 0.52vw;
+    margin: 0 0 0 0.99vw;
+    border-top: solid rgba(118, 148, 244, 0.45);
+    padding-top: 0.52vw;
+}

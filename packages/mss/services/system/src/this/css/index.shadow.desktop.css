@@ -1,0 +1,9 @@
+api-button {
+    width: 100%;
+}
+
+div[slot="service"] {
+    /*display: flex;*/
+    /*flex-direction: column;*/
+    height: 100%;
+}

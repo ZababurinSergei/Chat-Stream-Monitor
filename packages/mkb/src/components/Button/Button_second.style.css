@@ -1,0 +1,51 @@
+.button__second {
+	/* width: 91px; */
+	height: 40px;
+	/* min-width: 91px; */
+	min-height: 40px;
+	padding: 0 25px;
+	background: var(--white-100per);
+	border: 1px solid var(--black-10per);
+	border-radius: 4px;
+	font-family: 'Golos 14pt Medium 14x20';
+	font-size: 14px;
+	color: var(--blue-100per);
+	outline: none;
+	cursor: pointer;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.button__second:hover {
+	background: var(--blue-10per);
+	border: 1px solid var(--blue-50per);
+	outline: none;
+
+}
+
+/* .button__second:focus {
+	background: var(--white-100per);
+	border: 3px solid var(--blue-40per);
+	outline: none;
+} */
+
+.button__second:active {
+	background: var(--blue-20per);
+	border: 1px solid var(--blue-120per);
+	outline: none;
+}
+
+.button__second:disabled {
+	background: var(--black-5per);
+	border: 1px solid var(--black-10per);
+	color: var(--black-35per);
+}
+
+.button__second-img {
+	background: url('../img/Vector.png');
+	background-repeat: no-repeat;
+	width: 14px;
+	height: 14px;
+	margin-right: 10px;
+}

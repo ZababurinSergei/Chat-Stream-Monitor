@@ -1,0 +1,65 @@
+:host {
+	position: fixed;
+	bottom: 15vh;
+	left: 48.49vw;
+	z-index: 15;
+	transition:  left 1.5s linear;
+}
+
+:host(.fer-scroll_4) {
+	left: 37%;
+}
+
+.welcome__scroll {
+	position: absolute;
+	top: 30%;
+	z-index: 15;
+	/*bottom: -55%;*/
+	/*left: 58%;*/
+}
+
+.scroll {
+	width: 3.13vw;
+	height: 2.6vw;
+	cursor: pointer;
+	transition: height 0.4s ease;
+}
+
+.scroll__up-block {
+	width: 100%;
+	height: 38%;
+	display: flex;
+}
+
+.scroll__left {
+	border-right: white 0.05vw solid;
+	width: 50%;
+	height: 100%;
+}
+
+.scroll__right {
+	width: 50%;
+	height: 100%;
+}
+
+.scroll__title {
+	margin: 0;
+	padding-top: 0.89vw;
+	width: 3.02vw;
+	height: 0.83vw;
+	font-family: "Raleway", serif;
+	font-style: normal;
+	font-weight: 300;
+	font-size: 0.63vw;
+	line-height: 0.83vw;
+	letter-spacing: 0.255em;
+	text-transform: uppercase;
+	color: #ffffff;
+	flex: none;
+	order: 1;
+	flex-grow: 0;
+}
+
+.scroll:hover {
+	height: 4.27vw;
+}

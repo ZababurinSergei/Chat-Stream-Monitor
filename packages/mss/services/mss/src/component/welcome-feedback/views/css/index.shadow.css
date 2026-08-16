@@ -1,0 +1,92 @@
+.container {
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	padding: 1.56vw 1.3vw;
+	box-sizing: border-box;
+	width: 20.83vw;
+	height: 19.79vw;
+	background: rgba(0, 0, 0, 0.2);
+	box-shadow: 0px 0.42vw 0.94vw -0.31vw rgba(24, 39, 75, 0.12);
+	-webkit-backdrop-filter: blur(0.26vw);
+	        backdrop-filter: blur(0.26vw);
+	border-radius: 0.63vw;
+
+}
+
+.container-name {
+	display: flex;
+	flex-direction: column;
+	align-items: baseline;
+	position: relative;
+}
+
+.feedback-icon {
+	position: absolute;
+	width: 1.35vw;
+	height: 1.35vw;
+	left: 0;
+	top: calc(37% - 0.26vw);
+	box-sizing: border-box;
+	margin-left: 0.52vw;
+}
+
+.container-name label {
+	margin-bottom: 0.26vw;
+}
+
+.container-name input {
+	width: 100%;
+	margin-bottom: 1.56vw;
+	height: 2.34vw;
+	margin-right: 0;
+	box-sizing: border-box;
+	border-radius: 0.47vw;
+	border: unset;
+	padding: 0px 0px 0px 1.88vw;
+}
+
+.container-information {
+	width: 18.23vw;
+	height: 6.25vw;
+	background: #FFFFFF;
+	border: 0.05vw solid #FFFFFF;
+	border-radius: 0.47vw;
+}
+
+.container-information-textarea {
+	width: 100%;
+	box-sizing: border-box;
+	height: 100%;
+	background: rgb(255, 255, 255);
+	border: 0.05vw solid rgb(255, 255, 255);
+	border-radius: 0.47vw;
+	padding: 0.52vw;
+}
+
+.container-information-textarea::-moz-placeholder {
+	font-family: 'Raleway', serif;
+	font-style: normal;
+	font-weight: 500;
+	font-size: 0.63vw;
+	line-height: 0.73vw;
+	color: #666666;
+	box-sizing: border-box;
+}
+
+.container-information-textarea::placeholder {
+	font-family: 'Raleway', serif;
+	font-style: normal;
+	font-weight: 500;
+	font-size: 0.63vw;
+	line-height: 0.73vw;
+	color: #666666;
+	box-sizing: border-box;
+}
+
+.form__buttons {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 3.13vw;
+	gap: 2.08vw;
+}

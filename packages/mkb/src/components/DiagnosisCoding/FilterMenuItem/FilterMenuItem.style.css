@@ -1,0 +1,23 @@
+.filter-menu-item__wrapper {
+	font-family: 'Golos 14pt Medium 14x20';
+	font-style: normal;
+	font-weight: 400;
+	font-size: 14px;
+	line-height: 20px;
+	letter-spacing: -0.01em;
+	color: var(--black-100per);
+	padding: 8px 16px 0;
+	margin-bottom: 4px;
+	width: 297px;
+	height: 36px;
+	background: var(--white-100per);
+	box-shadow: 0px 2px 8px rgba(0, 31, 141, 0.14);
+	border-radius: 8px;
+	box-sizing: border-box;
+	display: flex;
+}
+
+.filter-menu-item__wrapper:hover {
+	background: var(--blue-10per);
+
+}

@@ -38,15 +38,15 @@
       "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
       "description_en": "User files: sources, templates, projects, user data",
       "required": false,
-      "excluded": true
+      "excluded": false
     },
     {
       "id": "15",
-      "name": "packages/MTProxy",
+      "name": "packages/mqtt",
       "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
       "description_en": "User files: sources, templates, projects, user data",
       "required": false,
-      "excluded": false
+      "excluded": true
     },
     {
       "id": "16",
@@ -54,11 +54,91 @@
       "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
       "description_en": "User files: sources, templates, projects, user data",
       "required": false,
-      "excluded": false
+      "excluded": true
     },
     {
       "id": "17",
-      "name": "Directory/firmware",
+      "name": "packages/mtproto-mqtt/metaflow/00-default",
+      "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
+      "description_en": "User files: sources, templates, projects, user data",
+      "required": false,
+      "excluded": true
+    },
+    {
+      "id": "18",
+      "name": "packages/mtproto-mqtt-gateway",
+      "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
+      "description_en": "User files: sources, templates, projects, user data",
+      "required": false,
+      "excluded": true
+    },
+    {
+      "id": "19",
+      "name": "packages/explorer",
+      "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
+      "description_en": "User files: sources, templates, projects, user data",
+      "required": false,
+      "excluded": true
+    },
+    {
+      "id": "20",
+      "name": "packages/bookmarks/03-template-store",
+      "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
+      "description_en": "User files: sources, templates, projects, user data",
+      "required": false,
+      "excluded": true
+    },
+    {
+      "id": "21",
+      "name": "packages/bookmarks/02-config-generator/web",
+      "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
+      "description_en": "User files: sources, templates, projects, user data",
+      "required": false,
+      "excluded": true
+    },
+    {
+      "id": "22",
+      "name": "packages/bookmarks/a0_5238_store",
+      "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
+      "description_en": "User files: sources, templates, projects, user data",
+      "required": false,
+      "excluded": true
+    },
+    {
+      "id": "23",
+      "name": "packages/bookmarks/grid/src/infoenergo-ui",
+      "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
+      "description_en": "User files: sources, templates, projects, user data",
+      "required": false,
+      "excluded": true
+    },
+    {
+      "id": "24",
+      "name": "packages/bookmarks/a2_5231_build_vite",
+      "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
+      "description_en": "User files: sources, templates, projects, user data",
+      "required": false,
+      "excluded": true
+    },
+    {
+      "id": "24",
+      "name": "packages/bookmarks/a0_5238_store",
+      "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
+      "description_en": "User files: sources, templates, projects, user data",
+      "required": false,
+      "excluded": true
+    },
+    {
+      "id": "25",
+      "name": "packages/bookmarks/a4_6532_infoenergo_ui",
+      "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
+      "description_en": "User files: sources, templates, projects, user data",
+      "required": false,
+      "excluded": true
+    },
+    {
+      "id": "26",
+      "name": "packages/bookmarks/a4_6532_infoenergo_ui",
       "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
       "description_en": "User files: sources, templates, projects, user data",
       "required": false,
@@ -67,10 +147,16 @@
   ],
   "excludePatterns": {
     "directories": [
+      "formal/__tests__",
+      "refactor/__tests__",
+      "test-temp-stress",
+      "tests",
+      "venv",
+      "third_party",
+      "aedes",
+      "metaflow-tutorials",
       ".vite-cache",
       "migration_commits",
-      "packages/ast-analyzer/src/__tests__",
-      "packages/ast-analyzer/src/formal/__tests__",
       "cache",
       ".turbo",
       ".github",

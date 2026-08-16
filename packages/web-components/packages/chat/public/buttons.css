@@ -1,0 +1,212 @@
+/* ===== ОБЩИЕ СТИЛИ ДЛЯ ВСЕХ КНОПОК ===== */
+.action-button,
+.control-btn,
+.predict-button,
+.generate-button,
+.clear-button,
+.start-button,
+.stop-button,
+.reset-button,
+.load-button {
+    padding: 14px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 160px;
+    justify-content: center;
+    font-family: inherit;
+    position: relative;
+    overflow: hidden;
+}
+
+.action-button::before,
+.control-btn::before,
+.predict-button::before,
+.generate-button::before,
+.clear-button::before,
+.start-button::before,
+.stop-button::before,
+.reset-button::before,
+.load-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.5s ease;
+}
+
+.action-button:hover::before,
+.control-btn:hover::before,
+.predict-button:hover::before,
+.generate-button:hover::before,
+.clear-button:hover::before,
+.start-button:hover::before,
+.stop-button:hover::before,
+.reset-button:hover::before,
+.load-button:hover::before {
+    left: 100%;
+}
+
+/* Специфичные стили для разных типов кнопок */
+.predict-button {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    color: white;
+    box-shadow: 0 4px 16px rgba(78, 84, 200, 0.3);
+}
+
+.predict-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(78, 84, 200, 0.4);
+}
+
+.generate-button {
+    background: linear-gradient(135deg, var(--info), #2db9d2);
+    color: white;
+    box-shadow: 0 4px 16px rgba(23, 162, 184, 0.3);
+}
+
+.generate-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(23, 162, 184, 0.4);
+}
+
+.clear-button {
+    background: linear-gradient(135deg, var(--danger), #e25562);
+    color: white;
+    box-shadow: 0 4px 16px rgba(220, 53, 69, 0.3);
+}
+
+.clear-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(220, 53, 69, 0.4);
+}
+
+.start-button {
+    background: linear-gradient(135deg, var(--success, #28a745), #34ce57);
+    color: white;
+    box-shadow: 0 4px 16px rgba(40, 167, 69, 0.3);
+}
+
+.start-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(40, 167, 69, 0.4);
+}
+
+.stop-button {
+    background: linear-gradient(135deg, var(--danger, #dc3545), #e25562);
+    color: white;
+    box-shadow: 0 4px 16px rgba(220, 53, 69, 0.3);
+}
+
+.stop-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(220, 53, 69, 0.4);
+}
+
+.reset-button {
+    background: linear-gradient(135deg, var(--warning, #ffc107), #ffd54f);
+    color: var(--text, #212529);
+    box-shadow: 0 4px 16px rgba(255, 193, 7, 0.3);
+}
+
+.reset-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(255, 193, 7, 0.4);
+}
+
+.load-button {
+    background: linear-gradient(135deg, var(--info, #17a2b8), #2db9d2);
+    color: white;
+    box-shadow: 0 4px 16px rgba(23, 162, 184, 0.3);
+}
+
+.load-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(23, 162, 184, 0.4);
+}
+
+/* Состояние disabled */
+.action-button:disabled,
+.control-btn:disabled,
+.predict-button:disabled,
+.generate-button:disabled,
+.clear-button:disabled,
+.start-button:disabled,
+.stop-button:disabled,
+.reset-button:disabled,
+.load-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* ===== КОНТЕЙНЕРЫ КНОПОК ===== */
+.model-controls,
+.action-buttons,
+.control-buttons,
+.button-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+/* Адаптивность для контейнеров кнопок */
+@media (max-width: 768px) {
+    .model-controls,
+    .action-buttons,
+    .control-buttons,
+    .button-group {
+        flex-direction: column;
+    }
+
+    .action-button,
+    .control-btn,
+    .predict-button,
+    .generate-button,
+    .clear-button,
+    .start-button,
+    .stop-button,
+    .reset-button,
+    .load-button {
+        width: 100%;
+        min-width: auto;
+    }
+}
+
+/* Фокус для доступности */
+.action-button:focus-visible,
+.control-btn:focus-visible,
+.predict-button:focus-visible,
+.generate-button:focus-visible,
+.clear-button:focus-visible,
+.start-button:focus-visible,
+.stop-button:focus-visible,
+.reset-button:focus-visible,
+.load-button:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 2px;
+}
+
+/* Анимация для активных кнопок */
+.action-button:active:not(:disabled),
+.control-btn:active:not(:disabled),
+.predict-button:active:not(:disabled),
+.generate-button:active:not(:disabled),
+.clear-button:active:not(:disabled),
+.start-button:active:not(:disabled),
+.stop-button:active:not(:disabled),
+.reset-button:active:not(:disabled),
+.load-button:active:not(:disabled) {
+    transform: translateY(1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}

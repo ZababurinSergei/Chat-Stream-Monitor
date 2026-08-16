@@ -1,0 +1,5 @@
+
+
+// export const URL_DEV_AUTH = `https://ia.helpms.ru/realms/mkb11/protocol/openid-connect/auth?response_type=code&scope=openid&client_id=web-client&redirect_uri=https://mkb11-compose-qa.digitalms.ru&state=123412341234adfg&code_challenge=Ngk-opkLAvUYcKBUG2lZQaq-GS40IEBcufYyOHR3CuE&code_challenge_method=S256`
+export const URL_DEV_AUTH = 'https://ia.helpms.ru/realms/mkb11/protocol/openid-connect/auth?response_type=code&scope=openid&client_id=web-client&redirect_uri=https://mkb11-compose-dev.digitalms.ru/&state=123412341234adfg&code_challenge=Ngk-opkLAvUYcKBUG2lZQaq-GS40IEBcufYyOHR3CuE&code_challenge_method=S256'
+export const redirectUrlAuth = (redirect_uri, code_challenge) => `https://ia.helpms.ru/realms/mkb11/protocol/openid-connect/auth?response_type=code&scope=openid&client_id=web-client&redirect_uri=${redirect_uri}&state=123412341234adfg&code_challenge=${code_challenge}&code_challenge_method=S256`

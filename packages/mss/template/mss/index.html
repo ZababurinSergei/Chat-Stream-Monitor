@@ -1,0 +1,779 @@
+<template id="welcomebook">
+  <body>
+  <div class="welcome__book">
+    <slot name="welcome-header"></slot>
+    <slot name="fer-scroll"></slot>
+    <slot name="welcome-menu"></slot>
+    <slot name="welcome-animation"></slot>
+    <div class="welcome-body">
+      <section class="slider parallax-container-off" data-id="0">
+        <slot name="welcome-section-0"></slot>
+      </section>
+      <section class="slider parallax-container-off" data-id="1">
+        <slot name="welcome-section-1"></slot>
+      </section>
+      <section class="slider parallax-container-off" data-id="2">
+        <slot name="welcome-section-2"></slot>
+      </section>
+      <section class="slider parallax-container-off" data-id="3">
+        <slot name="welcome-section-3"></slot>
+      </section>
+      <section class="slider parallax-container-off" data-id="4">
+        <slot name="welcome-section-4"></slot>
+      </section>
+      <section class="slider parallax-container-off" data-id="5">
+        <slot name="welcome-section-5"></slot>
+      </section>
+      <section class="slider parallax-container-off" data-id="6">
+        <slot name="welcome-section-6"></slot>
+      </section>
+      <section class="slider parallax-container-off" data-id="7">
+        <slot name="welcome-section-7"></slot>
+      </section>
+      <section class="slider parallax-container-off" data-id="100">
+        <slot name="welcome-section-100"></slot>
+      </section>
+    </div>
+    <div
+      data-id="0"
+      data-section="0_0"
+      class="welcome-body_section_0_0"
+      style="display: none"
+    >
+      <section class="container__section" data-id="0">
+        <slot name="welcome-section_0_0"></slot>
+      </section>
+    </div>
+    <div
+      data-id="6"
+      data-section="6_0"
+      class="welcome-body_section_6_0"
+      style="display: none"
+    >
+      <section class="layer" data-id="6">
+        <slot name="welcome-section-6_0"></slot>
+      </section>
+    </div>
+    <div
+      data-id="7"
+      data-section="7_0"
+      class="welcome-body_section_7_0"
+      style="display: none"
+    >
+      <section class="layer" data-id="7">
+        <slot name="welcome-section-7_0"></slot>
+      </section>
+    </div>
+    <div
+      data-id="5"
+      data-section="5_0"
+      class="welcome-body_section_5_0"
+      style="display: none"
+    >
+      <section class="layer" data-id="5">
+        <slot name="welcome-section-5_0"></slot>
+      </section>
+    </div>
+  </div>
+
+  <welcome-menu
+    data-id="menu"
+    data-services-path="mss"
+    data-css-shadow="mss"
+    slot="welcome-menu"
+  >
+    <template>
+      <div class="container">
+        <div class="slider">
+          <div class="square"></div>
+        </div>
+        <div class="body">
+          <slot name="button-0"></slot>
+          <slot name="button-1"></slot>
+          <slot name="button-2"></slot>
+          <slot name="button-3"></slot>
+          <slot name="button-4"></slot>
+          <slot name="button-5"></slot>
+          <slot name="button-6"></slot>
+          <slot name="button-7"></slot>
+          <slot name="button-100"></slot>
+        </div>
+      </div>
+    </template>
+  </welcome-menu>
+
+  <welcome-section
+    data-services-path="mss"
+    data-id="0"
+    data-to="0_0"
+    data-css-shadow="mss"
+    slot="welcome-section-0"
+  >
+    <template>
+      <div class="images"></div>
+      <div class="body">
+        <div class="container">
+          <div class="slot">
+            <slot name="select"></slot>
+            <slot name="fer-table_0"></slot>
+          </div>
+        </div>
+      </div>
+
+      <fer-table
+        data-services-path="mss"
+        data-template="card"
+        data-id="0"
+        data-to="0_0"
+        slot="fer-table_0"
+        data-css-shadow="mss"
+      >
+        <template>
+          <div class="auction-data">
+            <div class="table card">
+              <div class="header"></div>
+              <div class="body card"></div>
+              <div class="footer">
+                <slot name="pagination"></slot>
+              </div>
+            </div>
+          </div>
+          <fer-pagination
+                  data-services-path="mss"
+                  data-id="0"
+                  data-to="0_0"
+                  data-items-per-page="10"
+                  data-page="0"
+                  slot="pagination"
+                  data-css-shadow="mss"
+          >
+            <template>
+              <div class="container">
+                <div class="pagination_info">
+                  <div class="container_info">
+                    <div class="title">
+                      Показать:
+                    </div>
+                    <fer-select
+                            class="container_limit"
+                            data-value="6"
+                            data-services-path="mss"
+                            data-css-shadow="mss"
+                    >
+                      <template>
+                        <div class="dropdown">
+                          <div class="dropdown__wrapper">
+                            <div class="dropdown_input">
+                              <button class="dropdown__button" type="button">6</button>
+                            </div>
+                            <div class="dropdown__button_arrow">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M7.99994 8.93934L11.4696 5.46967L12.5303 6.53033L8.53027 10.5303C8.23738 10.8232 7.76251 10.8232 7.46961 10.5303L3.46961 6.53033L4.53027 5.46967L7.99994 8.93934Z" fill="#0D4CD3"/>
+                              </svg>
+                            </div>
+                          </div>
+                          <ul style="position: absolute; top: -20px; left: 45px;" class="dropdown__list">
+                            <li style="text-align: center;"class="dropdown__list-item">
+                              6
+                            </li>
+                            <li style="text-align: center;"class="dropdown__list-item">
+                              12
+                            </li>
+                            <li style="text-align: center;"class="dropdown__list-item">
+                              32
+                            </li>
+                          </ul>
+                          <input class="dropdown__input_hidden" type="text" name="select-category" value="Фильтр 1" />
+                        </div>
+                      </template>
+                    </fer-select>
+                  </div>
+                  <div class="container_info_all">
+                    <div class="limit">-</div>
+                    <div>из</div>
+                    <div class="total">-</div>
+                  </div>
+                </div>
+                <div class="pagination_wrapper">
+                  <div class="pagination">
+                    <div class="previous">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="20" viewBox="0 0 24 20" fill="none">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                              d="M10.4697 5.46973L6.46967 9.46973C6.17678 9.76262 6.17678 10.2375 6.46967 10.5304L10.4697 14.5304L11.5303 13.4697L8.80909 10.7485L17.9999 10.7502L18.0001 9.25019L8.81223 9.24849L11.5303 6.53039L10.4697 5.46973Z"
+                              fill="#0D4CD3" />
+                      </svg>
+                    </div>
+                    <div class="container-data"></div>
+                    <div class="next">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="20" viewBox="0 0 24 20" fill="none">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                              d="M13.5303 14.5294L17.5303 10.5294C17.8232 10.2365 17.8232 9.76164 17.5303 9.46875L13.5303 5.46875L12.4697 6.52941L15.191 9.25079L6.00028 9.24908L6 10.7491L15.1876 10.7508L12.4697 13.4688L13.5303 14.5294Z"
+                              fill="#0D4CD3" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </fer-pagination>
+        </template>
+      </fer-table>
+    </template>
+  </welcome-section>
+
+  <welcome-section
+    data-services-path="mss"
+    data-id="6"
+    data-to="6_0"
+    data-css-shadow="mss"
+    slot="welcome-section-6"
+  >
+    <template>
+      <div class="images"></div>
+      <div class="body">
+        <div class="container">
+          <div class="slot">
+            <slot name="mss-table_6"></slot>
+          </div>
+        </div>
+      </div>
+
+      <fer-table
+        data-services-path="mss"
+        data-template="registry"
+        data-id="6"
+        data-to="6_0"
+        slot="mss-table_6"
+        data-css-shadow="mss"
+      >
+        <template>
+          <div class="data">
+            <div class="table">
+              <div class="header"></div>
+              <div class="body"></div>
+              <div class="footer">
+                <slot name="table_6_pagination"></slot>
+              </div>
+            </div>
+          </div>
+
+          <fer-pagination
+                  data-services-path="mss"
+                  data-id="6"
+                  data-to="6_0"
+                  data-items-per-page="10"
+                  data-page="0"
+                  slot="table_6_pagination"
+                  data-css-shadow="mss"
+          >
+            <template>
+              <div class="container">
+                <div class="pagination_info">
+                  <div class="container_info">
+                    <div class="title">
+                      Показать:
+                    </div>
+                    <fer-select
+                            class="container_limit"
+                            data-value="6"
+                            data-services-path="mss"
+                            data-css-shadow="mss"
+                    >
+                      <template>
+                        <div class="dropdown">
+                          <div class="dropdown__wrapper">
+                            <div class="dropdown_input">
+                              <button class="dropdown__button" type="button">6</button>
+                            </div>
+                            <div class="dropdown__button_arrow">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M7.99994 8.93934L11.4696 5.46967L12.5303 6.53033L8.53027 10.5303C8.23738 10.8232 7.76251 10.8232 7.46961 10.5303L3.46961 6.53033L4.53027 5.46967L7.99994 8.93934Z" fill="#0D4CD3"/>
+                              </svg>
+                            </div>
+                          </div>
+                          <ul style="position: absolute; top: -20px; left: 45px;" class="dropdown__list">
+                            <li style="text-align: center;"class="dropdown__list-item">
+                              6
+                            </li>
+                            <li style="text-align: center;"class="dropdown__list-item">
+                              12
+                            </li>
+                            <li style="text-align: center;"class="dropdown__list-item">
+                              32
+                            </li>
+                          </ul>
+                          <input class="dropdown__input_hidden" type="text" name="select-category" value="Фильтр 1" />
+                        </div>
+                      </template>
+                    </fer-select>
+                  </div>
+                  <div class="container_info_all">
+                    <div class="limit">-</div>
+                    <div>из</div>
+                    <div class="total">-</div>
+                  </div>
+                </div>
+                <div class="pagination_wrapper">
+                  <div class="pagination">
+                    <div class="previous">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="20" viewBox="0 0 24 20" fill="none">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                              d="M10.4697 5.46973L6.46967 9.46973C6.17678 9.76262 6.17678 10.2375 6.46967 10.5304L10.4697 14.5304L11.5303 13.4697L8.80909 10.7485L17.9999 10.7502L18.0001 9.25019L8.81223 9.24849L11.5303 6.53039L10.4697 5.46973Z"
+                              fill="#0D4CD3" />
+                      </svg>
+                    </div>
+                    <div class="container-data"></div>
+                    <div class="next">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="20" viewBox="0 0 24 20" fill="none">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                              d="M13.5303 14.5294L17.5303 10.5294C17.8232 10.2365 17.8232 9.76164 17.5303 9.46875L13.5303 5.46875L12.4697 6.52941L15.191 9.25079L6.00028 9.24908L6 10.7491L15.1876 10.7508L12.4697 13.4688L13.5303 14.5294Z"
+                              fill="#0D4CD3" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </fer-pagination>
+        </template>
+      </fer-table>
+    </template>
+  </welcome-section>
+
+  <welcome-section
+    data-services-path="mss"
+    data-id="7"
+    data-to="7_0"
+    data-css-shadow="mss"
+    slot="welcome-section-7"
+  >
+    <template>
+      <div class="images"></div>
+      <div class="body">
+        <div class="container">
+          <div class="slot">
+            <slot name="mss-table_7"></slot>
+          </div>
+        </div>
+      </div>
+
+      <fer-table
+        data-services-path="mss"
+        data-template="registry"
+        data-id="7"
+        data-to="7_0"
+        slot="mss-table_7"
+        data-css-shadow="mss"
+      >
+        <template>
+          <div class="data">
+            <div class="table">
+              <div class="header"></div>
+              <div class="body"></div>
+              <div class="footer">
+                <slot name="table_7_pagination"></slot>
+              </div>
+            </div>
+          </div>
+
+          <!--        <div class="pagination">-->
+          <!--          <slot name="table_7_pagination"></slot>-->
+          <!--        </div>-->
+
+          <fer-pagination
+                  data-services-path="mss"
+                  data-id="7"
+                  data-to="7_0"
+                  data-items-per-page="10"
+                  data-page="0"
+                  slot="table_7_pagination"
+                  data-css-shadow="mss"
+          >
+            <template>
+              <div class="container">
+                <div class="pagination_info">
+                  <div class="container_info">
+                    <div class="title">
+                      Показать:
+                    </div>
+                    <fer-select
+                            class="container_limit"
+                            data-value="6"
+                            data-services-path="mss"
+                            data-css-shadow="mss"
+                    >
+                      <template>
+                        <div class="dropdown">
+                          <div class="dropdown__wrapper">
+                            <div class="dropdown_input">
+                              <button class="dropdown__button" type="button">6</button>
+                            </div>
+                            <div class="dropdown__button_arrow">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M7.99994 8.93934L11.4696 5.46967L12.5303 6.53033L8.53027 10.5303C8.23738 10.8232 7.76251 10.8232 7.46961 10.5303L3.46961 6.53033L4.53027 5.46967L7.99994 8.93934Z" fill="#0D4CD3"/>
+                              </svg>
+                            </div>
+                          </div>
+                          <ul style="position: absolute; top: -20px; left: 45px;" class="dropdown__list">
+                            <li style="text-align: center;"class="dropdown__list-item">
+                              6
+                            </li>
+                            <li style="text-align: center;"class="dropdown__list-item">
+                              12
+                            </li>
+                            <li style="text-align: center;"class="dropdown__list-item">
+                              32
+                            </li>
+                          </ul>
+                          <input class="dropdown__input_hidden" type="text" name="select-category" value="Фильтр 1" />
+                        </div>
+                      </template>
+                    </fer-select>
+                  </div>
+                  <div class="container_info_all">
+                    <div class="limit">-</div>
+                    <div>из</div>
+                    <div class="total">-</div>
+                  </div>
+                </div>
+                <div class="pagination_wrapper">
+                  <div class="pagination">
+                    <div class="previous">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="20" viewBox="0 0 24 20" fill="none">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                              d="M10.4697 5.46973L6.46967 9.46973C6.17678 9.76262 6.17678 10.2375 6.46967 10.5304L10.4697 14.5304L11.5303 13.4697L8.80909 10.7485L17.9999 10.7502L18.0001 9.25019L8.81223 9.24849L11.5303 6.53039L10.4697 5.46973Z"
+                              fill="#0D4CD3" />
+                      </svg>
+                    </div>
+                    <div class="container-data"></div>
+                    <div class="next">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="20" viewBox="0 0 24 20" fill="none">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                              d="M13.5303 14.5294L17.5303 10.5294C17.8232 10.2365 17.8232 9.76164 17.5303 9.46875L13.5303 5.46875L12.4697 6.52941L15.191 9.25079L6.00028 9.24908L6 10.7491L15.1876 10.7508L12.4697 13.4688L13.5303 14.5294Z"
+                              fill="#0D4CD3" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </fer-pagination>
+        </template>
+      </fer-table>
+    </template>
+  </welcome-section>
+
+  <welcome-section
+    data-services-path="mss"
+    data-id="6_0"
+    data-to="6"
+    data-css-shadow="mss"
+    slot="welcome-section-6_0"
+  >
+    <template>
+      <div class="images"></div>
+      <div class="body">
+        <div class="container">
+          <div class="slot">
+            <slot name="select"></slot>
+            <slot name="fer-table_6_0"></slot>
+          </div>
+        </div>
+      </div>
+
+      <fer-table
+        data-services-path="mss"
+        data-template="card"
+        data-id="6_0"
+        data-to="6"
+        slot="fer-table_6_0"
+        data-css-shadow="mss"
+      >
+        <template>
+          <div class="auction-data">
+            <div class="table card">
+              <div class="header" style="display: none"></div>
+              <div class="body card"></div>
+              <div class="footer" style="display: none">
+                <slot name="table_6_0_pagination"></slot>
+              </div>
+            </div>
+          </div>
+        </template>
+      </fer-table>
+    </template>
+  </welcome-section>
+
+  <welcome-section
+    data-services-path="mss"
+    data-id="7_0"
+    data-to="7"
+    data-css-shadow="mss"
+    slot="welcome-section-7_0"
+  >
+    <template>
+      <div class="images"></div>
+      <div class="body">
+        <div class="container">
+          <div class="slot">
+            <slot name="mss-table_7_0"></slot>
+          </div>
+        </div>
+      </div>
+
+      <fer-table
+        data-services-path="mss"
+        data-template="registry"
+        data-id="7_0"
+        data-to="7"
+        slot="mss-table_7_0"
+        data-css-shadow="mss"
+      >
+        <template>
+          <div class="data">
+            <div class="table">
+              <div class="header"></div>
+              <div class="body"></div>
+              <div class="footer">
+                <slot name="table_7_pagination"></slot>
+              </div>
+            </div>
+          </div>
+        </template>
+      </fer-table>
+    </template>
+  </welcome-section>
+  <welcome-section
+          data-services-path="mss"
+          data-id="100"
+          data-to="_"
+          data-css-shadow="mss"
+          slot="welcome-section-100"
+  >
+    <template>
+      <div class="images"></div>
+      <div class="body">
+        <div class="container">
+          <div class="slot">
+            <slot name="select"></slot>
+            <slot name="table"></slot>
+          </div>
+        </div>
+      </div>describe
+      <mss-settings
+        data-services-path="mss"
+        data-css-shadow="mss"
+        slot="select"
+      >
+        <template>
+          <div data-exclusion id="swagger">
+            <div class="swagger-menu">
+              <input id="describe" type="text" placeholder="Введите название describe блока">
+              <button class="swagger-save">Сохранить тесты</button>
+              <button class="swagger-reset">Сбросить блоки it</button>
+            </div>
+            <div id="swagger-ui"></div>
+          </div>
+        </template>
+      </mss-settings>
+      <fer-table
+              data-services-path="mss"
+              data-template="registry"
+              data-id="100"
+              data-to="_"
+              slot="table"
+              data-css-shadow="mss"
+      >
+        <template>
+          <div class="data">
+            <div class="table">
+              <div class="header"></div>
+              <div class="body"></div>
+              <div class="footer"></div>
+            </div>
+          </div>
+        </template>
+      </fer-table>
+    </template>
+  </welcome-section>
+
+
+
+  <welcome-section
+          data-services-path="mss"
+          data-id="5"
+          data-to="5_0"
+          data-css-shadow="mss"
+          slot="welcome-section-5"
+  >
+    <template>
+      <div class="images"></div>
+      <div class="body">
+        <div class="container">
+          <div class="slot">
+            <slot name="mss-table_5"></slot>
+          </div>
+        </div>
+      </div>
+
+      <fer-table
+              data-services-path="mss"
+              data-template="registry"
+              data-id="5"
+              data-to="5_0"
+              slot="mss-table_5"
+              data-css-shadow="mss"
+      >
+        <template>
+          <div class="data">
+            <div class="table">
+              <div class="header"></div>
+              <div class="body"></div>
+              <div class="footer">
+                <slot name="table_5_pagination"></slot>
+              </div>
+            </div>
+          </div>
+
+          <!--        <div class="pagination">-->
+          <!--          <slot name="table_5_pagination"></slot>-->
+          <!--        </div>-->
+
+          <fer-pagination
+                  data-services-path="mss"
+                  data-id="5"
+                  data-to="5_0"
+                  data-items-per-page="10"
+                  data-page="0"
+                  slot="table_5_pagination"
+                  data-css-shadow="mss"
+          >
+            <template>
+              <div class="container">
+                <div class="pagination_info">
+                  <div class="container_info">
+                    <div class="title">
+                      Показать:
+                    </div>
+                    <fer-select
+                            class="container_limit"
+                            data-value="6"
+                            data-services-path="mss"
+                            data-css-shadow="mss"
+                    >
+                      <template>
+                        <div class="dropdown">
+                          <div class="dropdown__wrapper">
+                            <div class="dropdown_input">
+                              <button class="dropdown__button" type="button">6</button>
+                            </div>
+                            <div class="dropdown__button_arrow">
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                <path fill-rule="evenodd" clip-rule="evenodd" d="M7.99994 8.93934L11.4696 5.46967L12.5303 6.53033L8.53027 10.5303C8.23738 10.8232 7.76251 10.8232 7.46961 10.5303L3.46961 6.53033L4.53027 5.46967L7.99994 8.93934Z" fill="#0D4CD3"/>
+                              </svg>
+                            </div>
+                          </div>
+                          <ul
+                             style="position: absolute; top: -20px; left: 45px;"
+                             class="dropdown__list"
+                          >
+                            <li style="text-align: center;" class="dropdown__list-item">
+                              6
+                            </li>
+                            <li style="text-align: center;" class="dropdown__list-item">
+                              12
+                            </li>
+                            <li style="text-align: center;" class="dropdown__list-item">
+                              32
+                            </li>
+                          </ul>
+                          <input class="dropdown__input_hidden" type="text" name="select-category" value="Фильтр 1" />
+                        </div>
+                      </template>
+                    </fer-select>
+                  </div>
+                  <div class="container_info_all">
+                    <div class="limit">-</div>
+                    <div>из</div>
+                    <div class="total">-</div>
+                  </div>
+                </div>
+                <div class="pagination_wrapper">
+                  <div class="pagination">
+                    <div class="previous">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="20" viewBox="0 0 24 20" fill="none">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                              d="M10.4697 5.46973L6.46967 9.46973C6.17678 9.76262 6.17678 10.2375 6.46967 10.5304L10.4697 14.5304L11.5303 13.4697L8.80909 10.7485L17.9999 10.7502L18.0001 9.25019L8.81223 9.24849L11.5303 6.53039L10.4697 5.46973Z"
+                              fill="#0D4CD3" />
+                      </svg>
+                    </div>
+                    <div class="container-data"></div>
+                    <div class="next">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="20" viewBox="0 0 24 20" fill="none">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                              d="M13.5303 14.5294L17.5303 10.5294C17.8232 10.2365 17.8232 9.76164 17.5303 9.46875L13.5303 5.46875L12.4697 6.52941L15.191 9.25079L6.00028 9.24908L6 10.7491L15.1876 10.7508L12.4697 13.4688L13.5303 14.5294Z"
+                              fill="#0D4CD3" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </fer-pagination>
+        </template>
+      </fer-table>
+    </template>
+  </welcome-section>
+
+  <welcome-section
+          data-services-path="mss"
+          data-id="5_0"
+          data-to="5"
+          data-css-shadow="mss"
+          slot="welcome-section-5_0"
+  >
+    <template>
+      <div class="images"></div>
+      <div class="body">
+        <div class="container">
+          <div class="slot">
+            <slot name="mss-table_5_0"></slot>
+          </div>
+        </div>
+      </div>
+
+      <fer-table
+              data-services-path="mss"
+              data-template="registry"
+              data-id="5_0"
+              data-to="5"
+              slot="mss-table_5_0"
+              data-css-shadow="mss"
+      >
+        <template>
+          <div class="data">
+            <div class="table">
+              <div class="header"></div>
+              <div class="body"></div>
+              <div class="footer">
+<!--                <slot name="table_5_pagination"></slot>-->
+              </div>
+            </div>
+          </div>
+        </template>
+      </fer-table>
+    </template>
+  </welcome-section>
+
+
+  <div slot="welcome-animation" class="animation">
+    <div class="item"></div>
+    <div class="item"></div>
+    <div class="item"></div>
+    <div class="item"></div>
+    <div class="item"></div>
+    <div class="item"></div>
+    <div class="item"></div>
+  </div>
+  </body>
+</template>

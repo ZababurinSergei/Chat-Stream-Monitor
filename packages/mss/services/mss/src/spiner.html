@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Портал государственных услуг Российской Федерации</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+  <meta name="description" content="Портал государственных услуг Российской Федерации">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta name="google" content="notranslate">
+  <link rel="shortcut icon" type="image/x-icon" href="https://gu-st.ru/portal-st/favicon.ico?ver=1.1">
+  <style type="text/css">
+      :host {
+          width: 100%
+      }
+
+      #start-app-loader {
+          position: absolute;
+          width: 100vw;
+          height: 100vh;
+          background: #fff;
+      }
+
+      .container-app-loader {
+          position: fixed;
+          z-index: 999;
+          width: 88px;
+          height: 100px;
+          left: 50%;
+          top: 50%;
+          margin: -50px 0 0 -44px
+      }
+
+      .throbber-hexagon {
+          text-align: center;
+          display: flex;
+          justify-content: center
+      }
+
+      .throbber-hexagon svg {
+          width: 100%;
+          height: 100%
+      }
+
+      .throbber-hexagon .hexagon {
+          overflow: visible;
+          background-color: transparent;
+          transform: rotateX(180deg)
+      }
+
+      .throbber-hexagon .hexagon .throbber-hexagon-base, .throbber-hexagon .hexagon .throbber-hexagon-line-animation {
+          fill: transparent;
+          stroke-miterlimit: 10;
+          stroke-width: 4px
+      }
+
+      .throbber-hexagon .hexagon .throbber-hexagon-base {
+          stroke: none
+      }
+
+      .throbber-hexagon .hexagon .throbber-hexagon-line-animation {
+          stroke: #f9c12c;
+          stroke-linecap: round;
+          animation: dash 2.5s linear;
+          animation-iteration-count: infinite
+      }
+
+      .throbber-hexagon .hexagon .throbber-hexagon-dot-animation {
+          stroke: #f9c12c;
+          fill: transparent;
+          stroke-linecap: round;
+          animation: dash2 2.5s linear;
+          animation-iteration-count: infinite;
+          stroke-width: 10px;
+          stroke-miterlimit: 10
+      }
+
+      @keyframes dash {
+          0% {
+              stroke-dasharray: 260.22 173.48;
+              stroke-dashoffset: -867.4
+          }
+
+          25% {
+              stroke: #57dee1
+          }
+
+          50% {
+              stroke-dasharray: 260.22 173.48;
+              stroke: #f51047
+          }
+
+          75% {
+              stroke: #33bf02
+          }
+
+          100% {
+              stroke-dasharray: 260.22 173.48;
+              stroke-dashoffset: 0
+          }
+      }
+
+      @keyframes dash2 {
+          0% {
+              stroke-dasharray: 1 431.7;
+              stroke-dashoffset: -867.4
+          }
+
+          25% {
+              stroke: #57dee1
+          }
+
+          50% {
+              stroke-dasharray: 1 431.7;
+              stroke: #f51047
+          }
+
+          75% {
+              stroke: #33bf02
+          }
+
+          100% {
+              stroke-dasharray: 1 431.7;
+              stroke-dashoffset: 0
+          }
+      }
+  </style>
+  <style>
+      @charset "UTF-8";html,body,div {
+          margin: 0;
+          padding: 0;
+          border: 0;
+          font-size: 100%;
+          font: inherit;
+          vertical-align: baseline
+      }
+
+      body {
+          line-height: 1
+      }
+
+      html {
+          height: 100%;
+          overflow-x: hidden
+      }
+
+      body {
+          display: flex;
+          flex-direction: column
+      }
+
+      body {
+          font-family: Lato,Arial,serif,-apple-system;
+          overflow-x: hidden
+      }
+
+      *,*:after,*:before {
+          box-sizing: border-box
+      }
+
+      @media print {
+          * {
+              -webkit-print-color-adjust: exact;
+              color-adjust: exact
+          }
+
+          @page {
+              size: A4;
+              margin: 1cm
+          }
+
+          body {
+              display: block!important
+          }
+
+          html ::-webkit-scrollbar,body ::-webkit-scrollbar {
+              width: 0!important
+          }
+      }
+
+      @media print {
+          html,body {
+              height: auto;
+              margin: 0!important;
+              padding: 0!important
+          }
+      }
+
+      @font-face {
+          font-family: Lato;
+          src: url(https://gu-st.ru/landings-st/lib-assets/fonts/Lato-Regular-v2.woff2) format("woff2"),url(https://gu-st.ru/landings-st/lib-assets/fonts/Lato-Regular-v2.woff) format("woff");
+          font-weight: 400;
+          font-style: normal;
+          font-display: swap
+      }
+
+      html {
+          overflow: visible
+      }
+
+      body {
+          display: flex;
+          min-height: 100vh;
+          flex-direction: column;
+          background: #FAFCFF;
+          font-family: Lato,Arial,serif,-apple-system;
+          color: #0b1f33
+      }
+  </style>
+  <link rel="stylesheet" href="https://gu-st.ru/landings-st/styles.1e88cca09d21b49b.css" media="print" onload="this.media='all'">
+  <noscript>
+    <link rel="stylesheet" href="https://gu-st.ru/landings-st/styles.1e88cca09d21b49b.css">
+  </noscript>
+</head>
+<body>
+<div id="start-app-loader">
+  <div class="container-app-loader">
+    <div class="throbber-hexagon">
+      <svg class="hexagon" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 129.78 150.37">
+        <path class="throbber-hexagon-base" d="M-1665.43,90.94V35.83a15.09,15.09,0,0,1,6.78-12.59l48.22-31.83a15.09,15.09,0,0,1,16-.38L-1547,19.13a15.09,15.09,0,0,1,7.39,13V90.94a15.09,15.09,0,0,1-7.21,12.87l-47.8,29.24a15.09,15.09,0,0,1-15.75,0l-47.8-29.24A15.09,15.09,0,0,1-1665.43,90.94Z" transform="translate(1667.43 13.09)"></path>
+        <path class="throbber-hexagon-line-animation" d="M-1665.43,90.94V35.83a15.09,15.09,0,0,1,6.78-12.59l48.22-31.83a15.09,15.09,0,0,1,16-.38L-1547,19.13a15.09,15.09,0,0,1,7.39,13V90.94a15.09,15.09,0,0,1-7.21,12.87l-47.8,29.24a15.09,15.09,0,0,1-15.75,0l-47.8-29.24A15.09,15.09,0,0,1-1665.43,90.94Z" transform="translate(1667.43 13.09)"></path>
+        <path class="throbber-hexagon-dot-animation" d="M-1665.43,90.94V35.83a15.09,15.09,0,0,1,6.78-12.59l48.22-31.83a15.09,15.09,0,0,1,16-.38L-1547,19.13a15.09,15.09,0,0,1,7.39,13V90.94a15.09,15.09,0,0,1-7.21,12.87l-47.8,29.24a15.09,15.09,0,0,1-15.75,0l-47.8-29.24A15.09,15.09,0,0,1-1665.43,90.94Z" transform="translate(1667.43 13.09)"></path>
+      </svg>
+    </div>
+    <div class="container-app-logo">
+      <div class="app-logo"></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

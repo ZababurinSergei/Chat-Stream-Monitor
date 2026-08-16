@@ -1,0 +1,48 @@
+.wrapper {
+	width: 100%;
+	display: flex;
+	align-items: start;
+	padding-left: 16px;
+	padding-bottom: 12px;
+	flex-direction: column;
+	cursor: pointer;
+	box-sizing: border-box;
+}
+
+.wrapper:hover {
+	background: var(--blue-10per);
+}
+
+.code {
+	color: var(--black-100per);
+	font-family: 'Golos 14pt Regular 14x20';
+	font-style: normal;
+	font-weight: 400;
+	font-size: 14px;
+	line-height: 20px;
+	letter-spacing: -0.01em;
+	margin-right: 9px;
+	width: 55px;
+	text-align: center;
+	display: flex;
+	align-items: start;
+}
+
+.word {
+	color: var(--black-100per);
+	font-family: 'Golos 14pt Regular 14x20';
+	font-style: normal;
+	font-weight: 400;
+	font-size: 14px;
+	line-height: 20px;
+	letter-spacing: -0.01em;
+	margin-right: 9px;
+	width: 350px;
+	display: inline-block;
+	align-items: start;
+}
+
+.word span {
+	color: var(--red-100per);
+	font-weight: bold;
+}

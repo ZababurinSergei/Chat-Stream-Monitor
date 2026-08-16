@@ -1,0 +1,56 @@
+//Страниц списка
+### get list
+### POST http://svc-fer-dev.helpms.ru:3333/v1/rule/list
+POST http://127.0.0.1:3333/v1/rule/list
+Content-Type: application/json
+
+
+### get all events with condition
+POST http://127.0.0.1:3333/v1/event/list
+Content-Type: application/json
+
+
+//id - ?  Он не нужен
+
+//Забирается список events 
+### get all events with condition
+POST http://127.0.0.1:3333/v1/event/list
+Content-Type: application/json
+
+{
+  "condition": {
+    "eventIds": [
+      "4f1468ea-f9ee-4c4b-b98f-d78354886977",
+      "3ace0acb-d361-44c4-8f92-110c92c9130a"
+    ]
+  }
+}
+
+### get list with consition
+POST http://127.0.0.1:3333/v1/rule/list
+Content-Type: application/json
+
+{
+  "condition": {
+    "eventIds": [
+      "ef81fd32-cd38-452c-924c-37620d9496e3"
+    ]
+  }
+}
+
+### get one rule version
+POST http://127.0.0.1:3333/v1/rule
+Content-Type: application/json
+
+{
+  "condition": {
+    "snapshotIds": [
+      "9c48e7dc-bb97-4cf3-aba5-1a8222cf2f9d"
+    ]
+  }
+}
+
+
+### get validators list
+POST http://127.0.0.1:3333/v1/executor/validators
+Content-Type: application/json

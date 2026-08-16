@@ -1,0 +1,112 @@
+{
+  "name": "@newkind/tsgen",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "CLI tool for generating TypeScript configurations and monorepo structures with maximum strictness",
+  "keywords": [
+    "typescript",
+    "monorepo",
+    "cli",
+    "codegen",
+    "tsconfig",
+    "newkind",
+    "strict",
+    "max-strict"
+  ],
+  "homepage": "https://github.com/newkind/tsgen#readme",
+  "bugs": {
+    "url": "https://github.com/newkind/tsgen/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/newkind/tsgen.git"
+  },
+  "license": "MIT",
+  "author": "NewKind Team",
+  "main": "scripts/tsgen.js",
+  "bin": {
+    "newkind-tsgen": "./scripts/tsgen.js",
+    "nk-tsgen": "./scripts/tsgen.js"
+  },
+  "scripts": {
+    "==== public ====": "",
+    "=== Генерация tsconfig ===": " echo ",
+    "tsgen": "node scripts/tsgen.mjs",
+    "=== работа с пресетами для app ===": " echo ",
+    "build": "node scripts/build.js --no-vendor",
+    "build:bundle": "node scripts/bundle.js -o vendor --esm-only",
+    "build:watch": "tsc --watch",
+    "==== private ====": "",
+    "declarations:collect": "node scripts/declarations.js",
+    "cli:install": "npm run cli:make-executable && npm run cli:link",
+    "cli:make-executable": "chmod +x scripts/tsgen.js",
+    "cli:link": "npm link",
+    "cli:unlink": "npm unlink -g @newkind/tsgen",
+    "cli:global": "npm install -g .",
+    "cli:publish": "npm publish --access public",
+    "config:max-strict": "node scripts/tsgen.js max-strict",
+    "config:strict": "node scripts/tsgen.js strict",
+    "config:references": "node scripts/tsgen.js references",
+    "config:dev": "node scripts/tsgen.js dev",
+    "monorepo:smart": "node scripts/tsgen.js smart-monorepo",
+    "monorepo:full": "node scripts/tsgen.js full-monorepo",
+    "monorepo:minimal": "node scripts/tsgen.js minimal-monorepo",
+    "monorepo:update": "node scripts/tsgen.js update-existing",
+    "examples": "node scripts/tsgen.js examples",
+    "examples:list": "node scripts/tsgen.js list-examples",
+    "docs:readme": "node scripts/tsgen.js readme",
+    "clean": "npm run clean --workspaces && rm -rf dist build coverage tsconfig-examples",
+    "help": "node scripts/tsgen.js help",
+    "version:cli": "node scripts/tsgen.js version",
+    "test:cli": "node scripts/tsgen.js version && node scripts/tsgen.js help",
+    "test:examples": "npm run examples && npm run examples:list",
+    "test:max-strict": "npm run config:max-strict && npm run type-check",
+    "dev:microservice": "npm run build:microservice:watch",
+    "dev:frontend": "npm run build:frontend:watch",
+    "build:all": "npm run build:microservice && npm run build:frontend",
+    "vendor:generate": "node scripts/generate-vendor-index.js",
+    "clean:microservice": "rm -rf microservice",
+    "clean:build": "npm run clean:microservice && rm -rf packages/frontend/public/index.bundle.mjs",
+    "======== правильно работают ========": "",
+    "monorepo:existing": "node scripts/tsgen.js existing-only",
+    "build:frontend-react": "npm run build --workspace=@newkind/react-vite",
+    "build:microservice": "node scripts/build.microservice.js microservice",
+    "build:microservice:watch": "node scripts/build.microservice.js microservice --watch",
+    "build:frontend": "npm run vendor:generate && node scripts/build.frontend.js frontend",
+    "build:frontend:watch": "node scripts/build.frontend.js frontend --watch",
+    "======== --------- ========": ""
+  },
+  "workspaces": [
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "files": [
+    "scripts/tsgen.js",
+    "package.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "devDependencies": {
+    "@angular/cli": "^19.2.19",
+    "@types/node": "^24.10.1",
+    "nodemon": "^3.1.11",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "body-parser": "^2.2.1",
+    "chokidar": "^5.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "express-ws": "^5.0.2",
+    "http-proxy": "^1.18.1",
+    "morgan": "^1.10.1",
+    "socket.io": "^4.8.1"
+  }
+}

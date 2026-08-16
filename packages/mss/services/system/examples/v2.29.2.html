@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Welcome Book</title>
+    <meta name="viewport" content="width=device-width,height=device-height, initial-scale=1, maximum-scale=3.0, minimum-scale=1">
+    <meta property="og:site_name" content="markdown"/>
+    <meta property="og:locale" content="ru_RU"/>
+    <meta property="og:type" content="contract"/>
+    <meta property="og:title" content="markdown"/>
+    <meta property="og:description" content="markdown"/>
+    <meta property="og:url" content="https://zababurinsv.github.io/design/"/>
+    <meta property="og:image" content="https://i.imgur.com/pSrPUkJ.jpg"/>
+    <meta property="og:image:width" content="537"/>
+    <meta property="og:image:height" content="240"/>
+    <link rel="shortcut icon"
+          href="data:image/png;base64, AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAbbv+DGW3/mRlt/5kZbf+ZGq6/hIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGa3/ohkt/7/Zbj//2S3/v9lt/6WAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGm5/iRlt/74Zbj//2W4//9luP//Zbf++mi4/i4gIPciGhr24hsb9uwbG/bsGhr24CEh9xoAAAAAAAAAAAAAAABnuP5mZLf+/2W4//9luP//Zbj//2S3/v9muP5yGBj2rhMT9v8TE/b/ExP2/xMT9f8YGPWkAAAAAAAAAAAAAAAAb7z/BGW3/tZluP//Zbj//2W4//9lt/7gJzH3ShMT9f8TE/b/ExP2/xMT9v8TE/b/ExP1/CAg9joAAAAAAAAAAAAAAABmuP5GZLf+6GS3/uhkt/7oZbf+UhgY9YQSEvX/ExP2/xMT9v8TE/b/ExP2/xIS9f8aGvZ8AAAAAD4++gQgIPZ6IiL2hiIi9oYgIPZ8KCj5BAAAAAAtLfgUFBT17BMT9v8TE/b/ExP2/xMT9v8VFfXoLCz4DgAAAAAaGvZqEhL1/xMT9v8TE/b/EhL1/xsb9nIAAAAAAAAAABwc9m4SEvX/ExP2/xMT9v8SEvX/HR32ZAAAAAAnJ/gSFRX16hMT9v8TE/b/ExP2/xMT9v8UFPXuJyf4Fp2xlAKNnqUYLC/mfhYW83ATE/VuFxf1aDc3+gIAAAAAGBj1fhIS9f8TE/b/ExP2/xMT9v8TE/b/ExP1/xkZ9YaGn3yIhZ57/4Wee/+Gn3yKAAAAAAAAAAAAAAAAAAAAACMj9zYTE/X8ExP2/xMT9v8TE/b/ExP2/xMT9f9JUshihZ57+IaffP+Gn3z/hZ579oigfiYAAAAAAAAAAAAAAAAAAAAAGBj1oBIS9f8TE/b/ExP2/xMT9f8YGPWmiKB+PIWee/+Gn3z/hp98/4Wee/+HoH06AAAAAAAAAAAAAAAAAAAAACUl9xgVFfXOExP11BMT9dQUFPXQJib3HgAAAACGn3ymhp98/4affP+Gn3ymAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAiKB+EIihf0CIoX9AiKB+EAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//8AAP//AADg/wAA4MMAAOCBAADggQAA8QEAAOeBAADDwwAAgf8AAIAPAACBDwAAgQ8AAMMPAAD//wAA//8AAA=="
+          type="image/png">
+</head>
+<body>
+<div class="welcome__book">
+    <slot name="welcome-menu"></slot>
+    <div class="body">
+        <section class='slider parallax-container-off' data-id="0" >
+            <slot name="welcome-section-0"></slot>
+        </section>
+        <section class='slider parallax-container-off' data-id="1">
+            <slot name="welcome-section-1"></slot>
+        </section>
+        <section class='slider parallax-container-off' data-id="2">
+            <slot name="welcome-section-2"></slot>
+        </section>
+        <section class='slider parallax-container-off' data-id="3">
+            <slot name="welcome-section-3"></slot>
+        </section>
+        <section class='slider parallax-container-off' data-id="4">
+            <slot name="welcome-section-4"></slot>
+        </section>
+        <section class='slider parallax-container-off' data-id="5">
+            <slot name="welcome-section-5"></slot>
+        </section>
+        <section class='slider parallax-container-off' data-id="6">
+            <slot name="welcome-section-6"></slot>
+        </section>
+        <section class='slider parallax-container-off' data-id="7">
+            <slot name="welcome-section-7"></slot>
+        </section>
+        <section class='slider parallax-container-off' data-id="8">
+            <slot name="welcome-section-8"></slot>
+        </section>
+        <section class='slider parallax-container-off' data-id="9">
+            <slot name="welcome-section-9"></slot>
+        </section>
+        <section class='slider parallax-container-off' data-id="10">
+            <slot name="welcome-section-10"></slot>
+        </section>
+        <section class='slider parallax-container-off' data-id="11">
+            <slot name="welcome-section-11"></slot>
+        </section>
+        <section class='slider parallax-container-off' data-id="12">
+            <slot name="welcome-section-12"></slot>
+        </section>
+    </div>
+</div>
+
+<welcome-section slot="welcome-section-0">
+    <div class='parallax'>
+        <img src='./this/img/north_tower.png'/>
+        <slot name="welcome-header"></slot>
+    </div>
+    <div class='teaser'>
+        <div class='first-page'>
+            <div class="description">
+                <p class="description-title">Привет!</p>
+                <p class="description-title">Мы рады приветствовать тебя в команде</p>
+                <h1>Цифромед</h1>
+                <div class="description-content">
+                    <p class="description-text">
+                        Мы знаем, что в первое время у тебя может возникнуть масса самых разнообразных вопросов о Компании, ее структуре, особенностях организации работы, перспективах роста и многом другом. Каждый из нас задавал себе подобные вопросы, когда начинал свою карьеру в Компании и мы понимаем, как важно получить на них своевременные и полные ответы.
+                    </p>
+                    <p class="description-text">
+                        Для того, чтобы ты смог быстрее освоиться в нашей Компании и уверенно ориентироваться в новой обстановке, мы подготовили Welcome Book. В нем содержится вся необходимая в первые месяцы работы информация, даны ответы на многие важные вопросы и полезные рекомендации по успешному прохождению испытательного срока и скорейшей адаптации на новом месте.
+                    </p>
+                    <p class="description-content-end">
+                        Желаем тебе успехов и будем рады оказать поддержку в нужную минуту!
+                    </p>
+                </div>
+            </div>
+            <div class="fer-scroll">
+                <slot name="fer-scroll"></slot>
+            </div>
+        </div>
+    </div>
+
+    <fer-scroll slot="fer-scroll">
+        <div class="welcome__scroll">
+            <div class="scroll">
+                <div class="scroll__up-block">
+                    <div class="scroll__left"></div>
+                    <div class="scroll__right"></div>
+                </div>
+                <p class="scroll__title">scroll</p>
+            </div>
+        </div>
+    </fer-scroll>
+
+
+    <welcome-header slot="welcome-header">
+        <img class='welcome__logo' src="./this/icons/logo.svg"/>
+        <div class="welcome__wrapper">
+            <div class="welcome__link">
+                <slot name="company-struct"></slot>
+            </div>
+        </div>
+    </welcome-header>
+</welcome-section>
+
+<welcome-section slot="welcome-section-1">
+    <div class='parallax image-background'>
+        <img class="image-scale" src='./this/img/pg2.png'/>
+    </div>
+    <img class="image-scale opacity" src='./this/img/pg2.png'/>
+    <div class='teaser'>
+        <div class='content'>
+            <div class="description-without-background">
+                <div class="description-page">
+                    <p class="text-offset description-about-compeny">Важное о компании</p>
+                    <ul class="text-offset description-ul">
+                        <li>Структура компании</li>
+                        <li>Наши продукты</li>
+                        <li>Что мы ценим друг в друге?</li>
+                        <li>График работы</li>
+                        <li>Дресс-код</li>
+                        <li>Переговорные комнаты</li>
+                        <li>Зарплата</li>
+                        <li>Отпуск</li>
+                        <li>Обед</li>
+                        <li>Прочие радости</li>
+                    </ul>
+                </div>
+                <div class="welcome-logo">
+                    <slot name="welcome-logo"></slot>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <welcome-logo slot="welcome-logo">
+        <div class="welcome-logo">
+            <div class="square-buttom">
+                <p class="square-title">больше</p>
+            </div>
+        </div>
+    </welcome-logo>
+</welcome-section>
+
+<welcome-section slot="welcome-section-2">
+    <div class='parallax image-background'>
+        <img class="image-scale" src='./this/img/pg3.png'/>
+    </div>
+    <img class="image-scale opacity" src='./this/img/pg3.png'/>
+    <div class='teaser'>
+        <div class='content'>
+            <div class="description-without-background">
+                <div class="description-page">
+                    <p class="text-offset description-about-resources">КОРПОРАТИВНАЯ КУЛЬТУРА</p>
+                    <ul class="text-offset description-ul-2">
+                        <li>Обращение к коллегам</li>
+                        <li>Лого, официальные бланки, реквизиты</li>
+                        <li>Программа рекомендаций</li>
+                        <li>Корпоративные праздники</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="welcome-logo">
+                <slot name="welcome-logo"></slot>
+            </div>
+        </div>
+    </div>
+    <welcome-logo slot="welcome-logo">
+        <div class="welcome-logo">
+            <div class="square-buttom">
+                <p class="square-title">больше</p>
+            </div>
+        </div>
+    </welcome-logo>
+</welcome-section>
+
+<welcome-section slot="welcome-section-3">
+    <div class='parallax image-background'>
+        <img class="image-scale" src='./this/img/test.jpg'/>
+    </div>
+    <img class="image-scale opacity" src='./this/img/test.jpg'/>
+    <div class='teaser'>
+        <div class='content'>
+            <div class="description-without-background-resources">
+                <div class="description-page">
+                    <p class="text-offset description-about-resources">ИНФОРМАЦИЯ О РЕСУРСАХ И ДОКУМЕНТАХ</p>
+                    <ul class="text-offset description-ul-resources">
+                        <li>CRM ресурсы</li>
+                        <li>Почта</li>
+                        <li>Принтер и сканер</li>
+                        <li>Техническое оборудование</li>
+                        <li>Корпоративная онлайн библиотека</li>
+                        <li>Заказ канцелярии</li>
+                        <li>Пропускная система</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="welcome-logo">
+                <slot name="welcome-logo"></slot>
+            </div>
+        </div>
+    </div>
+
+    <welcome-logo slot="welcome-logo">
+        <div class="welcome-logo">
+            <div class="square-buttom">
+                <p class="square-title">больше</p>
+            </div>
+        </div>
+    </welcome-logo>
+</welcome-section>
+
+<welcome-section slot="welcome-section-4">
+    <div class='parallax image-background'>
+        <img class="image-scale" src='./this/img/pg5.png'/>
+    </div>
+    <img class="image-scale opacity" src='./this/img/pg5.png'/>
+    <div class='teaser'>
+        <div class='content'>
+            <div class="description-without-background-thanks">
+                <div class="description-page-thanks">
+                    <p
+                            class="text-offset description-thanks"
+                    >
+                        Спасибо,
+                    </p>
+                    <p
+                            class="text-offset description-thanks"
+                    >
+                        что прочел наш welcome book!
+                    </p>
+                    <p
+                            class="text-offset description-thanks"
+                    >
+                        Нам важно твое мнение о нем. Помоги нам сделать его лучше и полезнее для новых коллег. Ты можешь предложить новые разделы, ссылки или порекомендовать, что можно доработать или изменить. О своих предложениях ты можешь сообщить в HR отдел :)
+                    </p>
+                </div>
+                <secton>
+                    <slot name="welcome-feedback"></slot>
+                </secton>
+            </div>
+        </div>
+    </div>
+    <welcome-feedback slot="welcome-feedback">
+        <div class="welcome-feedback">
+            sdfsdfsdfsdfsdfsdfsd
+        </div>
+    </welcome-feedback>
+</welcome-section>
+
+<welcome-general slot="welcome-general" >
+    <div class="general__body">
+        <div class="general_close">
+            <img src="./this/icons/close.svg">
+        </div>
+        <div class="general_info">
+            <div class="general_info_description">
+                Наша компания разделена на Бизнес-единицы, самостоятельные подразделения, которые полностью отвечают за
+                реализацию проектов в своей зоне ответственности.
+                Также в структуре Группы компаний есть несколько продуктовых компаний (мы их называем ДЗО – дочернее
+                зависимое общество)
+                Информация о продуктах ДЗО в разделе Наши продукты
+                Подробно со структурой компании и топ-менеджерами ты можешь познакомиться на корпоративном портале.
+            </div>
+            <div class="general_info_wrapper">
+                <p class="general_info_name">
+                    Владимир Пасынков
+                </p>
+                <p class="general_info_status">
+                    Генеральный директор
+                </p>
+            </div>
+        </div>
+    </div>
+</welcome-general>
+
+<welcome-menu slot="welcome-menu">
+    <div class="container">
+        <div class="slider">
+            <div class="square"></div>
+        </div>
+        <div class="body">
+            <slot name="button-0"></slot>
+            <slot name="button-1"></slot>
+            <slot name="button-2"></slot>
+            <slot name="button-3"></slot>
+            <slot name="button-4"></slot>
+        </div>
+    </div>
+    <fer-button
+            slot="button-0"
+            data-id="0"
+            data-type="welcome-menu"
+            data-css-shadow="menu"
+    >
+        <p>Приветствие</p>
+    </fer-button>
+
+    <fer-button
+            slot="button-1"
+            data-id="1"
+            data-type="welcome-menu"
+            data-css-shadow="menu"
+    >
+        <p>О компании</p>
+
+    </fer-button>
+
+    <fer-button
+            slot="button-2"
+            data-id="2"
+            data-type="welcome-menu"
+            data-css-shadow="menu"
+    >
+        <p>КОРПОРАТИВНАЯ КУЛЬТУРА</p>
+    </fer-button>
+
+    <fer-button
+            slot="button-3"
+            data-id="3"
+            data-type="welcome-menu"
+            data-css-shadow="menu"
+    >
+        <p>Ресурсы и документы</p>
+    </fer-button>
+
+    <fer-button
+            slot="button-4"
+            data-id="4"
+            data-type="welcome-menu"
+            data-css-shadow="menu"
+    >
+        <p>Спасибо!</p>
+    </fer-button>
+</welcome-menu>
+</body>
+<script type="module">
+    // import { welcomebook} from '../this/index.mjs'
+    <!--import style from '../this/index.css' assert { type:'css' }-->
+    // document.adoptedStyleSheets = [...document.adoptedStyleSheets, style];
+    // welcomebook(document.body)
+</script>
+</html>

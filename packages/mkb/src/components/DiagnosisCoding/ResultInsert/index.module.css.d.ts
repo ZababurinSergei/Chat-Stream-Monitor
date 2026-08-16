@@ -1,0 +1,28 @@
+declare const ClassNames: {
+  "close": string;
+  "codeLink": string;
+  "container": string;
+  "header": string;
+  "hierarchy": string;
+  "hierarchyLink": string;
+  "iconCoding": string;
+  "inclusionHeader": string;
+  "inclusionMarker": string;
+  "infoSearchText": string;
+  "links": string;
+  "list": string;
+  "modal": string;
+  "resultInsertBodyMain": string;
+  "resultInsertLayoutTreeViews": string;
+  "resultInsertContent": string;
+  "styleMapImgWrapper": string;
+  "styleMap": string;
+  "textHeader": string;
+  "textHeaderYellow": string;
+  "textLink": string;
+  "textList": string;
+  "textTitle": string;
+  "title": string;
+  "wrapper": string;
+};
+export default ClassNames;

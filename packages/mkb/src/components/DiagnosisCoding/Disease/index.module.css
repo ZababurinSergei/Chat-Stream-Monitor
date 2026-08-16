@@ -1,0 +1,185 @@
+.code {
+	color: var(--black-100per);
+	font-family: 'Golos 14pt Regular 14x20';
+	font-style: normal;
+	font-weight: 400;
+	font-size: 14px;
+	line-height: 20px;
+	letter-spacing: -0.01em;
+	margin-right: 9px;
+	/* width: 55px; */
+	text-align: center;
+	display: flex;
+	align-items: start;
+	cursor: pointer;
+
+}
+
+.word {
+	color: var(--black-100per);
+	font-family: 'Golos 14pt Regular 14x20';
+	font-style: normal;
+	font-weight: 400;
+	font-size: 14px;
+	line-height: 20px;
+	letter-spacing: -0.01em;
+	margin-right: 9px;
+	min-width: 200px;
+	width: 80vw;
+	/* width: 1430px; */
+	display: inline-block;
+	align-items: start;
+	cursor: pointer;
+
+}
+
+.word span {
+	color: var(--red-100per);
+	font-weight: bold;
+}
+
+.container {
+	width: 100%;
+	display: flex;
+	align-items: start;
+	padding-bottom: 12px;
+	flex-direction: column;
+	/* margin-right: 124px; */
+}
+
+.containerBlue{
+	width: 100%;
+	display: flex;
+	align-items: start;
+	padding-bottom: 12px;
+	flex-direction: column;
+	background: rgba(0, 153, 255, 0.1);
+}
+
+.link {
+	font-family: 'Golos 11pt Regular 11x14';
+	font-style: normal;
+	font-weight: 400;
+	font-size: 9px;
+	line-height: 12px;
+	color: var(--blue-100per);
+	margin-left: 50px;
+	margin-top: 3px;
+	display: flex;
+	justify-content: end;
+	width: 138px;
+}
+
+.marker {
+	display: flex;
+	flex-direction: column;
+	padding-left: 7px;
+	cursor: pointer;
+	/* justify-content: center; */
+	position: relative;
+}
+
+.marker:hover::before {
+	position: absolute;
+	z-index: 20;
+	width: 170px;
+	height: 45px;
+	content: '';
+	top: 45px;
+	left: -140px;
+	font-family: 'Golos 14pt Regular 14x20';
+	font-style: normal;
+	font-weight: 400;
+	font-size: 14px;
+	line-height: 20px;
+	letter-spacing: -0.01em;
+	background: var(--white-100per);
+	box-shadow: 0px 2px 8px rgba(0, 31, 141, 0.14);
+	border-radius: 8px;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+}
+
+.marker[typeMark="plusNecessarily"]:hover::before {
+	content: 'Посткоординация обязательна';
+}
+
+.marker[typeMark="plusMaby"]:hover::before {
+	content: 'Доступна посткоординация';
+}
+
+.marker[typeMark="jmark"]:hover::before {
+	content: 'Родственные категории в главе о материнстве';
+}
+
+.marker[typeMark="kmark"]:hover::before {
+	content: 'Родственные категории в перинатальной главе';
+}
+
+.marker[typeMark="equals"]:hover::before {
+	content: 'Примечания по кодированию';
+}
+
+.marker[typeMark="details"]:hover::before {
+	content: 'Подробнее';
+}
+
+.upBlock {
+	display: flex;
+	width: 100%;
+}
+.upBlockBlue {
+	display: flex;
+	background: rgba(0, 153, 255, 0.1);
+	width: 100%;
+}
+
+.iTerm {
+	color: var(--black-100per);
+	font-family: 'Golos 14pt Regular 14x20';
+	font-style: normal;
+	font-weight: 400;
+	font-size: 12px;
+	line-height: 20px;
+	letter-spacing: -0.01em;
+	margin-right: 9px;
+	width: 350px;
+	display: inline-block;
+	align-items: start;
+	background: rgba(221, 128, 0, 0.1);
+	border-radius: 4px;
+	padding-left: 20px;
+}
+
+.iTermBlue {
+	color: var(--black-100per);
+	font-family: 'Golos 14pt Regular 14x20';
+	font-style: normal;
+	font-weight: 400;
+	font-size: 12px;
+	line-height: 20px;
+	letter-spacing: -0.01em;
+	margin-right: 9px;
+	width: 350px;
+	display: inline-block;
+	align-items: start;
+	background: rgba(0, 153, 255, 0.1);
+	border-radius: 4px;
+	padding-left: 20px;
+}
+
+.iTerm span,
+.iTermBlue span {
+	color: var(--red-100per);
+	font-weight: bold;
+}
+
+.title {
+	cursor: pointer;
+}
+
+.downBlock {
+	width: 100%;
+}

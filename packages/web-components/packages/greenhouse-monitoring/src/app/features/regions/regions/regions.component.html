@@ -1,0 +1,138 @@
+<div class="regions-container">
+    <div class="header-section">
+        <h2>Регионы и теплицы</h2>
+
+        <div class="filter-section">
+            <div class="filter-input-container">
+                <input
+                        type="text"
+                        [(ngModel)]="filterValue"
+                        (ngModelChange)="onFilterChange()"
+                        placeholder="Поиск по названию теплицы или ID..."
+                        class="filter-input"
+                />
+                <span class="search-icon">🔍</span>
+            </div>
+
+            <div class="stats-summary">
+            <span class="stat-item">
+              <span class="stat-label">Всего регионов:</span>
+              <span class="stat-value">{{ regionsCount() }}</span>
+            </span>
+                <span class="stat-item">
+              <span class="stat-label">Всего теплиц:</span>
+              <span class="stat-value">{{ greenhousesCount() }}</span>
+            </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="regions-list">
+        @if (filteredRegions().length === 0) {
+        <div class="no-results">
+          <p>По вашему запросу ничего не найдено</p>
+          <button class="clear-filter-btn" (click)="clearFilter()">Сбросить фильтр</button>
+        </div>
+        }
+
+        @for (region of filteredRegions(); track region.id; let regionIndex = $index) {
+        <div class="region-card" [class.expanded]="expandedRegions()[region.id]">
+          <div class="region-header" (click)="toggleRegion(region.id)">
+            <div class="region-info">
+              <h3 class="region-name">{{ region.name }}</h3>
+                <span class="region-meta">
+                  Теплиц: {{ region.greenhouses.length }}
+        | Последнее обновление: {{ getLatestUpdate(region) | date:'dd.MM.yyyy HH:mm' }}
+        </span>
+      </div>
+
+      <div class="region-actions">
+        <span class="toggle-icon">
+        {{ expandedRegions()[region.id] ? '▼' : '▶' }}
+        </span>
+      </div>
+    </div>
+
+    @if (expandedRegions()[region.id]) {
+        <div class="greenhouses-section">
+            <div class="greenhouses-list">
+                @for (greenhouse of region.greenhouses; track greenhouse.id; let ghIndex = $index) {
+                <div
+                  class="greenhouse-item"
+                  [class.selected]="selectedGreenhouseId() === greenhouse.id"
+                  [class.normal]="greenhouse.status === 'normal'"
+                  [class.warning]="greenhouse.status === 'warning'"
+                  [class.emergency]="greenhouse.status === 'emergency'"
+                  (click)="selectGreenhouse(greenhouse)"
+                  [routerLink]="['/greenhouse', greenhouse.id]"
+                  routerLinkActive="active-link"
+                >
+                  <div class="greenhouse-main-info">
+                    <div class="greenhouse-header">
+                      <span class="greenhouse-name">{{ greenhouse.name }}</span>
+                          <span class="greenhouse-id">ID: {{ greenhouse.id }}</span>
+                        </div>
+                        
+                        <div class="greenhouse-details">
+                          <span class="detail-item">
+                            <span class="detail-label">Статус:</span>
+                            <span class="status-badge" [class]="greenhouse.status">
+                {{ getStatusText(greenhouse.status) }}
+                </span>
+              </span>
+
+              <span class="detail-item">
+                <span class="detail-label">Обновлено:</span>
+                <span class="detail-value">
+                {{ greenhouse.lastUpdated | date:'dd.MM.yyyy HH:mm:ss' }}
+                </span>
+              </span>
+            </div>
+          </div>
+
+          <div class="greenhouse-actions">
+            <button
+              class="action-btn refresh-btn"
+              (click)="requestUpdate(greenhouse.id); $event.stopPropagation()"
+              title="Запросить обновление данных"
+            >
+              🔄
+            </button>
+
+            <button
+              class="action-btn recalc-btn"
+              (click)="requestRecalculation(greenhouse.id); $event.stopPropagation()"
+              title="Запросить пересчёт состояния"
+            >
+              ⚙️
+            </button>
+
+            <div class="selection-indicator">
+              <div class="indicator-dot" [class.selected]="selectedGreenhouseId() === greenhouse.id"></div>
+            </div>
+          </div>
+        </div>
+                }
+            </div>
+
+            @if (region.greenhouses.length === 0) {
+            <div class="no-greenhouses">
+              <p>В этом регионе нет теплиц, соответствующих фильтру</p>
+            </div>
+            }
+        </div>
+        }
+        </div>
+        }
+    </div>
+
+    @if (lastUpdate()) {
+    <div class="last-update-footer">
+      <span class="update-label">Последнее обновление системы:</span>
+      <span class="update-time">{{ lastUpdate() | date:'dd.MM.yyyy HH:mm:ss' }}</span>
+          <button class="refresh-all-btn" (click)="refreshAll()">
+            Обновить все
+          </button>
+        </div>
+    }
+</div>

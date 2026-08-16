@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Git v7.4.0 - Квантовая синхронизация</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gosblue: #0D4CD3;
+            --white: #FFF;
+            --gray-light: #F5F5F5;
+            --gray-dark: #333;
+            --border-radius: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: var(--white);
+            color: var(--gray-dark);
+            line-height: 1.5;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 24px;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--gosblue);
+        }
+
+        .panel {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 24px;
+            border: 1px solid #eee;
+        }
+
+        .panel-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--gosblue);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-family: inherit;
+            font-size: 16px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--gosblue);
+        }
+
+        button {
+            border: none;
+            margin: 0;
+            padding: 0;
+            width: auto;
+            overflow: visible;
+            background: transparent;
+            color: inherit;
+            font: inherit;
+            line-height: normal;
+            -webkit-font-smoothing: inherit;
+            -moz-osx-font-smoothing: inherit;
+            -webkit-appearance: none;
+        }
+
+        button::-moz-focus-inner {
+            border: 0;
+            padding: 0;
+        }
+
+        .button {
+            border-radius: var(--border-radius);
+            border: 2px solid var(--gosblue);
+            background: var(--white);
+            display: inline-flex;
+            padding: 14px 24px;
+            justify-content: center;
+            align-items: center;
+            color: var(--gosblue);
+            font-size: 16px;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .button:hover {
+            background: var(--gosblue);
+            color: var(--white);
+        }
+
+        .button[disabled] {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .button-primary {
+            background: var(--gosblue);
+            color: var(--white);
+        }
+
+        .button-primary:hover {
+            background: #0a3aab;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ccc;
+        }
+
+        .status-indicator.connected {
+            background: #4CAF50;
+        }
+
+        .status-indicator.disconnected {
+            background: #f44336;
+        }
+
+        .status-indicator.loading {
+            background: #FFC107;
+            animation: pulse 1.5s infinite;
+        }
+
+        .state-output {
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            padding: 16px;
+            margin-top: 16px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .sync-progress {
+            width: 100%;
+            height: 20px;
+            background: #f0f0f0;
+            border-radius: var(--border-radius);
+            margin: 16px 0;
+            overflow: hidden;
+        }
+
+        .sync-progress-bar {
+            height: 100%;
+            background: var(--gosblue);
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .log-output {
+            background: #1a1a1a;
+            color: #e0e0e0;
+            padding: 12px;
+            border-radius: var(--border-radius);
+            font-family: monospace;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 16px;
+        }
+
+        .log-entry {
+            margin-bottom: 8px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 8px;
+        }
+
+        .log-time {
+            color: #888;
+            margin-right: 8px;
+        }
+
+        .log-message {
+            color: #fff;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .checkbox-group input {
+            width: auto;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .panel {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <h1 class="title">Квантовая синхронизация</h1>
+        <div class="status">
+            <span class="status-indicator" id="systemStatus"></span>
+            <span id="systemStatusText">Готов к синхронизации</span>
+        </div>
+    </header>
+
+    <div class="grid">
+        <!-- Панель параметров синхронизации -->
+        <div class="panel">
+            <h2 class="panel-title">Параметры синхронизации</h2>
+
+            <div class="form-group">
+                <label for="syncSource">Источник синхронизации</label>
+                <select id="syncSource">
+                    <option value="quantum-cloud">Квантовое облако</option>
+                    <option value="temporal-branch">Временная ветка</option>
+                    <option value="parallel-universe">Параллельная вселенная</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="syncTarget">Целевая система</label>
+                <select id="syncTarget">
+                    <option value="main-repo">Основное хранилище</option>
+                    <option value="backup-repo">Резервное хранилище</option>
+                    <option value="quantum-cache">Квантовый кеш</option>
+                </select>
+            </div>
+
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="deepSync" checked>
+                <label for="deepSync">Глубокая синхронизация</label>
+            </div>
+
+            <div class="form-group checkbox-group">
+                <input type="checkbox" id="entangleParticles">
+                <label for="entangleParticles">Запутать частицы</label>
+            </div>
+
+            <div class="form-group">
+                <label for="quantumLevel">Уровень квантования (0-100)</label>
+                <input type="range" id="quantumLevel" min="0" max="100" value="75">
+                <span id="quantumLevelValue">75%</span>
+            </div>
+
+            <button class="button button-primary" id="btnStartSync" onclick="startSync()">Начать синхронизацию</button>
+            <button class="button" id="btnStopSync" onclick="stopSync()" disabled>Остановить</button>
+        </div>
+
+        <!-- Панель прогресса синхронизации -->
+        <div class="panel">
+            <h2 class="panel-title">Прогресс синхронизации</h2>
+
+            <div class="status">
+                <span class="status-indicator disconnected" id="syncStatus"></span>
+                <span id="syncStatusText">Синхронизация не активна</span>
+            </div>
+
+            <div class="sync-progress">
+                <div class="sync-progress-bar" id="syncProgress"></div>
+            </div>
+
+            <div class="form-group">
+                <label>Статистика:</label>
+                <div id="syncStats">
+                    <div>Обработано частиц: <span id="particlesProcessed">0</span></div>
+                    <div>Запутанных состояний: <span id="entangledStates">0</span></div>
+                    <div>Временных аномалий: <span id="timeAnomalies">0</span></div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Лог синхронизации:</label>
+                <div class="log-output" id="syncLog">
+                    <div class="log-entry">
+                        <span class="log-time">[00:00:00]</span>
+                        <span class="log-message">Система квантовой синхронизации инициализирована</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Панель контроля состояния -->
+        <div class="panel">
+            <h2 class="panel-title">Контроль состояния</h2>
+
+            <div class="form-group">
+                <button class="button" onclick="getSystemState()">
+                    Получить состояние системы
+                </button>
+            </div>
+
+            <div class="form-group">
+                <label>Текущее состояние:</label>
+                <div id="stateOutput" class="state-output">
+                    Нажмите кнопку для получения состояния системы
+                </div>
+            </div>
+
+            <div class="form-group">
+                <button class="button" onclick="resetQuantumStates()">
+                    Сбросить квантовые состояния
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    import GlobalState from './global-state.mjs';
+
+    // Инициализация состояния
+    GlobalState.initGlobalState({
+        activeApp: 'quantum-sync'
+    });
+
+    // Элементы интерфейса
+    const quantumLevel = document.getElementById('quantumLevel');
+    const quantumLevelValue = document.getElementById('quantumLevelValue');
+    const syncProgress = document.getElementById('syncProgress');
+    const syncLog = document.getElementById('syncLog');
+    const btnStartSync = document.getElementById('btnStartSync');
+    const btnStopSync = document.getElementById('btnStopSync');
+
+    // Обновление значения уровня квантования
+    quantumLevel.addEventListener('input', () => {
+        quantumLevelValue.textContent = `${quantumLevel.value}%`;
+    });
+
+    // Логирование сообщений
+    function logMessage(message) {
+        const now = new Date();
+        const timeString = `[${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}]`;
+
+        const logEntry = document.createElement('div');
+        logEntry.className = 'log-entry';
+        logEntry.innerHTML = `<span class="log-time">${timeString}</span><span class="log-message">${message}</span>`;
+
+        syncLog.prepend(logEntry);
+
+        // Ограничиваем количество записей в логе
+        if (syncLog.children.length > 50) {
+            syncLog.removeChild(syncLog.lastChild);
+        }
+    }
+
+    // Функция запуска синхронизации
+    window.startSync = () => {
+        logMessage('Запуск квантовой синхронизации...');
+
+        // Обновляем UI
+        document.getElementById('syncStatus').className = 'status-indicator loading';
+        document.getElementById('syncStatusText').textContent = 'Синхронизация в процессе';
+        btnStartSync.disabled = true;
+        btnStopSync.disabled = false;
+
+        // Имитируем процесс синхронизации
+        let progress = 0;
+        const syncInterval = setInterval(() => {
+            progress += Math.random() * 5;
+            if (progress > 100) progress = 100;
+
+            syncProgress.style.width = `${progress}%`;
+
+            // Обновляем статистику
+            document.getElementById('particlesProcessed').textContent =
+                Math.floor(progress * 1000);
+            document.getElementById('entangledStates').textContent =
+                Math.floor(progress * 500);
+            document.getElementById('timeAnomalies').textContent =
+                Math.floor(progress * 2);
+
+            // Логируем прогресс
+            if (progress % 25 === 0) {
+                logMessage(`Прогресс синхронизации: ${progress}%`);
+            }
+
+            // Завершение синхронизации
+            if (progress >= 100) {
+                clearInterval(syncInterval);
+                completeSync();
+            }
+        }, 300);
+
+        // Сохраняем интервал для остановки
+        window.syncInterval = syncInterval;
+    };
+
+    // Функция завершения синхронизации
+    function completeSync() {
+        document.getElementById('syncStatus').className = 'status-indicator connected';
+        document.getElementById('syncStatusText').textContent = 'Синхронизация завершена';
+        btnStartSync.disabled = false;
+        btnStopSync.disabled = true;
+
+        logMessage('Квантовая синхронизация успешно завершена!');
+    }
+
+    // Функция остановки синхронизации
+    window.stopSync = () => {
+        if (window.syncInterval) {
+            clearInterval(window.syncInterval);
+            logMessage('Синхронизация принудительно остановлена');
+
+            document.getElementById('syncStatus').className = 'status-indicator disconnected';
+            document.getElementById('syncStatusText').textContent = 'Синхронизация прервана';
+            btnStartSync.disabled = false;
+            btnStopSync.disabled = true;
+        }
+    };
+
+    // Получение состояния системы
+    window.getSystemState = () => {
+        const state = {
+            app: 'quantum-sync',
+            config: GlobalState.getConfig(),
+            syncStatus: document.getElementById('syncStatusText').textContent,
+            quantumLevel: quantumLevel.value,
+            deepSync: document.getElementById('deepSync').checked,
+            entangleParticles: document.getElementById('entangleParticles').checked
+        };
+
+        document.getElementById('stateOutput').textContent = JSON.stringify(state, null, 2);
+        logMessage('Текущее состояние системы получено');
+    };
+
+    // Сброс квантовых состояний
+    window.resetQuantumStates = () => {
+        syncProgress.style.width = '0%';
+        document.getElementById('particlesProcessed').textContent = '0';
+        document.getElementById('entangledStates').textContent = '0';
+        document.getElementById('timeAnomalies').textContent = '0';
+
+        document.getElementById('syncStatus').className = 'status-indicator disconnected';
+        document.getElementById('syncStatusText').textContent = 'Синхронизация не активна';
+
+        logMessage('Квантовые состояния сброшены');
+    };
+
+    // Инициализация
+    logMessage('Система квантовой синхронизации готова к работе');
+</script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+
+### get all events with page
+POST http://svc-fer-dev.helpms.ru:3333/v1/event/list
+Content-Type: application/json
+
+### get all events with page
+POST http://svc-fer-dev.helpms.ru:3333/v1/rule/list
+Content-Type: application/json
+
+### get all regions
+POST http://svc-fer-dev.helpms.ru:3333/v1/region/list
+Content-Type: application/json
+
+### get list with consition
+POST http://svc-fer-dev.helpms.ru:3333/v1/rule/list
+Content-Type: application/json
+
+{
+  "condition": {
+    "schemaIds": [
+      "showcase.booking.service.1.0.1"
+    ]
+  }
+}
+
+
+### save new manifest
+### POST http://svc-fer-dev.helpms.ru:3333/v1/manifest/save
+POST http://127.0.0.1:3333/v1/manifest/save
+Content-Type: application/json
+
+{
+  "manifest": {
+    "eventSnapshotId": "a45ec933-cc2b-4fe7-a12b-1ba99f1a6a36",
+    "regionId": "451f532b-8637-42b1-a341-2f2b27f7e528",
+    "ruleSnapshotIds": [
+     "02fe9e3c-f11f-4932-8178-23462a97c291"
+    ],
+    "description": "mo rules"
+  }
+}
+
+### get all manifests
+POST http://127.0.0.1:3333/v1/manifest/list
+Content-Type: application/json

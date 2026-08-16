@@ -1,0 +1,52 @@
+.user-header {
+	display: flex;
+	align-items: center;
+}
+
+.user-header__text {
+	font-family: 'Golos 14pt Medium 14x20';
+	color: var(--white-60per);
+	text-decoration: none;
+	margin-left: 11px;
+	cursor: pointer;
+}
+
+.user-header__bell {
+	margin-right: 22px;
+}
+
+.profile-menu__container {
+	position: relative;
+	opacity: 0;
+	visibility: hidden;
+	z-index: 2;
+}
+
+.profile-menu__container_active {
+	opacity: 1;
+	visibility: visible;
+	transform: translateY(-19px);
+	transition: opacity 0.5s, visibility 0.5s, transform 0.6s;
+}
+.close-wrapper {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	opacity: 0.5;
+	z-index: 1;
+	/* background: var(--blue-100per); */
+}
+
+.rotate-arrow {
+	width: 24px;
+	height: 24px;
+	transition: 0.25s linear;
+	cursor: pointer;
+}
+
+.rotate-arrow_active {
+	transform: rotate(180deg);
+	transition: 0.25s linear;
+}

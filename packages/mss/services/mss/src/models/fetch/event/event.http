@@ -1,0 +1,327 @@
+### get all events
+POST http://127.0.0.1:3333/v1/event/list
+Authorization: Bearer eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiIzZTQ5YWRkZi0xMGY4LTRkMjctYjk5MC00MmI4MWViYzgzYTEiLCJleHAiOjE2ODYxMzg5NjYsIm5iZiI6MCwiaWF0IjoxNjg2MTM4MzY2LCJpc3MiOiJodHRwczovL2lhLXRlc3QuZWdpc3oucm9zbWluemRyYXYucnUvcmVhbG1zL2RldiIsImF1ZCI6ImZlci1mbXZyLWRldiIsInN1YiI6IjgwMTVlMThhLWNhMjMtNGNlOS04ZjI3LTlhNGE0NjFiYWM0NCIsInR5cCI6IkJlYXJlciIsImF6cCI6ImZlci1mbXZyLWRldiIsInNlc3Npb25fc3RhdGUiOiJhMTBjYTdmNy1hZTE2LTQxYzUtODQxNS0zZTRmZjBkOTA3MTMiLCJjbGllbnRfc2Vzc2lvbiI6IjY0N2M5ZTc5LTIzMWEtNGQyNS1iMWY3LWM4ZjFhYmMwYWM3NSIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vZmVyLWZtdnItZGV2LmhlbHBtcy5ydSJdLCJyZXNvdXJjZV9hY2Nlc3MiOnsiZmVyLWZtdnItZGV2Ijp7InJvbGVzIjpbImZlcl9mbXZyX2FkbWluICJdfX0sIm5hbWUiOiLQn9GA0LjQvNC10YAg0J_RgNC40LzQtdGA0L7QstC40Ycg0J_RgNC40LzQtdGA0L7QsiIsInByZWZlcnJlZF91c2VybmFtZSI6IjI3MC02NTktMTIzIDgwIiwiZ2l2ZW5fbmFtZSI6ItCf0YDQuNC80LXRgCIsIm1pZGRsZV9uYW1lIjoi0J_RgNC40LzQtdGA0L7QstC40YciLCJmYW1pbHlfbmFtZSI6ItCf0YDQuNC80LXRgNC-0LIiLCJlbWFpbCI6ImV4YW1wbGUtMzU2MTQxOEBleGFtcGxlLnJ1In0.f9amNxtYoyc-g8BH55YWVJuyTZD74BrxSGlNIMIGZHe0QPr3_KPYyMCbpzhJ4yJmS8A3eqV36Zj7tKTlh2BntzcdexW-zeaMqvx_AKONPcnlQqqc2zwF7SuFFKO03xEWHPj4z6biOy6fO9sRph8RWRF3h8dpyWe6i-0EAkuHf79ldtwxVX5UQlrLlmZr0_UYRsftJVuh9z-Sw5yA7gIKnhIiNdH289XoetnXfzCMQZObg8qjXsu1WzYK1sA_UaJXcorCBFWKGqf9zXZagGE9yaCLoo7vZvs5LP74jyu0OxuLFI0RZwovd9U-XtJUB_nHresQwKf3wPsFmFERvYez7w
+Content-Type: application/json
+
+### get all events with page
+POST http://127.0.0.1:3333/v1/event/list
+Content-Type: application/json
+
+{
+  "page": {
+    "limit": 10,
+    "offset": 0
+  }
+}
+
+### get all events with page
+POST http://svc-fer-dev.helpms.ru:3333/v1/event/list
+Content-Type: application/json
+
+{
+  "page": {
+    "limit": 30,
+    "offset": 17
+  }
+}
+
+### get all events with condition
+POST http://127.0.0.1:3333/v1/event/list
+Content-Type: application/json
+
+### get one events with condition
+POST http://127.0.0.1:3333/v1/event
+Content-Type: application/json
+
+{
+  "condition": {
+    "snapshotIds": [
+      "53e9ba95-1b56-4e4b-9e7c-64c7963a9c8e"
+    ]
+  }
+}
+
+### get one events with condition
+POST http://127.0.0.1:3333/v1/event
+Content-Type: application/json
+
+{
+  "condition": {
+    "eventIds": [
+      "ef81fd32-cd38-452c-924c-37620d9496e3"
+    ]
+  }
+}
+
+### count all events
+POST http://127.0.0.1:3333/v1/event/count
+Content-Type: application/json
+### count all events with condition
+POST http://127.0.0.1:3333/v1/event/count
+Content-Type: application/json
+
+{
+  "condition": {
+    "schemaIds": [
+      "showcase.booking.mo.1.0.0",
+      "showcase.booking.mo.1.0.1"
+    ]
+  }
+}
+
+### get one
+POST http://127.0.0.1:3333/v1/event
+Content-Type: application/json
+
+{
+  "condition": {
+    "schemaIds": [
+      "test.booking.test_data.1.0.1"
+    ]
+  }
+}
+
+### new event
+POST http://127.0.0.1:3333/v1/event/save
+Authorization: Bearer eyJhbGciOiJSUzI1NiJ9.eyJqdGkiOiJhOGU5NmQ4Yy1jYmRiLTQ2M2YtOGI4ZC03MmRhYmFkMWVlNjYiLCJleHAiOjE2ODYyMjMxNDcsIm5iZiI6MCwiaWF0IjoxNjg2MjIyNTQ3LCJpc3MiOiJodHRwczovL2lhLXRlc3QuZWdpc3oucm9zbWluemRyYXYucnUvcmVhbG1zL2RldiIsImF1ZCI6ImZlci1mbXZyLWRldiIsInN1YiI6IjgwMTVlMThhLWNhMjMtNGNlOS04ZjI3LTlhNGE0NjFiYWM0NCIsInR5cCI6IkJlYXJlciIsImF6cCI6ImZlci1mbXZyLWRldiIsInNlc3Npb25fc3RhdGUiOiJmNGJhNTUzNi02ZDllLTRkY2ItOWE1MC1lOGM3MzM4MDA0ZWYiLCJjbGllbnRfc2Vzc2lvbiI6IjI0ZmMwZDUyLTdjZjktNGFmZC04MTlkLWRkYTFiM2UxY2RhNCIsImFsbG93ZWQtb3JpZ2lucyI6WyJodHRwOi8vZmVyLWZtdnItZGV2LmhlbHBtcy5ydSJdLCJyZXNvdXJjZV9hY2Nlc3MiOnsiZmVyLWZtdnItZGV2Ijp7InJvbGVzIjpbImZlcl9mbXZyX2FkbWluICJdfX0sIm5hbWUiOiLQn9GA0LjQvNC10YAg0J_RgNC40LzQtdGA0L7QstC40Ycg0J_RgNC40LzQtdGA0L7QsiIsInByZWZlcnJlZF91c2VybmFtZSI6IjI3MC02NTktMTIzIDgwIiwiZ2l2ZW5fbmFtZSI6ItCf0YDQuNC80LXRgCIsIm1pZGRsZV9uYW1lIjoi0J_RgNC40LzQtdGA0L7QstC40YciLCJmYW1pbHlfbmFtZSI6ItCf0YDQuNC80LXRgNC-0LIiLCJlbWFpbCI6ImV4YW1wbGUtMzU2MTQxOEBleGFtcGxlLnJ1In0.IAUmSq4NE5ph7e5hsycPTl0WZdQkYlSYUwkCpqnrj2P2M4cHQ2ggEvbp2RheM4YgFcZ6kJJH66ImPkUkjoqfsRnseWBr0aXs4A5uvh26120I7IyJZQwo6QgAOa4Vh8HwWXbEH-nbrhI4aylNHK3guAlSimJ32McvogpYLZMOHhvxYXp6ofYduWZ7mD74rQrX53fgWpDB1S5ZfjI_3MfORjgmJVJ0qN6sONuooYYZKkyshkYp9OmJ-c7fuHJ0ayRqD_iX91tBWF3qpqB-uIrLmfLk7Td8BCzXT4A9WsnopliHdWGv9xiw3E4_Ds0KqERb6C7TBGp-Bd_zUXnRvOZXyQ
+Content-Type: application/json
+
+{
+  "event": {
+    "slug": "test",
+    "name": "154444",
+    "title": "newevt",
+    "description": "description of newevt",
+    "errors": [
+      {
+        "code": "1",
+        "message": "ошибка 1",
+        "howToFix": "как исправить ошмбку 1"
+      }
+    ],
+    "jsonSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "title": "Схем для проверки события newevt",
+      "properties": {},
+      "required": []
+    }
+  }
+}
+
+### update event (save new version of evet)
+POST http://127.0.0.1:3333/v1/event/save
+Content-Type: application/json
+
+{
+  "event": {
+    "slug": "test.booking",
+    "name": "newevtasasassa",
+    "title": "title",
+    "description": "",
+    "version": "",
+    "errors": [
+    ],
+    "jsonSchema": {
+      "properties": { },
+      "required": []
+    }
+  }
+}
+
+
+
+### new event
+### POST http://svc-fer-dev.helpms.ru:3333/v1/event/save
+POST http://127.0.0.1:3333/v1/event/save
+Content-Type: application/json
+
+{
+  "event": {
+    "slug": "showcase.booking",
+    "name": "mo",
+    "title": "Медицинская организация",
+    "description": "Схема описывает поля события медицинская организация",
+    "errors": [
+      {
+        "code": "1",
+        "message": "OID не соответствует формату OID медицинской организации",
+        "howToFix": "Исправить OID"
+      },
+      {
+        "code": "2",
+        "message": "OID организации не найден в ФРМО",
+        "howToFix": "Проверить OID организации"
+      },
+      {
+        "code": "3",
+        "message": "Название организации не соответствует названию fullName в ФРМО",
+        "howToFix": "Исправить название организации"
+      }
+    ],
+    "jsonSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "$id": "showcase.booking.mo.1.0.1",
+      "title": "Медицинская организация",
+      "description": "Схема описывает поля события медицинская организация",
+      "type": "object",
+      "properties": {
+        "parent_oid": {
+          "type": "string",
+          "description": "parent_id"
+        },
+        "parent_name": {
+          "type": "string",
+          "description": "parent_name"
+        }
+      },
+      "required": ["parent_oid", "parent_name" ]
+    }
+  }
+}
+
+### new event
+POST http://127.0.0.1:3333/v1/event/save
+Content-Type: application/json
+
+{
+  "event": {
+    "eventId": "b8b3729e-e760-41b6-a9e9-460c92e020bc",
+    "slug": "showcase.booking1",
+    "name": "test1",
+    "title": "check erwer",
+    "description": "check qreqrew",
+    "version": "1.0.2",
+    "errors": [
+      {
+        "code": "1",
+        "message": "ошибка",
+        "howToFix": "как исправить"
+      }
+    ],
+    "jsonSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema"
+    }
+  }
+}
+
+
+
+### save  event
+POST http://127.0.0.1:3333/v1/event/save
+Content-Type: application/json
+
+{
+  "event": {
+    "eventId": "",
+    "slug": "showcase.booking",
+    "name": "mo",
+    "version": "1.0.0",
+    "title": "medical organization check two changed",
+    "description": "medical organization check",
+    "errors": [
+      {
+        "code": 100,
+        "message": "Контроль формата OID медицинской организации не пройден",
+        "how_to_fix": "исправить OID медицинской организации"
+      },
+      {
+        "code": 200,
+        "message": "Контроль наличия OID MO в ФРМО не пройден",
+        "how_to_fix": ""
+      },
+      {
+        "code": 301,
+        "message": "Соответствие названия MO не пройден",
+        "how_to_fix": ""
+      },
+      {
+        "code": 400,
+        "message": "Контроль формата OID родительского MO не пройден",
+        "how_to_fix": "исправить OID родительской медицинской органицации"
+      },
+      {
+        "code": 401,
+        "message": "Контроль наличия OID родительской MO в ФРМО не пройден",
+        "how_to_fix": ""
+      },
+      {
+        "code": 500,
+        "message": "Контроль наличия OID родительского MO в ФРМО не пройден",
+        "how_to_fix": ""
+      }
+    ],
+    "jsonSchema": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "description": "medical organization check",
+      "properties": {
+        "address": {
+          "description": "Адрес учреждения. Значение соответствует атрибуту “moAddress” в таблице org модели данных ФРМР",
+          "type": "string"
+        },
+        "create_ts": {
+          "description": "Время создания записи",
+          "type": "string"
+        },
+        "enabled": {
+          "description": "Типы прикрепления, допустимые к данному учреждению, Возможные значения:ATTACHED_MO - принимает по прикреплениям ATTACHED_REG - принимает по прикреплению в регионе ALL - принимает всех без прикрепления NONE - не принимает",
+          "type": "string"
+        },
+        "mo_id": {
+          "description": "Идентификатор МО. Локальный id из витрины/МИС",
+          "type": "string"
+        },
+        "mo_oid": {
+          "description": "OID учреждения в системе здравоохранения. Значение соответствует атрибуту “oid“ в таблице depart модели данных ФРМР",
+          "type": "string"
+        },
+        "name": {
+          "description": "Полное наименование учреждения. Значение соответствует атрибуту “departName” в таблице depart модели данных ФРМР",
+          "type": "string"
+        },
+        "parent_oid": {
+          "description": "OID родительского МО в системе здравоохранения, Значение соответствует атрибуту “oid“ в таблице org модели данных ФРМР",
+          "type": "string"
+        },
+        "phone": {
+          "description": "Телефон учреждения. Значение соответствует атрибуту “phones” в таблице depart модели данных ФРМР",
+          "type": "string"
+        },
+        "region_okato": {
+          "description": "ОКАТО региона",
+          "type": "string"
+        },
+        "rmis_id": {
+          "description": "Код РМИС. Идентификатор информационной системы, зарегистрированной в ФЭР. Выдается после регистрации ИС в тестовой/промышленной среде ФЭР. Пример: conc-5015-rmis",
+          "type": "string"
+        },
+        "update_ts": {
+          "description": "Время изменения записи",
+          "type": "string"
+        }
+      },
+      "required": [
+        "mo_id",
+        "mo_oid",
+        "name",
+        "address",
+        "phone",
+        "enabled",
+        "region_okato",
+        "rmis_id",
+        "create_ts",
+        "update_ts"
+      ],
+      "title": "medical organization check",
+      "type": "object"
+    }
+  }
+}
+
+
+### delete  event snapshot
+POST http://127.0.0.1:3333/v1/event/delete
+Content-Type: application/json
+
+{
+  "snapshotId": "cc835301-a635-4a09-ac88-09c5748b00e2"
+}

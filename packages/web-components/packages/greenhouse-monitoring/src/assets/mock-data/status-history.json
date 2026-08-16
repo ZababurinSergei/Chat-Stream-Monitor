@@ -1,0 +1,67 @@
+{
+  "history": [
+    {
+      "id": 1,
+      "greenhouseId": 2,
+      "status": "normal",
+      "changedAt": "2024-01-15T09:30:00Z",
+      "comment": "Регулярная проверка",
+      "changedBy": "Иванов А.И.",
+      "previousStatus": "normal"
+    },
+    {
+      "id": 2,
+      "greenhouseId": 2,
+      "status": "warning",
+      "changedAt": "2024-01-18T14:45:00Z",
+      "comment": "Повышение температуры выше нормы",
+      "changedBy": "Петрова С.В.",
+      "previousStatus": "normal"
+    },
+    {
+      "id": 3,
+      "greenhouseId": 4,
+      "status": "emergency",
+      "changedAt": "2024-01-19T11:20:00Z",
+      "comment": "Отказ системы отопления",
+      "changedBy": "Сидоров П.К.",
+      "previousStatus": "warning"
+    },
+    {
+      "id": 4,
+      "greenhouseId": 11,
+      "status": "normal",
+      "changedAt": "2024-01-10T16:30:00Z",
+      "comment": "Плановое обслуживание завершено",
+      "changedBy": "Иванов А.И.",
+      "previousStatus": "emergency"
+    },
+    {
+      "id": 5,
+      "greenhouseId": 11,
+      "status": "emergency",
+      "changedAt": "2024-01-20T18:15:00Z",
+      "comment": "Критическое закисление почвы",
+      "changedBy": "Система",
+      "previousStatus": "normal"
+    },
+    {
+      "id": 6,
+      "greenhouseId": 5,
+      "status": "warning",
+      "changedAt": "2024-01-17T10:15:00Z",
+      "comment": "Падение влажности",
+      "changedBy": "Петрова С.В.",
+      "previousStatus": "normal"
+    },
+    {
+      "id": 7,
+      "greenhouseId": 9,
+      "status": "warning",
+      "changedAt": "2024-01-19T15:40:00Z",
+      "comment": "Нестабильные показатели",
+      "changedBy": "Сидоров П.К.",
+      "previousStatus": "normal"
+    }
+  ]
+}

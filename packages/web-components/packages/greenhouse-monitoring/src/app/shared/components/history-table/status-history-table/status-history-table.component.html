@@ -1,0 +1,203 @@
+<div class="history-table-container">
+    <div class="table-header">
+        <h3>История изменений состояний</h3>
+        @if (canAddComments) {
+        <div class="header-info">
+          <span>Для добавления комментария кликните на ячейку</span>
+        </div>
+        }
+    </div>
+
+    <div class="table-wrapper">
+        <table class="history-table">
+            <thead>
+            <tr>
+                <th>Дата изменения</th>
+                <th>Статус</th>
+                <th>Изменил</th>
+                <th>Комментарий</th>
+                <th>Действия</th>
+            </tr>
+            </thead>
+            <tbody>
+            @for (item of sortedHistory(); track item.id) {
+            <tr>
+              <td>{{ item.changedAt | date:'dd.MM.yyyy HH:mm' }}</td>
+                <td>
+                  <span class="status-badge" [class]="item.status">
+            {{ getStatusText(item.status) }}
+            </span>
+          </td>
+          <td>{{ item.changedBy }}</td>
+                <td>
+                  @if (editingId() === item.id) {
+            <textarea
+                    [(ngModel)]="editCommentText"
+                    (keydown.enter)="$event.preventDefault(); saveComment(item)"
+                    (blur)="saveComment(item)"
+                    rows="2"
+                    class="comment-edit"
+                    autofocus
+            ></textarea>
+            } @else {
+            <div
+                    class="comment-display"
+                    [class.editable]="canAddComments"
+                    (click)="startEditing(item)"
+            >
+                {{ item.comment || 'Без комментария' }}
+            </div>
+            }
+            </td>
+            <td>
+              @if (canAddComments && editingId() !== item.id) {
+            <button
+                    class="btn-edit"
+                    (click)="startEditing(item)"
+                    title="Редактировать комментарий"
+            >
+                ✏️
+            </button>
+            }
+            @if (showDetailsButton) {
+            <button
+                    class="btn-details"
+                    (click)="showDetails.emit(item)"
+                    title="Подробности"
+            >
+                🔍
+            </button>
+            }
+            </td>
+          </tr>
+            } @empty {
+            <tr>
+              <td colspan="5" class="no-data">Нет данных истории</td>
+            </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination-controls" *ngIf="enablePagination">
+        <div class="pagination-info">
+            Показано {{ startIndex() + 1 }}-{{ endIndex() }} из {{ totalItems() }}
+        </div>
+        <div class="pagination-buttons">
+            <button
+                    class="btn-pagination"
+                    (click)="previousPage()"
+                    [disabled]="currentPage() === 1"
+            >
+                ← Назад
+            </button>
+            <span class="page-info">Страница {{ currentPage() }} из {{ totalPages() }}</span>
+            <button
+                    class="btn-pagination"
+                    (click)="nextPage()"
+                    [disabled]="currentPage() === totalPages()"
+            >
+                Вперед →
+            </button>
+        </div>
+        <div class="page-size-selector">
+            <label for="pageSize">Записей на странице:</label>
+            <select
+                    id="pageSize"
+                    [(ngModel)]="pageSize"
+                    (change)="onPageSizeChange()"
+                    class="page-size-select"
+            >
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="table-filters">
+        <div class="filter-group">
+            <label for="statusFilter">Фильтр по статусу:</label>
+            <select
+                    id="statusFilter"
+                    [(ngModel)]="selectedStatus"
+                    (change)="applyFilters()"
+                    class="filter-select"
+            >
+                <option value="">Все статусы</option>
+                <option value="normal">Норма</option>
+                <option value="warning">Предупреждение</option>
+                <option value="emergency">Авария</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="userFilter">Изменил:</label>
+            <input
+                    type="text"
+                    id="userFilter"
+                    [(ngModel)]="userFilter"
+                    (ngModelChange)="applyFilters()"
+                    placeholder="ФИО..."
+                    class="filter-input"
+            />
+        </div>
+
+        <div class="filter-group">
+            <label for="dateFrom">От:</label>
+            <input
+                    type="date"
+                    id="dateFrom"
+                    [(ngModel)]="dateFrom"
+                    (change)="applyFilters()"
+                    class="filter-date"
+            />
+
+            <label for="dateTo">До:</label>
+            <input
+                    type="date"
+                    id="dateTo"
+                    [(ngModel)]="dateTo"
+                    (change)="applyFilters()"
+                    class="filter-date"
+            />
+        </div>
+
+        <div class="filter-actions">
+            <button
+                    class="btn-reset"
+                    (click)="resetFilters()"
+                    [disabled]="!hasActiveFilters()"
+            >
+                Сбросить фильтры
+            </button>
+            <button
+                    class="btn-export"
+                    (click)="exportToCSV()"
+                    *ngIf="enableExport"
+            >
+                📥 Экспорт CSV
+            </button>
+        </div>
+    </div>
+
+    <div class="table-summary" *ngIf="showSummary">
+        <div class="summary-item">
+            <span class="summary-label">Всего записей:</span>
+            <span class="summary-value">{{ totalItems() }}</span>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Норма:</span>
+            <span class="summary-value normal">{{ getStatusCount('normal') }}</span>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Предупреждение:</span>
+            <span class="summary-value warning">{{ getStatusCount('warning') }}</span>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Авария:</span>
+            <span class="summary-value emergency">{{ getStatusCount('emergency') }}</span>
+        </div>
+    </div>
+</div>

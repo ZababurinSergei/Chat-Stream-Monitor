@@ -1,0 +1,11 @@
+### get one events with condition
+POST http://127.0.0.1:3333/v1/event
+Content-Type: application/json
+
+{
+  "condition": {
+    "snapshotIds": [
+      "31daae00-6df1-4a67-8b00-41f063615d82"
+    ]
+  }
+}

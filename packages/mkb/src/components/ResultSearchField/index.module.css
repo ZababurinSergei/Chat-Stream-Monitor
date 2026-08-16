@@ -1,0 +1,29 @@
+.wrapper {
+	/* height: 300px; */
+	margin-top: 12px;
+}
+
+.header {
+	height: 40px;
+	background-color: #FCF2E6;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding-left: 43px;
+	padding-right: 36px;
+}
+
+.header__title {
+	font-family: 'Golos 14pt DemiBold 14x20';
+}
+
+.deseasesList {
+	height: 203px;
+	overflow-y: auto;
+	padding-left: 27px;
+	font-family: 'Golos 11pt Regular 11x14';
+	font-style: normal;
+	font-weight: 400;
+	font-size: 11px;
+	line-height: 14px;
+}

@@ -1,0 +1,367 @@
+# ============================================
+# MTProto MQTT Gateway - .gitignore
+# ============================================
+
+# -------------------- Build Artifacts --------------------
+build/
+bin/
+*.o
+*.a
+*.so
+*.dylib
+*.exe
+*.dll
+*.obj
+*.lib
+*.out
+*.app
+
+# -------------------- CMake --------------------
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+CMakeCache.txt
+*.cmake
+!CMakeLists.txt
+!*.cmake.in
+
+# -------------------- Logs --------------------
+logs/
+*.log
+*.log.*
+build.log
+build-debug.log
+valgrind.log
+
+# -------------------- IDE --------------------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.bak
+*.tmp
+.DS_Store
+Thumbs.db
+*.suo
+*.user
+*.sln.docstates
+
+# -------------------- Dependencies --------------------
+liboqs/
+*.tar.gz
+*.zip
+*.tgz
+
+# -------------------- Node.js --------------------
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+.pnpm-debug.log*
+pnpm-lock.yaml
+
+# -------------------- Python --------------------
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+*.egg-info/
+dist/
+build/
+*.whl
+*.egg
+
+# -------------------- Metaflow --------------------
+.metaflow/
+*.metaflow/
+metaflow-*.json
+*.metaflow.json
+results/
+*.results.json
+workflow_*.json
+data.json
+token.json
+
+# -------------------- Environment --------------------
+.env
+.env.local
+.env.*.local
+.env.example
+!/.env.example
+
+# -------------------- Reports --------------------
+reports/
+*.html
+*.pdf
+coverage/
+*.cover
+*.gcov
+*.gcda
+*.gcno
+
+# -------------------- Temporary Files --------------------
+*.tmp
+*.temp
+*.cache
+.cache/
+*.pid
+*.seed
+*.pid.lock
+*.sock
+*.socket
+
+# -------------------- OS --------------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# -------------------- Documentation --------------------
+docs/_build/
+docs/api/
+*.aux
+*.out
+*.toc
+*.synctex.gz
+*.fls
+*.fdb_latexmk
+
+# -------------------- Config --------------------
+config/local/
+config/*.local
+*.local.yaml
+*.local.yml
+*.local.json
+*.local.toml
+
+# -------------------- Test --------------------
+test-results/
+*.test.js
+*.spec.js
+coverage/
+.nyc_output/
+
+# -------------------- Backup --------------------
+*.backup
+*.old
+*.orig
+*.rej
+*.patch
+
+# -------------------- Docker --------------------
+*.dockerignore
+!/.dockerignore
+docker-compose.override.yml
+.docker/
+
+# -------------------- Archives --------------------
+*.zip
+*.tar.gz
+*.tgz
+*.rar
+*.7z
+*.bz2
+*.xz
+
+# -------------------- Debug --------------------
+*.core
+core.*
+*.dmp
+*.dump
+*.trace
+gdb.*
+valgrind.*
+callgrind.*
+cachegrind.*
+
+# -------------------- Database --------------------
+*.db
+*.sqlite
+*.sqlite3
+*.mdb
+*.ldb
+
+# -------------------- Certificates --------------------
+*.pem
+*.crt
+*.key
+*.csr
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.truststore
+
+# -------------------- Project Specific --------------------
+# MTProto MQTT specific
+*.mtproto
+*.mqtt
+*.mesh
+!src/*.c
+!include/*.h
+
+# -------------------- Node.js Build --------------------
+dist/
+lib/
+build-node/
+*.tsbuildinfo
+
+# -------------------- Editor --------------------
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.tern-project
+.ropeproject
+.venv
+
+# -------------------- Web --------------------
+*.min.js
+*.min.css
+*.map
+*.bundle.js
+*.chunk.js
+
+# -------------------- Performance --------------------
+perf/
+benchmark/
+*.perf
+*.bench
+
+# -------------------- Profiling --------------------
+*.prof
+*.cpuprofile
+*.heapsnapshot
+*.heapdump
+
+# -------------------- Misc --------------------
+*.orig
+*.rej
+*.patch
+*.diff
+*.merge
+*.swp
+*.swo
+*~
+*.backup
+*.bak
+*.tmp
+*.temp
+*.cache
+
+# -------------------- Security --------------------
+*.secret
+*.key
+*.pem
+*.priv
+*.pub
+!*.pub
+*.p12
+*.pfx
+*.jks
+*.keystore
+
+# -------------------- Output Directories --------------------
+output/
+out/
+dist/
+release/
+debug/
+coverage/
+reports/
+
+# -------------------- Lock Files --------------------
+*.lock
+!package-lock.json
+!yarn.lock
+!pnpm-lock.yaml
+
+# -------------------- Cloud --------------------
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup
+*.tfvars
+!*.tfvars.example
+.aws/
+.gcloud/
+.azure/
+
+# -------------------- Jupyter --------------------
+.ipynb_checkpoints/
+*.ipynb
+!*.ipynb
+*.pynb
+
+# -------------------- TypeScript --------------------
+*.tsbuildinfo
+*.d.ts.map
+*.js.map
+*.js
+!*.js
+!*.cjs
+!*.mjs
+
+# -------------------- Coverage --------------------
+coverage/
+.nyc_output/
+*.lcov
+*.lcov.info
+*.coverage
+
+# -------------------- Profiling --------------------
+*.cpuprofile
+*.heapsnapshot
+*.heapdump
+*.hprof
+*.prof
+
+# -------------------- Specific Rules --------------------
+# Keep important files
+!package.json
+!package-lock.json
+!.env.example
+!.gitignore
+!README.md
+!INTERFACE.md
+!request.http
+
+# Keep source files
+!src/**/*.c
+!src/**/*.h
+!include/**/*.h
+!scripts/**/*.sh
+!scripts/**/*.py
+
+# Keep config examples
+!config/*.example.*
+!*.example.yaml
+!*.example.yml
+!*.example.json
+!*.example.toml
+
+# Keep test files
+!test/**/*.c
+!test/**/*.js
+!test/**/*.py
+!test/**/*.sh
+
+# Keep documentation
+!docs/**/*.md
+!*.md
+!LICENSE
+!CHANGELOG.md
+!CONTRIBUTING.md

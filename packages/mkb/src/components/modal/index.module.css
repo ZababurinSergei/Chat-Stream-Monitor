@@ -1,0 +1,53 @@
+.container {
+    /*width: 560px;*/
+    /*min-height: min-content;*/
+    max-height: 80vh;
+    border-radius: 4px;
+		width: 560px;
+}
+
+.title {
+    padding-bottom: 28px;
+}
+
+.header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    height: 72px;
+    align-items: center;
+    box-sizing: border-box;
+    padding: 0 32px;
+}
+
+.titleHeader, .title {
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.icon {
+    cursor: pointer;
+}
+
+.body {
+    padding: 24px 32px;
+}
+
+.content {
+
+}
+
+.paragraph {
+    padding-bottom: 28px;
+    font-size: 14px;
+    line-height: 20px;
+}
+
+.ul {
+    margin-left: 18px;
+}
+
+.li {
+    font-size: 14px;
+    line-height: 20px;
+}

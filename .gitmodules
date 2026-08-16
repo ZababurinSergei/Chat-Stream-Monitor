@@ -32,3 +32,18 @@
 [submodule "packages/MTProxy"]
 	path = packages/MTProxy
 	url = https://github.com/ZababurinSergei/MTProxy.git
+[submodule "packages/nk-mesh"]
+	path = packages/nk-mesh
+	url = https://github.com/ZababurinSergei/nk-mesh.git
+[submodule "packages/radar_backend"]
+	path = packages/radar_backend
+	url = https://github.com/ZababurinSergei/radar_backend.git
+[submodule "packages/mtproto-mqtt-gateway"]
+	path = packages/mtproto-mqtt-gateway
+	url = https://github.com/ZababurinSergei/mtproto-mqtt-gateway.git
+[submodule "packages/protobufs"]
+	path = packages/protobufs
+	url = https://github.com/ZababurinSergei/protobufs.git
+[submodule "packages/bookmarks"]
+	path = packages/bookmarks
+	url = https://github.com/ZababurinSergei/bookmarks.git

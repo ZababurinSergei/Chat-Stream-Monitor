@@ -1,0 +1,131 @@
+:host {
+    display: flex;
+    align-self: flex-end;
+}
+
+:host([disabled]) .rules-relation_container {
+    color: linen!important;
+    opacity: 0.5!important;
+    cursor: initial;
+}
+
+.rules-relation_container {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 0.83vw;
+    background: rgb(110, 143, 176);
+    border-radius: 1.04vw 0px 0px 1.04vw;
+    align-items: center;
+    height: 5vw;
+    width: 10.42vw;
+    cursor: pointer;
+    transition: all 0.3s ease 0s;
+    box-sizing: border-box;
+    padding-left: 1.04vw;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+            user-select: none;
+}
+
+.rules-relation_container:after {
+    content: '';
+    position: absolute;
+    bottom: -0.78vw;
+    right: 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    width: 0.52vw;
+    height: 0.57vw;
+}
+
+.rules-relation_container:before {
+    content: '';
+    position: absolute;
+    bottom: -0.58vw;
+    right: 0;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    width: 0.52vw;
+    height: 0.57vw;
+}
+
+.rules-relation_container svg{
+    width: 1.88vw;
+    height: 1.88vw;
+}
+
+.rules-relation_container_img {
+    width: 1.72vw;
+    height: 1.72vw;
+}
+
+.rules-relation_container_name {
+    width: 3.59vw;
+    height: 1.46vw;
+    font-family: 'Inter', serif;
+    font-style: normal;
+    font-weight: 300;
+    font-size: 1.04vw;
+    line-height: 1.46vw;
+    color: #FFFFFF;
+    flex: none;
+    order: 1;
+    flex-grow: 0;
+    transition: all 0.3s ease;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+            user-select: none;
+}
+
+.rules-relation_container.active {
+    width: 12.5vw;
+    height: 5vw;
+    background: white;
+    transition: all 0.3s ease;
+    position: relative;
+    padding-left: 1.67vw;
+}
+
+svg {
+    width: 100%;
+    height: 100%;
+}
+
+.rules-relation_container.active:after {
+    content: url('/services/system/src/component/api-button/views/svg/decorationTop.svg');
+    position: absolute;
+    object-fit: cover;
+    top: -0.54vw;
+    right: 0;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.rules-relation_container.active:before {
+    content: url('/services/system/src/component/api-button/views/svg/decorationBottom.svg');
+    object-fit: cover;
+    position: absolute;
+    bottom: -0.57vw;
+    right: 0;
+    opacity: 1;
+    transition: opacity 0.3s ease;
+}
+
+.rules-relation_container_name.active {
+   color: #435F7B;
+    transition: all 0.3s ease;
+}
+
+.rules-relation_container_img.active {
+    filter: invert(36%) sepia(5%) saturate(4314%) hue-rotate(169deg) brightness(87%) contrast(78%);
+    transition: all 0.3s ease;
+}
+
+.active {
+    filter: drop-shadow(0px 0.31vw 0.63vw rgba(171, 190, 209, 0.3));
+}
+
+.active path  {
+    fill: #435F7B;
+}

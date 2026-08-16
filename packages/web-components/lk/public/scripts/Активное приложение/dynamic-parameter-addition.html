@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Git - Динамические параметры</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --gosblue: #0D4CD3;
+            --white: #FFF;
+            --gray-light: #F5F5F5;
+            --gray-dark: #333;
+            --border-radius: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: var(--white);
+            color: var(--gray-dark);
+            line-height: 1.5;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid #eee;
+            margin-bottom: 24px;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--gosblue);
+        }
+
+        .panel {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            padding: 24px;
+            border: 1px solid #eee;
+        }
+
+        .panel-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--gosblue);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
+            font-family: inherit;
+            font-size: 16px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--gosblue);
+        }
+
+        button {
+            border: none;
+            margin: 0;
+            padding: 0;
+            width: auto;
+            overflow: visible;
+            background: transparent;
+            color: inherit;
+            font: inherit;
+            line-height: normal;
+            -webkit-font-smoothing: inherit;
+            -moz-osx-font-smoothing: inherit;
+            -webkit-appearance: none;
+        }
+
+        button::-moz-focus-inner {
+            border: 0;
+            padding: 0;
+        }
+
+        .button {
+            border-radius: var(--border-radius);
+            border: 2px solid var(--gosblue);
+            background: var(--white);
+            display: inline-flex;
+            padding: 14px 24px;
+            justify-content: center;
+            align-items: center;
+            color: var(--gosblue);
+            font-size: 16px;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .button:hover {
+            background: var(--gosblue);
+            color: var(--white);
+        }
+
+        .button[disabled] {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .button-primary {
+            background: var(--gosblue);
+            color: var(--white);
+        }
+
+        .button-primary:hover {
+            background: #0a3aab;
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ccc;
+        }
+
+        .status-indicator.connected {
+            background: #4CAF50;
+        }
+
+        .status-indicator.disconnected {
+            background: #f44336;
+        }
+
+        .status-indicator.loading {
+            background: #FFC107;
+            animation: pulse 1.5s infinite;
+        }
+
+        .parameter-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .parameter-card {
+            border: 1px solid #eee;
+            border-radius: var(--border-radius);
+            padding: 16px;
+            background: var(--white);
+        }
+
+        .parameter-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .add-parameter-form {
+            background: var(--gray-light);
+            padding: 16px;
+            border-radius: var(--border-radius);
+            margin-top: 24px;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .panel {
+                padding: 16px;
+            }
+
+            .parameter-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="header">
+        <h1 class="title">Динамические параметры</h1>
+        <div class="status">
+            <span class="status-indicator connected" id="systemStatus"></span>
+            <span id="systemStatusText">Активно</span>
+        </div>
+    </header>
+
+    <div class="panel">
+        <h2 class="panel-title">Управление параметрами</h2>
+
+        <div class="parameter-list" id="parameterList">
+            <!-- Параметры будут добавляться динамически -->
+            <div class="parameter-card">
+                <div class="form-group">
+                    <label>Имя параметра</label>
+                    <input type="text" value="quantum_entanglement" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Значение</label>
+                    <input type="text" value="0.95">
+                </div>
+                <div class="form-group">
+                    <label>Тип</label>
+                    <select>
+                        <option>number</option>
+                        <option>string</option>
+                        <option selected>boolean</option>
+                    </select>
+                </div>
+                <div class="parameter-actions">
+                    <button class="button">Сохранить</button>
+                    <button class="button">Удалить</button>
+                </div>
+            </div>
+
+            <div class="parameter-card">
+                <div class="form-group">
+                    <label>Имя параметра</label>
+                    <input type="text" value="temporal_branching" readonly>
+                </div>
+                <div class="form-group">
+                    <label>Значение</label>
+                    <input type="text" value="true">
+                </div>
+                <div class="form-group">
+                    <label>Тип</label>
+                    <select>
+                        <option>number</option>
+                        <option>string</option>
+                        <option selected>boolean</option>
+                    </select>
+                </div>
+                <div class="parameter-actions">
+                    <button class="button">Сохранить</button>
+                    <button class="button">Удалить</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="add-parameter-form">
+            <h3>Добавить новый параметр</h3>
+            <div class="form-group">
+                <label for="newParamName">Имя параметра</label>
+                <input type="text" id="newParamName" placeholder="Введите имя параметра">
+            </div>
+            <div class="form-group">
+                <label for="newParamValue">Значение</label>
+                <input type="text" id="newParamValue" placeholder="Введите значение">
+            </div>
+            <div class="form-group">
+                <label for="newParamType">Тип параметра</label>
+                <select id="newParamType">
+                    <option value="number">Число</option>
+                    <option value="string">Строка</option>
+                    <option value="boolean">Логический</option>
+                </select>
+            </div>
+            <button class="button button-primary" onclick="addParameter()">Добавить параметр</button>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2 class="panel-title">Экспорт/Импорт</h2>
+        <div class="form-group">
+            <label for="jsonData">JSON данные</label>
+            <textarea id="jsonData" rows="6" placeholder='{"parameters": [...]}'></textarea>
+        </div>
+        <div style="display: flex; gap: 12px;">
+            <button class="button" onclick="exportParameters()">Экспорт параметров</button>
+            <button class="button button-primary" onclick="importParameters()">Импорт параметров</button>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+    // Импорт состояния (если нужно)
+    import GlobalState from './global-state.mjs';
+
+    // Пример данных параметров
+    let parameters = [
+        { name: 'quantum_entanglement', value: '0.95', type: 'boolean' },
+        { name: 'temporal_branching', value: 'true', type: 'boolean' }
+    ];
+
+    // Функция для отображения параметров
+    function renderParameters() {
+        const container = document.getElementById('parameterList');
+        container.innerHTML = '';
+
+        parameters.forEach((param, index) => {
+            const paramCard = document.createElement('div');
+            paramCard.className = 'parameter-card';
+            paramCard.innerHTML = `
+                    <div class="form-group">
+                        <label>Имя параметра</label>
+                        <input type="text" value="${param.name}" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Значение</label>
+                        <input type="text" value="${param.value}" id="value_${index}">
+                    </div>
+                    <div class="form-group">
+                        <label>Тип</label>
+                        <select id="type_${index}">
+                            <option value="number" ${param.type === 'number' ? 'selected' : ''}>Число</option>
+                            <option value="string" ${param.type === 'string' ? 'selected' : ''}>Строка</option>
+                            <option value="boolean" ${param.type === 'boolean' ? 'selected' : ''}>Логический</option>
+                        </select>
+                    </div>
+                    <div class="parameter-actions">
+                        <button class="button" onclick="saveParameter(${index})">Сохранить</button>
+                        <button class="button" onclick="deleteParameter(${index})">Удалить</button>
+                    </div>
+                `;
+            container.appendChild(paramCard);
+        });
+    }
+
+    // Добавление нового параметра
+    window.addParameter = () => {
+        const name = document.getElementById('newParamName').value.trim();
+        const value = document.getElementById('newParamValue').value.trim();
+        const type = document.getElementById('newParamType').value;
+
+        if (!name || !value) {
+            alert('Пожалуйста, заполните все поля');
+            return;
+        }
+
+        parameters.push({ name, value, type });
+        renderParameters();
+
+        // Очистка формы
+        document.getElementById('newParamName').value = '';
+        document.getElementById('newParamValue').value = '';
+    };
+
+    // Сохранение параметра
+    window.saveParameter = (index) => {
+        parameters[index].value = document.getElementById(`value_${index}`).value;
+        parameters[index].type = document.getElementById(`type_${index}`).value;
+        alert('Параметр сохранён');
+    };
+
+    // Удаление параметра
+    window.deleteParameter = (index) => {
+        if (confirm('Вы уверены, что хотите удалить этот параметр?')) {
+            parameters.splice(index, 1);
+            renderParameters();
+        }
+    };
+
+    // Экспорт параметров в JSON
+    window.exportParameters = () => {
+        const jsonData = JSON.stringify({ parameters }, null, 2);
+        document.getElementById('jsonData').value = jsonData;
+    };
+
+    // Импорт параметров из JSON
+    window.importParameters = () => {
+        try {
+            const json = document.getElementById('jsonData').value.trim();
+            if (!json) return;
+
+            const data = JSON.parse(json);
+            if (data.parameters && Array.isArray(data.parameters)) {
+                parameters = data.parameters;
+                renderParameters();
+                alert('Параметры успешно импортированы');
+            } else {
+                alert('Неверный формат данных');
+            }
+        } catch (e) {
+            alert('Ошибка при импорте: ' + e.message);
+        }
+    };
+
+    // Инициализация при загрузке
+    document.addEventListener('DOMContentLoaded', () => {
+        const labelsToggle = document.getElementById('toggle-labels');
+        const componentsToggle = document.getElementById('toggle-components');
+
+        // Восстановление состояния из localStorage
+        const labelsVisible = localStorage.getItem('labelsVisible') !== 'false';
+        const componentsVisible = localStorage.getItem('componentsVisible') !== 'false';
+
+        // Применяем сохраненные состояния
+        labelsToggle.checked = labelsVisible;
+        componentsToggle.checked = componentsVisible;
+
+        // Триггерим события для применения состояний
+        labelsToggle.dispatchEvent(new Event('change'));
+        componentsToggle.dispatchEvent(new Event('change'));
+
+        renderParameters();
+    });
+</script>
+</body>
+</html>

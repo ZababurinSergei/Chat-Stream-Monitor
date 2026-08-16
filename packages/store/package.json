@@ -1,0 +1,62 @@
+{
+  "name": "infoenergo-store-server",
+  "version": "4.0.8",
+  "description": "🏢 Enterprise Store Server — 100% СИМВОЛЫ, полная изоляция",
+  "type": "module",
+  "main": "server.mjs",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node --watch server.mjs",
+    "debug": "node --inspect server.mjs",
+    "test": "node --test server.test.mjs",
+    "lint": "node --check server.mjs logger.mjs"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "vue": "^3.5.25",
+    "naive-ui": "^2.44.1",
+    "immer": "^11.1.15",
+    "zustand": "^4.5.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "keywords": [
+    "enterprise-store",
+    "global-store",
+    "symbols",
+    "isolation",
+    "server",
+    "api",
+    "rest"
+  ],
+  "author": "Enterprise Store Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "http://gitlab.infoenergo.loc/infoenergo.npm/enterprise-store.git"
+  },
+  "publishConfig": {
+    "registry": "http://gitlab.infoenergo.loc/api/v4/projects/508/packages/npm/"
+  },
+  "files": [
+    "server.mjs",
+    "logger.mjs",
+    "mockData.js",
+    "src/"
+  ],
+  "exports": {
+    ".": {
+      "import": "./server.mjs",
+      "require": "./server.mjs"
+    },
+    "./logger": {
+      "import": "./logger.mjs",
+      "require": "./logger.mjs"
+    },
+    "./mockData": {
+      "import": "./mockData.js",
+      "require": "./mockData.js"
+    }
+  }
+}

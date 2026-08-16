@@ -1,0 +1,82 @@
+### get all regions
+POST http://127.0.0.1:3333/v1/region/list
+Content-Type: application/json
+
+### get all redions with Page
+POST http://127.0.0.1:3333/v1/region/list
+Content-Type: application/json
+
+{
+  "page": {
+    "limit": 1,
+    "offset": 1
+  }
+}
+
+### count all regions
+POST http://127.0.0.1:3333/v1/region/count
+Content-Type: application/json
+
+
+
+### create region
+POST http://127.0.0.1:3333/v1/region/save
+Content-Type: application/json
+
+{
+  "region": {
+    "region": "fantastic-1234_67889",
+    "description": "типа дагестан"
+  }
+}
+
+### create region
+POST http://127.0.0.1:3333/v1/region/save
+Content-Type: application/json
+
+{
+  "region": {
+    "region": "f_mzrv_consmr005",
+    "description": "типа дагестан"
+  }
+}
+### create region
+POST http://svc-fer-dev.helpms.ru:3333/v1/region/save
+Content-Type: application/json
+
+{
+  "region": {
+    "region": "federal",
+    "description": "общий"
+  }
+}
+### create region
+POST http://127.0.0.1:3333/v1/region/save
+Content-Type: application/json
+
+{
+  "region": {
+    "region": "federal",
+    "description": "общий"
+  }
+}
+
+### update region
+POST http://127.0.0.1:3333/v1/region/save
+Content-Type: application/json
+
+{
+  "region": {
+    "id":"2d522214-d84a-474d-90db-013bb655f917",
+    "region": "msc99",
+    "description": "москва"
+  }
+}
+
+### delete region
+POST http://127.0.0.1:3333/v1/region/delete
+Content-Type: application/json
+
+{
+  "regionId": "77960d00-b942-44e2-8de8-661d8ed8edcb"
+}

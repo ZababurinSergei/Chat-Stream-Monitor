@@ -1,0 +1,33 @@
+@import url('./normalize.css');
+
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.ReactModal__Content {
+    border-radius: 8px;
+}
+
+#root {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    /* overflow: clip; */
+    flex-grow: 1;
+}
+
+/* Fonts */
+h1 {
+    font-family: 'Golos H1 DemiBold 24x32';
+}
+h2 {
+    font-family: 'Golos H2 DemiBold 22x28';
+    font-size: 18px;
+}
+h3 {
+    font-family: 'Golos H3 Medium 20x28';
+}
+h4 {
+    font-family: 'Golos H4 DemiBold 18x24';
+}

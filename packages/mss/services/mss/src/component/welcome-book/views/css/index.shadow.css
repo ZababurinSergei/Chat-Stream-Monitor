@@ -1,0 +1,218 @@
+:host {
+	width: 100%;
+	/*background-image: url(/this/img/north_tower.png);*/
+	background-size: cover;
+	overflow: auto;
+}
+
+.welcome__book {
+	/*min-height: 100%;*/
+	width: 100%;
+	position: relative;
+	box-sizing: border-box;
+	/*background: radial-gradient(50% 50% at 50% 50%, rgba(0, 0, 0, 0) 2.6%, rgba(0, 0, 0, 0.89) 100%);*/
+}
+
+.welcome__header {
+	height: 6.98vw;
+	width: 100%;
+	box-sizing: border-box;
+	display: flex;
+	justify-content: space-between;
+	padding: 0 0.78vw;
+	position: absolute;
+	z-index: 10;
+}
+
+.welcome__logo {
+	width: 16.09vw;
+	height: 2.4vw;
+	margin-top: 1.98vw;
+}
+
+.welcome__wrapper {
+	display: flex;
+	margin-left: 31.25vw;
+	margin-top: 2.6vw;
+}
+
+.welcome__link {
+	padding-right: 1.41vw;
+}
+
+.welcome__scroll {
+	display: flex;
+	justify-content: center;
+	position: absolute;
+	bottom: 0;
+	left: 50%;
+}
+
+.scroll {
+	width: 3.13vw;
+	height: 2.6vw;
+	cursor: pointer;
+	transition: height 0.4s ease;
+
+}
+
+.scroll__up-block {
+	width: 100%;
+	height: 38%;
+	display: flex;
+}
+
+.scroll__left {
+	border-right: white 0.05vw solid;
+	width: 50%;
+	height: 100%;
+}
+
+.scroll__right {
+	width: 50%;
+	height: 100%;
+}
+
+.scroll__title {
+	margin: 0;
+	padding-top: 0.89vw;
+	width: 3.02vw;
+	height: 0.83vw;
+	font-family: 'Open Sans';
+	font-style: normal;
+	font-weight: 300;
+	font-size: 0.63vw;
+	line-height: 0.83vw;
+	letter-spacing: 0.255em;
+	text-transform: uppercase;
+	color: #FFFFFF;
+	flex: none;
+	order: 1;
+	flex-grow: 0;
+}
+
+.scroll:hover {
+	height: 4.27vw;
+}
+
+#welcome1 {
+	width: 100%;
+	background-image: url('/this/img/pg1.png');
+	background-size: cover;
+}
+#welcome2 {
+	width: 100%;
+	background-image: url('/this/img/pg2.png');
+	background-size: cover;
+}
+
+.welcome__logo {
+	width: 16.09vw;
+	height: 2.4vw;
+	margin-top: 1.98vw;
+}
+
+.welcome__wrapper {
+	display: flex;
+	margin-left: 31.25vw;
+	margin-top: 2.6vw;
+}
+
+.welcome__link {
+	padding-right: 1.41vw;
+}
+
+.welcome__scroll {
+	display: flex;
+	justify-content: center;
+}
+
+.welcome__pg1 {
+	background-image: url('/this/img/pg1.png');
+	background-size: cover;
+	width: 100%;
+	height: 100%;
+}
+
+.welcome__pg2 {
+	background-image: url('/this/img/pg2.png');
+	background-size: cover;
+	width: 100%;
+	height: 100%;
+
+}
+
+.welcome__pg3 {
+	background-image: url('/this/img/pg3.png');
+	background-size: cover;
+	width: 100%;
+	height: 100%;
+
+}
+
+.welcome__pg4 {
+	background-image: url('/this/img/pg4.png');
+	background-size: cover;
+	width: 100%;
+	height: 100%;
+
+}
+
+.welcome__pg5 {
+	background-image: url('/this/img/pg5.png');
+	background-size: cover;
+	width: 100%;
+	height: 100%;
+
+}
+
+.welcome__pg6 {
+	background-image: url('/this/img/pg6.png');
+	background-size: cover;
+	width: 100%;
+	height: 100%;
+
+}
+
+.welcome__pg7 {
+	background-image: url('/this/img/pg7.png');
+	background-size: cover;
+	width: 100%;
+	height: 100%;
+
+}
+
+.welcome__pg8 {
+	background-image: url('/this/img/pg8.png');
+	background-size: cover;
+	width: 100%;
+	height: 100%;
+
+}
+
+.welcome__pg9 {
+	background-image: url('/this/img/pg9.png');
+	background-size: cover;
+	width: 100%;
+	height: 100%;
+
+}
+
+.welcome__pg10 {
+	background-image: url('/this/img/pg10.png');
+	background-size: cover;
+	width: 100%;
+	height: 100%;
+
+}
+
+.welcome__pg11 {
+	background-image: url('/this/img/pg11.png');
+	background-size: cover;
+	width: 100%;
+	height: 100%;
+}
+
+.img-parallax {
+	width: 100%;
+}

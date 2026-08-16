@@ -1,0 +1,991 @@
+/*
+    MTProto MQTT Gateway - Главный файл
+    Шлюз для передачи MTProto-трафика через MQTT/Mesh-сети
+    С поддержкой гибридной криптографии (ECDH + ML-KEM + ML-DSA)
+    С автоматическим управлением памятью (heap allocation)
+    Полная поддержка иерархии топиков msh/RU/
+*/
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <signal.h>
+#include <unistd.h>
+#include <getopt.h>
+#include <time.h>
+#include <sys/resource.h>
+#include <errno.h>
+
+#include "mesh-mqtt.h"
+#include "mesh-packet.h"
+#include "mesh-crypto.h"
+#include "mesh-user.h"
+#include "mesh-registry.h"
+
+static int g_running = 1;
+static char g_city_code[16] = "SPB";
+static char g_topic_root[128] = "msh/RU/SPB";
+
+// ============================================================================
+// Увеличение размера стека
+// ============================================================================
+
+static void increase_stack_size(void) {
+    struct rlimit rl;
+    if (getrlimit(RLIMIT_STACK, &rl) == 0) {
+        printf("📊 Current stack limit: %lu MB\n",
+               (unsigned long)(rl.rlim_cur / (1024 * 1024)));
+
+        // Увеличиваем до 32 МБ
+        rl.rlim_cur = 32 * 1024 * 1024;
+        if (setrlimit(RLIMIT_STACK, &rl) == 0) {
+            printf("✅ Stack limit increased to 32 MB\n");
+        } else {
+            printf("⚠️ Failed to increase stack limit: %s\n", strerror(errno));
+        }
+    }
+}
+
+// ============================================================================
+// Обработчики сигналов
+// ============================================================================
+
+void signal_handler(int sig) {
+    if (sig == SIGINT || sig == SIGTERM) {
+        printf("\n⚠️ Shutting down...\n");
+        g_running = 0;
+    }
+}
+
+// ============================================================================
+// Колбэки
+// ============================================================================
+
+void on_message_received(const mesh_packet_t *packet) {
+    printf("\n📥 Received packet\n");
+    mesh_packet_print(packet);
+}
+
+void on_connect(int success, const char *message) {
+    if (success) {
+        printf("✅ Connected to broker: %s\n", message);
+        mesh_mqtt_subscribe_all();
+    } else {
+        printf("❌ Failed to connect: %s\n", message);
+    }
+}
+
+void on_disconnect(int reason, const char *message) {
+    printf("⚠️ Disconnected from broker (reason: %d, message: %s)\n", reason, message);
+}
+
+void on_error(int error_code, const char *message) {
+    printf("❌ Error: [%d] %s\n", error_code, message);
+}
+
+void on_packet_sent(const mesh_packet_t *packet) {
+    printf("📤 Packet sent: %llu\n", (unsigned long long)packet->packet_id);
+}
+
+void on_packet_received(const mesh_packet_t *packet) {
+    printf("📥 Packet received: %llu\n", (unsigned long long)packet->packet_id);
+}
+
+void on_protobuf_message(const char *topic, const void *data, int len, int is_compressed) {
+    (void)data;
+    (void)is_compressed;
+    printf("📥 Protobuf from %s: %d bytes\n", topic, len);
+}
+
+// ============================================================================
+// Тесты криптографии
+// ============================================================================
+
+int crypto_basic(void) {
+    printf("\n🔐 Testing basic crypto...\n");
+
+    unsigned char key1[32], key2[32];
+    if (mesh_crypto_random(key1, 32) < 0) {
+        printf("❌ Failed to generate random key\n");
+        return 1;
+    }
+    if (mesh_crypto_random(key2, 32) < 0) {
+        printf("❌ Failed to generate random key\n");
+        return 1;
+    }
+
+    printf("  Random key1: ");
+    for (int i = 0; i < 8; i++) printf("%02x", key1[i]);
+    printf("...\n");
+    printf("  Random key2: ");
+    for (int i = 0; i < 8; i++) printf("%02x", key2[i]);
+    printf("...\n");
+
+    printf("✅ Basic crypto test passed!\n");
+    return 0;
+}
+
+// ============================================================================
+// Тест гибридной криптографии с динамическим выделением памяти (HEAP)
+// ============================================================================
+
+int test_hybrid_crypto(void) {
+    printf("\n🔐 Testing hybrid crypto (ECDH + ML-KEM)...\n");
+    printf("   Max packet size: %zu bytes\n", (size_t)MESH_HYBRID_PACKET_MAX_SIZE);
+    printf("   Buffer size: %zu bytes\n", (size_t)MESH_TEST_BUFFER_SIZE);
+
+    // Инициализируем реестр ПЕРЕД созданием пользователей
+    if (mesh_registry_init(1024) < 0) {
+        printf("❌ Failed to initialize registry\n");
+        return 1;
+    }
+    printf("✅ Registry initialized\n");
+
+    mesh_hybrid_init();
+
+    if (!mesh_hybrid_is_pq_supported()) {
+        printf("⚠️ PQ algorithms not supported!\n");
+        printf("   Install liboqs for quantum-safe cryptography.\n");
+        return 1;
+    }
+
+    printf("✅ PQ algorithms supported\n");
+    printf("   Version: %s\n", mesh_hybrid_version());
+
+    // Выделяем память на HEAP, а не на стеке
+    printf("✅ Allocating memory on HEAP for users...\n");
+    mesh_user_t *alice = calloc(1, sizeof(mesh_user_t));
+    mesh_user_t *bob = calloc(1, sizeof(mesh_user_t));
+
+    if (!alice || !bob) {
+        printf("❌ Failed to allocate memory for users\n");
+        if (alice) free(alice);
+        if (bob) free(bob);
+        return 1;
+    }
+
+    printf("✅ Memory allocated on HEAP for users\n");
+    printf("   alice at %p, size %zu\n", (void*)alice, sizeof(mesh_user_t));
+    printf("   bob at %p, size %zu\n", (void*)bob, sizeof(mesh_user_t));
+
+    // Правильный порядок параметров
+    if (mesh_user_create_hybrid(alice, "@alice", "Alice", "alice_secret_123") < 0) {
+        printf("❌ Failed to create Alice\n");
+        free(alice);
+        free(bob);
+        return 1;
+    }
+
+    if (mesh_user_create_hybrid(bob, "@bob", "Bob", "bob_secret_456") < 0) {
+        printf("❌ Failed to create Bob\n");
+        mesh_user_free_hybrid(alice);
+        free(alice);
+        free(bob);
+        return 1;
+    }
+
+    // Добавляем пользователей в реестр
+    mesh_registry_add_user(alice);
+    mesh_registry_add_user(bob);
+
+    printf("\n👤 Alice:\n");
+    mesh_user_print_hybrid(alice);
+
+    printf("\n👤 Bob:\n");
+    mesh_user_print_hybrid(bob);
+
+    // Отправляем сообщение с динамическим выделением памяти (HEAP)
+    const char *message = "Hello Bob! This is Alice with hybrid crypto!";
+    size_t msg_len = strlen(message) + 1;
+
+    printf("\n📤 Alice encrypting message for Bob...\n");
+    printf("   Message: '%s'\n", message);
+    printf("   Message length: %zu bytes\n", msg_len);
+
+    // Выделяем память на HEAP (не на стеке!)
+    printf("✅ Allocating buffers on HEAP...\n");
+    unsigned char *packet = malloc(MESH_TEST_BUFFER_SIZE);
+    unsigned char *decrypted = malloc(MESH_TEST_BUFFER_SIZE);
+
+    if (!packet || !decrypted) {
+        printf("❌ Failed to allocate buffers\n");
+        if (packet) free(packet);
+        if (decrypted) free(decrypted);
+        mesh_user_free_hybrid(alice);
+        mesh_user_free_hybrid(bob);
+        free(alice);
+        free(bob);
+        return 1;
+    }
+
+    printf("✅ Memory allocated on HEAP for buffers\n");
+    printf("   packet at %p, size %zu\n", (void*)packet, (size_t)MESH_TEST_BUFFER_SIZE);
+    printf("   decrypted at %p, size %zu\n", (void*)decrypted, (size_t)MESH_TEST_BUFFER_SIZE);
+
+    size_t packet_len = MESH_TEST_BUFFER_SIZE;
+    size_t decrypted_len = MESH_TEST_BUFFER_SIZE;
+
+    printf("📤 Calling mesh_user_send_hybrid...\n");
+
+    // Шифруем
+    int result = mesh_user_send_hybrid(alice, "@bob",
+                                       (unsigned char*)message, msg_len,
+                                       packet, &packet_len);
+
+    if (result < 0) {
+        printf("❌ Failed to encrypt message (code: %d)\n", result);
+        free(packet);
+        free(decrypted);
+        mesh_user_free_hybrid(alice);
+        mesh_user_free_hybrid(bob);
+        free(alice);
+        free(bob);
+        return 1;
+    }
+
+    printf("✅ Encrypted packet size: %zu bytes\n", packet_len);
+    printf("   packet[0..15]: ");
+    for (int i = 0; i < 16 && i < (int)packet_len; i++) {
+        printf("%02x ", packet[i]);
+    }
+    printf("\n");
+
+    // Выводим информацию о пакете
+    if (packet_len >= sizeof(mesh_hybrid_packet_t)) {
+        mesh_hybrid_packet_t *pkt = (mesh_hybrid_packet_t*)packet;
+        printf("   Packet magic: 0x%08X\n", pkt->magic);
+        printf("   Packet version: %d\n", pkt->version);
+        printf("   Crypto type: %d\n", pkt->crypto_type);
+        printf("   PQ ciphertext len: %d\n", pkt->pq_ciphertext_len);
+        printf("   Payload len: %d\n", pkt->payload_len);
+        printf("   Sender: %s\n", pkt->sender_id);
+        printf("   Receiver: %s\n", pkt->receiver_id);
+    }
+
+    // Расшифровываем
+    printf("\n📥 Bob decrypting message...\n");
+    result = mesh_user_receive_hybrid(bob, packet, packet_len,
+                                      decrypted, &decrypted_len);
+
+    if (result < 0) {
+        printf("❌ Failed to decrypt message (code: %d)\n", result);
+        free(packet);
+        free(decrypted);
+        mesh_user_free_hybrid(alice);
+        mesh_user_free_hybrid(bob);
+        free(alice);
+        free(bob);
+        return 1;
+    }
+
+    printf("✅ Decrypted: '%s'\n", decrypted);
+    printf("   Length: %zu bytes\n", decrypted_len);
+
+    // Проверяем совпадение
+    int match = (strcmp((char*)decrypted, message) == 0);
+
+    if (!match) {
+        printf("❌ Decrypted message doesn't match original!\n");
+        printf("   Expected: '%s'\n", message);
+        printf("   Got:      '%s'\n", decrypted);
+    }
+
+    // Очистка памяти - ТОЛЬКО ЧЕРЕЗ РЕЕСТР
+    printf("\n🧹 Cleaning up memory...\n");
+
+    // Освобождаем буферы
+    free(packet);
+    free(decrypted);
+
+    // Реестр владеет памятью пользователей - освобождаем через него
+    mesh_registry_cleanup();
+
+    if (!match) {
+        return 1;
+    }
+
+    printf("\n✅ Hybrid crypto test passed!\n");
+    printf("   Memory: All buffers were allocated on HEAP and cleaned up\n");
+    return 0;
+}
+
+// ============================================================================
+// Тест нескольких сообщений с динамическим выделением памяти
+// ============================================================================
+
+int test_hybrid_multi_message(void) {
+    printf("\n📨 Testing multiple messages with heap allocation...\n");
+
+    // Инициализируем реестр
+    if (mesh_registry_init(1024) < 0) {
+        printf("❌ Failed to initialize registry\n");
+        return 1;
+    }
+
+    mesh_user_t *alice = calloc(1, sizeof(mesh_user_t));
+    mesh_user_t *bob = calloc(1, sizeof(mesh_user_t));
+
+    if (!alice || !bob) {
+        printf("❌ Failed to allocate users\n");
+        if (alice) free(alice);
+        if (bob) free(bob);
+        return 1;
+    }
+
+    if (mesh_user_create_hybrid(alice, "@alice", "Alice", "secret1") < 0) {
+        free(alice);
+        free(bob);
+        return 1;
+    }
+    if (mesh_user_create_hybrid(bob, "@bob", "Bob", "secret2") < 0) {
+        mesh_user_free_hybrid(alice);
+        free(alice);
+        free(bob);
+        return 1;
+    }
+
+    mesh_registry_add_user(alice);
+    mesh_registry_add_user(bob);
+
+    const char *messages[] = {
+        "Hello Bob!",
+        "How are you?",
+        "This is a test message with hybrid crypto!",
+        "Quantum-safe communication is the future!",
+        NULL
+    };
+
+    int success_count = 0;
+    int total_count = 0;
+
+    for (int i = 0; messages[i]; i++) {
+        total_count++;
+        printf("\n📤 Message %d: '%s'\n", i+1, messages[i]);
+
+        size_t msg_len = strlen(messages[i]) + 1;
+
+        // Выделяем память на HEAP для каждого сообщения
+        unsigned char *packet = malloc(MESH_TEST_BUFFER_SIZE);
+        unsigned char *decrypted = malloc(MESH_TEST_BUFFER_SIZE);
+
+        if (!packet || !decrypted) {
+            printf("❌ Failed to allocate buffers for message %d\n", i+1);
+            if (packet) free(packet);
+            if (decrypted) free(decrypted);
+            continue;
+        }
+
+        size_t packet_len = MESH_TEST_BUFFER_SIZE;
+        size_t decrypted_len = MESH_TEST_BUFFER_SIZE;
+
+        if (mesh_user_send_hybrid(alice, "@bob",
+                                  (unsigned char*)messages[i], msg_len,
+                                  packet, &packet_len) < 0) {
+            printf("❌ Failed to encrypt message %d\n", i+1);
+            free(packet);
+            free(decrypted);
+            continue;
+        }
+
+        printf("   Packet size: %zu bytes\n", packet_len);
+
+        if (mesh_user_receive_hybrid(bob, packet, packet_len,
+                                     decrypted, &decrypted_len) < 0) {
+            printf("❌ Failed to decrypt message %d\n", i+1);
+            free(packet);
+            free(decrypted);
+            continue;
+        }
+
+        printf("   Decrypted: '%s'\n", decrypted);
+        printf("   Decrypted length: %zu bytes\n", decrypted_len);
+
+        if (strcmp((char*)decrypted, messages[i]) == 0) {
+            printf("   ✅ Match!\n");
+            success_count++;
+        } else {
+            printf("   ❌ Mismatch!\n");
+        }
+
+        free(packet);
+        free(decrypted);
+    }
+
+    // Очистка через реестр
+    mesh_registry_cleanup();
+
+    printf("\n📊 Results: %d/%d messages succeeded\n", success_count, total_count);
+
+    if (success_count == total_count) {
+        printf("✅ All messages tested successfully!\n");
+        return 0;
+    } else {
+        printf("❌ Some messages failed!\n");
+        return 1;
+    }
+}
+
+// ============================================================================
+// Тест стресс-нагрузки
+// ============================================================================
+
+int test_hybrid_stress(void) {
+    printf("\n🔥 Stress test: 100 messages with heap allocation...\n");
+
+    // Инициализируем реестр
+    if (mesh_registry_init(1024) < 0) {
+        printf("❌ Failed to initialize registry\n");
+        return 1;
+    }
+
+    mesh_user_t *alice = calloc(1, sizeof(mesh_user_t));
+    mesh_user_t *bob = calloc(1, sizeof(mesh_user_t));
+
+    if (!alice || !bob) {
+        printf("❌ Failed to allocate users\n");
+        if (alice) free(alice);
+        if (bob) free(bob);
+        return 1;
+    }
+
+    if (mesh_user_create_hybrid(alice, "@alice", "Alice", "secret1") < 0) {
+        free(alice);
+        free(bob);
+        return 1;
+    }
+    if (mesh_user_create_hybrid(bob, "@bob", "Bob", "secret2") < 0) {
+        mesh_user_free_hybrid(alice);
+        free(alice);
+        free(bob);
+        return 1;
+    }
+
+    mesh_registry_add_user(alice);
+    mesh_registry_add_user(bob);
+
+    char message[256];
+    int success_count = 0;
+    int total_count = 100;
+
+    time_t start_time = time(NULL);
+
+    for (int i = 0; i < total_count; i++) {
+        snprintf(message, sizeof(message),
+                 "Stress test message #%d: Quantum-safe hybrid crypto with ML-KEM!",
+                 i + 1);
+
+        size_t msg_len = strlen(message) + 1;
+
+        unsigned char *packet = malloc(MESH_TEST_BUFFER_SIZE);
+        unsigned char *decrypted = malloc(MESH_TEST_BUFFER_SIZE);
+
+        if (!packet || !decrypted) {
+            if (packet) free(packet);
+            if (decrypted) free(decrypted);
+            continue;
+        }
+
+        size_t packet_len = MESH_TEST_BUFFER_SIZE;
+        size_t decrypted_len = MESH_TEST_BUFFER_SIZE;
+
+        if (mesh_user_send_hybrid(alice, "@bob",
+                                  (unsigned char*)message, msg_len,
+                                  packet, &packet_len) < 0) {
+            free(packet);
+            free(decrypted);
+            continue;
+        }
+
+        if (mesh_user_receive_hybrid(bob, packet, packet_len,
+                                     decrypted, &decrypted_len) < 0) {
+            free(packet);
+            free(decrypted);
+            continue;
+        }
+
+        if (strcmp((char*)decrypted, message) == 0) {
+            success_count++;
+        }
+
+        free(packet);
+        free(decrypted);
+
+        if ((i + 1) % 10 == 0) {
+            printf("  Progress: %d/%d messages processed\n", i + 1, total_count);
+        }
+    }
+
+    time_t end_time = time(NULL);
+    double elapsed = difftime(end_time, start_time);
+
+    // Очистка через реестр
+    mesh_registry_cleanup();
+
+    printf("\n📊 Stress test results:\n");
+    printf("   Total messages: %d\n", total_count);
+    printf("   Successful: %d\n", success_count);
+    printf("   Success rate: %.1f%%\n", (double)success_count / total_count * 100);
+    printf("   Time: %.2f seconds\n", elapsed);
+    printf("   Throughput: %.1f msg/sec\n", total_count / elapsed);
+
+    if (success_count == total_count) {
+        printf("✅ All messages processed successfully!\n");
+        return 0;
+    } else {
+        printf("⚠️ Some messages failed!\n");
+        return 1;
+    }
+}
+
+// ============================================================================
+// Функция теста подключения к MQTT (ОБНОВЛЕНА)
+// ============================================================================
+
+int test_mqtt_connection(const mesh_mqtt_config_t *config) {
+    printf("\n🔌 Testing MQTT connection...\n");
+    printf("  Broker:     %s\n", config->broker);
+    printf("  Host:       %s\n", config->host);
+    printf("  Port:       %d\n", config->port);
+    printf("  Username:   %s\n", config->username);
+    printf("  Password:   %s\n", config->password[0] ? "********" : "(empty)");
+    printf("  TLS:        %s\n", config->use_tls ? "Enabled" : "Disabled");
+    printf("  Client ID:  %s\n", config->client_id[0] ? config->client_id : "(auto)");
+    printf("  Topic root: %s\n", config->topic_root);
+    printf("  City code:  %s\n", config->city_code);
+    printf("  Subscribe:  %s/#\n", config->topic_root);
+    printf("\n");
+
+    // Проверка конфигурации перед инициализацией
+    if (!mesh_mqtt_config_valid(config)) {
+        printf("❌ Invalid configuration!\n");
+        return -1;
+    }
+
+    // Инициализация
+    printf("⏳ Initializing MQTT client...\n");
+    if (mesh_mqtt_init(config) < 0) {
+        printf("❌ Failed to initialize MQTT\n");
+        return -1;
+    }
+    printf("✅ MQTT client initialized\n");
+
+    // Подключение с таймаутом
+    printf("⏳ Connecting to broker...\n");
+    int rc = mesh_mqtt_connect();
+
+    if (rc < 0) {
+        printf("❌ Connection failed with code: %d\n", rc);
+        const mesh_mqtt_stats_t *stats = mesh_mqtt_get_stats();
+        if (stats->last_error_code) {
+            printf("   Error: [%d] %s\n", stats->last_error_code, stats->last_error_msg);
+        }
+        mesh_mqtt_cleanup();
+        return -1;
+    }
+
+    printf("✅ Connection successful!\n");
+
+    // Проверка подключения
+    if (mesh_mqtt_is_connected()) {
+        printf("✅ Client is connected\n");
+
+        const mesh_mqtt_stats_t *stats = mesh_mqtt_get_stats();
+        printf("   Client ID: %s\n", config->client_id);
+        printf("   Connected at: %s", ctime(&stats->connected_at));
+
+        // Подписка на топики
+        printf("\n📡 Subscribing to topics...\n");
+        printf("   Topic root: %s\n", config->topic_root);
+        printf("   Subscribe:  %s/#\n", config->topic_root);
+
+        // Подписываемся на все топики города
+        int subs = mesh_mqtt_subscribe_all();
+        printf("   Subscribed to %d topics\n", subs);
+
+        // Дополнительная подписка на специфические топики
+        char city_all[256];
+        snprintf(city_all, sizeof(city_all), "msh/RU/%s/#", config->city_code);
+        printf("   Also subscribing to: %s\n", city_all);
+        mesh_mqtt_subscribe(city_all);
+
+        // Отправка тестового сообщения
+        printf("\n📤 Sending test message...\n");
+        char msg[128];
+        snprintf(msg, sizeof(msg), "Hello from MTProto-MQTT Gateway! Time: %ld",
+                 (long)time(NULL));
+        int send_rc = mesh_mqtt_send_to("broadcast", MESH_MSG_TYPE_PING,
+                                        msg, strlen(msg) + 1);
+        if (send_rc == 0) {
+            printf("   ✅ Message sent: %s\n", msg);
+        } else {
+            printf("   ❌ Failed to send message (code: %d)\n", send_rc);
+        }
+
+        printf("\n📊 Connection test complete!\n");
+        mesh_mqtt_print_stats();
+
+        // Ожидаем 2 секунды для получения ответов
+        printf("\n⏳ Waiting 2 seconds for responses...\n");
+        sleep(2);
+
+        mesh_mqtt_cleanup();
+        return 0;
+    } else {
+        printf("❌ Client is not connected\n");
+        mesh_mqtt_cleanup();
+        return -1;
+    }
+}
+
+// ============================================================================
+// Проверка поддержки PQ алгоритмов
+// ============================================================================
+
+int check_pq_support(void) {
+    mesh_hybrid_init();
+    printf("PQ algorithms: %s\n",
+           mesh_hybrid_is_pq_supported() ? "✅ Supported" : "❌ Not supported");
+    if (mesh_hybrid_is_pq_supported()) {
+        printf("Version: %s\n", mesh_hybrid_version());
+        printf("Max packet size: %zu bytes\n", (size_t)MESH_HYBRID_PACKET_MAX_SIZE);
+        printf("Test buffer size: %zu bytes\n", (size_t)MESH_TEST_BUFFER_SIZE);
+    }
+    return 0;
+}
+
+// ============================================================================
+// Основная функция
+// ============================================================================
+
+void print_help(const char *progname) {
+    printf("Usage: %s [options]\n", progname);
+    printf("\nOneMesh Connection:\n");
+    printf("  Default: mqtt://mqtt.onemesh.ru:1883 (user: onemeshd, pass: onecat)\n");
+    printf("\nOptions:\n");
+    printf("  -b, --broker <url>     MQTT broker URL (mqtt://host:port)\n");
+    printf("  -H, --host <host>      MQTT host (default: mqtt.onemesh.ru)\n");
+    printf("  -p, --port <port>      MQTT port (default: 1883)\n");
+    printf("  -u, --user <user>      MQTT username (default: onemeshd)\n");
+    printf("  -P, --pass <pass>      MQTT password (default: onecat)\n");
+    printf("  -c, --city <code>      City code (default: SPB)\n");
+    printf("  -t, --topic <root>     Topic root (default: msh/RU/XXX)\n");
+    printf("  -s, --send <msg>       Send test message\n");
+    printf("  -r, --receiver <id>    Receiver ID for test message\n");
+    printf("  -v, --verbose          Enable verbose output\n");
+    printf("  --test-connect         Test MQTT connection only\n");
+    printf("  --check-pq             Check PQ algorithms support\n");
+    printf("  --test-crypto          Run crypto tests\n");
+    printf("  --test-hybrid          Run hybrid crypto tests\n");
+    printf("  --test-multi           Run multi-message tests\n");
+    printf("  --test-stress          Run stress tests (100 messages)\n");
+    printf("  --help                 Show this help\n");
+    printf("\nCity Codes:\n");
+    printf("  SPB  - Saint Petersburg\n");
+    printf("  MOS  - Moscow\n");
+    printf("  KRD  - Krasnodar\n");
+    printf("  EKB  - Yekaterinburg\n");
+    printf("  NSK  - Novosibirsk\n");
+    printf("  KZN  - Kazan\n");
+    printf("  VVO  - Vladivostok\n");
+    printf("  SOCH - Sochi\n");
+    printf("  CRM  - Crimea\n");
+    printf("\nTopic Hierarchy (msh/RU/):\n");
+    printf("  device/<DEVICE_ID>/   - Device topics\n");
+    printf("  group/<GROUP_ID>/     - Group topics\n");
+    printf("  subgroup/<GROUP>/<SUB> - Subgroup topics\n");
+    printf("  user/<USER_ID>/       - User topics\n");
+    printf("  broadcast/            - Broadcast messages\n");
+    printf("  telemetry/            - Telemetry data\n");
+    printf("  position/             - GPS positions\n");
+    printf("  stat/                 - Statistics\n");
+    printf("  alert/                - Alerts\n");
+    printf("  log/                  - Logs\n");
+    printf("  config/               - Configuration\n");
+    printf("\nMemory Management:\n");
+    printf("  All buffers allocated on HEAP (not stack)\n");
+    printf("  Automatic cleanup with free()\n");
+    printf("  Max packet size: %zu bytes\n", (size_t)MESH_HYBRID_PACKET_MAX_SIZE);
+}
+
+int main(int argc, char *argv[]) {
+    // ============================================================
+    // Увеличиваем размер стека
+    // ============================================================
+    increase_stack_size();
+
+    signal(SIGINT, signal_handler);
+    signal(SIGTERM, signal_handler);
+
+    // Проверяем специальные режимы
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--check-pq") == 0) {
+            return check_pq_support();
+        }
+        if (strcmp(argv[i], "--test-crypto") == 0) {
+            return crypto_basic();
+        }
+        if (strcmp(argv[i], "--test-hybrid") == 0) {
+            return test_hybrid_crypto();
+        }
+        if (strcmp(argv[i], "--test-multi") == 0) {
+            return test_hybrid_multi_message();
+        }
+        if (strcmp(argv[i], "--test-stress") == 0) {
+            return test_hybrid_stress();
+        }
+        if (strcmp(argv[i], "--test-connect") == 0) {
+            mesh_mqtt_config_t test_config = {0};
+            // Правильный формат для MQTT протокола
+            snprintf(test_config.broker, sizeof(test_config.broker),
+                     "mqtt://mqtt.onemesh.ru:1883");
+            snprintf(test_config.host, sizeof(test_config.host), "mqtt.onemesh.ru");
+            test_config.port = 1883;
+            snprintf(test_config.username, sizeof(test_config.username), "onemeshd");
+            snprintf(test_config.password, sizeof(test_config.password), "onecat");
+            snprintf(test_config.topic_root, sizeof(test_config.topic_root), "msh/RU/SPB");
+            snprintf(test_config.city_code, sizeof(test_config.city_code), "SPB");
+            snprintf(test_config.client_id, sizeof(test_config.client_id),
+                     "gateway-test-%d", getpid());
+            test_config.use_tls = 0;
+            test_config.keepalive = 60;
+            test_config.qos = 1;
+            test_config.retain = 0;
+            test_config.clean_session = 1;
+            test_config.connect_timeout = 10;
+            test_config.verbose = 1;
+            test_config.log_messages = 1;
+            test_config.log_packets = 0;
+            test_config.parse_protobuf = 1;
+
+            return test_mqtt_connection(&test_config);
+        }
+    }
+
+    static struct option long_options[] = {
+        {"broker", required_argument, 0, 'b'},
+        {"host", required_argument, 0, 'H'},
+        {"port", required_argument, 0, 'p'},
+        {"user", required_argument, 0, 'u'},
+        {"pass", required_argument, 0, 'P'},
+        {"city", required_argument, 0, 'c'},
+        {"topic", required_argument, 0, 't'},
+        {"send", required_argument, 0, 's'},
+        {"receiver", required_argument, 0, 'r'},
+        {"verbose", no_argument, 0, 'v'},
+        {"test-connect", no_argument, 0, 1000},
+        {"check-pq", no_argument, 0, 1001},
+        {"test-crypto", no_argument, 0, 1002},
+        {"test-hybrid", no_argument, 0, 1003},
+        {"test-multi", no_argument, 0, 1004},
+        {"test-stress", no_argument, 0, 1005},
+        {"help", no_argument, 0, 'h'},
+        {0, 0, 0, 0}
+    };
+
+    mesh_mqtt_config_t config = {0};
+
+    // ============================================================
+    // ПРАВИЛЬНЫЙ ФОРМАТ ДЛЯ MQTT: mqtt://host:port
+    // ============================================================
+    snprintf(config.broker, sizeof(config.broker), "mqtt://mqtt.onemesh.ru:1883");
+    snprintf(config.host, sizeof(config.host), "mqtt.onemesh.ru");
+    config.port = 1883;
+    snprintf(config.username, sizeof(config.username), "onemeshd");
+    snprintf(config.password, sizeof(config.password), "onecat");
+    snprintf(config.topic_root, sizeof(config.topic_root), "msh/RU/SPB");
+    snprintf(config.city_code, sizeof(config.city_code), "SPB");
+    snprintf(config.client_id, sizeof(config.client_id),
+             "gateway-%d-%ld", getpid(), (long)time(NULL));
+
+    config.use_tls = 0;
+    config.keepalive = 60;
+    config.qos = 1;
+    config.retain = 0;
+    config.clean_session = 1;
+    config.connect_timeout = 30;
+    config.max_reconnect = 5;
+    config.reconnect_delay = 5;
+    config.verbose = 0;
+    config.log_messages = 0;
+    config.log_packets = 0;
+    config.parse_protobuf = 1;
+
+    char *send_message = NULL;
+    char *receiver_id = NULL;
+    int verbose = 0;
+    int opt;
+
+    while ((opt = getopt_long(argc, argv, "b:H:p:u:P:c:t:s:r:vh",
+                              long_options, NULL)) != -1) {
+        switch (opt) {
+            case 'b': {
+                // Поддержка mqtt:// и tcp:// протоколов
+                char *proto_start = strstr(optarg, "://");
+                if (proto_start) {
+                    // Уже есть протокол - используем как есть
+                    snprintf(config.broker, sizeof(config.broker), "%s", optarg);
+                } else {
+                    // Нет протокола - добавляем mqtt://
+                    snprintf(config.broker, sizeof(config.broker), "mqtt://%s", optarg);
+                }
+
+                // Извлекаем host и port из broker URL
+                char *start = strstr(config.broker, "://");
+                if (start) {
+                    char *host_start = start + 3;
+                    char *colon = strchr(host_start, ':');
+                    if (colon) {
+                        int len = colon - host_start;
+                        if (len < (int)sizeof(config.host)) {
+                            strncpy(config.host, host_start, len);
+                            config.host[len] = '\0';
+                        }
+                        config.port = atoi(colon + 1);
+                    } else {
+                        strncpy(config.host, host_start, sizeof(config.host) - 1);
+                    }
+                }
+                break;
+            }
+            case 'H':
+                snprintf(config.host, sizeof(config.host), "%s", optarg);
+                // Обновляем broker с новым хостом
+                snprintf(config.broker, sizeof(config.broker), "mqtt://%s:%d",
+                         config.host, config.port);
+                break;
+            case 'p':
+                config.port = atoi(optarg);
+                snprintf(config.broker, sizeof(config.broker), "mqtt://%s:%d",
+                         config.host, config.port);
+                break;
+            case 'u':
+                snprintf(config.username, sizeof(config.username), "%s", optarg);
+                break;
+            case 'P':
+                snprintf(config.password, sizeof(config.password), "%s", optarg);
+                break;
+            case 'c':
+                snprintf(g_city_code, sizeof(g_city_code), "%s", optarg);
+                snprintf(config.topic_root, sizeof(config.topic_root), "msh/RU/%s", optarg);
+                snprintf(config.city_code, sizeof(config.city_code), "%s", optarg);
+                break;
+            case 't':
+                snprintf(config.topic_root, sizeof(config.topic_root), "%s", optarg);
+                break;
+            case 's':
+                send_message = optarg;
+                break;
+            case 'r':
+                receiver_id = optarg;
+                break;
+            case 'v':
+                verbose = 1;
+                config.verbose = 1;
+                break;
+            case 'h':
+            default:
+                print_help(argv[0]);
+                return (opt == 'h') ? 0 : 1;
+        }
+    }
+
+    printf("\n╔═══════════════════════════════════════════════════════════════╗\n");
+    printf("║     MTProto MQTT Gateway v2.0 (Hybrid Crypto)               ║\n");
+    printf("║     MTProto ↔ MQTT Mesh Gateway                             ║\n");
+    printf("║     ECDH + ML-KEM + ML-DSA (Quantum-Safe)                   ║\n");
+    printf("║     Memory: HEAP allocation + auto-cleanup                  ║\n");
+    printf("║     Topics: msh/RU/ (full hierarchy)                        ║\n");
+    printf("╚═══════════════════════════════════════════════════════════════╝\n");
+    printf("\nConfiguration:\n");
+    printf("  Broker:      %s\n", config.broker);
+    printf("  Host:        %s\n", config.host);
+    printf("  Port:        %d\n", config.port);
+    printf("  Username:    %s\n", config.username);
+    printf("  Password:    %s\n", config.password[0] ? "********" : "(empty)");
+    printf("  Client ID:   %s\n", config.client_id);
+    printf("  City:        %s\n", g_city_code);
+    printf("  Topic root:  %s\n", config.topic_root);
+    printf("  PQ Support:  %s\n", mesh_hybrid_is_pq_supported() ? "✅ Yes" : "❌ No");
+    printf("  Memory:      HEAP (max %zu bytes)\n", (size_t)MESH_TEST_BUFFER_SIZE);
+    printf("  Verbose:     %s\n", verbose ? "Yes" : "No");
+    printf("\n");
+
+    // ============================================================
+    // Инициализируем реестр
+    // ============================================================
+    if (mesh_registry_init(1024) < 0) {
+        fprintf(stderr, "❌ Failed to initialize user registry\n");
+        return 1;
+    }
+
+    // Настройка колбэков
+    mesh_mqtt_callbacks_t callbacks = {
+        .on_message = on_message_received,
+        .on_connect = on_connect,
+        .on_disconnect = on_disconnect,
+        .on_error = on_error,
+        .on_packet_sent = on_packet_sent,
+        .on_packet_received = on_packet_received,
+        .on_protobuf_message = on_protobuf_message
+    };
+    mesh_mqtt_set_callbacks(&callbacks);
+
+    // Инициализация MQTT
+    printf("📡 Initializing MQTT...\n");
+    if (mesh_mqtt_init(&config) < 0) {
+        fprintf(stderr, "❌ Failed to initialize MQTT\n");
+        mesh_registry_cleanup();
+        return 1;
+    }
+
+    // Подключение
+    printf("📡 Connecting to MQTT broker...\n");
+    if (mesh_mqtt_connect() < 0) {
+        fprintf(stderr, "❌ Failed to connect\n");
+        mesh_mqtt_cleanup();
+        mesh_registry_cleanup();
+        return 1;
+    }
+
+    // Отправка тестового сообщения
+    if (send_message) {
+        const char *target = receiver_id ? receiver_id : "broadcast";
+        printf("📤 Sending test message to %s: '%s'\n", target, send_message);
+
+        // Используем правильный топик для отправки
+        char topic[256];
+        if (strcmp(target, "broadcast") == 0) {
+            snprintf(topic, sizeof(topic), "%s/broadcast", config.topic_root);
+        } else if (strchr(target, '/') != NULL) {
+            snprintf(topic, sizeof(topic), "%s", target);
+        } else {
+            snprintf(topic, sizeof(topic), "%s/device/%s/inbox", config.topic_root, target);
+        }
+
+        mesh_mqtt_send_data(topic, send_message, strlen(send_message) + 1);
+    }
+
+    printf("\n📡 Listening for messages on: %s/#\n", config.topic_root);
+    printf("   (Press Ctrl+C to exit)\n\n");
+
+    time_t last_stats = 0;
+    while (g_running) {
+        sleep(1);
+
+        time_t now = time(NULL);
+        if (now - last_stats > 60) {
+            mesh_mqtt_print_stats();
+            last_stats = now;
+        }
+    }
+
+    // ============================================================
+    // Очистка ресурсов
+    // ============================================================
+    mesh_mqtt_cleanup();
+    mesh_registry_cleanup();
+    mesh_hybrid_cleanup();
+    printf("✅ Done.\n");
+
+    return 0;
+}

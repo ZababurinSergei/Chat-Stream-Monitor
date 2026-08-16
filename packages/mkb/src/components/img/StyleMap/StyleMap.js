@@ -1,0 +1,30 @@
+import React from 'react';
+import './StyleMap.style.css';
+
+function StyleMap({onClick, className}) {
+	className = (className) ? className : {}
+
+	return (
+		<div
+			onClick={onClick}
+			className={`style-map-img__wrapper ${className['style-map-img__wrapper']}`}
+		>
+			<svg
+				width="24"
+				height="24"
+				viewBox="0 0 24 24"
+				fill="none"
+				xmlns="http://www.w3.org/2000/svg"
+			>
+				<path
+					fillRule="evenodd"
+					clipRule="evenodd"
+					d="M13 2H11C9.34315 2 8 3.34315 8 5V6C8 7.65685 9.34315 9 11 9V11H8C6.34315 11 5 12.3431 5 14V15C3.34315 15 2 16.3431 2 18V19C2 20.6569 3.34315 22 5 22H7C8.65685 22 10 20.6569 10 19V18C10 16.3431 8.65685 15 7 15V14C7 13.4477 7.44772 13 8 13H12H16C16.5523 13 17 13.4477 17 14V15C15.3431 15 14 16.3431 14 18V19C14 20.6569 15.3431 22 17 22H19C20.6569 22 22 20.6569 22 19V18C22 16.3431 20.6569 15 19 15V14C19 12.3431 17.6569 11 16 11H13V9C14.6569 9 16 7.65685 16 6V5C16 3.34315 14.6569 2 13 2ZM10 5C10 4.44772 10.4477 4 11 4H13C13.5523 4 14 4.44772 14 5V6C14 6.55228 13.5523 7 13 7H11C10.4477 7 10 6.55228 10 6V5ZM5 17C4.44772 17 4 17.4477 4 18V19C4 19.5523 4.44772 20 5 20H7C7.55228 20 8 19.5523 8 19V18C8 17.4477 7.55228 17 7 17H5ZM16 18C16 17.4477 16.4477 17 17 17H19C19.5523 17 20 17.4477 20 18V19C20 19.5523 19.5523 20 19 20H17C16.4477 20 16 19.5523 16 19V18Z"
+					fill="#6C8BC9"
+				/>
+			</svg>
+		</div>
+	);
+}
+
+export default StyleMap;

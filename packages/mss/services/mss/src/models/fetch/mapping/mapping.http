@@ -1,0 +1,118 @@
+### get one mapping
+POST http://127.0.0.1:3333/v1/mapping
+Content-Type: application/json
+
+{
+  "condition":{
+    "ids":[
+      "30fec85c-9be9-4c70-8d8c-e58ef74b9a5e"
+    ]
+  }
+}
+
+### get mapping list
+POST http://svc-fer-dev.helpms.ru:3333/v1/mapping/list
+
+
+### get mapping list
+POST http://svc-fer-dev.helpms.ru:3333/v1/mapping/list
+Content-Type: application/json
+
+{
+  "condition":{
+    "eventSnapshotIds":[
+      "ae77c263-cd4c-4560-a0ab-bab289bf430b"
+    ]
+  }
+}
+
+### count mapping list
+POST http://127.0.0.1:3333/v1/mapping/count
+Content-Type: application/json
+
+{
+  "condition":{
+    "eventSnapshotIds":[
+      "f3b39f37-77e5-4175-a36a-e479b1758f35"
+    ]
+  }
+}
+
+
+
+### create mapping
+### POST http://svc-fer-dev.helpms.ru:3333/v1/mapping/save
+POST http://127.0.0.1:3333/v1/mapping/save
+Content-Type: application/json
+
+{
+  "mapping": {
+    "eventSnapshotId": "a45ec933-cc2b-4fe7-a12b-1ba99f1a6a36",
+    "regionId": "451f532b-8637-42b1-a341-2f2b27f7e528",
+    "table": {
+      "sourceTableName": "mo",
+      "aliases": [
+        {
+          "sourceName": "parent_id",
+          "destinationName": "parent_oid",
+          "kind": 1,
+          "type": 1
+        },
+        {
+          "sourceName": "parent_name",
+          "destinationName": "parent_name",
+          "kind": 1,
+          "type": 1
+        },
+        {
+          "sourceName": "rmis_id",
+          "destinationName": "rmis_id",
+          "kind": 2,
+          "type": 1
+        },
+        {
+          "sourceName": "parent_id",
+          "destinationName": "parent_oid",
+          "kind": 2,
+          "type": 1
+        }
+      ]
+    }
+  }
+}
+
+
+### update mapping
+POST http://127.0.0.1:3333/v1/mapping/save
+Content-Type: application/json
+
+{
+  "mapping": {
+    "mappingId": "5f95bfff-af2e-4322-855a-c2c84788a8cd",
+    "table": {
+      "sourceTableName": "source-table",
+      "aliases": [
+        {
+          "sourceName": "special-name",
+          "destinationName": "schemaFieldName1",
+          "kind": 1,
+          "type": 1
+        },
+        {
+          "sourceName": "sourceTableColumnName",
+          "destinationName": "headerFieldName2",
+          "kind": 2,
+          "type": 3
+        }
+      ]
+    }
+  }
+}
+
+### delete one mapping
+POST http://127.0.0.1:3333/v1/mapping/delete
+Content-Type: application/json
+
+{
+  "mappingId": "5f95bfff-af2e-4322-855a-c2c84788a8cd"
+}

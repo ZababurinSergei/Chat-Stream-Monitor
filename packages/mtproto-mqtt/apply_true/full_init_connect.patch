@@ -1,0 +1,65 @@
+# Создаем исправление с полной инициализацией
+cat > /tmp/full_init_connect.patch << 'EOF'
+--- a/src/mesh-mqtt.c
++++ b/src/mesh-mqtt.c
+@@ -685,8 +685,11 @@
+         return -1;
+     }
+
+-    // 🔥 ИСПОЛЬЗУЕМ СТАНДАРТНЫЙ ИНИЦИАЛИЗАТОР
+-    MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
++    // 🔥 ПОЛНАЯ ИНИЦИАЛИЗАЦИЯ структуры
++    MQTTClient_connectOptions conn_opts;
++    memset(&conn_opts, 0, sizeof(conn_opts));
++    conn_opts.struct_id = "MQTC";
++    conn_opts.struct_version = 0;
+
+     // 🔥 Проверяем структуру
+     log_message("DEBUG", "conn_opts struct_id: %.4s, version: %d",
+@@ -694,20 +697,16 @@
+
+     // 🔥 Устанавливаем параметры
+     conn_opts.keepAliveInterval = g_config.keepalive;
+-    conn_opts.cleansession = g_config.clean_session ? 1 : 0;
++    conn_opts.cleansession = 1;
+     conn_opts.username = g_config.username;
+     conn_opts.password = g_config.password;
+     conn_opts.connectTimeout = g_config.connect_timeout;
+     conn_opts.retryInterval = g_config.reconnect_delay;
+
+-    // 🔥 Для совместимости со старыми версиями
+-    conn_opts.reliable = 0;
+-    conn_opts.will = NULL;
+-    conn_opts.ssl = NULL;
+-
+     log_message("INFO", "Connecting to %s as %s...",
+                 g_config.broker, g_config.username);
+
++    // 🔥 Устанавливаем статус
+     g_status = MESH_STATUS_CONNECTING;
+
+     // 🔥 Проверяем broker
+@@ -722,6 +721,10 @@
+                 conn_opts.username ? conn_opts.username : "(null)",
+                 conn_opts.password ? "***" : "(null)");
+
++    // 🔥 Проверяем, что g_client не NULL
++    if (!g_client) {
++        log_message("ERROR", "g_client is NULL!");
++        return -1;
++    }
++
+     // 🔥 САМО ПОДКЛЮЧЕНИЕ
+     int rc = MQTTClient_connect(g_client, &conn_opts);
+
+EOF
+
+# Применяем патч
+patch src/mesh-mqtt.c /tmp/full_init_connect.patch
+
+# Пересобираем
+make clean
+make
+
+# Тестируем
+./bin/mtproto-mqtt-gateway --test-connect

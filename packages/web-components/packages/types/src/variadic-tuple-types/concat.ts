@@ -1,0 +1,1 @@
+function concat<T, U>(arr1: T[], arr2: U[]): Array<T | U>;

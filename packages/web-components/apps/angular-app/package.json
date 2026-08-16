@@ -1,0 +1,53 @@
+{
+  "name": "@newkind/angular",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "ng": "ng",
+    "ng:new": "ng new",
+    "ng:mcp": "ng mcp",
+    "ng:generate": "ng generate",
+    "ng:build": "ng build",
+    "ng:serve": "ng serve",
+    "ng:test": "ng test",
+    "ng:e2e": "ng e2e",
+    "ng:lint": "ng lint",
+    "ng:extract-i18n": "ng extract-i18n",
+    "ng:analytics": "ng analytics",
+    "ng:cache": "ng cache",
+    "ng:config": "ng config",
+    "ng:deploy": "ng deploy",
+    "ng:doc": "ng doc",
+    "ng:update": "ng update",
+    "ng:version": "ng version",
+    "ng:component": "ng generate component",
+    "ng:directive": "ng generate directive",
+    "ng:pipe": "ng generate pipe",
+    "ng:service": "ng generate service",
+    "ng:class": "ng generate class",
+    "ng:guard": "ng generate guard",
+    "ng:interface": "ng generate interface",
+    "ng:enum": "ng generate enum",
+    "ng:module": "ng generate module",
+    "ng:resolver": "ng generate resolver",
+    "ng:application": "ng generate application",
+    "ng:library": "ng generate library"
+  },
+  "devDependencies": {
+    "@angular/cli": "^21.0.2",
+    "turbo": "latest",
+    "prettier": "^3.7.4",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=10.0.0"
+  },
+  "lint-staged": {
+    "*.{ts,js,json,scss,css,html,md}": [
+      "prettier --write"
+    ]
+  }
+}

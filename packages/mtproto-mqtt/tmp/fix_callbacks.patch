@@ -1,0 +1,21 @@
+--- src/mesh-mqtt.h
++++ src/mesh-mqtt.h
+@@ -234,14 +234,6 @@
+      */
+     void (*on_error)(int error_code, const char *message);
+
+-    /**
+-     * Вызывается после отправки пакета
+-     * @param packet Отправленный пакет
+-     */
+-    void (*on_packet_sent)(const mesh_packet_t *packet);
+-
+-    /**
+-     * Вызывается после получения пакета
+-     * @param packet Полученный пакет
+-     */
+-    void (*on_packet_received)(const mesh_packet_t *packet);
+-
+     /**
+      * Вызывается при переподключении
+      * @param attempt Номер попытки

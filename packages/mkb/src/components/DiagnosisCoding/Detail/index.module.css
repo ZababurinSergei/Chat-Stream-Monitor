@@ -1,0 +1,26 @@
+.wrapper {
+	font-family: 'Golos 11pt Regular 11x14';
+	font-style: normal;
+	font-weight: 400;
+	font-size: 9px;
+	line-height: 12px;
+	color: var(--blue-100per);
+	margin-top: 3px;
+	cursor: pointer;
+	/* position: relative; */
+}
+
+/* .closeField {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	opacity: 0.2;
+	z-index: 4;
+	background: var(--blue-50per);
+} */
+
+.insertWrapper {
+	position: relative;
+}

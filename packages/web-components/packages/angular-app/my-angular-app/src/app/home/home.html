@@ -1,0 +1,28 @@
+<section>
+    <form>
+        <input type="text" placeholder="Filter by city" #filter />
+        <button class="primary" type="button" (click)="filterResults(filter.value)">Search</button>
+    </form>
+</section>
+
+@if (isLoading()) {
+    <div class="loading-container">
+        <p>Загрузка данных...</p>
+        <div class="spinner"></div>
+    </div>
+} @else if (hasError()) {
+    <div class="error-container">
+        <p>Ошибка при загрузке данных. Пожалуйста, проверьте подключение и попробуйте снова.</p>
+        <button (click)="ngOnInit()">Повторить загрузку</button>
+    </div>
+} @else if (filteredLocationList.length === 0) {
+    <div class="no-data-container">
+        <p>Нет доступного жилья</p>
+    </div>
+} @else {
+    <section class="results">
+        @for(housingLocation of filteredLocationList; track housingLocation.id) {
+            <app-housing-location [housingLocation]="housingLocation" />
+        }
+    </section>
+}

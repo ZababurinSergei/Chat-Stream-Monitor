@@ -176,7 +176,6 @@ sudo ldconfig
 #### Автоматическая проверка
 
 ```bash
-
 ./rebuild.sh
 ```
 

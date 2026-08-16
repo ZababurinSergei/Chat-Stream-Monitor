@@ -1,0 +1,32 @@
+.input-search__wrapper-dis {
+	display: inline-flex;
+	border-radius: 4px;
+	padding: 14px 16px;
+	align-items: center;
+	outline: none;
+	background: var(--black-5per);
+	box-sizing: border-box;
+}
+
+.input-search-dis {
+	width: 357px;
+	height: 24px;
+	border: none;
+	font-family: 'Golos 14pt Regular 14x20';
+	font-weight: 400;
+	letter-spacing: -0.01em;
+	font-size: 14px;
+	outline: none;
+	background: var(--black-5per);
+}
+
+.input-search__icon-dis {
+	width: 15px;
+	height: 15px;
+	margin-right: 12px;
+	order: -1;
+}
+
+.input-search__icon-dis path{
+	fill: var(--black-15per); 	
+}

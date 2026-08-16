@@ -1,0 +1,38 @@
+<div class="search-box-container">
+    <div class="search-input-wrapper">
+        <span class="search-icon">🔍</span>
+        <input
+                type="text"
+                [placeholder]="placeholder()"
+                [(ngModel)]="searchQuery"
+                (ngModelChange)="onSearch()"
+                class="search-input"
+                [class.has-value]="searchQuery"
+        />
+
+        @if (searchQuery) {
+        <button
+          (click)="clearSearch()"
+          class="clear-button"
+          title="Очистить поиск"
+        >
+          ×
+        </button>
+        }
+
+        @if (showAdvancedLink()) {
+        <button
+          (click)="toggleAdvanced.emit()"
+          class="advanced-button"
+        >
+        {{ advancedLabel() }}
+        </button>
+        }
+    </div>
+
+    @if (searchQuery && resultsCount !== null) {
+    <div class="search-results-info">
+      Найдено: {{ resultsCount }}
+    </div>
+    }
+</div>

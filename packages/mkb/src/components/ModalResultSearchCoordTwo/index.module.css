@@ -1,0 +1,91 @@
+.mainWrapper {
+	width: 484px;
+	height: 285px;
+	padding: 8px 0 8px;
+	background: #ffffff;
+	box-shadow: 0px 2px 8px rgba(0, 31, 141, 0.14);
+	border-radius: 8px;
+  position: absolute;
+  top: 55px;
+  left: 0px;
+	z-index: 12;
+	overflow: auto;
+}
+
+.extendWrapper {
+	width: 416px;
+	height: 330px;
+	padding: 8px 0 8px;
+	background: #ffffff;
+	box-shadow: 0px 2px 8px rgba(0, 31, 141, 0.14);
+	border-radius: 8px;
+  position: absolute;
+  top:55px;
+  left: 0px;
+	z-index: 12;
+	overflow: auto;
+}
+
+.extendWrapper {
+	width: 416px;
+	height: 330px;
+	padding: 8px 0 8px;
+	background: #ffffff;
+	box-shadow: 0px 2px 8px rgba(0, 31, 141, 0.14);
+	border-radius: 8px;
+  position: absolute;
+  top:55px;
+  left: 0px;
+	z-index: 12;
+	overflow: auto;
+}
+
+.postcoordinationWrapper {
+	width: 430px;
+	height: 273px;
+	padding: 8px 0 8px;
+	background: #ffffff;
+	box-shadow: 0px 2px 3px rgba(0, 31, 141, 0.40);
+	border-radius: 4px;
+  /* position: absolute;
+  top:410px;
+  left: 0px;
+	z-index: 12; */
+	overflow: auto;
+}
+
+.wrapper {
+
+}
+
+.modalWrapper {
+	height: 100%;
+	width: 100%;
+}
+
+.modalWrapperHeader {
+	background-color: var(--white-100per);
+	height: 60px;
+	box-shadow: 0px 2px 8px rgba(0, 31, 141, 0.40);
+	border-radius: 4px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 0 9px 0;
+}
+
+.modalText {
+margin-left: 8px;
+}
+
+.crossDeleteWrapper {
+	display: flex;
+	position: relative;
+}
+.crossDeleteContainer {
+	display: flex;
+	position: absolute;
+	z-index: 40;
+	top: -15px;
+	left: -30px;
+}

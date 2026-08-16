@@ -1,0 +1,42 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "skipLibCheck": true,
+    "module": "ESNext",
+    "target": "ES2022",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noImplicitOverride": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "useUnknownInCatchVariables": true,
+    "outDir": "./dist",
+    "rootDir": ".",
+    "types": [
+      "node"
+    ],
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": true,
+    "resolveJsonModule": true
+  },
+  "include": [
+    "vite.config.ts",
+    "vite.config.*.ts",
+    "plugins/**/*.ts",
+    "config/**/*.ts"
+  ],
+  "exclude": [
+    "src/**/*",
+    "node_modules",
+    "dist"
+  ]
+}

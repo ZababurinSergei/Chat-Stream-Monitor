@@ -1,0 +1,11 @@
+@import url('./Button_main.style.css');
+@import url('./Button_second.style.css');
+@import url('./Button-load_main.style.css');
+@import url('./Button-load_second.style.css');
+@import url('./Button-delete.style.css');
+
+.buttons {
+display: flex;
+flex-wrap: wrap;
+margin-left: 50px;
+}

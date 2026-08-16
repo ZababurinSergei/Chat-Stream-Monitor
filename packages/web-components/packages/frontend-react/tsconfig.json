@@ -1,0 +1,94 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "allowJs": false,
+    "checkJs": false,
+    "strict": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noImplicitOverride": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "useUnknownInCatchVariables": true,
+    "isolatedModules": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": false,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "composite": true,
+    "incremental": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "~/*": [
+        "./src/*"
+      ],
+      "@frontend": [
+        "../frontend/src"
+      ],
+      "@frontend/*": [
+        "../frontend/src/*"
+      ],
+      "frontend/*": [
+        "../frontend/src/*"
+      ]
+    },
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "types": [
+      "vite/client"
+    ],
+    "esModuleInterop": true,
+    "noEmit": true,
+    "jsx": "preserve",
+    "preserveWatchOutput": true
+  },
+  "include": [
+    "src/**/*",
+    "../frontend/src/**/*",
+    "env.d.ts",
+    "src/**/*.vue",
+    "vite.config.ts",
+    "src/**/*.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "**/*.jsx"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "coverage",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "**/__tests__/**",
+    "**/__mocks__/**",
+    "**/*.min.js",
+    "../frontend/node_modules",
+    "../frontend/dist",
+    "../frontend/build",
+    "dist/**/*",
+    "**/dist/**/*"
+  ],
+  "references": [
+    {
+      "path": "../frontend"
+    }
+  ]
+}

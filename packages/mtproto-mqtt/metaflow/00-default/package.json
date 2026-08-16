@@ -1,0 +1,53 @@
+{
+  "name": "mtproto-mqtt-metaflow",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Metaflow workflow for MTProto MQTT Gateway with INTERFACE.md parsing and request.http validation",
+  "main": "metaflow-workflow.js",
+  "scripts": {
+    "start": "node ui-server.js",
+    "workflow": "node -e \"import('./metaflow-workflow.js').then(m => new m.MetaflowWorkflow().run())\"",
+    "show": "node -e \"import('./metaflow-workflow.js').then(m => new m.MetaflowWorkflow().show())\"",
+    "validate": "node run-workflow.js validate",
+    "dev": "nodemon ui-server.js",
+    "parse": "node -e \"import('./interface-parser.js').then(m => console.log(JSON.stringify(m.parseInterfaceFile('INTERFACE.md'), null, 2)))\"",
+    "test": "node -e \"import('./metaflow-workflow.js').then(m => new m.MetaflowWorkflow().initialize().then(() => console.log('✅ Workflow initialized')))\"",
+    "clean": "rm -rf .metaflow && echo '✅ Cleaned .metaflow directory'",
+    "build": "npm install && echo '✅ Dependencies installed'"
+  },
+  "keywords": [
+    "metaflow",
+    "mtproto",
+    "mqtt",
+    "workflow",
+    "interface",
+    "parser",
+    "validation",
+    "markdown",
+    "http"
+  ],
+  "author": "Sergei",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.18.1",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "markdown-wasm": "^1.2.0",
+    "node-html-parser": "^9.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/mtproto-mqtt.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/mtproto-mqtt/issues"
+  },
+  "homepage": "https://github.com/your-username/mtproto-mqtt#readme"
+}

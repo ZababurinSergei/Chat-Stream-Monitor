@@ -1,0 +1,3 @@
+### get all directories
+GET http://193.228.110.214/metamart-subscription-service/api/v1/directory
+Content-Type: application/json

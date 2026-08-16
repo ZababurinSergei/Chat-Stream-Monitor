@@ -1,0 +1,61 @@
+{
+  "name": "tsgen",
+  "timestamp": "2025-11-30T16:01:01.862Z",
+  "files": {
+    "esm": "tsgen.mjs"
+  },
+  "build": {
+    "tool": "esbuild",
+    "target": "node18",
+    "format": [
+      "esm"
+    ],
+    "minify": true,
+    "treeShaking": true,
+    "onlyMjs": true,
+    "virtualCss": false
+  },
+  "externalDependencies": [
+    "fs",
+    "path",
+    "os",
+    "child_process",
+    "crypto",
+    "http",
+    "https",
+    "net",
+    "dns",
+    "url",
+    "util",
+    "stream",
+    "buffer",
+    "events",
+    "module",
+    "assert",
+    "querystring",
+    "zlib",
+    "tls",
+    "cluster",
+    "vm",
+    "perf_hooks",
+    "readline",
+    "repl",
+    "timers",
+    "string_decoder",
+    "node:fs",
+    "node:path",
+    "node:os",
+    "node:child_process",
+    "node:crypto",
+    "node:http",
+    "node:https",
+    "node:net",
+    "node:dns",
+    "node:url",
+    "node:util",
+    "node:stream",
+    "node:buffer",
+    "node:events"
+  ],
+  "node": true
+}

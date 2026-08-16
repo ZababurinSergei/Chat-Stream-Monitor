@@ -1,0 +1,266 @@
+<div class="filter-container">
+    <div class="filter-header">
+        <h3 class="filter-title">Фильтрация теплиц</h3>
+        <div class="filter-summary">
+          <span class="summary-text" *ngIf="activeFiltersCount() > 0">
+            Применено фильтров: {{ activeFiltersCount() }}
+          </span>
+            <span class="summary-text" *ngIf="activeFiltersCount() === 0">
+            Все фильтры сброшены
+          </span>
+        </div>
+    </div>
+
+    <div class="filter-body">
+        <div class="filter-section main-search">
+            <label for="searchText" class="filter-label">
+                <span class="label-icon">🔍</span>
+                Поиск по теплицам
+            </label>
+            <input
+                    id="searchText"
+                    type="text"
+                    [(ngModel)]="filterModel.searchText"
+                    (ngModelChange)="onFilterChange('searchText')"
+                    placeholder="Введите название, ID теплицы или регион..."
+                    class="search-input"
+                    aria-label="Поиск теплиц"
+            />
+            <div class="hint-text">Ищет по названию, ID теплицы и региону</div>
+        </div>
+
+        <div class="filter-row">
+            <div class="filter-section">
+                <label for="statusFilter" class="filter-label">
+                    <span class="label-icon">📊</span>
+                    Статус теплицы
+                </label>
+                <div class="status-options">
+                    <label class="status-option" *ngFor="let status of statusOptions">
+                        <input
+                                type="radio"
+                                name="status"
+                                [value]="status.value"
+                                [checked]="filterModel.status === status.value"
+                                (change)="onStatusChange(status.value)"
+                                class="status-radio"
+                        />
+                        <span class="status-indicator" [class]="status.value">
+                  {{ status.icon }}
+                </span>
+                        <span class="status-label">{{ status.label }}</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <label for="regionFilter" class="filter-label">
+                    <span class="label-icon">📍</span>
+                    Регион
+                </label>
+                <select
+                        id="regionFilter"
+                        [(ngModel)]="filterModel.regionId"
+                        (ngModelChange)="onFilterChange('regionId')"
+                        class="region-select"
+                        aria-label="Выбор региона"
+                >
+                    <option value="all" class="region-option">Все регионы</option>
+                    <option
+                            *ngFor="let region of regions()"
+                            [value]="region.id"
+                            class="region-option"
+                    >
+                        {{ region.name }} ({{ region.greenhouseCount }})
+                    </option>
+                </select>
+                <div class="hint-text">
+                    {{ getSelectedRegionName() }}
+                </div>
+            </div>
+        </div>
+
+        <div class="filter-row">
+            <div class="filter-section">
+                <label class="filter-label">
+                    <span class="label-icon">📅</span>
+                    Диапазон дат обновления
+                </label>
+                <div class="date-range-container">
+                    <div class="date-input-group">
+                        <label for="dateFrom" class="date-label">С:</label>
+                        <input
+                                id="dateFrom"
+                                type="date"
+                                [value]="getDateString(filterModel.dateRange.from)"
+                                (change)="onDateChange('from', $event)"
+                                class="date-input"
+                                [max]="getDateString(filterModel.dateRange.to || new Date())"
+                                aria-label="Дата начала"
+                        />
+                        <div class="date-display" *ngIf="filterModel.dateRange.from">
+                            {{ filterModel.dateRange.from | date : 'dd.MM.yyyy' }}
+                        </div>
+                    </div>
+
+                    <div class="date-separator">—</div>
+
+                    <div class="date-input-group">
+                        <label for="dateTo" class="date-label">По:</label>
+                        <input
+                                id="dateTo"
+                                type="date"
+                                [value]="getDateString(filterModel.dateRange.to)"
+                                (change)="onDateChange('to', $event)"
+                                class="date-input"
+                                [min]="getDateString(filterModel.dateRange.from)"
+                                [max]="getDateString(new Date())"
+                                aria-label="Дата окончания"
+                        />
+                        <div class="date-display" *ngIf="filterModel.dateRange.to">
+                            {{ filterModel.dateRange.to | date : 'dd.MM.yyyy' }}
+                        </div>
+                    </div>
+                </div>
+                <div class="hint-text">
+                    {{ getDateRangeHint() }}
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <label class="filter-label">
+                    <span class="label-icon">↕️</span>
+                    Сортировка
+                </label>
+                <div class="sort-options">
+                    <select
+                            [(ngModel)]="filterModel.sortBy"
+                            (ngModelChange)="onFilterChange('sortBy')"
+                            class="sort-select"
+                            aria-label="Поле для сортировки"
+                    >
+                        <option value="name">По названию</option>
+                        <option value="id">По ID</option>
+                        <option value="status">По статусу</option>
+                        <option value="lastUpdated">По дате обновления</option>
+                    </select>
+
+                    <div class="sort-direction">
+                        <button
+                                type="button"
+                                class="direction-btn"
+                                [class.active]="filterModel.sortDirection === 'asc'"
+                                (click)="toggleSortDirection()"
+                                [title]="filterModel.sortDirection === 'asc' ? 'По возрастанию' : 'По убыванию'"
+                                aria-label="Направление сортировки"
+                        >
+                            {{ filterModel.sortDirection === 'asc' ? '↑' : '↓' }}
+                        </button>
+                    </div>
+                </div>
+                <div class="hint-text">
+                    Сортировка: {{ getSortLabel() }}
+                </div>
+            </div>
+        </div>
+
+        <div class="preset-filters">
+            <div class="preset-label">Быстрые фильтры:</div>
+            <div class="preset-buttons">
+                <button
+                        type="button"
+                        class="preset-btn"
+                        [class.active]="isPresetActive('today')"
+                        (click)="applyPresetFilter('today')"
+                >
+                    Сегодня
+                </button>
+                <button
+                        type="button"
+                        class="preset-btn"
+                        [class.active]="isPresetActive('warning')"
+                        (click)="applyPresetFilter('warning')"
+                >
+                    С предупреждениями
+                </button>
+                <button
+                        type="button"
+                        class="preset-btn"
+                        [class.active]="isPresetActive('emergency')"
+                        (click)="applyPresetFilter('emergency')"
+                >
+                    Аварийные
+                </button>
+                <button
+                        type="button"
+                        class="preset-btn"
+                        [class.active]="isPresetActive('week')"
+                        (click)="applyPresetFilter('week')"
+                >
+                    За неделю
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="filter-footer">
+        <div class="filter-actions">
+            <button
+                    type="button"
+                    class="filter-action-btn secondary"
+                    (click)="resetFilters()"
+                    [disabled]="activeFiltersCount() === 0"
+                    aria-label="Сбросить все фильтры"
+            >
+                <span class="btn-icon">🗑️</span>
+                Сбросить все
+            </button>
+
+            <button
+                    type="button"
+                    class="filter-action-btn primary"
+                    (click)="applyFilters()"
+                    aria-label="Применить фильтры"
+            >
+                <span class="btn-icon">✅</span>
+                Применить фильтры
+            </button>
+
+            <button
+                    type="button"
+                    class="filter-action-btn outline"
+                    (click)="exportFilteredData()"
+                    [disabled]="activeFiltersCount() === 0"
+                    aria-label="Экспорт результатов"
+            >
+                <span class="btn-icon">📥</span>
+                Экспорт
+            </button>
+        </div>
+
+        <div class="filter-stats" *ngIf="filterStats()">
+            <div class="stat-item">
+                <span class="stat-label">Найдено:</span>
+                <span class="stat-value">{{ filterStats()?.found || 0 }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Показано:</span>
+                <span class="stat-value">{{ filterStats()?.visible || 0 }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="active-filters-badge" *ngIf="activeFiltersCount() > 0">
+        <div class="badge-content">
+            <span class="badge-count">{{ activeFiltersCount() }}</span>
+            <span class="badge-text">активных фильтров</span>
+            <button
+                    class="badge-close"
+                    (click)="resetFilters()"
+                    aria-label="Очистить фильтры"
+            >
+                ×
+            </button>
+        </div>
+    </div>
+</div>

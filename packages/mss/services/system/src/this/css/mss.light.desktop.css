@@ -1,0 +1,56 @@
+/*https://codepen.io/sarazond/pen/LYGbwj*/
+body {
+    box-sizing: border-box;
+    background: var(--Background, #FAFCFF);
+    padding: 0;
+    overflow: auto;
+    display: flex;
+}
+
+.service, .rules {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.service > pre {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    font-size: 1.41vw;
+    color: #f7eded;
+    line-height: 1.3vw;
+    letter-spacing: 0.21vw;
+}
+
+.swagger-ui {
+    margin-top: 32px;
+}
+
+
+*::-webkit-scrollbar {
+    display: block;
+    width: 0.4dvw;
+}
+
+*::-webkit-scrollbar-button {
+    display: none;
+}
+
+*::-webkit-scrollbar-track {
+    background-color: #00000000;
+}
+
+*::-webkit-scrollbar-track-piece {
+    background-color: #00000000;
+}
+
+*::-webkit-scrollbar-thumb {
+    background: var(--Scroll, rgba(147, 152, 155, 0.79));
+    border-radius: 0.2vw;
+    width: 1vw;
+}

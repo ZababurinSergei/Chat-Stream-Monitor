@@ -1,0 +1,31 @@
+:host {
+    height: -moz-max-content;
+    height: max-content;
+    align-self: center;
+    width: -moz-fit-content;
+    width: auto;
+    margin: 0;
+    cursor: pointer;
+}
+
+.container {
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    background: white;
+    width: 7.34vw;
+    height: 1.72vw;
+
+}
+
+.title {
+    font-size: 0.73vw;
+    line-height: 0.83vw;
+    font-family: 'Raleway', serif;
+    font-weight: 800;
+    font-style: normal;
+    text-transform: uppercase;
+    mix-blend-mode: multiply;
+    color: black;
+}

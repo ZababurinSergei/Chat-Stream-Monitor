@@ -1,0 +1,101 @@
+### get all manifests
+### POST http://127.0.0.1:3333/v1/manifest/list
+POST http://svc-fer-dev.helpms.ru:3333/v1/manifest/list
+
+### get all manifests
+POST http://127.0.0.1:3333/v1/manifest/list
+Content-Type: application/json
+
+### get all manifests
+POST http://127.0.0.1:3333/v1/manifest/list
+Content-Type: application/json
+
+{
+  "condition": {
+    "eventSnapshotIds": [
+      "1ca4c137-cec4-4404-8de9-4b5c02437342"
+    ]
+  }
+}
+
+### get manifests
+POST http://127.0.0.1:3333/v1/manifest/list
+Content-Type: application/json
+
+{
+  "condition": {
+    "eventIds": [
+      "2cd1eebb-2c8e-40bf-a929-f0dfe9c74774"
+    ]
+  }
+}
+
+### count all manifests
+POST http://127.0.0.1:3333/v1/manifest/count
+Content-Type: application/json
+
+
+### count manifests with condition
+POST http://127.0.0.1:3333/v1/manifest/count
+Content-Type: application/json
+
+{
+  "condition": {
+    "eventIds": [
+      "2cd1eebb-2c8e-40bf-a929-f0dfe9c74774"
+    ]
+  }
+}
+
+### save new manifest
+### POST http://svc-fer-dev.helpms.ru:3333/v1/manifest/save
+POST http://127.0.0.1:3333/v1/manifest/save
+Content-Type: application/json
+
+{
+  "manifest": {
+    "eventSnapshotId": "a45ec933-cc2b-4fe7-a12b-1ba99f1a6a36",
+    "regionId": "451f532b-8637-42b1-a341-2f2b27f7e528",
+    "version": "1.0.0",
+    "ruleSnapshotIds": [
+      "0a9b7612-f6d2-4c97-bf9e-53dcd67a958b",
+      "bbcef46e-6b1f-45a1-971a-4cbc003ad5b7"
+    ],
+    "description": "mo rules"
+  }
+}
+### save new manifest
+POST http://127.0.0.1:3333/v1/manifest/save
+Content-Type: application/json
+
+{
+  "manifest": {
+    "eventSnapshotId": "1ca4c137-cec4-4404-8de9-4b5c02437342",
+    "regionId": "b15cdc36-22e5-4d37-bdff-350646e1dd3a",
+    "ruleSnapshotIds": [
+      "108df77d-9b0f-4d51-af45-3a7d835e12e8"
+    ],
+    "description": "test"
+  }
+}
+
+
+### get one manifest
+POST http://127.0.0.1:3333/v1/manifest
+Content-Type: application/json
+
+{
+  "condition": {
+    "snapshotIds": [
+      "8db1da8c-5a4c-4ff9-806a-b744fe98ab11"
+    ]
+  }
+}
+
+### get verification results
+POST http://127.0.0.1:3333/v1/manifest/verify/results
+Content-Type: application/json
+
+{
+  "snapshotId": "f75cd21c-73b5-430b-adfa-5e24f84e2edd"
+}

@@ -1,0 +1,213 @@
+:host {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    min-height: 56px;
+}
+
+button {
+    border: none;
+    margin: 0;
+    padding: 0;
+    width: auto;
+    overflow: visible;
+
+    background: transparent;
+    color: inherit;
+    font: inherit;
+
+    /* Normalize `line-height`. Cannot be changed from `normal` in Firefox 4+. */
+    line-height: normal;
+
+    /* Corrects font smoothing for webkit */
+    -webkit-font-smoothing: inherit;
+    -moz-osx-font-smoothing: inherit;
+
+    /* Corrects inability to style clickable `input` types in iOS */
+    -webkit-appearance: none;
+}
+
+/* Remove excess padding and border in Firefox 4+ */
+button::-moz-focus-inner {
+    border: 0;
+    padding: 0;
+}
+
+.button {
+    border-radius: 8px;
+    border: 2px solid var(--Gosblue, #0D4CD3);
+    background: var(--White, #FFF);
+
+    display: flex;
+    padding: 14px 40px;
+    justify-content: center;
+    align-items: center;
+
+    color: var(--Gosblue, #0D4CD3);
+    text-align: center;
+
+    /* Plain Text */
+    font-family: 'Lato', serif;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 150%;
+    cursor: pointer;
+}
+
+svg {
+    /*width: 100%;*/
+    /*height: 100%;*/
+}
+
+.pagination, .container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+.pagination_wrapper {
+    min-width: 420px;
+    display: flex;
+}
+
+.container {
+    display: flex;
+    flex-direction: row;
+    gap: 24px;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    min-width: 904px;
+    height: 56px;
+}
+
+.first, .previous, .next, .last, .item {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 32px;
+    height: 100%;
+    cursor: pointer;
+    align-self: center;
+    text-align: center;
+}
+
+.item {
+    justify-content: center;
+    display: flex;
+    flex-direction: column;
+    width: min-content;
+    height: 32px;
+    min-width: 32px;
+}
+
+.item.active {
+    /*height: 32px;*/
+    width: min-content;
+    min-width: 32px;
+    padding:  4px;
+}
+
+.close {
+    opacity: 0.5;
+    color: rgb(110, 143, 176);
+    align-self: center;
+}
+
+.active {
+    display: flex;
+    width: 32px;
+    height: 32px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    background: var(--Active-item, #1D5DEB);
+
+    color: var(--White, #FFF);
+    text-align: center;
+    font-family: 'Lato', serif;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 142.857%;
+}
+
+
+.pagination_info {
+    display: flex;
+    flex-direction: row;
+    /*width: 100%;*/
+    justify-content: start;
+    height: 100%;
+    /*gap: 32px;*/
+    min-width: 240px;
+}
+
+.container_info_all {
+    align-self: center;
+    display: flex;
+    gap: 8px;
+    min-width: 80px;
+}
+
+.container_info {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    align-items: center;
+    width: min-content;
+}
+
+.container_info_all {
+    width: min-content;
+}
+
+.container_limit {
+    padding: 0;
+    height: 32px;
+    background: transparent;
+}
+
+.title {
+    color: var(--Summer-night, #0B1F33);
+    font-family: 'Lato', serif;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 150%;
+}
+
+.container_info_all div{
+    color: var(--Summer-night, #0B1F33);
+    text-align: center;
+    font-family: 'Lato', serif;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 142.857%;
+}
+
+.container_info_all div.limit {
+    text-align: end;
+    min-width: 46px;
+}
+
+.container_info_all div.total {
+    text-align: start;
+    min-width: 46px;
+}
+
+.container-data {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    gap: 8px;
+    min-height: 32px;
+}

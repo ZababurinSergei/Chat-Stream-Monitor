@@ -1,0 +1,75 @@
+flowchart
+    subgraph Root[Компонент таблицы]
+        AiDataTable[AiDataTable.vue]
+    end
+
+    subgraph Toolbar[Тулбар]
+        AiToolbar[AiToolbar.vue]
+        useToolbarConfig[useToolbarConfig.ts]
+    end
+
+    subgraph Footer[Футер]
+        AiFooter[AiFooter.vue]
+    end
+
+    subgraph TableState[Состояние таблицы]
+        useTableState[useTableState.ts]
+    end
+
+    subgraph DataState[Данные]
+        useDataState[useDataState.ts]
+        
+        subgraph DataStore[Хранение данных]
+            useDataStore[useDataStore.ts]
+        end 
+
+        subgraph ChangesTracker[Хранение изменений данных]
+            useChangesTracker[useChangesTracker.ts]
+        end 
+    end
+
+    subgraph VirtualScroll[Виртуализация]
+        useVirtualScroll[useVirtualScroll.ts]
+    end
+
+    subgraph Columns[Настройка колонок]
+        useColumnsConfig[useColumnsConfig.ts]
+    end
+
+    subgraph Cell[Компонент ячейки]
+        AiCell[AiCell.vue]
+    end
+
+    subgraph Field[Компонент поля]
+        AiField[AiField.vue]
+        useFieldComponent[useFieldComponent.ts]
+    end
+
+    subgraph FilterState[Состояние фильтра]
+        useFilterState[useFilterState.ts]
+    end
+
+    subgraph HeaderCellComponent[Компонент заголовка]
+        HeaderCell[HeaderCell.vue]
+    end
+
+    AiDataTable --> AiFooter
+    AiDataTable --> useTableState
+    AiDataTable --> useDataState
+    AiDataTable --> useVirtualScroll
+    AiDataTable --> useColumnsConfig
+
+    useDataState --> useDataStore
+    useDataState --> useChangesTracker
+
+    AiDataTable --> AiToolbar
+    AiToolbar --> useToolbarConfig
+
+    useColumnsConfig --> AiCell
+    useColumnsConfig --> useFilterState
+    useColumnsConfig --> HeaderCellComponent
+
+  
+    AiCell --> AiField
+
+    AiField --> useFieldComponent

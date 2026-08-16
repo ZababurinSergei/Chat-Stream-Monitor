@@ -1,0 +1,35 @@
+export const ColorTokens = {
+    WHITE: '#FFFFFF',
+
+    DARK_900: '#031425',
+    DARK_700: '#354351',
+
+    BLUE_900: '#0D457F',
+    BLUE_800: '#1C5EA2',
+    BLUE_700: '#286EB6',
+    BLUE_600: '#699ACC',
+    BLUE_500: '#92AFCD',
+
+    LIGHT_BLUE_900: '#AACCED',
+    LIGHT_BLUE_800: '#C1DFFF',
+    LIGHT_BLUE_700: '#CBE1F7',
+    LIGHT_BLUE_100: '#F6FAFE',
+
+    GRAY_900: '#8F8F8F',
+    GRAY_800: '#B3B8BD',
+    GRAY_700: '#C9C9C9',
+
+    LIGHT_GRAY_900: '#C9D1DA',
+    LIGHT_GRAY_800: '#E0E0E0',
+    LIGHT_GRAY_700: '#EDEDED',
+    LIGHT_GRAY_100: '#F5F5F5',
+
+    GREEN_900: '#209E00',
+    GREEN_200: '#DAECC5',
+
+    RED_900: '#E01D20',
+    RED_500: '#FE676A',
+    RED_100: '#F9D2D2',
+
+    YELLOW: '#FFE018',
+};

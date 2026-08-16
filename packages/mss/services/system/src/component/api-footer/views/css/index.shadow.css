@@ -1,0 +1,14 @@
+.footer_content {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+p, a {
+    margin: 0px;
+    padding: 0px;
+    color: rgba(var(--colorT), var(--colorT), var(--colorT), 0.5);
+    text-decoration: none;
+    font-size: 1.8rem;
+    transform: translateX(10rem);
+}

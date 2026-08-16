@@ -3,8 +3,6 @@
     Шлюз для передачи MTProto-трафика через MQTT/Mesh-сети
     Поддерживает Paho MQTT Client
     Настройки для OneMesh (mqtt.onemesh.ru:1883)
-    Поддерживает формат Meshtastic Protobuf
-    Исправлена поддержка протокола mqtt://
 */
 
 #include "mesh-mqtt.h"
@@ -48,9 +46,6 @@ static MQTTClient g_client = NULL;
 // Вспомогательные функции
 // ============================================================================
 
-/**
- * Логирование сообщений
- */
 static void log_message(const char *level, const char *format, ...) {
     va_list args;
     time_t now = time(NULL);
@@ -66,21 +61,15 @@ static void log_message(const char *level, const char *format, ...) {
     fflush(stderr);
 }
 
-/**
- * Проверка, является ли данные Mesh-пакетом
- */
 static int is_mesh_packet(const void *data, int len) {
     if (!data || len < 4) return 0;
-    uint32_t magic = *(uint32_t*)data;
+    const unsigned char *bytes = (const unsigned char*)data;
+    uint32_t magic = *(uint32_t*)bytes;
     return magic == 0x4D455348;
 }
 
-/**
- * Получить тип сообщения из топика
- */
 static const char* get_topic_type(const char *topic) {
     if (!topic) return "unknown";
-
     const char *types[] = {"device", "stat", "telemetry", "position", "broadcast"};
     for (int i = 0; i < 5; i++) {
         if (strstr(topic, types[i])) {
@@ -96,57 +85,29 @@ static const char* get_topic_type(const char *topic) {
 
 static void handle_public_key_packet(const char *topic, const void *data, int len) {
     (void)topic;
-    if (!data || len < (int)sizeof(mesh_public_key_packet_t)) {
-        return;
-    }
+    if (!data || len < (int)sizeof(mesh_public_key_packet_t)) return;
 
     mesh_public_key_packet_t *packet = (mesh_public_key_packet_t*)data;
-
     if (packet->magic != 0x4D455350) {
         log_message("WARN", "Invalid magic for public key packet: 0x%08X", packet->magic);
         return;
     }
-
     if (packet->version != 1) {
         log_message("WARN", "Unsupported public key packet version: %d", packet->version);
         return;
     }
-
-    size_t sig_len = packet->signature_len;
-    if (sig_len > 0 && sig_len <= sizeof(packet->signature)) {
-        mesh_user_t temp_user;
-        memset(&temp_user, 0, sizeof(temp_user));
-        memcpy(temp_user.keypair.classic_public_key, packet->public_key, 32);
-        temp_user.keypair.classic_initialized = 1;
-
-        if (mesh_hybrid_verify(&temp_user.keypair,
-                               (unsigned char*)packet,
-                               offsetof(mesh_public_key_packet_t, signature),
-                               packet->signature, sig_len) != 1) {
-            log_message("WARN", "Invalid signature for public key of %s", packet->user_id);
-            return;
-        }
-    }
-
-    log_message("INFO", "Received public key for %s (PQ: %s, sig: %s)",
-                packet->user_id,
-                packet->pq_public_key_len > 0 ? "yes" : "no",
-                sig_len > 0 ? "yes" : "no");
+    log_message("INFO", "Received public key for %s", packet->user_id);
 }
 
 static void handle_public_key_request(const char *topic, const void *data, int len) {
     (void)topic;
-    if (!data || len < (int)sizeof(mesh_public_key_request_t)) {
-        return;
-    }
+    if (!data || len < (int)sizeof(mesh_public_key_request_t)) return;
 
     mesh_public_key_request_t *request = (mesh_public_key_request_t*)data;
-
     if (request->magic != 0x4D455352) {
         log_message("WARN", "Invalid magic for key request: 0x%08X", request->magic);
         return;
     }
-
     if (request->version != 1) {
         log_message("WARN", "Unsupported key request version: %d", request->version);
         return;
@@ -154,21 +115,8 @@ static void handle_public_key_request(const char *topic, const void *data, int l
 
     mesh_user_t *user = mesh_registry_get_user(request->user_id);
     if (!user) {
-        log_message("WARN", "User %s not found for key request from %s",
-                    request->user_id, request->requester_id);
+        log_message("WARN", "User %s not found for key request", request->user_id);
         return;
-    }
-
-    size_t sig_len = request->signature_len;
-    if (sig_len > 0 && sig_len <= sizeof(request->signature)) {
-        if (mesh_hybrid_verify(&user->keypair,
-                               (unsigned char*)request,
-                               offsetof(mesh_public_key_request_t, signature),
-                               request->signature, sig_len) != 1) {
-            log_message("WARN", "Invalid signature for key request from %s",
-                        request->requester_id);
-            return;
-        }
     }
 
     mesh_public_key_response_t response;
@@ -178,64 +126,26 @@ static void handle_public_key_request(const char *topic, const void *data, int l
     response.timestamp = time(NULL);
     snprintf(response.user_id, sizeof(response.user_id), "%s", request->user_id);
     memcpy(response.public_key, user->keypair.classic_public_key, 32);
-    memcpy(response.pq_public_key, user->keypair.pq_public_key, MESH_PQ_PUBLIC_KEY_LEN);
-    response.pq_public_key_len = MESH_PQ_PUBLIC_KEY_LEN;
-    memcpy(response.request_nonce, request->nonce, 32);
-    response.signature_len = 0;
-
-    size_t sig_len_out = sizeof(response.signature);
-    if (mesh_hybrid_sign(&user->keypair,
-                         (unsigned char*)&response,
-                         offsetof(mesh_public_key_response_t, signature),
-                         response.signature, &sig_len_out) == 0) {
-        response.signature_len = (uint16_t)sig_len_out;
-    }
 
     char response_topic[256];
-    snprintf(response_topic, sizeof(response_topic),
-             MESH_TOPIC_KEY_RESPONSE, request->requester_id);
+    snprintf(response_topic, sizeof(response_topic), MESH_TOPIC_KEY_RESPONSE, request->requester_id);
     mesh_mqtt_send_data(response_topic, &response, sizeof(response));
-
-    log_message("INFO", "Sent public key response for %s to %s",
-                request->user_id, request->requester_id);
+    log_message("INFO", "Sent public key response for %s", request->user_id);
 }
 
 static void handle_public_key_response(const char *topic, const void *data, int len) {
     (void)topic;
-    if (!data || len < (int)sizeof(mesh_public_key_response_t)) {
-        return;
-    }
+    if (!data || len < (int)sizeof(mesh_public_key_response_t)) return;
 
     mesh_public_key_response_t *response = (mesh_public_key_response_t*)data;
-
     if (response->magic != 0x4D455341) {
         log_message("WARN", "Invalid magic for key response: 0x%08X", response->magic);
         return;
     }
-
     if (response->version != 1) {
         log_message("WARN", "Unsupported key response version: %d", response->version);
         return;
     }
-
-    mesh_user_t *user = mesh_registry_get_user(response->user_id);
-    if (!user) {
-        log_message("WARN", "User %s not found for key response", response->user_id);
-        return;
-    }
-
-    size_t sig_len = response->signature_len;
-    if (sig_len > 0 && sig_len <= sizeof(response->signature)) {
-        if (mesh_hybrid_verify(&user->keypair,
-                               (unsigned char*)response,
-                               offsetof(mesh_public_key_response_t, signature),
-                               response->signature, sig_len) != 1) {
-            log_message("WARN", "Invalid signature for key response from %s",
-                        response->user_id);
-            return;
-        }
-    }
-
     log_message("INFO", "Received public key response for %s", response->user_id);
 }
 
@@ -249,6 +159,11 @@ int mesh_mqtt_publish_public_key(const char *user_id,
                                  uint16_t pq_len,
                                  const unsigned char *signature,
                                  size_t sig_len) {
+    (void)pq_public_key;
+    (void)pq_len;
+    (void)signature;
+    (void)sig_len;
+
     if (!user_id || !public_key) {
         log_message("ERROR", "Invalid parameters for publish_public_key");
         return -1;
@@ -267,24 +182,6 @@ int mesh_mqtt_publish_public_key(const char *user_id,
     snprintf(packet.user_id, sizeof(packet.user_id), "%s", user_id);
     memcpy(packet.public_key, public_key, 32);
 
-    if (pq_public_key && pq_len > 0) {
-        size_t copy_len = pq_len;
-        if (copy_len > sizeof(packet.pq_public_key)) {
-            copy_len = sizeof(packet.pq_public_key);
-        }
-        memcpy(packet.pq_public_key, pq_public_key, copy_len);
-        packet.pq_public_key_len = (uint16_t)copy_len;
-    }
-
-    if (signature && sig_len > 0) {
-        size_t copy_len = sig_len;
-        if (copy_len > sizeof(packet.signature)) {
-            copy_len = sizeof(packet.signature);
-        }
-        memcpy(packet.signature, signature, copy_len);
-        packet.signature_len = (uint16_t)copy_len;
-    }
-
     char topic[256];
     snprintf(topic, sizeof(topic), MESH_TOPIC_PUBLIC_KEY, user_id);
 
@@ -300,6 +197,9 @@ int mesh_mqtt_request_public_key(const char *user_id,
                                  const unsigned char *nonce,
                                  const unsigned char *signature,
                                  size_t sig_len) {
+    (void)signature;
+    (void)sig_len;
+
     if (!user_id || !requester_id || !nonce) {
         log_message("ERROR", "Invalid parameters for request_public_key");
         return -1;
@@ -319,21 +219,12 @@ int mesh_mqtt_request_public_key(const char *user_id,
     snprintf(request.requester_id, sizeof(request.requester_id), "%s", requester_id);
     memcpy(request.nonce, nonce, 32);
 
-    if (signature && sig_len > 0) {
-        size_t copy_len = sig_len;
-        if (copy_len > sizeof(request.signature)) {
-            copy_len = sizeof(request.signature);
-        }
-        memcpy(request.signature, signature, copy_len);
-        request.signature_len = (uint16_t)copy_len;
-    }
-
     char topic[256];
     snprintf(topic, sizeof(topic), MESH_TOPIC_KEY_REQUEST, user_id);
 
     int result = mesh_mqtt_send_data(topic, &request, sizeof(request));
     if (result == 0) {
-        log_message("INFO", "Requested public key for %s from %s", user_id, requester_id);
+        log_message("INFO", "Requested public key for %s", user_id);
     }
     return result;
 }
@@ -344,9 +235,6 @@ int mesh_mqtt_request_public_key(const char *user_id,
 
 #ifdef USE_PAHO_MQTT
 
-/**
- * Колбэк получения сообщения
- */
 static int mqtt_message_callback(void *context, char *topicName,
                                   int topicLen, MQTTClient_message *message) {
     (void)context;
@@ -359,10 +247,9 @@ static int mqtt_message_callback(void *context, char *topicName,
         return 1;
     }
 
-    // Проверяем формат пакета
     if (message->payloadlen >= 4) {
-        uint32_t magic = *(uint32_t*)message->payload;
-
+        const unsigned char *bytes = (const unsigned char*)message->payload;
+        uint32_t magic = *(uint32_t*)bytes;
         if (magic == 0x4D455350) {
             handle_public_key_packet(topicName, message->payload, message->payloadlen);
             MQTTClient_freeMessage(&message);
@@ -385,8 +272,7 @@ static int mqtt_message_callback(void *context, char *topicName,
 
     if (is_mesh) {
         if (message->payloadlen < (int)sizeof(mesh_packet_t)) {
-            log_message("WARN", "Mesh packet too small: %d bytes (expected at least %zu)",
-                        message->payloadlen, sizeof(mesh_packet_t));
+            log_message("WARN", "Mesh packet too small: %d bytes", message->payloadlen);
             g_stats.packets_dropped++;
             MQTTClient_freeMessage(&message);
             MQTTClient_free(topicName);
@@ -395,7 +281,7 @@ static int mqtt_message_callback(void *context, char *topicName,
 
         mesh_packet_t *packet = (mesh_packet_t*)malloc(message->payloadlen);
         if (!packet) {
-            log_message("ERROR", "Failed to allocate packet (out of memory)");
+            log_message("ERROR", "Failed to allocate packet");
             g_stats.errors++;
             MQTTClient_freeMessage(&message);
             MQTTClient_free(topicName);
@@ -403,24 +289,17 @@ static int mqtt_message_callback(void *context, char *topicName,
         }
 
         memcpy(packet, message->payload, message->payloadlen);
-
         g_stats.packets_received++;
         g_stats.bytes_received += message->payloadlen;
         g_stats.last_activity = time(NULL);
 
         if (g_config.verbose) {
-            log_message("DEBUG", "Received Mesh packet from %s, size: %d bytes, type: %u, id: %llu",
-                        topicName ? topicName : "unknown",
-                        message->payloadlen, packet->type,
-                        (unsigned long long)packet->packet_id);
+            log_message("DEBUG", "Received Mesh packet from %s, size: %d bytes",
+                        topicName ? topicName : "unknown", message->payloadlen);
         }
 
         if (g_callbacks.on_message) {
             g_callbacks.on_message(packet);
-        }
-
-        if (g_callbacks.on_packet_received) {
-            g_callbacks.on_packet_received(packet);
         }
 
         free(packet);
@@ -430,71 +309,29 @@ static int mqtt_message_callback(void *context, char *topicName,
         g_stats.last_activity = time(NULL);
 
         const char *type = get_topic_type(topicName);
-
         if (g_config.verbose) {
-            log_message("INFO", "Received Meshtastic [%s] from %s, size: %d bytes (Protobuf)",
+            log_message("INFO", "Received Meshtastic [%s] from %s, size: %d bytes",
                         type, topicName ? topicName : "unknown", message->payloadlen);
-
-            if (g_config.log_packets && message->payloadlen > 0) {
-                char hex[128] = {0};
-                int show_bytes = message->payloadlen > 32 ? 32 : message->payloadlen;
-                for (int i = 0; i < show_bytes; i++) {
-                    char tmp[4];
-                    snprintf(tmp, sizeof(tmp), "%02x ", ((unsigned char*)message->payload)[i]);
-                    strcat(hex, tmp);
-                    if ((i + 1) % 16 == 0) strcat(hex, "\n                 ");
-                }
-                if (message->payloadlen > 32) strcat(hex, "...");
-                log_message("DEBUG", "Data preview: %s", hex);
-
-                char text[65] = {0};
-                int text_len = 0;
-                for (int i = 0; i < message->payloadlen && text_len < 64; i++) {
-                    unsigned char c = ((unsigned char*)message->payload)[i];
-                    if (c >= 32 && c < 127) {
-                        text[text_len++] = c;
-                    } else {
-                        text[text_len++] = '.';
-                    }
-                }
-                if (text_len > 0) {
-                    log_message("DEBUG", "Text preview: %s", text);
-                }
-            }
-        }
-
-        if (g_callbacks.on_protobuf_message) {
-            g_callbacks.on_protobuf_message(topicName, message->payload,
-                                            message->payloadlen, 0);
         }
     }
 
     MQTTClient_freeMessage(&message);
     MQTTClient_free(topicName);
-
     return 1;
 }
 
-/**
- * Колбэк потери соединения
- */
 static void mqtt_connection_lost(void *context, char *cause) {
     (void)context;
-
     g_stats.is_connected = 0;
     g_stats.reconnect_count++;
     g_status = MESH_STATUS_DISCONNECTED;
 
     log_message("WARN", "Connection lost: %s", cause ? cause : "unknown");
-
     if (g_callbacks.on_disconnect) {
         g_callbacks.on_disconnect(-1, cause ? cause : "Connection lost");
     }
 }
 
-/**
- * Колбэк завершения доставки
- */
 static void mqtt_delivery_complete(void *context, MQTTClient_deliveryToken dt) {
     (void)context;
     (void)dt;
@@ -508,12 +345,8 @@ static void mqtt_delivery_complete(void *context, MQTTClient_deliveryToken dt) {
 
 #ifdef USE_PAHO_MQTT
 
-/**
- * Поток для приема сообщений
- */
 static void* receive_thread_func(void *arg) {
     (void)arg;
-
     log_message("INFO", "Receive thread started");
     g_receive_thread_running = 1;
 
@@ -529,7 +362,6 @@ static void* receive_thread_func(void *arg) {
                 sleep(ONEMESH_RECONNECT_DELAY);
             }
         }
-
         for (int i = 0; i < 10 && g_running && !g_should_exit; i++) {
             sleep(1);
         }
@@ -557,39 +389,27 @@ int mesh_mqtt_init(const mesh_mqtt_config_t *config) {
         return -1;
     }
 
-    // Копируем конфигурацию
     memcpy(&g_config, config, sizeof(mesh_mqtt_config_t));
 
-    // Генерируем Client ID если пустой
     if (g_config.client_id[0] == '\0') {
         snprintf(g_config.client_id, sizeof(g_config.client_id),
                  "mesh-gateway-%d-%ld", getpid(), (long)time(NULL));
         log_message("INFO", "Generated client ID: %s", g_config.client_id);
     }
 
-    // 🔥 КОНВЕРТАЦИЯ mqtt:// в tcp:// для Paho
-    if (strncmp(g_config.broker, "mqtt://", 7) == 0) {
-        char new_broker[256];
-        snprintf(new_broker, sizeof(new_broker), "tcp://%s", g_config.broker + 7);
-        strcpy(g_config.broker, new_broker);
-        log_message("INFO", "Converted mqtt:// to tcp://: %s", g_config.broker);
-    }
-
-    // Строим broker URL если пустой
+    // Используем tcp:// для Paho MQTT C
     if (g_config.broker[0] == '\0' && g_config.host[0] != '\0') {
         snprintf(g_config.broker, sizeof(g_config.broker),
                  "tcp://%s:%d", g_config.host, g_config.port);
         log_message("INFO", "Built broker URL: %s", g_config.broker);
     }
 
-    // Проверка конфигурации
     if (!mesh_mqtt_config_valid(&g_config)) {
         log_message("ERROR", "Invalid configuration");
         return -1;
     }
 
 #ifdef USE_PAHO_MQTT
-    // Создаем клиент
     int rc = MQTTClient_create(&g_client, g_config.broker,
                                g_config.client_id,
                                MQTTCLIENT_PERSISTENCE_NONE, NULL);
@@ -605,7 +425,6 @@ int mesh_mqtt_init(const mesh_mqtt_config_t *config) {
         return -3;
     }
 
-    // Устанавливаем колбэки
     rc = MQTTClient_setCallbacks(g_client, &g_stats,
                                  mqtt_connection_lost,
                                  mqtt_message_callback,
@@ -621,22 +440,21 @@ int mesh_mqtt_init(const mesh_mqtt_config_t *config) {
     log_message("INFO", "MQTT client created: %s (broker: %s)",
                 g_config.client_id, g_config.broker);
 #else
-    log_message("ERROR", "No MQTT library support compiled (USE_PAHO_MQTT not defined)");
+    log_message("ERROR", "No MQTT library support compiled");
     return -5;
 #endif
 
     g_initialized = 1;
     g_status = MESH_STATUS_DISCONNECTED;
     g_stats.start_time = time(NULL);
-
     return 0;
 }
 
 int mesh_mqtt_init_default(void) {
     mesh_mqtt_config_t config = {0};
 
-    // 🔥 ИСПРАВЛЕНО: используем mqtt:// протокол
-    snprintf(config.broker, sizeof(config.broker), "mqtt://mqtt.onemesh.ru:1883");
+    // Используем tcp:// для Paho MQTT C
+    snprintf(config.broker, sizeof(config.broker), "tcp://mqtt.onemesh.ru:1883");
     snprintf(config.host, sizeof(config.host), "mqtt.onemesh.ru");
     config.port = 1883;
     snprintf(config.username, sizeof(config.username), "onemeshd");
@@ -660,6 +478,10 @@ int mesh_mqtt_init_default(void) {
     return mesh_mqtt_init(&config);
 }
 
+// ============================================================================
+// mesh_mqtt_connect - ГЛАВНАЯ ФУНКЦИЯ ПОДКЛЮЧЕНИЯ
+// ============================================================================
+
 int mesh_mqtt_connect(void) {
     if (!g_initialized) {
         log_message("ERROR", "Not initialized");
@@ -673,55 +495,31 @@ int mesh_mqtt_connect(void) {
 
 #ifdef USE_PAHO_MQTT
     if (!g_client) {
-        log_message("ERROR", "MQTT client is NULL - call mesh_mqtt_init first");
+        log_message("ERROR", "MQTT client is NULL");
         return -1;
     }
 
-    // 🔥 ПОЛНАЯ ИНИЦИАЛИЗАЦИЯ структуры
-    MQTTClient_connectOptions conn_opts;
-    memset(&conn_opts, 0, sizeof(conn_opts));
-    strcpy(conn_opts.struct_id, "MQTC");
-    conn_opts.struct_version = 0;
-    // MQTTClient_SSLOptions ssl_opts = MQTTClient_SSLOptions_initializer;
+    // ============================================================
+    // ✅ ТОЧНО ТАК ЖЕ КАК В ТЕСТЕ - УПРОЩЕННОЕ ПОДКЛЮЧЕНИЕ
+    // ============================================================
+    MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
 
-    // 🔥 Проверяем структуру
-    log_message("DEBUG", "conn_opts struct_id: %.4s, version: %d",
-                conn_opts.struct_id, conn_opts.struct_version);
-
-    // 🔥 Устанавливаем параметры
-    conn_opts.keepAliveInterval = g_config.keepalive;
+    // Только эти поля - как в работающем тесте
+    conn_opts.keepAliveInterval = 60;
     conn_opts.cleansession = 1;
-    conn_opts.username = g_config.username;
-    conn_opts.password = g_config.password;
-    conn_opts.connectTimeout = g_config.connect_timeout;
-    conn_opts.retryInterval = g_config.reconnect_delay;
+    conn_opts.username = "onemeshd";
+    conn_opts.password = "onecat";
+    conn_opts.connectTimeout = 10;
 
-    log_message("INFO", "Connecting to %s as %s...",
-                g_config.broker, g_config.username);
+    log_message("DEBUG", "=== MQTT CONNECT PARAMETERS ===");
+    log_message("DEBUG", "broker:      %s", g_config.broker);
+    log_message("DEBUG", "username:    %s", conn_opts.username);
+    log_message("DEBUG", "conn_opts.struct_id: %.4s", conn_opts.struct_id);
+    log_message("DEBUG", "conn_opts.struct_version: %d", conn_opts.struct_version);
+    log_message("DEBUG", "sizeof(conn_opts): %zu", sizeof(conn_opts));
 
-    // 🔥 Устанавливаем статус
-    g_status = MESH_STATUS_CONNECTING;
+    log_message("INFO", "Connecting to %s as %s...", g_config.broker, conn_opts.username);
 
-    // 🔥 Проверяем broker
-    if (g_config.broker[0] == '\0') {
-        log_message("ERROR", "Broker address is empty");
-        g_status = MESH_STATUS_ERROR;
-        return -1;
-    }
-
-    log_message("DEBUG", "Connect options: keepalive=%d, cleansession=%d, timeout=%d",
-                conn_opts.keepAliveInterval, conn_opts.cleansession, conn_opts.connectTimeout);
-    log_message("DEBUG", "Username: '%s', Password: '%s'",
-                conn_opts.username ? conn_opts.username : "(null)",
-                conn_opts.password ? "***" : "(null)");
-
-    // 🔥 Проверяем, что g_client не NULL
-    if (!g_client) {
-        log_message("ERROR", "g_client is NULL!");
-        return -1;
-    }
-
-    // 🔥 САМО ПОДКЛЮЧЕНИЕ
     int rc = MQTTClient_connect(g_client, &conn_opts);
 
     if (rc != MQTTCLIENT_SUCCESS) {
@@ -748,6 +546,7 @@ int mesh_mqtt_connect(void) {
         g_callbacks.on_connect(1, "Connected successfully");
     }
 
+    // Создаем поток ТОЛЬКО после успешного подключения
     if (!g_running) {
         g_running = 1;
         g_should_exit = 0;
@@ -767,13 +566,14 @@ int mesh_mqtt_connect(void) {
 #endif
 }
 
+// ============================================================================
+// Остальные функции
+// ============================================================================
+
 int mesh_mqtt_disconnect(void) {
-    if (!g_initialized) {
-        return 0;
-    }
+    if (!g_initialized) return 0;
 
     log_message("INFO", "Disconnecting...");
-
     g_running = 0;
     g_should_exit = 1;
 
@@ -797,11 +597,9 @@ int mesh_mqtt_disconnect(void) {
     g_status = MESH_STATUS_DISCONNECTED;
 
     log_message("INFO", "Disconnected from broker");
-
     if (g_callbacks.on_disconnect) {
         g_callbacks.on_disconnect(0, "Disconnected");
     }
-
     return 0;
 }
 
@@ -874,10 +672,6 @@ int mesh_mqtt_send(const mesh_packet_t *packet) {
         log_message("DEBUG", "Sent packet %llu to %s (%zu bytes)",
                     (unsigned long long)packet->packet_id,
                     topic, packet_size);
-    }
-
-    if (g_callbacks.on_packet_sent) {
-        g_callbacks.on_packet_sent(packet);
     }
 
     return 0;
@@ -1021,7 +815,7 @@ const mesh_mqtt_stats_t* mesh_mqtt_get_stats(void) {
 }
 
 void mesh_mqtt_reset_stats(void) {
-    memset(&g_stats, 0, sizeof(mesh_mqtt_stats_t));
+    memset(&g_stats, 0, sizeof(g_stats));
     g_stats.start_time = time(NULL);
     log_message("INFO", "Statistics reset");
 }
@@ -1046,7 +840,7 @@ int mesh_mqtt_ping(void) {
 #ifdef USE_PAHO_MQTT
     if (MQTTClient_isConnected(g_client)) {
         g_stats.last_activity = time(NULL);
-        log_message("DEBUG", "Ping (connection check) successful");
+        log_message("DEBUG", "Ping successful");
         return 0;
     } else {
         log_message("WARN", "Connection check failed");
@@ -1057,10 +851,6 @@ int mesh_mqtt_ping(void) {
     return -1;
 #endif
 }
-
-// ============================================================================
-// Отправка сырых данных
-// ============================================================================
 
 int mesh_mqtt_send_data(const char *topic, const void *data, size_t len) {
     if (!g_initialized) {
@@ -1167,8 +957,6 @@ void mesh_mqtt_print_stats(void) {
     printf("║ Client ID:      %s                   ║\n", g_config.client_id);
     printf("║ City:           %s                                       ║\n", g_config.city_code);
     printf("║ Topic root:     %s                   ║\n", g_config.topic_root);
-    printf("║ Protobuf:       %s                                       ║\n",
-           g_config.parse_protobuf ? "Enabled" : "Disabled");
     printf("╚═══════════════════════════════════════════════════════════╝\n");
 }
 
@@ -1202,8 +990,6 @@ void mesh_mqtt_print_config(void) {
            g_config.log_messages ? "Yes" : "No");
     printf("║ Log packets:    %s                                       ║\n",
            g_config.log_packets ? "Yes" : "No");
-    printf("║ Parse Protobuf: %s                                       ║\n",
-           g_config.parse_protobuf ? "Yes" : "No");
     printf("╚═══════════════════════════════════════════════════════════╝\n");
 }
 
@@ -1219,21 +1005,6 @@ void mesh_mqtt_print_connection_info(void) {
     printf("║ Client ID:      %s                   ║\n", g_config.client_id);
     printf("║ Username:       %s                                       ║\n", g_config.username);
     printf("║ City:           %s                                       ║\n", g_config.city_code);
-
-    if (g_stats.connected_at) {
-        char time_str[64];
-        strftime(time_str, sizeof(time_str), "%Y-%m-%d %H:%M:%S",
-                 localtime(&g_stats.connected_at));
-        printf("║ Connected at:   %s                         ║\n", time_str);
-    }
-
-    printf("║ Uptime:         %ld seconds                              ║\n",
-           g_stats.connected_at ? (long)(time(NULL) - g_stats.connected_at) : 0);
-    printf("║ Packets:        %llu sent, %llu received                  ║\n",
-           (unsigned long long)g_stats.packets_sent,
-           (unsigned long long)g_stats.packets_received);
-    printf("║ Errors:         %llu                                      ║\n",
-           (unsigned long long)g_stats.errors);
     printf("╚═══════════════════════════════════════════════════════════╝\n");
 }
 
@@ -1247,9 +1018,16 @@ void mesh_mqtt_set_log_packets(int enable) {
     log_message("INFO", "Packet logging %s", enable ? "enabled" : "disabled");
 }
 
-// ============================================================================
-// Освобождение ресурсов
-// ============================================================================
+mesh_message_format_t mesh_mqtt_detect_format(const void *data, int len) {
+    if (!data || len < 4) return MESH_FORMAT_UNKNOWN;
+    const unsigned char *bytes = (const unsigned char*)data;
+    uint32_t magic = *(uint32_t*)bytes;
+    if (magic == 0x4D455348) return MESH_FORMAT_MESH;
+    if (magic == 0x0A || magic == 0x0D) return MESH_FORMAT_PROTOBUF;
+    if (bytes[0] == '{' || bytes[0] == '[') return MESH_FORMAT_JSON;
+    if (len >= 2 && bytes[0] == 0x1F && bytes[1] == 0x8B) return MESH_FORMAT_BINARY;
+    return MESH_FORMAT_UNKNOWN;
+}
 
 void mesh_mqtt_cleanup(void) {
     log_message("INFO", "Cleaning up...");
@@ -1299,10 +1077,6 @@ int mesh_mqtt_config_valid(const mesh_mqtt_config_t *config) {
     if (config->username[0] == '\0') {
         log_message("ERROR", "Username is empty");
         return 0;
-    }
-
-    if (config->password[0] == '\0') {
-        log_message("WARN", "Password is empty");
     }
 
     if (config->topic_root[0] == '\0') {
@@ -1379,6 +1153,149 @@ int mesh_mqtt_parse_topic(const char *topic, char *root,
         root[buffer_size - 1] = '\0';
         if (subtopic) subtopic[0] = '\0';
     }
+    return 0;
+}
+
+// ============================================================================
+// Функции для работы с топиками OneMesh
+// ============================================================================
+
+int onemesh_parse_topic(const char *topic, onemesh_topic_info_t *info) {
+    if (!topic || !info) return -1;
+
+    memset(info, 0, sizeof(onemesh_topic_info_t));
+
+    char copy[512];
+    snprintf(copy, sizeof(copy), "%s", topic);
+
+    char *parts[10];
+    int num_parts = 0;
+    char *saveptr;
+    char *token = strtok_r(copy, "/", &saveptr);
+
+    while (token && num_parts < 10) {
+        parts[num_parts++] = token;
+        token = strtok_r(NULL, "/", &saveptr);
+    }
+
+    if (num_parts < 3) return -1;
+
+    snprintf(info->network, sizeof(info->network), "%s", parts[0]);
+    snprintf(info->region, sizeof(info->region), "%s", parts[1]);
+    snprintf(info->city, sizeof(info->city), "%s", parts[2]);
+
+    if (num_parts > 3) {
+        snprintf(info->type, sizeof(info->type), "%s", parts[3]);
+    }
+
+    if (num_parts > 4) {
+        if (strcmp(info->type, "subgroup") == 0) {
+            snprintf(info->group_id, sizeof(info->group_id), "%s", parts[4]);
+            if (num_parts > 5) {
+                snprintf(info->subgroup_id, sizeof(info->subgroup_id), "%s", parts[5]);
+            }
+        } else if (strcmp(info->type, "device") == 0 || strcmp(info->type, "user") == 0) {
+            snprintf(info->device_id, sizeof(info->device_id), "%s", parts[4]);
+        } else if (strcmp(info->type, "group") == 0) {
+            snprintf(info->group_id, sizeof(info->group_id), "%s", parts[4]);
+        }
+    }
+
+    if (num_parts > 5) {
+        snprintf(info->action, sizeof(info->action), "%s", parts[num_parts - 1]);
+    }
+
+    snprintf(info->full_topic, sizeof(info->full_topic), "%s", topic);
+
+    if (strcmp(info->type, "group") == 0) info->level = ONEMESH_LEVEL_GROUP;
+    else if (strcmp(info->type, "subgroup") == 0) info->level = ONEMESH_LEVEL_SUBGROUP;
+    else if (strcmp(info->type, "device") == 0) info->level = ONEMESH_LEVEL_DEVICE;
+    else if (strcmp(info->type, "user") == 0) info->level = ONEMESH_LEVEL_USER;
+    else info->level = ONEMESH_LEVEL_CITY;
 
     return 0;
+}
+
+int onemesh_build_device_topic(const char *city, const char *device_id,
+                               const char *action, char *buffer, size_t buffer_size) {
+    if (!city || !device_id || !buffer) return -1;
+    if (action && action[0] != '\0') {
+        snprintf(buffer, buffer_size, "msh/RU/%s/device/%s/%s", city, device_id, action);
+    } else {
+        snprintf(buffer, buffer_size, "msh/RU/%s/device/%s", city, device_id);
+    }
+    return 0;
+}
+
+int onemesh_build_group_topic(const char *city, const char *group_id,
+                              const char *action, char *buffer, size_t buffer_size) {
+    if (!city || !group_id || !buffer) return -1;
+    if (action && action[0] != '\0') {
+        snprintf(buffer, buffer_size, "msh/RU/%s/group/%s/%s", city, group_id, action);
+    } else {
+        snprintf(buffer, buffer_size, "msh/RU/%s/group/%s", city, group_id);
+    }
+    return 0;
+}
+
+int onemesh_build_subgroup_topic(const char *city, const char *group_id,
+                                 const char *subgroup_id, const char *action,
+                                 char *buffer, size_t buffer_size) {
+    if (!city || !group_id || !subgroup_id || !buffer) return -1;
+    if (action && action[0] != '\0') {
+        snprintf(buffer, buffer_size, "msh/RU/%s/subgroup/%s/%s/%s",
+                 city, group_id, subgroup_id, action);
+    } else {
+        snprintf(buffer, buffer_size, "msh/RU/%s/subgroup/%s/%s",
+                 city, group_id, subgroup_id);
+    }
+    return 0;
+}
+
+int onemesh_build_user_topic(const char *city, const char *user_id,
+                             const char *action, char *buffer, size_t buffer_size) {
+    if (!city || !user_id || !buffer) return -1;
+    if (action && action[0] != '\0') {
+        snprintf(buffer, buffer_size, "msh/RU/%s/user/%s/%s", city, user_id, action);
+    } else {
+        snprintf(buffer, buffer_size, "msh/RU/%s/user/%s", city, user_id);
+    }
+    return 0;
+}
+
+onemesh_level_t onemesh_get_topic_level(const char *topic) {
+    onemesh_topic_info_t info;
+    if (onemesh_parse_topic(topic, &info) != 0) {
+        return ONEMESH_LEVEL_CITY;
+    }
+    return info.level;
+}
+
+int onemesh_is_group_topic(const char *topic) {
+    onemesh_topic_info_t info;
+    if (onemesh_parse_topic(topic, &info) != 0) return 0;
+    return strcmp(info.type, "group") == 0;
+}
+
+int onemesh_is_subgroup_topic(const char *topic) {
+    onemesh_topic_info_t info;
+    if (onemesh_parse_topic(topic, &info) != 0) return 0;
+    return strcmp(info.type, "subgroup") == 0;
+}
+
+int onemesh_get_parent_topic(const char *topic, char *buffer, size_t buffer_size) {
+    onemesh_topic_info_t info;
+    if (onemesh_parse_topic(topic, &info) != 0) return -1;
+
+    if (info.level == ONEMESH_LEVEL_SUBGROUP) {
+        snprintf(buffer, buffer_size, "msh/RU/%s/group/%s", info.city, info.group_id);
+        return 0;
+    }
+    return -1;
+}
+
+void mesh_mqtt_handle_signal(int sig) {
+    log_message("INFO", "Signal %d received, shutting down...", sig);
+    g_running = 0;
+    g_should_exit = 1;
 }

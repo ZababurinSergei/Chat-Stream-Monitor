@@ -1,0 +1,207 @@
+<div class="app-container">
+    <!-- Шапка приложения -->
+    <header class="app-header">
+        <div class="header-left">
+            <h1>🌿 Система мониторинга теплиц</h1>
+            <div class="role-selector">
+                <span>Роль:</span>
+                <select [(ngModel)]="selectedRole" (change)="onRoleChange()">
+                    <option value="specialist">Специалист</option>
+                    <option value="senior-specialist">Старший специалист</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <div class="user-info">
+                <div class="user-role">
+                    Текущая роль: <strong>{{ userRole() === 'specialist' ? 'Специалист' : 'Старший специалист' }}</strong>
+                </div>
+                <div class="last-update" *ngIf="lastUpdate()">
+                    Последнее обновление: {{ lastUpdate() | date:'dd.MM.yyyy HH:mm:ss' }}
+                </div>
+            </div>
+            <button class="logout-btn" (click)="logout()">Выйти</button>
+        </div>
+    </header>
+
+    <!-- Основное содержимое -->
+    <main class="app-main">
+        <!-- Боковая панель с навигацией и светофором -->
+        <aside class="sidebar">
+            <nav class="main-nav">
+                <ul>
+                    <li>
+                        <a routerLink="/dashboard" routerLinkActive="active">
+                            📊 Панель управления
+                        </a>
+                    </li>
+                    <li>
+                        <a routerLink="/regions" routerLinkActive="active">
+                            🗺️ Регионы и теплицы
+                        </a>
+                    </li>
+                    <li *ngIf="isSeniorSpecialist()">
+                        <a routerLink="/recalculation" routerLinkActive="active">
+                            🔄 Пересчёт состояний
+                        </a>
+                    </li>
+                    <li>
+                        <a routerLink="/reports" routerLinkActive="active">
+                            📈 Отчёты
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <!-- Виджет светофор -->
+            <div class="traffic-light-section">
+                <app-traffic-light></app-traffic-light>
+            </div>
+
+            <!-- Быстрые действия -->
+            <div class="quick-actions">
+                <h3>Быстрые действия</h3>
+                <button
+                        class="action-btn refresh-btn"
+                        (click)="refreshData()"
+                        [disabled]="isRefreshing()">
+                    🔄 Обновить данные
+                </button>
+
+                <button
+                        *ngIf="selectedGreenhouse() && isSeniorSpecialist()"
+                        class="action-btn recalc-btn"
+                        (click)="recalculateStatus()">
+                    🔧 Пересчитать статус
+                </button>
+
+                <button
+                        *ngIf="selectedGreenhouse()"
+                        class="action-btn poll-btn"
+                        (click)="requestPolling()">
+                    📡 Запросить опрос датчиков
+                </button>
+            </div>
+        </aside>
+
+        <!-- Основная рабочая область -->
+        <div class="content-area">
+            <!-- Фильтр и навигация -->
+            <div class="content-header">
+                <div class="breadcrumbs">
+                    <span>Главная</span>
+                    <span *ngIf="selectedGreenhouse()"> › {{ selectedGreenhouse()?.name }}</span>
+                </div>
+
+                <div class="content-actions">
+                    <div class="time-range-selector">
+                        <select [(ngModel)]="selectedTimeRange">
+                            <option value="24h">Последние 24 часа</option>
+                            <option value="7d">7 дней</option>
+                            <option value="30d">30 дней</option>
+                            <option value="1y">1 год</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Маршрутизируемый контент -->
+            <div class="router-outlet-wrapper">
+                <router-outlet></router-outlet>
+            </div>
+
+            <!-- Дополнительные виджеты (если выбрана теплица) -->
+            <div class="additional-widgets" *ngIf="selectedGreenhouse()">
+                <!-- Графики измерений -->
+                <div class="measurements-section">
+                    <app-measurement-chart
+                            [measurements]="mockMeasurements"
+                            [timeRange]="selectedTimeRange === '24h' ? 'сутки' :
+                            selectedTimeRange === '7d' ? 'неделя' :
+                            selectedTimeRange === '30d' ? 'месяц' : 'год'"
+                            [isEditable]="isSeniorSpecialist()"
+                            (pointClicked)="onMeasurementPointClick($event)">
+                    </app-measurement-chart>
+                </div>
+
+                <!-- История состояний -->
+                <div class="history-section" *ngIf="isSeniorSpecialist()">
+                    <h3>История изменений состояний</h3>
+                    <div class="history-table">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>Дата изменения</th>
+                                <th>Статус</th>
+                                <th>Комментарий</th>
+                                <th>Изменил</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr *ngFor="let history of mockHistory">
+                                <td>{{ history.changedAt | date:'dd.MM.yyyy HH:mm' }}</td>
+                                <td>
+                        <span class="status-badge" [class]="history.status">
+                          {{ getStatusText(history.status) }}
+                        </span>
+                                </td>
+                                <td>
+                                    <input
+                                            type="text"
+                                            [value]="history.comment"
+                                            (change)="updateComment(history, $event)"
+                                            placeholder="Введите комментарий..."
+                                    />
+                                </td>
+                                <td>{{ history.changedBy }}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Информация о теплице -->
+                <div class="greenhouse-info" *ngIf="selectedGreenhouse()">
+                    <h3>Информация о теплице</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="label">ID:</span>
+                            <span class="value">{{ selectedGreenhouse()?.id }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Название:</span>
+                            <span class="value">{{ selectedGreenhouse()?.name }}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Текущий статус:</span>
+                            <span class="value status-badge" [class]="selectedGreenhouse()?.status">
+                    {{ getStatusText(selectedGreenhouse()?.status || '') }}
+                  </span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Последнее обновление:</span>
+                            <span class="value">{{ selectedGreenhouse()?.lastUpdated | date:'dd.MM.yyyy HH:mm:ss' }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Футер -->
+    <footer class="app-footer">
+        <div class="footer-content">
+            <div class="system-status">
+                <span class="status-indicator active"></span>
+                Система работает в нормальном режиме
+            </div>
+            <div class="version-info">
+                Версия: 1.0.0 | Прототип системы мониторинга теплиц
+            </div>
+            <div class="current-time">
+                {{ currentTime | date:'dd.MM.yyyy HH:mm:ss' }}
+            </div>
+        </div>
+    </footer>
+</div>

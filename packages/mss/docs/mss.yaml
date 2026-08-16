@@ -1,0 +1,2117 @@
+openapi: 3.0.1
+info:
+  title: Metamart Subscription Service
+  version: 1.3.0
+servers:
+  - url: /metamart-subscription-service
+    description: context path server url
+tags:
+  - name: Subscriptions
+    description: методы управления подписками
+  - name: Subscription Settings
+    description: методы управления настройками подписок
+  - name: Rules
+    description: методы управления правилами информационного взаимодействия
+  - name: Directories
+    description: методы управления внутренними справочниками системы
+  - name: Sync
+    description: методы управления синхронизацией между справочниками системами и справочниками ФНСИ
+  - name: Auth
+    description: методы управления пользователем и его ролями
+  - name: Audit
+    description: методы управления журналом изменений и его выгрузкой
+  - name: Sending
+    description: методы управления рассылками ИС-отправителей
+  - name: Recipient
+    description: методы для управления маршрутизацией сообщений
+  - name: Sender
+    description: методы управления проверки валидности рассылки маршрутизации
+paths:
+  /api/v1/subscription:
+    get:
+      tags:
+        - Subscriptions
+      operationId: getSubscriptions
+      description: получение списка подписок по заданным параметрам и пагинации
+      parameters:
+        - name: active
+          description: признак активности подписки
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: recipientId
+          description: идентификатор информационной системы
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: interactionId
+          description: идентификатор информационного взаимодействия
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: subscriptionId
+          description: идентификатор подписки
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          description: количество записей
+          in: query
+          required: true
+          schema:
+            minimum: 1
+            type: integer
+            format: int32
+        - name: offset
+          description: смещение
+          in: query
+          required: true
+          schema:
+            minimum: 0
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageSearchSubscriptionDTO'
+    put:
+      tags:
+        - Subscriptions
+      operationId: updateSubscription
+      description: обновление подписки по ID
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSubscriptionRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionDTO'
+    post:
+      tags:
+        - Subscriptions
+      operationId: createSubscription
+      description: создание подписки
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSubscriptionRequest'
+        required: true
+      responses:
+        "201":
+          description: CREATED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionDTO'
+    delete:
+      tags:
+        - Subscriptions
+      operationId: deleteSubscription
+      description: удаление (деактивация) подписки по ID
+      parameters:
+        - name: subscriptionId
+          description: идентификатор подписки
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: NO CONTENT
+  /api/v1/subscription/setting:
+    get:
+      tags:
+        - Subscription Settings
+      operationId: getSubscriptionSettings
+      description: получение списка настроек подписок по заданным параметрам и пагинации
+      parameters:
+        - name: active
+          description: признак активности настройки подписки
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: id
+          description: идентификатор настройки подписки
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: subscriptionId
+          description: индентификатор подписки
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          description: количество записей
+          in: query
+          required: true
+          schema:
+            minimum: 1
+            type: integer
+            format: int32
+        - name: offset
+          description: смещение
+          in: query
+          required: true
+          schema:
+            minimum: 0
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageSearchSubscriptionSettingDTO'
+    put:
+      tags:
+        - Subscription Settings
+      operationId: updateSubscriptionSetting
+      description: обновление настройки подписки по ID
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSubscriptionSettingRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionSettingDTO'
+    post:
+      tags:
+        - Subscription Settings
+      operationId: createSubscriptionSetting
+      description: создание списка настроек подписок
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/CreateSubscriptionSettingRequest'
+        required: true
+      responses:
+        "201":
+          description: CREATED
+    delete:
+      tags:
+        - Subscription Settings
+      operationId: deleteSubscriptionSetting
+      description: удаление (деактивация) настройки подписки по ID
+      parameters:
+        - name: id
+          description: идентификатор настройки подписки
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: NO CONTENT
+  /api/v1/sending:
+    get:
+      tags:
+        - Sending
+      operationId: getSending
+      description: получение связи системы отправителя и информационного взаимодействия по заданному фильтру и пагинации
+      parameters:
+        - name: active
+          description: признак активности рассылки
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: senderId
+          description: идентификатор информационной системы
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: interactionId
+          description: идентификатор информационного взаимодействия
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: id
+          in: query
+          description: идентификатор рассылки
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          description: количество записей
+          in: query
+          required: true
+          schema:
+            minimum: 1
+            type: integer
+            format: int32
+        - name: offset
+          description: смещение
+          in: query
+          required: true
+          schema:
+            minimum: 0
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageSearchSendingDTO'
+    post:
+      tags:
+        - Sending
+      operationId: createSending
+      description: создания связи системы отправителя и информационного взаимодействия
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSendingRequest'
+        required: true
+      responses:
+        "201":
+          description: CREATED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendingDTO'
+    put:
+      tags:
+        - Sending
+      operationId: updateSending
+      description: обновление связи системы отправителя и информационного взаимодействия
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSendingRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SendingDTO'
+    delete:
+      tags:
+        - Sending
+      operationId: deleteSending
+      description: удаление (деактивация) связи системы отправителя и информационного взаимодействия по ID
+      parameters:
+        - name: sendingId
+          description: идентификатор связи системы отправителя и информационного взаимодействия
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: NO CONTENT
+  /api/v1/sending/filter:
+    post:
+      tags:
+        - Sending
+      operationId: searchSending
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendingSearchFilter'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageSearchSendingDTO'
+  /api/v1/rule:
+    get:
+      tags:
+        - Rules
+      operationId: getRules
+      description: получение списка правил информационного взаимодействия по параметрам и пагинации
+      parameters:
+        - name: ruleId
+          description: идентификатор правила информационного взаимодействия
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: active
+          description: признак активности правила информационного взаимодействия
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: interactionId
+          description: идентификатор информационного взаимодействия
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          description: количество записей
+          in: query
+          required: true
+          schema:
+            minimum: 1
+            type: integer
+            format: int32
+        - name: offset
+          description: смещение
+          in: query
+          required: true
+          schema:
+            minimum: 0
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageSearchRuleDTO'
+    put:
+      tags:
+        - Rules
+      operationId: updateRule
+      description: обновление правила информационного взаимодействия по ID
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRuleRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleDTO'
+    post:
+      tags:
+        - Rules
+      operationId: createRule
+      description: создание правила информационного взаимодействия
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRuleRequest'
+        required: true
+      responses:
+        "201":
+          description: CREATED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RuleDTO'
+    delete:
+      tags:
+        - Rules
+      operationId: deleteRule
+      description: удаление (деактивация) правила информационного взаимодействия по ID
+      parameters:
+        - name: ruleId
+          description: идентификатор правила информационного взаимодействия
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: NO CONTENT
+  /api/v1/rule/grouped:
+    get:
+      tags:
+        - Rules
+      operationId: getGropedRules
+      description: получение сгруппированного по информационному взаимодействию списка правил по параметрам и пагинации
+      parameters:
+        - name: ruleId
+          description: идентификатор правила информационного взаимодействия
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: active
+          description: признак активности правила информационного взаимодействия
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: interactionId
+          description: идентификатор информационного взаимодействия
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          description: количество записей
+          in: query
+          required: true
+          schema:
+            minimum: 1
+            type: integer
+            format: int32
+        - name: offset
+          description: смещение
+          in: query
+          required: true
+          schema:
+            minimum: 0
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageGroupedRuleDTO'
+  /api/v1/directory/record:
+    get:
+      tags:
+        - Directories
+      operationId: getRecords
+      description: получение записей справочника по параметрами и пагинации
+      parameters:
+        - name: active
+          description: знак активности записи в справочнике
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: recordId
+          description: идентификатор записи справочника
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: directoryId
+          description: идентификатор справочника, определяет таблицу БД
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          description: количество записей
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int32
+        - name: offset
+          description: смещение
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int32
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageRecordDTO'
+    put:
+      tags:
+        - Directories
+      operationId: updateRecord
+      description: обновление записи справочника по ID
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRecordRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordDTO'
+    post:
+      tags:
+        - Directories
+      operationId: createRecord
+      description: создание записи в справочнике
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRecordRequest'
+        required: true
+      responses:
+        "201":
+          description: CREATED
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecordDTO'
+    delete:
+      tags:
+        - Directories
+      operationId: deleteRecord
+      description: удаление (деактивация) записи справочника по ID
+      parameters:
+        - name: directoryId
+          description: идентификатор справочника
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: recordId
+          description: идентификатор записи справочника
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: NO CONTENT
+  /api/v1/sync/{directoryOid}:
+    post:
+      tags:
+        - Sync
+      operationId: update
+      description: синхронизация справочника по его ID
+      parameters:
+        - name: directoryOid
+          description: идентификатор справочника
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncSummary'
+  /api/v1/sync/all:
+    post:
+      tags:
+        - Sync
+      operationId: updateAll
+      description: синхронизация всех справочников
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SyncSummary'
+  /api/v1/subscription/filter:
+    post:
+      tags:
+        - Subscriptions
+      operationId: searchSubscriptions
+      description: поиск подписок по заданному фильтру
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriptionSearchFilter'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageSearchSubscriptionDTO'
+  /api/v1/rule/filter:
+    post:
+      tags:
+        - Rules
+      operationId: searchRules
+      description: поиск правила информационного взаимодействия по заданному фильтру
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RuleSearchFilter'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageSearchRuleDTO'
+  /api/v1/recipient:
+    post:
+      tags:
+        - Recipient
+      operationId: getRecipients
+      description: получение кодов (мнемоник) информационных систем
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecipientRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RecipientDTO'
+  /api/v1/sender:
+    post:
+      tags:
+        - Sender
+      operationId: validateSender
+      description: проверка валидности рассылки
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SenderRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+  /api/v1/directory/record/filter:
+    post:
+      tags:
+        - Directories
+      operationId: searchRecords
+      description: поиск записей справочника системы по заданному фильтру
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecordSearchFilters'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageRecordDTO'
+  /api/v1/auth/token:
+    post:
+      tags:
+        - Auth
+      description:  Первичное получение пары токенов от авторизационного сервиса (ИА) после
+        редиректа на корневой эндпоинт фронта приложения с параметром code=... или refresh
+      operationId: getToken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRequest'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+  /api/v1/user/role/rights:
+    get:
+      tags:
+        - Auth
+      operationId: getRolePermissions
+      description: получение данных о правах роли по ее наименованию
+      parameters:
+        - name: roleCode
+          description: код роли
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RolePermissionsDTO'
+  /api/v1/subscription/setting/link:
+    get:
+      tags:
+        - Subscription Settings
+      operationId: getLinkHeaderMessage
+      description: получение связи между идентификаторами справочников и идентификаторов заголовков
+      parameters:
+        - name: headerId
+          description: идентификатор заголовка
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: active
+          description: признак активности записи
+          in: query
+          required: true
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LinkHeaderDirectoryDTO'
+  /api/v1/directory:
+    get:
+      tags:
+        - Directories
+      operationId: getDirectories
+      description: получение справочников системы
+      parameters:
+        - name: active
+          description: признак активности справочника
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: directoryId
+          description: идентификатор справочника системы
+          in: query
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: showActive
+          description: признак отображения справочника как таб в UI
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DirectoryDTO'
+  /api/v1/auth/userinfo:
+    get:
+      tags:
+        - Auth
+      operationId: getUserInfo
+      description: получение информации о пользователе
+      parameters:
+        - name: Authorization
+          description: http заголовок
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfo'
+  /api/v1/auth/logout:
+    get:
+      tags:
+        - Auth
+      operationId: logout
+      description: Аннулировать токен доступа
+      parameters:
+        - name: Authorization
+          description: http заголовок
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: NO CONTENT
+  /api/v1/audit:
+    post:
+      tags:
+        - Audit
+      operationId: getChangeLogs
+      description: получение информации о журнале изменений
+      parameters:
+        - name: limit
+          description: количество записей
+          in: query
+          required: true
+          schema:
+            minimum: 1
+            type: integer
+            format: int32
+        - name: offset
+          description: смещение
+          in: query
+          required: true
+          schema:
+            minimum: 0
+            type: integer
+            format: int32
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DirectoryRecordChangeLogFilter'
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PageDirectoryRecordChangeLogDTO'
+  /api/v1/audit/export:
+    get:
+      tags:
+        - Audit
+      operationId: getCsvFile
+      description: выгрузка CSV файла по заданному фильтру или без него
+      parameters:
+        - name: startDate
+          description: дата начала периода за который делается выгрузка
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: endDate
+          description: дата окончания периода за который делается выгрузка
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: OK
+  /api/v1/audit/filters:
+    get:
+      tags:
+        - Audit
+      operationId: getFilters
+      description: получение значений для фильтров
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditFilterDTO'
+components:
+  schemas:
+    UpdateSubscriptionRequest:
+      required:
+        - active
+        - id
+        - startAt
+      type: object
+      properties:
+        id:
+          description: идентификатор подписки
+          type: string
+          format: uuid
+        active:
+          description: признак активности подписки
+          type: boolean
+        startAt:
+          description: дата и время действия подписки
+          type: string
+          format: date-time
+        endAt:
+          description: дата и время окочания подписки
+          type: string
+          format: date-time
+    SubscriptionDTO:
+      type: object
+      properties:
+        id:
+          description: идентификатор подписки
+          type: string
+          format: uuid
+        active:
+          description: признак активности подписки
+          type: boolean
+        createdAt:
+          description: дата, время добавления записи в таблице
+          type: string
+          format: date-time
+        updatedAt:
+          description: дата, время обновления записи в таблице
+          type: string
+          format: date-time
+        recipientId:
+          description: идентификатор информационной системы
+          type: string
+          format: uuid
+        interactionId:
+          description: идентификатор информационного взаимодействия
+          type: string
+          format: uuid
+        startAt:
+          description: дата, время начала работы информационного взаимодействия
+          type: string
+          format: date-time
+        endAt:
+          description: дата, время окончания работы информационного взаимодействия
+          type: string
+          format: date-time
+    UpdateSubscriptionSettingRequest:
+      required:
+        - active
+        - id
+        - value
+      type: object
+      properties:
+        id:
+          description: идентификатор подписки
+          type: string
+          format: uuid
+        active:
+          description: признак активности подписки
+          type: boolean
+        value:
+          type: string
+    SubscriptionSettingDTO:
+      type: object
+      properties:
+        id:
+          description: идентификатор настройки подписки
+          type: string
+          format: uuid
+        active:
+          description: признак активности настройки подписки
+          type: boolean
+        createdAt:
+          description: дата, время добавления записи в таблице
+          type: string
+          format: date-time
+        updatedAt:
+          description: дата, время обновления записи в таблице
+          type: string
+          format: date-time
+        subscriptionId:
+          description: индетификатор подписки
+          type: string
+          format: uuid
+        headerId:
+          description: идентификатор заголовка сообщения
+          type: string
+          format: uuid
+        value:
+          type: string
+    SendingDTO:
+      type: object
+      properties:
+        id:
+          description: идентификатор связи системы отправителя и информационного взаимодействия
+          type: string
+          format: uuid
+        active:
+          description: признак активности связи системы отправителя и информационного взаимодействия
+          type: boolean
+        createdAt:
+          description: дата, время добавления записи в таблице
+          type: string
+          format: date-time
+        updatedAt:
+          description: дата, время обновления записи в таблице
+          type: string
+          format: date-time
+        senderId:
+          description: идентификатор информационной системы
+          type: string
+          format: uuid
+        interactionId:
+          description: идентификатор информационного взаимодействия
+          type: string
+          format: uuid
+        startAt:
+          description: дата, время начала работы информационного взаимодействия
+          type: string
+          format: date-time
+        endAt:
+          description: дата, время окончания работы информационного взаимодействия
+          type: string
+          format: date-time
+    CreateSendingRequest:
+      required:
+        - active
+        - createdAt
+        - interactionId
+        - senderId
+        - startAt
+      type: object
+      properties:
+        active:
+          description: признак активности связи системы отправителя и информационного взаимодействия
+          type: boolean
+        createdAt:
+          description: дата, время добавления записи в таблице
+          type: string
+          format: date-time
+        senderId:
+          description: идентификатор информационной системы
+          type: string
+          format: uuid
+        interactionId:
+          description: идентификатор информационного взаимодействия
+          type: string
+          format: uuid
+        startAt:
+          description: дата, время начала работы информационного взаимодействия
+          type: string
+          format: date-time
+        endAt:
+          description: дата, время окончания работы информационного взаимодействия
+          type: string
+          format: date-time
+    UpdateSendingRequest:
+      required:
+        - active
+        - id
+        - startAt
+      type: object
+      properties:
+        id:
+          description: идентификатор подписки
+          type: string
+          format: uuid
+        active:
+          description: признак активности подписки
+          type: boolean
+        startAt:
+          description: дата и время действия подписки
+          type: string
+          format: date-time
+        endAt:
+          description: дата и время окочания подписки
+          type: string
+          format: date-time
+    UpdateRuleRequest:
+      required:
+        - active
+        - id
+      type: object
+      properties:
+        id:
+          description: идентификатор правила информационного взаимодействия
+          type: string
+          format: uuid
+        active:
+          description: признак правила информационного взаимодействия
+          type: boolean
+    RuleDTO:
+      type: object
+      properties:
+        id:
+          description: идентификатор правила информационного взаимодействия
+          type: string
+          format: uuid
+        active:
+          description: признак активности правила информационного взаимодействия
+          type: boolean
+        createdAt:
+          description: дата, время добавления записи в таблице
+          type: string
+          format: date-time
+        updatedAt:
+          description: дата, время обновления записи в таблице
+          type: string
+          format: date-time
+        interactionId:
+          description: идентификатор информационного взаимодействия
+          type: string
+          format: uuid
+        headerId:
+          description: идентификатор заголовка сообщения
+          type: string
+          format: uuid
+    UpdateRecordRequest:
+      required:
+        - active
+        - code
+        - directoryId
+        - id
+        - name
+      type: object
+      properties:
+        id:
+          description: идентификатор записи справочника
+          type: string
+          format: uuid
+        active:
+          description: признак активности записи справочника
+          type: boolean
+        directoryId:
+          description: идентификатор справочника системы
+          type: string
+          format: uuid
+        code:
+          description: значение кода для записи в таблице
+          type: string
+        name:
+          description: наименование для записи в таблице
+          type: string
+    RecordDTO:
+      type: object
+      properties:
+        id:
+          description: индетификатор записи в таблице
+          type: string
+          format: uuid
+        active:
+          description: признак активности записи в таблице
+          type: boolean
+        createdAt:
+          description: дата, время добавления записи
+          type: string
+          format: date-time
+        updatedAt:
+          description: дата, время обновления записи
+          type: string
+          format: date-time
+        directoryId:
+          description: идентификатор справочника системы
+          type: string
+          format: uuid
+        code:
+          description: значение кода записи справочника в таблице
+          type: string
+        name:
+          description: наименование для записи справочника в таблице
+          type: string
+    SyncSummary:
+      type: object
+      properties:
+        summary:
+          description: результат синхронизации
+          type: string
+        deleted:
+          description: количество удаленных записей
+          type: integer
+          format: int32
+        updated:
+          description: количество обновленных записей
+          type: integer
+          format: int32
+    CreateSubscriptionRequest:
+      required:
+        - active
+        - interactionId
+        - recipientId
+        - startAt
+      type: object
+      properties:
+        active:
+          description: признак активности подписки
+          type: boolean
+        recipientId:
+          description: идентификатор информационной системы
+          type: string
+          format: uuid
+        interactionId:
+          description: идентификатор информационного взаимодействия
+          type: string
+          format: uuid
+        startAt:
+          description: дата, время начала работы информационного взаимодействия
+          type: string
+          format: date-time
+        endAt:
+          description: дата, время окончания работы информационного взаимодействия
+          type: string
+          format: date-time
+    CreateSubscriptionSettingRequest:
+      required:
+        - active
+        - headerId
+        - subscriptionId
+        - value
+      type: object
+      properties:
+        active:
+          description: признак активности настройки подписки
+          type: boolean
+        subscriptionId:
+          description: идентификатор подписки информационной системы
+          type: string
+          format: uuid
+        headerId:
+          description: идентификатор заголовка сообщения
+          type: string
+          format: uuid
+        value:
+          type: string
+    SubscriptionSearchFilter:
+      required:
+        - active
+        - field
+        - limit
+        - offset
+        - operator
+        - type
+        - value
+      type: object
+      properties:
+        active:
+          description: признак активности подписки
+          type: boolean
+        type:
+          description: тип данных для фильтрации
+          type: integer
+          format: int32
+          default: 0
+        operator:
+          description: наименование оператора
+          type: string
+        field:
+          description: наименование поля записи в БД, к которому применяется фильтр
+          type: string
+        value:
+          description: значение для фильтрации
+          type: string
+        limit:
+          description: количество записей
+          type: integer
+          format: int32
+        offset:
+          description: смещение
+          type: integer
+          format: int32
+    PageSearchSubscriptionDTO:
+      type: object
+      properties:
+        data:
+          description: список результирующих данных по подпискам
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchSubscriptionDTO'
+        limit:
+          description: количество записей
+          type: integer
+          format: int32
+        offset:
+          description: смещение
+          type: integer
+          format: int32
+        total:
+          description: общее количество записей согласно примененному фильтру
+          type: integer
+          format: int32
+    SearchSubscriptionDTO:
+      type: object
+      properties:
+        id:
+          description: идентификатор подписки
+          type: string
+          format: uuid
+        active:
+          description: признак активности подписки
+          type: boolean
+        createdAt:
+          description: дата, время добавления записи в таблице
+          type: string
+          format: date-time
+        updatedAt:
+          description: дата, время обновления записи в таблице
+          type: string
+          format: date-time
+        recipientId:
+          description: идентификатор информационной системы
+          type: string
+          format: uuid
+        interactionId:
+          description: идентификатор информационного взаимодействия
+          type: string
+          format: uuid
+        startAt:
+          description: дата, время начала работы информационного взаимодействия
+          type: string
+          format: date-time
+        endAt:
+          description: дата, время окончания работы информационного взаимодействия
+          type: string
+          format: date-time
+        recipientCode:
+          description: код информационной системы
+          type: string
+        recipientName:
+          description: наименование информационной системы
+          type: string
+        interactionCode:
+          description: код информационного взаимодействия
+          type: string
+        interactionName:
+          description: наименование информационного взаимодействия
+          type: string
+    CreateRuleRequest:
+      required:
+        - headerId
+        - interactionId
+      type: object
+      properties:
+        active:
+          description: признак активности правила информационного взаимодействия
+          type: boolean
+        interactionId:
+          description: идентификатор информационного взаимодействия
+          type: string
+          format: uuid
+        headerId:
+          description: идентификатор заголовка сообщения
+          type: string
+          format: uuid
+    RuleSearchFilter:
+      required:
+        - field
+        - limit
+        - offset
+        - operator
+        - type
+        - value
+      type: object
+      properties:
+        active:
+          description: признак активности правила информационного взаимодействия
+          type: boolean
+        type:
+          description: тип данных для фильтрации
+          default: 0
+          type: integer
+          format: int32
+        operator:
+          description: наименование оператора
+          type: string
+        field:
+          description: наименование поля записи в БД, к которому применяется фильтр
+          type: string
+        value:
+          description: значение для фильтрации
+          type: string
+        limit:
+          description: количество записей
+          type: integer
+          format: int32
+        offset:
+          description: смещение
+          type: integer
+          format: int32
+    PageSearchRuleDTO:
+      type: object
+      properties:
+        data:
+          description: список правил информационного взаимодействия
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchRuleDTO'
+        limit:
+          description: количество записей
+          type: integer
+          format: int32
+        offset:
+          description: смещение
+          type: integer
+          format: int32
+        total:
+          description: общее количество записей
+          type: integer
+          format: int32
+    PageGroupedRuleDTO:
+      type: object
+      properties:
+        data:
+          description: сгруппированный список правил информационного взаимодействия
+          type: array
+          items:
+            $ref: '#/components/schemas/GroupedRuleDTO'
+        limit:
+          description: количество записей
+          type: integer
+          format: int32
+        offset:
+          description: смещение
+          type: integer
+          format: int32
+        total:
+          description: общее количество записей
+          type: integer
+          format: int32
+    SearchRuleDTO:
+      type: object
+      properties:
+        id:
+          description: идентификатор записи в таблице
+          type: string
+          format: uuid
+        active:
+          description: признак активности правила
+          type: boolean
+        createdAt:
+          description: дата, время добавления записи в таблице
+          type: string
+          format: date-time
+        updatedAt:
+          description: дата, время обновления записи в таблице
+          type: string
+          format: date-time
+        interactionId:
+          description: идентификатор информационного взаимодействия
+          type: string
+          format: uuid
+        interactionCode:
+          description: код информационного взаимодействия
+          type: string
+        interactionName:
+          description: наименование информационного взаимодействия
+          type: string
+        headerId:
+          description: идентификатор заголовка сообщения
+          type: string
+          format: uuid
+        headerCode:
+          description: код заголовка сообщения
+          type: string
+        headerName:
+          description: наименование заголовка сообщения
+          type: string
+        linkDirectoryId:
+          description: идентификатор справочника, соответствующего заголовку в правиле
+          type: string
+          format: uuid
+    GroupedRuleDTO:
+      type: object
+      properties:
+        interactionId:
+          description: идентификатор информационного взаимодействия
+          type: string
+          format: uuid
+        interactionCode:
+          description: код информационного взаимодействия
+          type: string
+        interactionName:
+          description: наименование информационного взаимодействия
+          type: string
+        linkDirectoryIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+        headers:
+          type: array
+          items:
+            $ref: '#/components/schemas/HeaderMessageDTO'
+    HeaderMessageDTO:
+      type: object
+      properties:
+        id:
+          description: id заголовка
+          type: uuid
+        code:
+          description: код заголовка
+          type: string
+        name:
+          description: значение заголовка
+          type: string
+    RecipientHeaderDTO:
+      type: object
+      properties:
+        headerCode:
+          description: код заголовка
+          type: string
+        value:
+          description: значение заголовка
+          type: string
+    RecipientRequest:
+      required:
+        - ceType
+      type: object
+      properties:
+        ceType:
+          description: код информационного взаимодействия
+          type: string
+        headers:
+          type: array
+          items:
+            $ref: '#/components/schemas/RecipientHeaderDTO'
+    RecipientDTO:
+      type: object
+      properties:
+        code:
+          description: код (мнемоник) информационной системы
+          type: string
+    SenderRequest:
+      required:
+        - ceType
+        - ceSource
+      type: object
+      properties:
+        ceType:
+          description: код информационного взаимодействия
+          type: string
+        ceSource:
+          description: код информационной системы
+          type: string
+    CreateRecordRequest:
+      required:
+        - active
+        - code
+        - directoryId
+        - name
+      type: object
+      properties:
+        active:
+          description: признак активности записи справочника
+          type: boolean
+        directoryId:
+          description: идентификатор справочника
+          type: string
+          format: uuid
+        code:
+          description: значение кода для записи в таблице
+          type: string
+        name:
+          description: наименование для записи в таблице
+          type: string
+    RecordSearchFilters:
+      required:
+        - active
+        - directoryId
+        - field
+        - limit
+        - offset
+        - operator
+        - type
+        - value
+      type: object
+      properties:
+        directoryId:
+          description: идентификатор справочника, определяет таблицу БД
+          type: string
+          format: uuid
+        active:
+          description: признак активности записи в справочнике
+          type: boolean
+        limit:
+          description: количество записей
+          type: integer
+          format: int32
+        offset:
+          description: смещение
+          type: integer
+          format: int32
+        type:
+          description: тип данных для фильтрации
+          default: 0
+          type: integer
+          format: int32
+        operator:
+          description: наименование оператора
+          type: string
+        field:
+          description: наименование поля записи в БД, к которому применяется фильтр
+          type: string
+        value:
+          description: значение для фильтрации
+          type: string
+    PageRecordDTO:
+      type: object
+      properties:
+        data:
+          description: список записей справочника согласно примененному фильтру
+          type: array
+          items:
+            $ref: '#/components/schemas/RecordDTO'
+        limit:
+          description: количество записей
+          type: integer
+          format: int32
+        offset:
+          description: смещение
+          type: integer
+          format: int32
+        total:
+          description: общее количество записей согласно фильтру
+          type: integer
+          format: int32
+    TokenRequest:
+      required:
+        - data
+        - reqType
+      type: object
+      properties:
+        reqType:
+          description: Код типа запроса токена 0-Bycode, 1-refresh
+          type: integer
+          format: int32
+        data:
+          description: Значение
+          type: string
+    Token:
+      type: object
+      properties:
+        type:
+          description: Доступ
+          type: string
+        access:
+          description: Тип токена
+          type: string
+        refresh:
+          description: Тип токена
+          type: string
+        expiresIn:
+          description: время действия токена
+          type: integer
+          format: int64
+    PermissionDTO:
+      type: object
+      properties:
+        directoryId:
+          type: string
+          format: uuid
+        directoryName:
+          type: string
+        pathName:
+          type: string
+        rights:
+          type: array
+          items:
+            $ref: '#/components/schemas/RightDTO'
+    RightDTO:
+      type: object
+      properties:
+        rightId:
+          description: идентификатор права
+          type: string
+          format: uuid
+        rightCode:
+          description: код права
+          type: string
+        rightName:
+          description: наименование права
+          type: string
+    RolePermissionsDTO:
+      type: object
+      properties:
+        roleName:
+          description: наименование роли
+          type: string
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/PermissionDTO'
+    PageSearchSubscriptionSettingDTO:
+      type: object
+      properties:
+        data:
+          description: список настроек подписок согласно фильтру
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchSubscriptionSettingDTO'
+        limit:
+          description: количество записей
+          type: integer
+          format: int32
+        offset:
+          description: смещение
+          type: integer
+          format: int32
+        total:
+          description: общее количество записей согласно фильтру и пагинации
+          type: integer
+          format: int32
+    SearchSubscriptionSettingDTO:
+      type: object
+      properties:
+        id:
+          description: идентификатор настройки подписки
+          type: string
+          format: uuid
+        active:
+          description: признак активности настройки подписки
+          type: boolean
+        createdAt:
+          description: дата, время добавления записи в таблице
+          type: string
+          format: date-time
+        updatedAt:
+          description: дата, время обновления записи в таблице
+          type: string
+          format: date-time
+        subscriptionId:
+          description: идентификатор подписки информационной системы
+          type: string
+          format: uuid
+        headerId:
+          description: идентификатор заголовка сообщения
+          type: string
+          format: uuid
+        interactionId:
+          description: идентификатор информационного взаимодействия
+          type: string
+          format: uuid
+        value:
+          description: идентификатор записи в справочнике
+          type: string
+        headerCode:
+          description: код заголовка сообщения
+          type: string
+        headerName:
+          description: наименование заголовка сообщения
+          type: string
+    LinkHeaderDirectoryDTO:
+      type: object
+      properties:
+        id:
+          description: идентификатор записи
+          type: string
+          format: uuid
+        active:
+          description: признак активности записи
+          type: boolean
+        createdAt:
+          description: дата, время добавления записи в таблице
+          type: string
+          format: date-time
+        updatedAt:
+          description: дата, время обновления записи в таблице
+          type: string
+          format: date-time
+        headerId:
+          description: идентификатор заголовка сообщения
+          type: string
+          format: uuid
+        directoryId:
+          description: идентификатор записи в справочнике
+          type: string
+          format: uuid
+    DirectoryDTO:
+      type: object
+      properties:
+        id:
+          description: идентификатор справочника
+          type: string
+          format: uuid
+        active:
+          description: признак активности справочника
+          type: boolean
+        showActive:
+          description: признак отображения справочника как таб в UI
+          type: boolean
+        createdAt:
+          description: дата и время создания справочника
+          type: string
+          format: date-time
+        updatedAt:
+          description: дата и время обновления справочника
+          type: string
+          format: date-time
+        pathName:
+          description: наименование таблицы, соответствующей справочнику
+          type: string
+        name:
+          description: наименование справочника
+          type: string
+        type:
+          description: тип справочника, используется в UI
+          type: string
+    UserInfo:
+      type: object
+      properties:
+        email:
+          description: электронная почта пользователя
+          type: string
+        snils:
+          description: СНИЛС пользователя
+          type: string
+        lastName:
+          description: фамилия пользователя
+          type: string
+        firstName:
+          description: имя пользователя
+          type: string
+        enable:
+          description: активность пользователя
+          type: boolean
+    DirectoryRecordChangeLogFilter:
+      type: object
+      properties:
+        username:
+          type: string
+        directoryId:
+          type: string
+          format: uuid
+        directoryRecordId:
+          type: string
+          format: uuid
+        directoryName:
+          type: string
+        interactionCode:
+          type: string
+        interactionName:
+          type: string
+        systemCode:
+          type: string
+        systemName:
+          type: string
+        logType:
+          type: string
+          enum:
+            - CREATED
+            - UPDATED
+            - DELETED
+            - RECOVERED
+        interval:
+          $ref: '#/components/schemas/DirectoryRecordChangeLogInterval'
+    DirectoryRecordChangeLogInterval:
+      type: object
+      properties:
+        startDate:
+          type: string
+          format: date-time
+        endDate:
+          type: string
+          format: date-time
+    AuditUserDTO:
+      type: object
+      properties:
+        email:
+          type: string
+        username:
+          type: string
+        lastName:
+          type: string
+        firstName:
+          type: string
+    DirectoryRecordChangeLogDTO:
+      type: object
+      properties:
+        directoryId:
+          type: string
+          format: uuid
+        directoryRecordId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        auditUserDTO:
+          $ref: '#/components/schemas/AuditUserDTO'
+        directoryName:
+          type: string
+        interactionCode:
+          type: string
+        interactionName:
+          type: string
+        systemCode:
+          type: string
+        systemName:
+          type: string
+        logType:
+          type: string
+          enum:
+            - CREATED
+            - UPDATED
+            - DELETED
+            - RECOVERED
+        changedField:
+          $ref: '#/components/schemas/DirectoryRecordChangedField'
+    DirectoryRecordChangedField:
+      type: object
+      properties:
+        name:
+          type: string
+        oldValue:
+          type: object
+        currentValue:
+          type: object
+    PageDirectoryRecordChangeLogDTO:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/DirectoryRecordChangeLogDTO'
+        limit:
+          type: integer
+          format: int32
+        offset:
+          type: integer
+          format: int32
+        total:
+          type: integer
+          format: int32
+    SendingSearchFilter:
+      required:
+        - active
+        - field
+        - limit
+        - offset
+        - operator
+        - type
+        - value
+      type: object
+      properties:
+        active:
+          type: boolean
+        type:
+          type: integer
+          format: int32
+        operator:
+          type: string
+        field:
+          type: string
+        value:
+          type: string
+        limit:
+          minimum: 1
+          type: integer
+          format: int32
+        offset:
+          minimum: 0
+          type: integer
+          format: int32
+    PageSearchSendingDTO:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchSendingDTO'
+        limit:
+          type: integer
+          format: int32
+        offset:
+          type: integer
+          format: int32
+        total:
+          type: integer
+          format: int32
+    SearchSendingDTO:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        active:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        senderId:
+          type: string
+          format: uuid
+        interactionId:
+          type: string
+          format: uuid
+        startAt:
+          type: string
+          format: date-time
+        endAt:
+          type: string
+          format: date-time
+        senderCode:
+          type: string
+        senderName:
+          type: string
+        interactionCode:
+          type: string
+        interactionName:
+          type: string
+    AuditFilterDTO:
+      type: object
+      properties:
+        directories:
+          type: array
+          items:
+            $ref: '#/components/schemas/Directories'
+        interactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Interactions'
+        systems:
+          type: array
+          items:
+            $ref: '#/components/schemas/Systems'
+    Directories:
+      type: object
+      properties:
+        directoryName:
+          description: наименование сущности
+          type: string
+    Interactions:
+      type: object
+      properties:
+        interactionName:
+          description: наименование взаимодействия
+          type: string
+    Systems:
+      type: object
+      properties:
+        systemName:
+          description: наименование информационной системы
+          type: string

@@ -1,0 +1,119 @@
+@import url('./normalize.css');
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+.ReactModal__Content {
+    border-radius: 8px;
+}
+
+#root {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    /* overflow: clip; */
+    flex-grow: 1;
+}
+/* Colors */
+:root {
+  /* Blue */
+  --blue-120per: #3C5099;
+  --blue-100per: #3256B0;
+  --blue-50per: #6C8BC9;
+  --blue-40per: #99C0F0;
+  --blue-20per: #E4ECFC;
+  --blue-10per: #F5F8FE;
+  --blue-5per: #FAFCFF;
+  /* Red */
+  --red-100per: #F04B65;
+  --red-text-100per: #C61C1C;
+  --burgundy-100per: #AB2D2E;
+  --red-10per: #FDECEF;
+  /* Orange */
+  --orange-100per: #FDA52C ;
+  --orange-75per: #EF8C03 ;
+  --orange-50per: #FFF9E5 ;
+  --orange-10per: #FFFCF2 ;
+  --orange-5per: #FFFCF2 ;
+  /* Green */
+  --green-100per: #37C570 ;
+  --green-flowkit: #29CC6A;
+  --green-10per: #EBF9F1 ;
+  /* Black */
+  --black-100per: #333333 ;
+  --black-50per: #7B7D8A ;
+  --black-40per: rgba(51, 51, 51, 0.4) ;
+  --black-35per: #9FA2B4 ;
+  --black-20per: #C7D2E3 ;
+  --black-15per: #C3C6CE ;
+  --black-10per: #E5E5EB ;
+  --black-5per: #F5F7FA ;
+  /* White */
+  --white-100per: #FFF ;
+  --white-60per: rgba(255, 255, 255, 0.6);
+  /* Purple */
+  --purple-100per: #944EE0 ;
+  --purple-10per: #F5EEFB ;
+  /* Gray */
+  --gray-100per: rgba(51, 51, 51, 0.4);
+}
+
+:root.orange {
+    /* Blue */
+    --blue-120per: #DD8000;
+    --blue-100per: #3256B0;
+    --blue-50per: #6C8BC9;
+    --blue-40per: #99C0F0;
+    --blue-20per: #E4ECFC;
+    --blue-10per: #FFFCF2;
+    --blue-5per: #FFF9E5;
+    /* Red */
+    --red-100per: #F04B65;
+    --red-text-100per: #C61C1C;
+    --burgundy-100per: #AB2D2E;
+    --red-10per: #FDECEF;
+    /* Orange */
+    --orange-100per: #FDA52C ;
+    --orange-75per: #EF8C03 ;
+    --orange-50per: #FFF9E5 ;
+    --orange-10per: #FFFCF2 ;
+    --orange-5per: #FFFCF2 ;
+    /* Green */
+    --green-100per: #37C570 ;
+    --green-flowkit: #29CC6A;
+    --green-10per: #EBF9F1 ;
+    /* Black */
+    --black-100per: #333333 ;
+    --black-50per: #7B7D8A ;
+    --black-40per: rgba(51, 51, 51, 0.4) ;
+    --black-35per: #9FA2B4 ;
+    --black-20per: #C7D2E3 ;
+    --black-15per: #C3C6CE ;
+    --black-10per: #E5E5EB ;
+    --black-5per: #F5F7FA ;
+    /* White */
+    --white-100per: #FFF ;
+    --white-60per: rgba(255, 255, 255, 0.6);
+    /* Purple */
+    --purple-100per: #944EE0 ;
+    --purple-10per: #F5EEFB ;
+    /* Gray */
+    --gray-100per: rgba(51, 51, 51, 0.4);
+}
+
+/* Fonts */
+h1 {
+	font-family: 'Golos H1 DemiBold 24x32';
+}
+h2 {
+  font-family: 'Golos H2 DemiBold 22x28';
+  font-size: 18px;
+}
+h3 {
+  font-family: 'Golos H3 Medium 20x28';
+}
+h4 {
+  font-family: 'Golos H4 DemiBold 18x24';
+}

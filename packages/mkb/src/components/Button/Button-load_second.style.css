@@ -1,0 +1,66 @@
+.button__second-download {
+    width: 123px;
+    height: 40px;
+    min-width: 123px;
+    min-height: 40px;
+    padding: 0 23px 0 19px;
+    background: var(--white-100per);
+    border: 1px solid var(--black-10per);
+    border-radius: 4px;
+    font-family: 'Golos 14pt Medium 14x20';
+    font-size: 14px;
+    color: var(--blue-100per);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    outline: none;
+}
+
+.button__second-download path {
+  fill: var(--blue-50per);
+}
+
+.button__second-download:hover {
+  padding: 0 23px 0 19px;
+	background: var(--blue-10per);
+	border: 1px solid var(--blue-50per);
+	outline: none;
+
+}
+
+.button__second-download:hover path {
+  fill: var(--blue-100per);
+}
+
+.button__second-download:focus {
+  padding: 0 21px 0 17px;
+	background: var(--white-100per);
+	border: 3px solid var(--blue-40per);
+	outline: none;
+}
+
+.button__second-download:focus path {
+  fill: var(--blue-120per);
+}
+
+.button__second-download:active {
+  padding: 0 23px 0 19px;
+	background: var(--blue-20per);
+	border: 1px solid var(--blue-120per);
+  outline: none;
+}
+
+.button__second-download:active path {
+  fill: var(--blue-50per);
+}
+
+.button__second-download:disabled {
+  padding: 0 25px 0 21px;
+	background: var(--black-5per);
+	outline: 1px solid var(--black-10per);
+	color: var(--black-35per);
+}
+
+.button__second-download:disabled path {
+  fill: var(--black-15per);
+}

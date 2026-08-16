@@ -1,0 +1,115 @@
+/*@media (min-width: 1140px) {*/
+:host([slot="header_relation"]) {
+    grid-area: a;;
+}
+
+:host([slot="header_property"]) {
+    grid-area: b;
+}
+
+svg {
+    width: 100%;
+    height: 100%;
+}
+
+p {
+    margin: 0;
+}
+
+.container {
+    /*display: flex;*/
+    /*flex-direction: row;*/
+    /*justify-content: space-between;*/
+    /*width: 100%;*/
+    /*padding: 0 5.49vw;*/
+}
+
+.left, .right {
+    /*display: flex;*/
+    /*flex-direction: row;*/
+    /*flex-grow: 1;*/
+    /*align-self: center;*/
+}
+
+.left {
+    grid-area: a;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+}
+
+.logo_tite {
+    color: var(--Text-Helper, #66727F);
+
+    /* Plain Text */
+    font-family: 'Lato', sans-serif;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 24px; /* 150% */
+}
+
+.right {
+    grid-area: a;
+    /*justify-content: end;*/
+}
+
+.catalog {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    margin-right: 16px;
+    align-self: center;
+}
+
+.logo {
+    width: 56px;
+    height: 56px;
+    align-self: center;
+}
+
+.subject {
+    margin-left: 32px;
+    color: var(--Gosblue, #0D4CD3);
+    text-align: center;
+    font-family: Lato, serif;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 150%;
+    align-self: center;
+}
+
+.registration, .login {
+    width: 125px;
+    height: 36px;
+    color: var(--Gosblue, #0D4CD3);
+    text-align: center;
+    font-family: Lato, serif;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 150%;
+    border-radius: 8px;
+    background: var(--Tagline, #E4ECFD);
+    border: none;
+    box-sizing: border-box;
+    cursor: pointer;
+    padding: 0 4px;
+}
+
+.login {
+    width: 78px;
+    color: var(--Gosblue, #0D4CD3);
+    text-align: center;
+
+    /* Plain Text */
+    font-family: 'Lato', sans-serif;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 24px; /* 150% */
+}
+
+/*}*/

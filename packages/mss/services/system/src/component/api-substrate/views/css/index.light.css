@@ -1,0 +1,46 @@
+.system {
+    /* background: rgb(153, 209, 251); */
+    height: 100vh;
+    /* background: url('/dex/img/cat.png'); */
+}
+
+api-button {
+    border-radius: 0.21vw;
+    width: 3.02vw;
+    background: transparent;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    border: 0.1vw solid rgba(118, 148, 244, 0.45);
+    cursor: pointer;
+}
+
+api-header {
+    display: flex;
+    width: 100%;
+    gap: 0.52vw;
+    text-align: center;
+    align-items: center;
+    justify-content: space-between;
+}
+
+api-footer {
+    display: flex;
+    justify-content: center;
+    height: 100%;
+    gap: 1.98vw;
+    text-align: center;
+    align-items: center;
+    font-size: 0.99vw;
+}
+
+api-footer a {
+    font-size: 0.99vw;
+    color: rgba(var(--colorT), var(--colorT), var(--colorT), 0.5);
+    text-decoration: none;
+}
+
+lib-markdown {
+    height: 30vw;
+    width: 100%;
+}

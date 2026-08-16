@@ -1,0 +1,82 @@
+.wrapper {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	width: 256px;
+}
+
+.selectListWrapper {
+	display: flex;
+	align-items: center;
+	margin: 14px 0 8px;
+	justify-content: end;
+}
+
+.text {
+	font-family: 'Golos 14pt Medium 14x20';
+	color: var(--blue-100per);
+	text-decoration: none;
+	font-style: normal;
+	font-weight: 500;
+	font-size: 14px;
+	line-height: 20px;
+	display: flex;
+	align-items: center;
+	text-align: center;
+	letter-spacing: -0.01em;
+	cursor: pointer;
+}
+
+.selectListWrapper path {
+	fill: var(--blue-100per);
+}
+
+.selectMenuContainer {
+	opacity: 0;
+	display: none;
+}
+
+.selectMenuContainerActive {
+	opacity: 1;
+	display: flex;
+	z-index: 6;
+}
+
+.closeWrapper {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100%;
+	opacity: 0.5;
+	z-index: 4;
+}
+
+.rotateArrow {
+	width: 24px;
+	height: 24px;
+	transition: 0.25s linear;
+	cursor: pointer;
+}
+
+.rotateArrowActive {
+	transform: rotate(180deg);
+	transition: 0.25s linear;
+}
+
+.menu {
+	height: 100%;
+}
+
+.filterBox {
+	margin-top: 26px;
+	box-sizing: border-box;
+	/* height: 535px; */
+	height: 69vh;
+	overflow-y: auto;
+}
+
+.h4 {
+	text-align: end;
+	margin-top: 0;
+}

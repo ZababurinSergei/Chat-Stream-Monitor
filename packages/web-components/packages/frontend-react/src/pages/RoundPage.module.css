@@ -1,0 +1,326 @@
+/* components/round-page/css/index.css адаптированные */
+.roundPageContainer {
+    width: inherit;
+    margin: 0 auto;
+    padding: var(--space-xl);
+    min-width: 22dvw;
+}
+
+.pageHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-lg);
+}
+
+.pageHeader h1 {
+    margin: 0;
+    color: var(--text);
+    font-size: 1.5rem;
+}
+
+.userInfo {
+    background: var(--primary);
+    color: white;
+    padding: var(--space-sm) var(--space);
+    border-radius: var(--radius);
+    font-weight: 500;
+}
+
+.backBtn {
+    background: var(--surface-100);
+    color: var(--text);
+    border: 1px solid var(--border);
+    padding: var(--space-sm) var(--space);
+    border-radius: var(--radius);
+    margin-bottom: var(--space-xl);
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.backBtn:hover {
+    background: var(--surface-200);
+    border-color: var(--border-dark);
+}
+
+.gameArea {
+    text-align: center;
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    width: 20dvw;
+    margin: auto;
+}
+
+.gooseContainer {
+    margin-bottom: var(--space-xl);
+    font-size: 0.33dvw;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.gooseImage {
+    display: inline-block;
+    padding: var(--space);
+    border-radius: var(--radius-lg);
+    transition: var(--transition);
+    background: aqua;
+}
+
+.gooseImage.clickable {
+    cursor: pointer;
+}
+
+.gooseImage.clickable:hover {
+    transform: scale(1.05);
+}
+
+.gooseImage.clickable:active {
+    transform: scale(0.95);
+}
+
+.gooseImage.tapEffect {
+    animation: tapPulse 0.2s ease-in-out;
+}
+
+@keyframes tapPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+}
+
+/* Стили для ASCII арта гуся */
+.gooseArt {
+    font-family: 'Courier New', monospace;
+    line-height: 1.2;
+    letter-spacing: 0;
+    background: aqua;
+    padding: 1dvw;
+    border-radius: 8px;
+    display: inline-block;
+}
+
+.artLine {
+    white-space: pre;
+    margin: 0;
+    padding: 0;
+}
+
+.statusMessage {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: var(--space);
+    padding: var(--space);
+    border-radius: var(--radius);
+}
+
+.statusMessage.cooldown {
+    background: var(--warning-50);
+    color: var(--warning-dark);
+    border: 1px solid var(--warning);
+}
+
+.statusMessage.active {
+    background: var(--success-50);
+    color: var(--success-dark);
+    border: 1px solid var(--success);
+}
+
+.statusMessage.finished {
+    background: var(--surface-100);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+}
+
+.timer {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: var(--space);
+    font-family: var(--font-mono);
+}
+
+.userScore {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--primary);
+    background: var(--primary-50);
+    padding: var(--space);
+    border-radius: var(--radius);
+    border: 1px solid var(--primary-100);
+    margin-bottom: var(--space-lg);
+}
+
+.roundStats {
+    margin-top: var(--space-lg);
+}
+
+.statsDivider {
+    height: 2px;
+    background: var(--border);
+    margin: var(--space-lg) 0;
+}
+
+.statRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-sm) 0;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.statRow:last-child {
+    border-bottom: none;
+}
+
+.statRow span:first-child {
+    color: var(--text-secondary);
+}
+
+.statRow span:last-child {
+    font-weight: 600;
+    color: var(--text);
+}
+
+.roundStatus {
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-sm);
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.roundStatus.statusCooldown {
+    background: var(--warning-50);
+    color: var(--warning-dark);
+}
+
+.roundStatus.statusActive {
+    background: var(--success-50);
+    color: var(--success-dark);
+}
+
+.roundStatus.statusFinished {
+    background: var(--surface-100);
+    color: var(--text-secondary);
+}
+
+.winnerInfo {
+    color: var(--accent);
+    font-weight: 700;
+}
+
+.loading {
+    text-align: center;
+    padding: var(--space-xl);
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+/* Состояния загрузки и ошибок */
+.loadingState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space);
+    padding: var(--space-xl);
+    color: var(--text-secondary);
+}
+
+.spinner {
+    width: 32px;
+    height: 32px;
+    border: 3px solid var(--surface-200);
+    border-top: 3px solid var(--primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.errorState {
+    text-align: center;
+    padding: var(--space-xl);
+    background: var(--danger-50);
+    border: 1px solid var(--danger);
+    border-radius: var(--radius);
+}
+
+.errorIcon {
+    font-size: 2rem;
+    margin-bottom: var(--space);
+}
+
+.retryBtn {
+    background: var(--danger);
+    color: white;
+    border: none;
+    padding: var(--space-sm) var(--space);
+    border-radius: var(--radius);
+    cursor: pointer;
+    margin-top: var(--space);
+}
+
+.retryBtn:hover {
+    background: var(--danger-dark);
+}
+
+.tapHint {
+    margin-top: var(--space-lg);
+    padding: var(--space);
+    background: var(--info-50);
+    color: var(--info-dark);
+    border-radius: var(--radius);
+    border: 1px solid var(--info);
+    font-size: 0.9rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .roundPageContainer {
+        padding: var(--space);
+    }
+
+    .pageHeader {
+        flex-direction: column;
+        gap: var(--space);
+        text-align: center;
+    }
+
+    .gameArea {
+        padding: var(--space-lg);
+    }
+
+    .gooseArt {
+        font-size: 0.8em;
+        padding: 2dvw;
+    }
+}
+
+@media (max-width: 480px) {
+    .roundPageContainer {
+        padding: var(--space-sm);
+    }
+
+    .gameArea {
+        padding: var(--space);
+    }
+
+    .gooseArt {
+        font-size: 0.7em;
+    }
+
+    .statusMessage {
+        font-size: 1.1rem;
+    }
+
+    .timer {
+        font-size: 1.25rem;
+    }
+}

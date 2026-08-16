@@ -1,0 +1,31 @@
+{
+  "name": "react-typescript-playground",
+  "version": "1.0.0",
+  "description": "For quick hacking with react / typescript",
+  "keywords": [],
+  "homepage": "https://codesandbox.io/s/react-ts",
+  "main": "src/index.tsx",
+  "dependencies": {
+    "@babel/runtime": "7.28.4",
+    "@types/react": "16.3.13",
+    "@types/react-dom": "16.0.5",
+    "antd": "6.0.1",
+    "react": "19.2.1",
+    "react-dom": "19.2.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.10.1",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "@types/react-dom/node-stream": "latest",
+    "@types/react-dom/server": "latest",
+    "@types/react-dom/test-utils": "latest"
+  },
+  "scripts": {
+    "start": "react-scripts-ts start",
+    "build": "react-scripts-ts build",
+    "test": "react-scripts-ts test --env=jsdom",
+    "eject": "react-scripts-ts eject"
+  }
+}

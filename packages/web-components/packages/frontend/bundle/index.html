@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Тестовые компоненты TypeScript</title>
+    <script type="module" src="./example.js"></script>
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+
+<div class="container">
+    <h1>🚀 Тестовые компоненты TypeScript</h1>
+
+    <div class="components-grid">
+        <div class="component-section">
+            <h2>🧩 Test Component A</h2>
+            <test-component-a
+                    id="test-component-a-1"
+                    title="Демо компонент A"
+                    data-source="demo">
+            </test-component-a>
+        </div>
+
+        <div class="component-section">
+            <h2>⭐ Test Component B</h2>
+            <test-component-b
+                    id="test-component-b-1"
+                    title="Демо компонент B"
+                    description="Компонент с рейтингом и функциями"
+                    rating="4">
+            </test-component-b>
+        </div>
+    </div>
+
+    <div class="demo-controls">
+        <h3>🎮 Демо управление компонентами</h3>
+
+        <div class="control-buttons">
+            <button onclick="sendMessageToComponentA('INCREMENT_COUNTER')">
+                Увеличить счетчик A
+            </button>
+            <button onclick="sendMessageToComponentA('ADD_ITEM', {item: 'Новый элемент'})">
+                Добавить элемент в A
+            </button>
+            <button onclick="sendMessageToComponentB('SET_RATING', {rating: 5})">
+                Установить рейтинг 5 в B
+            </button>
+            <button onclick="sendMessageToComponentB('TOGGLE_ACTIVE')">
+                Переключить активность B
+            </button>
+            <button onclick="getComponentAState()">
+                Получить состояние A
+            </button>
+            <button onclick="getComponentBInfo()">
+                Получить информацию B
+            </button>
+        </div>
+
+        <div class="info-panel">
+            <h4>ℹ️ Информация о взаимодействии</h4>
+            <p>Компоненты общаются через метод <code>postMessage</code> и <code>getComponentAsync</code></p>
+            <pre id="demo-output">Жду действий...</pre>
+        </div>
+    </div>
+
+    <div class="component-section">
+        <h2>🧭 Navigation Manager</h2>
+        <navigation-manager id="navigation-manager"></navigation-manager>
+    </div>
+</div>
+</body>
+</html>

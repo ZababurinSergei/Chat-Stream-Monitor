@@ -1,0 +1,43 @@
+<div class="quick-filter-container">
+    <div class="filter-tags">
+        <button
+                class="filter-tag"
+                [class.active]="filter().onlyWithAlerts"
+                (click)="toggleAlertsFilter()"
+        >
+            ⚠️ Только с авариями
+        </button>
+
+        @for (status of statuses; track status.value) {
+        <button
+          class="filter-tag"
+          [class.active]="filter().status === status.value"
+          (click)="toggleStatusFilter(status.value)"
+        >
+        {{ status.icon }} {{ status.label }}
+        </button>
+        }
+
+        <div class="time-filter">
+            <label>Обновлены:</label>
+            <select
+                    [value]="filter().lastUpdated"
+                    (change)="onTimeFilterChange($event)"
+                    class="time-select"
+            >
+                <option value="all">За все время</option>
+                <option value="day">За сутки</option>
+                <option value="week">За неделю</option>
+                <option value="month">За месяц</option>
+            </select>
+        </div>
+
+        <button
+                class="clear-all"
+                (click)="clearAll()"
+                [disabled]="!hasActiveFilters()"
+        >
+            Очистить все
+        </button>
+    </div>
+</div>

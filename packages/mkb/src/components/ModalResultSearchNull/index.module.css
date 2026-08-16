@@ -1,0 +1,23 @@
+.nullWrapper {
+	/*width: 316px;*/
+	width: 100%;
+	max-height: 33px;
+	height: auto;
+	/* padding: 10px 16px 8px; */
+	background: #ffffff;
+	box-shadow: 0px 2px 8px rgba(0, 31, 141, 0.14);
+	border-radius: 8px;
+  position: absolute;
+  top: 65px;
+  left: 0px;
+	z-index: 12;
+	overflow: auto;
+	/* text-align: center; */
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.text {
+color: red;
+}

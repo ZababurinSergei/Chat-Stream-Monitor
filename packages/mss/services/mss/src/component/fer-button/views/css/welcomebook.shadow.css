@@ -1,0 +1,88 @@
+:host {
+    height: -moz-max-content;
+    height: max-content;
+    align-self: center;
+    width: -moz-fit-content;
+    width: auto;
+    margin: 0;
+    cursor: pointer;
+    --main-bg-color: blue;
+    --font-family: 'Rubik';
+    /*--text-color: #FFFFFF;*/
+    --font-size: 0.73vw;
+    /*--font-weight: 500;*/
+    --line-height: 0.89vw;
+    --stroke-width: 0;
+    /*--stroke-color: black;*/
+    --speed: 1s;
+    --easing: ease-in-out;
+    --animation-direction: normal;
+    --padding: .25em;
+    --margin: 1vh;
+    --letter-spacing: 0em;
+    --opacity: 0;
+}
+
+.word {
+    display: flex;
+    font-family: 'Rubik', serif;
+    font-style: normal;
+    text-transform: uppercase;
+    position: relative;
+    perspective: 5.21vw;
+    /*font-weight: var(--font-weight);*/
+    /*color: var(--text-color);*/
+    font-size: var(--font-size);
+    line-height: var(--line-height);
+    letter-spacing: var(--letter-spacing);
+    margin-right: var(--margin);
+    margin-left: var(--margin);
+    /*-webkit-text-fill-color: var(--text-color);*/
+    -webkit-text-stroke-width: var(--stroke-width);
+    /*-webkit-text-stroke-color: var(--stroke-color);*/
+    cursor: pointer;
+    color:whitesmoke;
+}
+
+.word__item {
+    animation-duration: var(--speed);
+    animation-timing-function: var(--easing);
+    animation-iteration-count: var(--count);
+    animation-direction: var(--animation-direction);
+    padding: 0 var(--padding);
+}
+
+.word__item--left {
+    transform-origin: center left;
+}
+
+.word__item--right {
+    transform-origin: center right;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.word__item_active-right {
+    animation-name: shrinkx;
+}
+
+.word__item_active-left {
+    animation-name: growx;
+}
+
+@keyframes shrinkx {
+    from {transform: scalex(1) skewx(0deg); opacity: 1}
+    to {
+        transform: scalex(0) skewx(0);
+        opacity: var(--opacity);
+    }
+}
+
+@keyframes growx {
+    from {transform: scalex(0) skewx(0); opacity: var(--opacity)}
+    to {
+        transform: scalex(1) skewx(0);
+        opacity: 1
+    }
+}

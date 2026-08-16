@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AiDataTable - Тестовый пример</title>
+
+    <!-- ============================================================
+         Подключаем библиотеку @infoenergo/infoenergo-ui
+         ============================================================ -->
+    <script type="importmap">
+        {
+            "imports": {
+                "vue": "https://cdn.jsdelivr.net/npm/vue@3.5.25/dist/vue.esm-browser.prod.js",
+                "naive-ui": "https://cdn.jsdelivr.net/npm/naive-ui@2.44.1/dist/index.prod.mjs",
+                "@infoenergo/infoenergo-ui": "./infoenergo-ui/dist/infoenergo-ui.mjs",
+                "@infoenergo/infoenergo-ui/styles": "./infoenergo-ui/dist/infoenergo-ui.css",
+                "immer": "https://cdn.jsdelivr.net/npm/immer@11.1.15/+esm",
+                "zustand": "https://cdn.jsdelivr.net/npm/zustand@4.5.2/+esm",
+                "zustand/middleware": "https://cdn.jsdelivr.net/npm/zustand@4.5.2/middleware/+esm",
+                "zustand/middleware/immer": "https://cdn.jsdelivr.net/npm/zustand@4.5.2/middleware/immer/+esm"
+            }
+        }
+    </script>
+
+    <!-- ============================================================
+         Подключаем стили библиотеки и пользовательские стили
+         ============================================================ -->
+    <link rel="stylesheet" href="./infoenergo-ui/dist/infoenergo-ui.css" />
+</head>
+<body>
+
+<div id="app" class="app-container"></div>
+<div class="panel-body" id="logContainer" style="font-family:monospace;font-size:11px;max-height:400px;overflow-y:auto;background:#f8f9fc;border-radius:6px;padding:8px;"></div>
+<div class="panel-body" id="tablesList"></div>
+<!-- ============================================================
+MAIN SCRIPT — подключаем модуль приложения
+============================================================ -->
+<script type="module" src="./infoenergo-app.js"></script>
+
+</body>
+</html>

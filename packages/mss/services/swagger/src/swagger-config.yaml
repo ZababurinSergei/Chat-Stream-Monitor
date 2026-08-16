@@ -1,0 +1,4 @@
+---
+url: "https://metamart-dev.helpms.ru/mss.yaml"
+dom_id: "#swagger-ui"
+validatorUrl: "https://metamart-dev.helpms.ru/validator"

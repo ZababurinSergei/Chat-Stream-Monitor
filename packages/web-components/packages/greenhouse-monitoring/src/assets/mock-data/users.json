@@ -1,0 +1,34 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "specialist",
+      "password": "spec123",
+      "role": "specialist",
+      "name": "Иванов Алексей",
+      "email": "a.ivanov@greenhouse.ru",
+      "phone": "+7 (495) 123-45-67",
+      "lastLogin": "2024-01-20T09:15:00Z"
+    },
+    {
+      "id": 2,
+      "username": "senior",
+      "password": "senior456",
+      "role": "senior-specialist",
+      "name": "Петрова Светлана",
+      "email": "s.petrova@greenhouse.ru",
+      "phone": "+7 (495) 987-65-43",
+      "lastLogin": "2024-01-20T08:30:00Z"
+    },
+    {
+      "id": 3,
+      "username": "admin",
+      "password": "admin789",
+      "role": "senior-specialist",
+      "name": "Сидоров Павел",
+      "email": "p.sidorov@greenhouse.ru",
+      "phone": "+7 (495) 555-35-35",
+      "lastLogin": "2024-01-19T16:45:00Z"
+    }
+  ]
+}

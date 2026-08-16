@@ -1,0 +1,18 @@
+{
+  "verbose": true,
+  "ignore": [
+    ".git",
+    ".idea",
+    ".jsonenv",
+    "logs",
+    "node_modules",
+    "jspm_packages",
+    ".npm",
+    "typings"
+  ],
+  "watch": [
+    "./**"
+  ],
+  "ext": "mjs js css json html tsx ts",
+  "delay": 10
+}

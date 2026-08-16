@@ -1,0 +1,84 @@
+{
+  "Пустой объект": {
+    "name": "Пустой объект",
+    "scripts": [],
+    "layout": {
+      "leftPanel": {
+        "width": 350,
+        "visible": true
+      },
+      "rightPanel": {
+        "width": 350,
+        "visible": true
+      }
+    },
+    "timestamp": "2025-04-29T09:34:36.503Z"
+  },
+  "Не обновляем ./app -> генерируем промт": {
+    "name": "Не обновляем ./app -> генерируем промт",
+    "scripts": [
+      "1-analyze",
+      "2_analyze-app:system:rm_./repo-init-state.txt",
+      "3_generate-snapshot:quantum-parser.mjs--snapshot",
+      "3-config",
+      "4-prompts",
+      "5-full-prompt",
+      "6-validate"
+    ],
+    "layout": {
+      "leftPanel": {
+        "width": 350,
+        "visible": true
+      },
+      "rightPanel": {
+        "width": 350,
+        "visible": true
+      }
+    },
+    "timestamp": "2025-05-02T14:57:49.443Z"
+  },
+  "Обновляем ./app -> генерируем промт": {
+    "name": "Обновляем ./app -> генерируем промт",
+    "scripts": [
+      "migrate:run",
+      "1-analyze",
+      "2_analyze-app:system:rm_./repo-init-state.txt",
+      "3_generate-snapshot:quantum-parser.mjs--snapshot",
+      "3-config",
+      "4-prompts",
+      "5-full-prompt",
+      "6-validate"
+    ],
+    "layout": {
+      "leftPanel": {
+        "width": 350,
+        "visible": true
+      },
+      "rightPanel": {
+        "width": 350,
+        "visible": true
+      }
+    },
+    "timestamp": "2025-05-02T14:58:36.013Z"
+  },
+  "Не обновляем ./app -> обновляем ./presets -> обновляем ./app": {
+    "name": "Не обновляем ./app -> обновляем ./presets -> обновляем ./app",
+    "scripts": [
+      "1-analyze",
+      "migrate:replace",
+      "migrate:load",
+      "migrate:run"
+    ],
+    "layout": {
+      "leftPanel": {
+        "width": 350,
+        "visible": true
+      },
+      "rightPanel": {
+        "width": 350,
+        "visible": true
+      }
+    },
+    "timestamp": "2025-05-02T15:27:41.070Z"
+  }
+}

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MSS</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes" />
+    <meta property="og:site_name" content="markdown" />
+    <meta property="og:locale" content="ru_RU" />
+    <meta property="og:type" content="contract" />
+    <meta property="og:title" content="markdown" />
+    <meta property="og:description" content="markdown" />
+    <meta property="og:url" content="https://zababurinsv.github.io/design/" />
+    <meta property="og:image" content="https://i.imgur.com/pSrPUkJ.jpg" />
+    <meta property="og:image:width" content="537" />
+    <meta property="og:image:height" content="240" />
+    <link rel="shortcut icon"
+          href="data:image/png;base64, AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAbbv+DGW3/mRlt/5kZbf+ZGq6/hIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGa3/ohkt/7/Zbj//2S3/v9lt/6WAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGm5/iRlt/74Zbj//2W4//9luP//Zbf++mi4/i4gIPciGhr24hsb9uwbG/bsGhr24CEh9xoAAAAAAAAAAAAAAABnuP5mZLf+/2W4//9luP//Zbj//2S3/v9muP5yGBj2rhMT9v8TE/b/ExP2/xMT9f8YGPWkAAAAAAAAAAAAAAAAb7z/BGW3/tZluP//Zbj//2W4//9lt/7gJzH3ShMT9f8TE/b/ExP2/xMT9v8TE/b/ExP1/CAg9joAAAAAAAAAAAAAAABmuP5GZLf+6GS3/uhkt/7oZbf+UhgY9YQSEvX/ExP2/xMT9v8TE/b/ExP2/xIS9f8aGvZ8AAAAAD4++gQgIPZ6IiL2hiIi9oYgIPZ8KCj5BAAAAAAtLfgUFBT17BMT9v8TE/b/ExP2/xMT9v8VFfXoLCz4DgAAAAAaGvZqEhL1/xMT9v8TE/b/EhL1/xsb9nIAAAAAAAAAABwc9m4SEvX/ExP2/xMT9v8SEvX/HR32ZAAAAAAnJ/gSFRX16hMT9v8TE/b/ExP2/xMT9v8UFPXuJyf4Fp2xlAKNnqUYLC/mfhYW83ATE/VuFxf1aDc3+gIAAAAAGBj1fhIS9f8TE/b/ExP2/xMT9v8TE/b/ExP1/xkZ9YaGn3yIhZ57/4Wee/+Gn3yKAAAAAAAAAAAAAAAAAAAAACMj9zYTE/X8ExP2/xMT9v8TE/b/ExP2/xMT9f9JUshihZ57+IaffP+Gn3z/hZ579oigfiYAAAAAAAAAAAAAAAAAAAAAGBj1oBIS9f8TE/b/ExP2/xMT9f8YGPWmiKB+PIWee/+Gn3z/hp98/4Wee/+HoH06AAAAAAAAAAAAAAAAAAAAACUl9xgVFfXOExP11BMT9dQUFPXQJib3HgAAAACGn3ymhp98/4affP+Gn3ymAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAiKB+EIihf0CIoX9AiKB+EAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//8AAP//AADg/wAA4MMAAOCBAADggQAA8QEAAOeBAADDwwAAgf8AAIAPAACBDwAAgQ8AAMMPAAD//wAA//8AAA=="
+          type="image/png">
+    <style>
+        html {
+            font-size: 1vw;
+            overflow-x: hidden;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            scrollbar-gutter: stable;
+        }
+
+        .auth {
+            z-index: 20;
+            position: absolute;
+        }
+    </style>
+</head>
+<body>
+<auction-auth
+  open="true"
+  data-services-path="mss"
+  data-css-shadow="auth_rules"
+>
+    <template>
+        <div class="auction-auth">
+            <div class="auction-auth__wallet">
+                <h2 class="auction-auth__wallet_title">Вход</h2>
+                <div class="auction-auth__wallet_content">
+                    Федеральная электронная регистратура <br>
+                    Агрегированная витрина расписаний ЕГИСЗ<br>
+                    Федеральный модуль валидации расписаний
+                </div>
+                <button id="auction-auth__button-login">Войти с помощью ЕГИСЗ</button>
+            </div>
+        </div>
+    </template>
+</auction-auth>
+<div class="service" slot="service"></div>
+<fer-dialog
+  data-services-path="mss"
+>
+    <dialog>
+        <div class="content"></div>
+    </dialog>
+</fer-dialog>
+</body>
+<script type="module">
+    import Auth from '/services/mss/src/component/auction-auth/index.mjs';
+    import { store } from '/services/mss/src/this/index.mjs';
+    import { removeParamFromURL } from '/services/mss/src/this/index.mjs';
+    import { Fonts } from '/services/mss/src/fonts.mjs';
+    import { Models } from '/services/mss/src/models/index.mjs';
+
+    localStorage.clear();
+
+    store.set('pathname', {
+        pathname: '/services/mss/src'
+    });
+
+    await Fonts('/services/mss/src');
+
+    const auctionAuth = document.body.querySelector('auction-auth');
+    const params = new URLSearchParams(document.location.search);
+    const code = params.get('code');
+
+    store.set('current_service', 'mss');
+    // store.set('isCode', code !== null)
+    store.set('isCode', true);
+
+    if (code === null) {
+        const singIn = async () => {
+            const { system } = await import('/services/system/src/system.mjs');
+
+            store.set('service', {
+                system: {
+                    header: true,
+                    relation: true,
+                    body: true,
+                    property: false,
+                    footer: true
+                }
+            });
+
+            const mountPointSystem = {
+                pathname: '/services/system/src',
+                pathTemplate: 'system',
+                cssShadow: 'mss',
+                mountPoint: document.body
+            };
+
+            store.set('mount_self', mountPointSystem);
+
+            system(mountPointSystem).catch((e) => {
+                console.log('ERROR', e);
+            });
+        };
+
+        singIn();
+        auctionAuth.style.zIndex = -1;
+        // document.addEventListener('rules-singIn', singIn, { once: true })
+    } else {
+
+        const models = await Models();
+
+        const token = await models.post.auth.token({
+            'reqType': 0,
+            'data': code
+        });
+
+        const url = removeParamFromURL(window.location.href, 'code');
+        window.history.pushState('', '', url);
+
+        const { system } = await import('/services/system/src/system.mjs');
+
+        store.set('service', {
+            system: {
+                header: false,
+                relation: true,
+                body: true,
+                property: false,
+                footer: true
+            }
+        });
+
+        const mountPointSystem = {
+            pathname: '.',
+            pathTemplate: 'system',
+            mountPoint: document.body
+        };
+
+        store.set('mount_self', mountPointSystem);
+
+        system(mountPointSystem).catch((e) => {
+            console.log('ERROR', e);
+        });
+    }
+</script>
+</html>

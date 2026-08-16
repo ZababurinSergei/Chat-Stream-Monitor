@@ -1,0 +1,120 @@
+### save rule
+### POST http://svc-fer-dev.helpms.ru:3333/v1/rule/save
+POST http://127.0.0.1:3333/v1/rule/save
+Content-Type: application/json
+
+{
+  "rule": {
+    "eventSnapshotId": "7e424b9c-d6df-4ca1-8b09-a7bbd4fd625e",
+    "version": "1.0.1",
+    "functionBase64Encoded": "ZnVuY3Rpb24gcnVsZShjdHgsIGV2ZW50KXsKCWNvbnNvbGUubG9nKCJzb21ldGhpbmciKQp9",
+    "description": "some rule 12"
+  }
+}
+
+### save rule
+### POST http://svc-fer-dev.helpms.ru:3333/v1/rule/save
+POST http://127.0.0.1:3333/v1/rule/save
+Content-Type: application/json
+
+{
+  "rule": {
+    "eventSnapshotId": "a45ec933-cc2b-4fe7-a12b-1ba99f1a6a36",
+    "version": "1.0.1",
+    "functionBase64Encoded": "CmZ1bmN0aW9uIHJ1bGUoY3R4LCBldmVudCl7Cgltb1ZhbCA9IGN0eC5mcm1vLm1lZGljYWxPcmdhbml6YXRpb24KCWlmIChmYWxzZSA9PT0gbW9WYWwuaXNWYWxpZE9JRChldmVudC5wYXJlbnRfb2lkKSkgewoJCXRocm93KDEpOwoJfQp9",
+    "description": "one in one"
+  }
+}
+
+### save rule
+###POST http://svc-fer-dev.helpms.ru:3333/v1/rule/save
+POST http://127.0.0.1:3333/v1/rule/save
+Content-Type: application/json
+
+{
+  "rule": {
+    "eventSnapshotId": "a45ec933-cc2b-4fe7-a12b-1ba99f1a6a36",
+    "version": "1.0.0",
+    "functionBase64Encoded": "CmZ1bmN0aW9uIHJ1bGUoY3R4LCBldmVudCl7Cgltb1ZhbCA9IGN0eC5mcm1vLm1lZGljYWxPcmdhbml6YXRpb24KCglpZiAoZmFsc2UgPT09IG1vVmFsLmV4aXN0cyhldmVudC5wYXJlbnRfb2lkKSkgewoJCXRocm93KDIpOwoJfQoKCWlmIChmYWxzZSA9PT0gbW9WYWwubmFtZUZ1bGxJc0NvcnJlY3QoIGV2ZW50LnBhcmVudF9vaWQsIGV2ZW50LnBhcmVudF9uYW1lICkpIHsKCQl0aHJvdygzKTsKCX0KfQ==",
+    "description": "two in one"
+  }
+}
+
+### get list
+### POST http://svc-fer-dev.helpms.ru:3333/v1/rule/list
+POST http://127.0.0.1:3333/v1/rule/list
+Content-Type: application/json
+
+### get list with page
+POST http://127.0.0.1:3333/v1/rule/list
+Content-Type: application/json
+
+{
+  "page": {
+    "limit": 2,
+    "offset": 1
+  }
+}
+
+
+### get list with consition
+POST http://127.0.0.1:3333/v1/rule/list
+Content-Type: application/json
+
+{
+  "condition": {
+    "schemaIds": [
+      "showcase.booking.mo.1.0.0"
+    ]
+
+  }
+}
+
+
+### get list with consition
+POST http://127.0.0.1:3333/v1/rule/list
+Content-Type: application/json
+
+{
+  "condition": {
+    "snapshotIds": ["9c48e7dc-bb97-4cf3-aba5-1a8222cf2f9d", "9c48e7dc-bb97-4cf3-aba5-1a8222cf2f9d"]
+
+  }
+}
+
+
+### get one rule version
+POST http://127.0.0.1:3333/v1/rule
+Content-Type: application/json
+
+{
+  "condition": {
+    "snapshotIds": [
+      "4f9d0902-8e0d-46c4-b7c0-52829af1f0e1"
+    ]
+  }
+}
+
+### count all events
+POST http://127.0.0.1:3333/v1/rule/count
+Content-Type: application/json
+### count all events with condition
+POST http://127.0.0.1:3333/v1/rule/count
+Content-Type: application/json
+
+{
+  "condition": {
+    "versions": [
+      "1.0.2",
+      "1.0.1"
+    ]
+  }
+}
+
+### delete rule
+POST http://127.0.0.1:3333/v1/rule/delete
+Content-Type: application/json
+
+{
+  "snapshotId": "50283897-9c31-4c6b-afcd-af3546e9cca9"
+}

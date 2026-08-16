@@ -1,0 +1,147 @@
+/* H1 DemiBold 24x32 */
+@font-face {
+  font-family: 'Golos H1 DemiBold 24x32';
+  font-style: normal;
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 32px;
+  letter-spacing: -0.4px;
+  color: #333;
+  src: url('./fonts/Golos-Text/Golos-Text_DemiBold.woff');
+}
+
+/* H2 DemiBold 22x28 */
+@font-face {
+  font-family: 'Golos H2 DemiBold 22x28';
+  font-style: normal;
+  font-weight: 600;
+  font-size: 22px;
+  line-height: 28px;
+  letter-spacing: -0.4px;
+  color: #333;
+  src: url('./fonts/Golos-Text/Golos-Text_DemiBold.woff');
+}
+
+/* H3 Medium 20x28 */
+@font-face {
+  font-family: 'Golos H3 Medium 20x28';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 20px;
+  line-height: 28px;
+  letter-spacing: -0.4px;
+  src: url('./fonts/Golos-Text/Golos-Text_Medium.woff');
+}
+
+/* H4 DemiBold 18x24 */
+@font-face {
+  font-family: 'Golos H4 DemiBold 18x24';
+  font-style: normal;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 24px;
+  letter-spacing: -0.2px;
+  src: url('./fonts/Golos-Text/Golos-Text_DemiBold.woff');
+}
+
+/* 16pt Medium 16x24 */
+@font-face {
+  font-family: 'Golos 16pt Medium 16x24';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: -0.3px;
+  src: url('./fonts/Golos-Text/Golos-Text_Medium.woff');
+}
+
+/* 16pt Regular 16x24 */
+@font-face {
+  font-family: 'Golos 16pt Regular 16x24';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: -0.3px;
+  src: url('./fonts/Golos-Text/Golos-Text_Regular.woff');
+}
+
+@font-face {
+  font-family: 'Golos';
+  src: url('./fonts/Golos-Text/Golos-Text_Regular.woff');
+}
+
+/* 14pt DemiBold 14x20 */
+@font-face {
+  font-family: 'Golos 14pt DemiBold 14x20';
+  font-style: normal;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.005em;
+  src: url('./fonts/Golos-Text/Golos-Text_DemiBold.woff');
+}
+
+/* 14pt Medium 14x20 */
+@font-face {
+  font-family: 'Golos 14pt Medium 14x20';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.01em;
+  src: url('./fonts/Golos-Text/Golos-Text_Medium.woff');
+}
+
+/* 14pt Regular 14x20 */
+@font-face {
+  font-family: 'Golos 14pt Regular 14x20';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 20px;
+  letter-spacing: -0.01em;
+  src: url('./fonts/Golos-Text/Golos-Text_Regular.woff');
+}
+
+/* 12pt Medium 12x18 */
+@font-face {
+  font-family: 'Golos 12pt Medium 12x18';
+  font-style: normal;
+  font-weight: 500;
+  font-size: 12px;
+  line-height: 18px;
+  letter-spacing: -0.004em;
+  src: url('./fonts/Golos-Text/Golos-Text_Medium.woff');
+}
+
+/* 12pt Regular 12x18 */
+@font-face {
+  font-family: 'Golos 12pt Regular 12x18';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 12px;
+  line-height: 18px;
+  letter-spacing: -0.004em;
+  src: url('./fonts/Golos-Text/Golos-Text_Regular.woff');
+}
+
+/* 11pt Regular 11x14 */
+@font-face {
+  font-family: 'Golos 11pt Regular 11x14';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 11px;
+  line-height: 14px;
+  src: url('./fonts/Golos-Text/Golos-Text_Medium.woff');
+}
+
+/* 11pt Regular 9x12 */
+@font-face {
+  font-family: 'Golos 9pt Regular 9x12';
+  font-style: normal;
+  font-weight: 400;
+  font-size: 9px;
+  line-height: 12px;
+  src: url('./fonts/Golos-Text/Golos-Text_Medium.woff');
+}

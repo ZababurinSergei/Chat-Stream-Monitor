@@ -1,0 +1,22 @@
+{
+  "endpoints": {
+    "auth": "/api/auth/login",
+    "regions": "/api/regions",
+    "greenhouses": "/api/greenhouses",
+    "measurements": "/api/measurements",
+    "history": "/api/history",
+    "recalculate": "/api/recalculate",
+    "refresh": "/api/refresh",
+    "updateMeasurement": "/api/measurements/update"
+  },
+  "timeouts": {
+    "recalculation": 900000,
+    "refresh": 30000,
+    "request": 10000
+  },
+  "mockDelay": {
+    "short": 300,
+    "medium": 1000,
+    "long": 3000
+  }
+}

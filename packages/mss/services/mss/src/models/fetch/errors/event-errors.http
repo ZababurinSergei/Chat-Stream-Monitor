@@ -1,0 +1,67 @@
+### get all event errors
+POST http://127.0.0.1:3333/v1/event/error/list
+Content-Type: application/json
+
+{
+  "condition": {
+    "eventIds": [
+      "dfa7bb53-985f-4c62-b823-eab226dda8de"
+    ]
+  }
+}
+
+### count all event errors
+POST http://127.0.0.1:3333/v1/event/error/count
+Content-Type: application/json
+
+{
+  "condition": {
+    "eventIds": [
+      "117a7d54-bde3-4894-86f2-b4a184ce61f0"
+    ]
+  }
+}
+
+
+### create event error
+POST http://127.0.0.1:3333/v1/event/error/save
+Content-Type: application/json
+
+{
+  "entry": {
+    "eventId": "117a7d54-bde3-4894-86f2-b4a184ce61f0",
+    "code": "3",
+    "message": "Название организации не соответствует названию fullName в ФРМО",
+    "howToFix": "Исправить название организации"
+  }
+}
+
+
+
+### create event error
+POST http://127.0.0.1:3333/v1/event/error/save
+Content-Type: application/json
+
+{
+  "entry": {
+    "eventId": "5db561c4-1b26-49f2-ba62-c1f62c236be8",
+    "code": "101",
+    "message": "ошибка 101",
+    "howToFix": "как починить ошибку 101"
+  }
+}
+
+
+### update event error
+POST http://127.0.0.1:3333/v1/event/error/save
+Content-Type: application/json
+
+{
+  "entry": {
+    "id": "69c8bffc-7230-4225-afb3-d4a3ba0f020e",
+    "eventId": "5db561c4-1b26-49f2-ba62-c1f62c236be8",
+    "code": "101",
+    "message": "ошибка 101",
+    "howToFix": "как починить ошибку 101 updated"
+  }
+}

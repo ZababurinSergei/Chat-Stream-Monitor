@@ -1,0 +1,220 @@
+:host {
+	position: absolute;
+	top: calc(100% - 11.98vw);
+	left: calc(50% - 2.24vw);
+	z-index: 15;
+	--color: white;
+	transition:  All 1.5s linear;
+	width: 4.48vw;
+	height: 4.48vw;
+}
+
+:host(.fer-scroll_1) {
+	left: 50.1%;
+}
+
+:host(.fer-scroll_2) {
+	left: 80%;
+}
+
+:host(.fer-scroll_3) {
+	left: 50.1%;
+}
+
+:host(.fer-scroll_4) {
+	left: 76.98vw;
+	top: 10.99vw;
+}
+
+.relative-container {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	height: 100%;
+	justify-content: center;
+	align-items: center;
+}
+
+.arrow {
+	position: absolute;
+	cursor: pointer;
+	transition: All 1.5s linear;
+}
+
+.arrow span {
+	display: flex;
+	flex-direction: column;
+	width: 1.98vw;
+	height: 1.98vw;
+	transition: All 1.5s linear;
+}
+
+[data-id="top"] {
+	width: 0;
+	border-bottom: 0.1vw solid #ff0059;
+	border-right: 0.1vw solid #ff0059;
+	bottom: 82%;
+	left: 51.8%;
+}
+
+[data-id="bottom"] {
+	width: 0;
+	border-bottom: 0.1vw solid #00b2ff;
+	border-right: 0.1vw solid #00b2ff;
+	top: 82%;
+	left: 51.8%;
+}
+
+[data-id="left"] {
+	width: 0;
+	transform-origin: top left;
+	transform: rotate(90deg) scale(0.5);
+	border-bottom: 0.1vw solid #ff0059;
+	border-right: 0.1vw solid #ff0059;
+	top: 50%;
+	left: 0;
+}
+
+[data-id="right"] {
+	width: 0;
+	top: 50%;
+	border-top: 0.1vw solid #00b2ff;
+	border-left:0.1vw solid #00b2ff;
+	right: 0;
+	transform-origin: right top;
+	transform: rotate(-90deg) scale(0.5);
+}
+
+[data-id="top"] span {
+	margin-left: -1.09vw;
+	border-top: 0.20833rem solid var(--color);
+	border-left: 0.20833rem solid var(--color);
+	transform: rotate(45deg);
+	animation: animate-top 2s infinite;
+}
+
+[data-id="bottom"] span {
+	margin-left: -1.09vw;
+	border-bottom: 0.20833rem solid var(--color);
+	border-right: 0.20833rem solid var(--color);
+	transform: rotate(45deg);
+	animation: animate-top 2s infinite;
+}
+
+[data-id="left"] span {
+	margin-left: -0.99vw;
+	border-bottom: 0.20833rem solid var(--color);
+	border-right: 0.20833rem solid var(--color);
+	transform: rotate(45deg);
+	animation: animate-top 2s infinite;
+}
+
+[data-id="right"] span {
+	margin-left: -0.99vw;
+	border-bottom: 0.20833rem solid var(--color);
+	border-right: 0.20833rem solid var(--color);
+	transform: rotate(45deg);
+	animation: animate-top 2s infinite;
+}
+
+[data-id="logo"] span {
+	display: flex;
+}
+
+[data-id="top"] span:nth-child(1) {
+	animation-delay: 0s;
+}
+
+[data-id="top"] span:nth-child(2) {
+	animation-delay: -0.2s;
+}
+
+[data-id="top"] span:nth-child(3) {
+	animation-delay: -0.4s;
+}
+
+[data-id="bottom"] span:nth-child(3) {
+	animation-delay: 0s;
+}
+
+[data-id="bottom"] span:nth-child(2) {
+	animation-delay: -0.2s;
+}
+
+[data-id="bottom"] span:nth-child(1) {
+	animation-delay: -0.4s;
+}
+
+[data-id="left"] span:nth-child(3) {
+	animation-delay: 0s;
+}
+
+[data-id="left"] span:nth-child(2) {
+	animation-delay: -0.2s;
+}
+
+[data-id="left"] span:nth-child(1) {
+	animation-delay: -0.4s;
+}
+
+[data-id="right"] span:nth-child(3) {
+	animation-delay: 0s;
+}
+
+[data-id="right"] span:nth-child(2) {
+	animation-delay: -0.2s;
+}
+
+[data-id="right"] span:nth-child(1) {
+	animation-delay: -0.4s;
+}
+@keyframes animate-top {
+	0% {
+		opacity: 0;
+		/*transform: rotate(45deg) translate(1.04167rem, 1.04167rem);*/
+	}
+	50% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+		/*transform: rotate(45deg) translate(-1.04167rem, -1.04167rem);*/
+	}
+}
+
+@keyframes animate {
+	0% {
+		opacity: 0;
+		/*transform: rotate(45deg) translate(-1.04167rem, -1.04167rem);*/
+	}
+	50% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 0;
+		/*transform: rotate(45deg) translate(1.04167rem, 1.04167rem);*/
+	}
+}
+
+:host(.last) .arrow {
+	/*transform: translate(-50%, -20vh);*/
+	/*transition: All 1.5s linear;*/
+}
+
+:host(.last) .arrow span {
+	/*display: flex;*/
+	/*flex-direction: column;*/
+	/*width: 2vw;*/
+	/*height: 2vw;*/
+	/*margin-left: -1.1rem;*/
+	/*border-top: 0.20833rem solid var(--color);*/
+	/*border-left: 0.20833rem solid var(--color);*/
+	/*-moz-outline-radius-bottomleft: 0.20833rem solid var(--color);*/
+	/*outline: 0.20833rem solid var(--color);*/
+	/*border-top: 0.20833rem solid var(--color);*/
+	/*border-left: 0.20833rem solid var(--color);*/
+	/*border-bottom: unset;*/
+	/*border-right: unset;*/
+	/*transition: All 1.5s linear;*/
+}

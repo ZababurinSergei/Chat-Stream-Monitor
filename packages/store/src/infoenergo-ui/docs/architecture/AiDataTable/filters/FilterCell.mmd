@@ -1,0 +1,57 @@
+flowchart
+    subgraph External[Внешняя интеграция]
+        useFilterState[useFilterState.ts]
+    end
+
+    subgraph FilterLogic[Логика фильтрации]
+        applyStringFilter[applyStringFilter.ts]
+        applyNumberFilter[applyNumberFilter.ts]
+        applyDateFilter[applyDateFilter.ts]
+        filterDateUtils[filterDate.utils.ts]
+        filterCommon[common.ts]
+    end
+
+    subgraph FilterCell[FilterCell — UI заголовка]
+        HeaderCell[HeaderCell.vue]
+
+        subgraph OperationSelect[Выбор операции]
+            FilterSelect[FilterSelect.vue]
+            SelectedOption[SelectedOption.vue]
+            SelectOption[SelectOption.vue]
+        end
+
+        subgraph ValueInput[Ввод значения]
+            FilterInput[FilterInput.vue]
+            dateSummary[date-summary]
+        end
+
+        subgraph DateFilterUI[Date / Datetime]
+            DateFilter[DateFilter.vue]
+            DateFilterItem[DateFilterItem.vue]
+        end
+    end
+
+    useFilterState --> applyStringFilter
+    useFilterState --> applyNumberFilter
+    useFilterState --> applyDateFilter
+    useFilterState --> filterDateUtils
+
+    applyDateFilter --> filterCommon
+    applyDateFilter --> filterDateUtils
+
+    HeaderCell --> FilterSelect
+    HeaderCell --> FilterInput
+    HeaderCell --> dateSummary
+    HeaderCell --> applyDateFilter
+
+    FilterSelect --> SelectedOption
+    FilterSelect --> SelectOption
+    FilterSelect --> DateFilter
+
+    DateFilter --> DateFilterItem
+    DateFilter --> filterDateUtils
+
+    FilterInput --> filterCommon
+
+
+ 

@@ -1,0 +1,129 @@
+/*@media (min-width: 1140px) {*/
+:host([slot="footer_substrate_right"]) {
+    align-self: flex-start;
+    grid-area: logo;
+}
+
+:host([slot="footer_substrate_left"]) {
+    align-self: flex-start;
+    grid-area: a;
+}
+
+:host([slot="footer_substrate_right"]) {
+    align-self: flex-start;
+    grid-area: b;
+}
+
+svg {
+    width: 100%;
+    height: 100%;
+}
+
+p {
+    margin: 0;
+}
+
+.title {
+    color: var(--Text-Helper, #66727F);
+
+    /* Plain Small */
+    font-family: 'Lato', serif;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 142.857% */
+}
+
+.container_left {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 4px;
+    width: 100%;
+}
+
+.social {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: center;
+    gap: 16px;
+    cursor: pointer;
+}
+
+.item {
+    width: 32px;
+    height: 32px;
+}
+
+.logo {
+    width: 37px;
+    height: 37px;
+}
+
+.container_right {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    text-align: end;
+}
+
+.paragraph {
+    color: var(--Text-Helper, #66727F);
+
+    /* Plain Small */
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 142.857% */
+}
+
+.mailto, .tel {
+    color: var(--Gosblue, #0D4CD3);
+
+    /* Plain Small */
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px;
+    text-decoration: none;
+}
+
+.container_left .title {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 37px;
+    margin: 0 0 4px 0;
+}
+
+.paragraph.policy-privacy, .paragraph.policy-terms {
+    color: var(--Gosblue, #0D4CD3);
+
+    /* Plain Small */
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 142.857% */
+    cursor: pointer;
+}
+
+.paragraph.policy-terms {
+    margin-bottom: 12px;
+}
+
+.egisz {
+    color: var(--Text-Helper, #66727F);
+
+    /* Plain Small */
+    font-family: 'Lato', sans-serif;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px; /* 142.857% */
+}
+/*}*/

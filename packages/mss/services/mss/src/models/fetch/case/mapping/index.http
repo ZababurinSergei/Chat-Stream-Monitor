@@ -1,0 +1,7 @@
+### get mapping list
+POST http://svc-fer-dev.helpms.ru:3333/v1/mapping/list
+
+
+### get all regions
+POST http://127.0.0.1:3333/v1/region/list
+Content-Type: application/json

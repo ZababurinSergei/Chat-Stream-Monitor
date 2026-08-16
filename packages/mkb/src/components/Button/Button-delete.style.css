@@ -1,0 +1,64 @@
+.button__main-delete {
+	/* width: 91px; */
+	padding: 0 25px;
+	height: 40px;
+	background: var(--red-100per);
+	border-radius: 4px;
+	font-family: 'Golos 14pt DemiBold 14x20';
+	color: var(--white-100per);
+	border: none;
+	cursor: pointer;
+}
+
+.button__second-delete {
+	width: 91px;
+	height: 40px;
+	background: var(--white-100per);
+	border: 1px solid var(--black-10per);
+	border-radius: 4px;
+	font-family: 'Golos 14pt Medium 14x20';
+	color: var(--red-100per);
+	outline: none;
+}
+
+.button__main-delete-img {
+	width: 123px;
+	height: 40px;
+	min-width: 123px;
+	min-height: 40px;
+	background: var(--red-100per);
+	border-radius: 4px;
+	font-family: 'Golos 14pt DemiBold 14x20';
+	font-size: 14px;
+	color: var(--white-100per);
+	border: none;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0 24px 0 16px;
+}
+
+.button__main-delete-img path {
+	fill: var(--white-100per);
+}
+
+.button__second-delete-img {
+	width: 123px;
+	height: 40px;
+	min-width: 123px;
+	min-height: 40px;
+	background: var(--white-100per);
+	border: 1px solid var(--black-10per);
+	border-radius: 4px;
+	font-family: 'Golos 14pt Medium 14x20';
+	color: var(--red-100per);
+	outline: none;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 0 24px 0 16px;
+}
+
+.button__second-delete-img path {
+	fill: var(--red-100per);
+}

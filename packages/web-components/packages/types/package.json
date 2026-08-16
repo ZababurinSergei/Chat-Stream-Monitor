@@ -1,0 +1,28 @@
+{
+  "name": "@newkind/ts-examplae",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "type-check": "tsc --noEmit --strict --skipLibCheck",
+    "build:css-module:html": "node scripts/generate-css-module.js --html --force",
+    "build:dist": "node scripts/build.js --copy",
+    "build:dist:watch": "nodemon --watch src --ext ts,js,css,html,json --exec \"node scripts/build.js --copy\"",
+    "build:dist:virtual:css": "node scripts/build.js --copy && npm run build:css-module:html",
+    "build:dist:virtual:css:watch": "nodemon --watch src --ext ts,js,css,html,json --exec \"node scripts/build.js --copy && npm run build:css-module:html\"",
+    "build:bundle": "node scripts/bundle.js --platform browser --virtual-css --browser-only -o example",
+    "vendor:build:browser": "node scripts/vendor.mjs build --platform browser",
+    "build:script:index": "node scripts/build.js --generate-index",
+    "build:components": "node scripts/build.js --web-components",
+    "build": "esbuild src/index.ts --bundle --outdir=dist --platform=browser",
+    "build:watch": "esbuild src/index.ts --bundle --outdir=dist --platform=browser --watch",
+    "dev": "npm run build:watch",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "esbuild": "^0.19.0"
+  }
+}

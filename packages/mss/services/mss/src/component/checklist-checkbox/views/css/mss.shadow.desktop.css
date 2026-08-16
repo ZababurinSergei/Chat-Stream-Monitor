@@ -1,0 +1,120 @@
+:host {
+    align-self: flex-start;
+}
+
+.container {
+    padding: 0;
+    list-style-type: none;
+    margin: auto;
+    text-align: center;
+}
+
+:host([data-id="checkbox_2"]) .container, :host([data-id="checkbox_1"]) .container, :host([data-id="checkbox_3"]) .container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 2.96rem;
+}
+
+li {
+    margin: 0;
+}
+
+.styled-checkbox:checked + label[for="checkbox-5"]:after, .styled-checkbox:checked + label[for="checkbox-7"]:after {
+    content: url(./icon.svg);
+    position: absolute;
+    top: 50%;
+    transform: translateY(-105%);
+}
+
+.styled-checkbox + label:before, .styled-checkbox:checked + label:after {
+    border-radius: 0.31vw;
+}
+
+
+.styled-checkbox + label[for="checkbox-5"]:before, .styled-checkbox + label[for="checkbox-7"]:before {
+    content: "";
+    align-self: flex-start;
+}
+
+.custom-checkbox + label[for="checkbox-5"]:before, .custom-checkbox + label[for="checkbox-7"]:before {
+    content: "";
+    align-self: flex-start;
+}
+
+.custom-checkbox + label[for="checkbox-5"], .custom-checkbox +  label[for="checkbox-7"] {
+    color: var(--unnamed, #000);
+    font-family: 'Raleway', serif;
+    font-size: min(1.61vw, 2.59rem);
+    /*font-size: 2.59rem;*/
+    font-style: normal;
+    font-weight: 500;
+    line-height: normal;
+}
+
+input {
+    display: none;
+}
+
+/* для элемента label, связанного с .custom-checkbox */
+.custom-checkbox+label {
+    display: inline-flex;
+    cursor: pointer;
+    align-items: center;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+            user-select: none;
+    overflow: hidden;
+    color: var(--Summer-night, #0B1F33);
+    text-overflow: ellipsis;
+
+    font-family: 'Lato', serif;
+    font-size: 16px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 150%;
+    gap: 16px;
+    flex-direction: row;
+}
+
+/* создание в label псевдоэлемента before со следующими стилями */
+.custom-checkbox+label::before {
+    content: '';
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    background-image: url(./mss_icon_disable.svg);
+}
+
+/* стили при наведении курсора на checkbox */
+.custom-checkbox:not(:disabled):not(:checked)+label:hover::before {
+    border-color: black;
+}
+
+/* стили для активного чекбокса (при нажатии на него) */
+.custom-checkbox:not(:disabled):active+label::before {
+    background-color: rgba(0, 160, 168, 0.68);
+    border-color: rgba(0, 160, 168, 0.63);
+}
+
+/* стили для чекбокса, находящегося в фокусе */
+.custom-checkbox:focus+label::before {
+    box-shadow: 0 0 0 0.1vw rgba(0, 123, 255, 0.25);
+}
+
+/* стили для чекбокса, находящегося в фокусе и не находящегося в состоянии checked */
+.custom-checkbox:focus:not(:checked)+label::before {
+    border-color: rgba(0, 242, 255, 0.41);
+}
+
+/* стили для чекбокса, находящегося в состоянии checked */
+.custom-checkbox:checked+label::before {
+    background-image: url(./mss_icon.svg);
+    background-repeat: no-repeat;
+    background-size: 100%;
+}
+
+/* стили для чекбокса, находящегося в состоянии disabled */
+.custom-checkbox:disabled+label::before {
+    background-color: #e9ecef;
+}

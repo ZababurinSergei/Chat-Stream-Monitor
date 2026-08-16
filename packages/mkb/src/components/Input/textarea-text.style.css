@@ -1,0 +1,109 @@
+.textarea-text__wrapper {
+	/*min-width: 416px;*/
+	/*min-height: 52px;*/
+	width: 416px;
+	height: 52px;
+	display: inline-flex;
+	border: 1px solid var(--black-10per);
+	border-radius: 4px;
+	padding: 0 16px;
+	align-items: center;
+	outline: none;
+	cursor: pointer;
+	box-sizing: border-box;
+	outline: none;
+	position: relative;
+}
+
+.textarea-text {
+	width: 357px;
+	height: 24px;
+	font-family: 'Golos 14pt Regular 14x20';
+	font-weight: 400;
+	letter-spacing: -0.01em;
+	font-size: 14px;
+	outline: none;
+	border: none;
+	cursor: pointer;
+}
+
+.label-text {
+	position: absolute;
+	font-family: 'Golos 14pt Regular 14x20';
+	font-weight: 400;
+	letter-spacing: -0.01em;
+	font-size: 14px;
+	transition: all 0.2s ease;
+	color: var(--black-35per);
+}
+
+.textarea-text::placeholder {
+	font-family: 'Golos 14pt Regular 14x20';
+	color: var(--black-35per);
+}
+
+.textarea-text__wrapper:hover {
+	border: 1px solid var(--black-15per);
+	outline: none;
+	border-radius: 4px;
+	cursor: pointer;
+}
+
+.textarea-text__wrapper:focus {
+	border: 1px solid var(--blue-50per);
+	outline: none;
+	border-radius: 4px;
+	cursor: text;
+}
+
+.textarea-text:hover,
+.textarea-text:focus,
+.textarea-text__wrapper:has(.textarea-text:focus) {
+	cursor: text;
+}
+
+.textarea-text__wrapper:has(.textarea-text:focus) {
+	border: 1px solid var(--blue-50per);
+	outline: none;
+	border-radius: 4px;
+}
+
+.textarea-text:focus + .textarea-text {
+	transform: translateY(-15px);
+	font-family: 'Golos 11pt Regular 11x14';
+	font-weight: 400;
+	font-size: 11px;
+}
+
+.textarea-text:not(:placeholder-shown) + .textarea-text {
+	transform: translateY(-15px);
+	font-family: 'Golos 11pt Regular 11x14';
+	font-weight: 400;
+	font-size: 11px;
+}
+
+.textarea-text__wrapper.textarea-error {
+	border: 1px solid var(--red-100per);
+	outline: none;
+	border-radius: 4px;
+	position: relative;
+}
+.textarea-text__wrapper.textarea-error::after {
+	content: 'Это значение некорректно';
+	color: var(--red-100per);
+	font-family: 'Golos 12pt Medium 12x18';
+	font-size: 12px;
+	font-weight: 500;
+	margin-top: 5px;
+	position: absolute;
+	bottom: -20px;
+	left: -1px;
+}
+
+.textarea-text__signature-error {
+	color: var(--red-100per);
+	font-family: 'Golos 12pt Medium 12x18';
+	font-size: 12px;
+	font-weight: 500;
+	margin-top: 5px;
+}

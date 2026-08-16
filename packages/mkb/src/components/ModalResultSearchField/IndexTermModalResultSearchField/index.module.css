@@ -1,0 +1,39 @@
+.wrapper {
+
+}
+
+.iTerm {
+	color: var(--black-100per);
+	font-family: 'Golos 14pt Regular 14x20';
+	font-style: normal;
+	font-weight: 400;
+	font-size: 12px;
+	line-height: 20px;
+	letter-spacing: -0.01em;
+	margin-right: 9px;
+	width: 350px;
+	display: inline-block;
+	align-items: start;
+	background: rgba(221, 128, 0, 0.1);
+}
+
+.iTermBlue {
+	color: var(--black-100per);
+	font-family: 'Golos 14pt Regular 14x20';
+	font-style: normal;
+	font-weight: 400;
+	font-size: 12px;
+	line-height: 20px;
+	letter-spacing: -0.01em;
+	margin-right: 9px;
+	width: 350px;
+	display: inline-block;
+	align-items: start;
+	background: rgba(0, 153, 255, 0.1);
+}
+
+.iTerm span,
+.iTermBlue span {
+	color: var(--red-100per);
+	font-weight: bold;
+}

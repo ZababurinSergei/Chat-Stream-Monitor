@@ -1,0 +1,38 @@
+.button__main {
+	/* width: 91px; */
+	height: 40px;
+	/* min-width: 91px; */
+	min-height: 40px;
+	padding: 0 25px;
+	background: var(--blue-100per);
+	border-radius: 4px;
+	font-family: 'Golos 14pt Medium 14x20';
+	font-size: 14px;
+	color: var(--white-100per);
+  outline: none;
+	border: none;
+	cursor: pointer;
+	box-sizing: border-box;
+}
+
+.button__main:hover {
+	background: var(--blue-120per);
+  outline: none;
+	border: none;
+	
+}
+
+.button__main:focus {
+	background: var(--blue-50per);
+	border: 1px solid var(--blue-40per);
+	outline: none;
+}
+
+.button__main:active {
+	background: var(--blue-120per);
+}
+
+.button__main:disabled {
+	background: var(--black-35per);
+  outline: none;
+}

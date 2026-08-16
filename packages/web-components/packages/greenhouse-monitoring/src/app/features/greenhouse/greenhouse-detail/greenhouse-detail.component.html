@@ -1,0 +1,167 @@
+<div class="greenhouse-detail-container">
+    <!-- Кнопка назад -->
+    <button class="back-button" (click)="goBack()">← Назад к списку</button>
+
+    @if (selectedGreenhouse()) {
+    <div class="greenhouse-header">
+      <div class="header-left">
+        <h1>{{ selectedGreenhouse()!.name }}</h1>
+            <div class="greenhouse-info">
+              <span class="id">ID: {{ selectedGreenhouse()!.id }}</span>
+              <span class="status-indicator" [class]="selectedGreenhouse()!.status">
+    {{ getStatusText(selectedGreenhouse()!.status) }}
+    </span>
+    <span class="last-update">
+      Последнее обновление: {{ selectedGreenhouse()!.lastUpdated | date:'dd.MM.yyyy HH:mm' }}
+    </span>
+  </div>
+</div>
+
+<div class="header-right">
+  <!-- Виджет времени последнего обновления -->
+  @if (store.lastUpdate()) {
+    <div class="update-time">
+        <span>Обновлено: {{ store.lastUpdate() | date:'HH:mm:ss' }}</span>
+    </div>
+    }
+
+    <!-- Кнопки управления -->
+    <div class="action-buttons">
+      <button
+        class="btn btn-primary"
+        (click)="requestUpdate()"
+        [disabled]="isUpdating()"
+      >
+    {{ isUpdating() ? 'Обновление...' : 'Запросить обновление' }}
+    </button>
+
+    <button
+      class="btn btn-secondary"
+      (click)="initiateRecalculation()"
+      [disabled]="isRecalculating()"
+    >
+    {{ isRecalculating() ? 'Пересчёт...' : 'Инициировать пересчёт' }}
+    </button>
+  </div>
+</div>
+</div>
+
+<div class="content-grid">
+<!-- Графики измерений -->
+<div class="charts-section">
+  <h2>Результаты измерений</h2>
+  <app-measurement-chart
+    [measurements]="measurements()"
+    [timeRange]="selectedTimeRange()"
+    [isEditable]="store.userRole() === 'senior-specialist'"
+    (pointClicked)="onMeasurementEdit($event)"
+  />
+
+  <!-- Выбор диапазона времени -->
+  <div class="time-range-selector">
+    <label>Период:</label>
+    <select [(ngModel)]="selectedTimeRange" class="range-select">
+      <option value="1d">Сутки</option>
+      <option value="7d">Неделя</option>
+      <option value="30d">Месяц</option>
+      <option value="365d">Год</option>
+    </select>
+  </div>
+</div>
+
+<!-- История состояний -->
+<div class="history-section">
+  <h2>История изменений состояний</h2>
+
+  <div class="history-table-container">
+    <table class="history-table">
+      <thead>
+        <tr>
+          <th>Дата изменения</th>
+          <th>Статус</th>
+          <th>Изменил</th>
+          <th>Комментарий</th>
+          <th *ngIf="store.userRole() === 'senior-specialist'">Действия</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (history of statusHistory(); track history.id) {
+    <tr>
+        <td>{{ history.changedAt | date:'dd.MM.yyyy HH:mm' }}</td>
+        <td>
+                        <span class="status-badge" [class]="history.status">
+                          {{ getStatusText(history.status) }}
+                        </span>
+        </td>
+        <td>{{ history.changedBy }}</td>
+        <td>{{ history.comment }}</td>
+        <td *ngIf="store.userRole() === 'senior-specialist'">
+            <button
+                    class="btn-sm btn-outline"
+                    (click)="editComment(history)"
+            >
+                Редактировать
+            </button>
+        </td>
+    </tr>
+    } @empty {
+    <tr>
+        <td colspan="5" class="empty-message">Нет данных об истории</td>
+    </tr>
+    }
+    </tbody>
+  </table>
+</div>
+
+<!-- Добавление нового комментария -->
+@if (store.userRole() === 'senior-specialist') {
+    <div class="add-comment-section">
+        <h3>Добавить комментарий</h3>
+        <div class="comment-form">
+                  <textarea
+                          [(ngModel)]="newComment"
+                          placeholder="Введите комментарий..."
+                          rows="3"
+                          class="comment-textarea"
+                  ></textarea>
+            <button
+                    class="btn btn-primary"
+                    (click)="addComment()"
+                    [disabled]="!newComment.trim()"
+            >
+                Добавить
+            </button>
+        </div>
+    </div>
+    }
+    </div>
+  </div>
+    } @else {
+    <div class="no-selection">
+      <p>Теплица не выбрана</p>
+      <button class="btn btn-primary" (click)="goBack()">
+        Вернуться к списку теплиц
+      </button>
+    </div>
+    }
+
+    <!-- Индикатор пересчёта -->
+    @if (isRecalculating()) {
+    <div class="recalculation-overlay">
+      <div class="recalculation-modal">
+        <h3>Идёт пересчёт состояний</h3>
+        <p>Пожалуйста, подождите. Это может занять 10-15 минут.</p>
+        <div class="progress-indicator">
+          <div class="progress-bar" [style.width.%]="recalculationProgress()"></div>
+        </div>
+        <p>Прогресс: {{ recalculationProgress() }}%</p>
+            <div class="estimated-time">
+              Ориентировочное время завершения: {{ estimatedCompletionTime() | date:'HH:mm' }}
+    </div>
+    <button class="btn btn-secondary" (click)="cancelRecalculation()">
+      Отменить (тестовая функция)
+    </button>
+  </div>
+</div>
+    }
+</div>

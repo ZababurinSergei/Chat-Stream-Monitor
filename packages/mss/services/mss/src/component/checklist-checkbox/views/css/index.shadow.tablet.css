@@ -1,0 +1,45 @@
+@media only screen and (min-width: 768px) and (max-width: 961px) {
+    :host([data-id="checkbox_2"]) .container, :host([data-id="checkbox_1"]) .container, :host([data-id="checkbox_3"]) .container {
+        gap: min(2.5vw, 2.5rem);
+    }
+
+    .custom-checkbox + label:before {
+        content: "";
+        margin-right: min(2.29vw, 2.29rem);
+        display: flex;
+        align-self: center;
+        width: min(2.5vw, 2.5rem);
+        min-width: min(2.5vw, 2.5rem);
+        min-height: min(2.5vw, 2.5rem);
+        height: min(2.5vw, 2.5rem);
+        background: white;
+    }
+
+    label {
+        width: 97%;
+    }
+
+    .custom-checkbox + label[for="checkbox-6"]:before, .custom-checkbox + label[for="checkbox-4"]:before, .custom-checkbox + label[for="checkbox-5"]:before, .custom-checkbox + label[for="checkbox-7"]:before {
+        content: "";
+        align-self: flex-start;
+    }
+
+    .custom-checkbox + label, .custom-checkbox + label[for="checkbox-5"], .custom-checkbox + label[for="checkbox-7"], .custom-checkbox + label[for="checkbox-6"] {
+        color: var(--unnamed, #000);
+        font-family: 'Raleway', serif;
+
+        font-size:  min(1.67vh, 2.08rem);
+        font-style: normal;
+        font-weight: 500;
+        line-height: 160%; /* 32px */
+    }
+
+    .custom-checkbox + label:before {
+        border-radius: min(0.63vw, 0.63rem);
+    }
+
+    .custom-checkbox+label::before {
+        width: min(2.29vw, 2.29rem);
+        height: min(2.29vw, 2.29rem);
+    }
+}

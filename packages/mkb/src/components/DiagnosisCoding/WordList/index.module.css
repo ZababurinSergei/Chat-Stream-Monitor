@@ -1,0 +1,70 @@
+.wrapper {
+	/* width: 180px;
+	margin: 0 54px;
+	padding: 54px; */
+	height: 100%;
+}
+
+.infoSearch {
+	width: 192px;
+	height: 24px;
+	font-family: 'Golos 9pt Regular 9x12';
+	font-style: normal;
+	font-weight: 400;
+	font-size: 9px;
+	line-height: 12px;
+	display: flex;
+	align-items: center;
+	color: var(--black-50per);
+	margin-bottom: 12px;
+}
+
+.wordsWrapper {
+	/* height: 445px; */
+	overflow: auto;
+	height: 54vh;
+	width: 182px;
+}
+
+.word {
+	display: flex;
+	align-items: center;
+	color: var(--black-100per);
+	font-family: 'Golos 14pt Regular 14x20';
+	font-style: normal;
+	font-weight: 400;
+	font-size: 14px;
+	line-height: 20px;
+	letter-spacing: -0.01em;
+	margin: 0;
+	cursor: pointer;
+}
+
+.filterTitle {
+	width: 202px;
+	height: 20px;
+	font-family: 'Golos 14pt Medium 14x20';
+	font-style: normal;
+	font-weight: 500;
+	font-size: 14px;
+	line-height: 20px;
+	letter-spacing: -0.01em;
+	color: var(--black-100per);
+	margin-bottom: 11px;
+}
+
+.infoSearchDown {
+	width: 192px;
+	height: 24px;
+	font-family: 'Golos 9pt Regular 9x12';
+	font-style: normal;
+	font-weight: 400;
+	font-size: 9px;
+	line-height: 12px;
+	display: flex;
+	align-items: center;
+	color: var(--black-50per);
+	margin-top: 12px;
+	margin-bottom: 12px;
+
+}

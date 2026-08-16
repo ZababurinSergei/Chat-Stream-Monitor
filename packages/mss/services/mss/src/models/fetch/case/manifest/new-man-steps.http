@@ -1,0 +1,37 @@
+### get all events
+POST http://svc-fer-dev.helpms.ru:3333/v1/event/list
+Content-Type: application/json
+
+### взять регионы
+POST http://svc-fer-dev.helpms.ru:3333/v1/region/list
+Content-Type: application/json
+
+//f0cb91b7-c3e8-4993-b286-b9464c6fc42b
+### get list
+POST http://svc-fer-dev.helpms.ru:3333/v1/rule/list
+Content-Type: application/json
+
+{
+  "condition": {
+    "eventSnapshotIds": [
+      "d14b3913-a8b4-4e2e-aebf-db162edda780"
+    ]
+  }
+}
+
+### save new manifest
+POST http://svc-fer-dev.helpms.ru:3333/v1/manifest/save
+Content-Type: application/json
+
+{
+  "manifest": {
+    "eventSnapshotId": "c7cbea56-db1a-4684-b087-7c0c05dda347",
+    "regionId": "d2136a0a-56ff-44e5-ae73-75e914efc40b",
+    "version": "1.0.0",
+    "ruleSnapshotIds": [
+      "02fe9e3c-f11f-4932-8178-23462a97c291"
+    ],
+    "description": "super man"
+  }
+}
+

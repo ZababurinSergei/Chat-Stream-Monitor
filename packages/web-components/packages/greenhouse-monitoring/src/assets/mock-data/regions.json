@@ -1,0 +1,32 @@
+{
+  "regions": [
+    {
+      "id": 1,
+      "name": "Московская область",
+      "code": "MOS",
+      "timezone": "Europe/Moscow",
+      "greenhouses": [1, 2, 3]
+    },
+    {
+      "id": 2,
+      "name": "Ленинградская область",
+      "code": "LEN",
+      "timezone": "Europe/Moscow",
+      "greenhouses": [4, 5, 6]
+    },
+    {
+      "id": 3,
+      "name": "Краснодарский край",
+      "code": "KRA",
+      "timezone": "Europe/Moscow",
+      "greenhouses": [7, 8, 9]
+    },
+    {
+      "id": 4,
+      "name": "Алтайский край",
+      "code": "ALT",
+      "timezone": "Asia/Barnaul",
+      "greenhouses": [10, 11]
+    }
+  ]
+}

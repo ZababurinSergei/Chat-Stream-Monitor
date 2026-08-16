@@ -1,0 +1,41 @@
+.wrapper {
+	height: 25px;
+	display: flex;
+	justify-content: space-between;
+	margin-top: 3px;
+	margin-right: 17px;
+}
+
+.checkBox {
+	margin-right: 10px;
+}
+
+.circleVoid {
+	margin-right: 8px;
+}
+
+.checkTitle {
+font-family: 'Golos 9pt Regular 9x12';
+font-style: normal;
+font-weight: 400;
+font-size: 9px;
+line-height: 12px;
+display: flex;
+align-items: center;
+color: var(--black-100per);
+}
+
+.checkTitle.checkTitleMany {
+color: var(--red-100per);
+}
+
+.left {
+	display: flex;
+	align-items: center;
+}
+
+.right {
+	display: flex;
+	justify-content: center;
+}
+

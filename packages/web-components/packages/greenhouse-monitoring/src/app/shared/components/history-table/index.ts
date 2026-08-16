@@ -1,0 +1,1 @@
+export { HistoryTableComponent } from './status-history-table/status-history-table.component';

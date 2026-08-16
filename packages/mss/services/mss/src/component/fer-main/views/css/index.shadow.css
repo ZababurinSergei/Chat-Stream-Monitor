@@ -1,0 +1,350 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    padding: 0;
+    height: 80.5vh;
+}
+
+pre {
+    margin: 0
+}
+
+hr {
+    margin-bottom: 0
+}
+
+h1 {
+    cursor: pointer;
+    border-radius: 0.21vw
+}
+
+.markdown__string_html_json_input, .markdown__string_views_json_input {
+    width: 45.99vw;
+    height: -webkit-fill-available
+}
+
+.markdown__string_html_json_output, .markdown__string_views_json_output {
+    width: auto;
+    height: -webkit-fill-available
+}
+
+.aside-menu {
+    height: -moz-min-content;
+    height: min-content
+}
+
+.aside-menu::-webkit-scrollbar {
+    width: 0
+}
+
+.aside-menu h1, .aside-menu h2, .aside-menu h3, .aside-menu h4, .aside-menu h5, .aside-menu h6 {
+    cursor: pointer
+}
+
+.markdown {
+    display: flex;
+    flex-direction: column
+}
+
+.markdown__button_download {
+    cursor: pointer
+}
+
+.markdown__button_upload {
+    cursor: pointer;
+    text-align: center
+}
+
+.markdown__self_html {
+    display: flex;
+    flex-direction: column;
+}
+
+.markdown__self {
+    resize: none;
+    white-space: pre-wrap;
+    min-height: 50vh;
+    padding: 0.99vw;
+    box-sizing: border-box;
+    border: none;
+    border-left: 0.21vw solid threedface;
+    border-right: 0.21vw solid threedface
+}
+
+.markdown__self_menu {
+    display: flex;
+    padding: 0;
+    height: 100%;
+    overflow: auto;
+    flex-direction: column;
+    margin-top: 0.52vw;
+    border: 0.1vw solid var(--global_border);
+}
+
+.markdown__self_menu > CodeMirror {
+    height: -webkit-fill-available;
+    width: 100%;
+}
+
+.markdown__self_menu_aside {
+    height: -moz-min-content;
+    height: min-content
+}
+
+.markdown__self_menu_aside::-webkit-scrollbar {
+    width: 0
+}
+
+.markdown__self_menu_aside h1 {
+    cursor: pointer
+}
+
+.markdown__self_menu_aside h2 {
+    cursor: pointer
+}
+
+.markdown__self_menu_aside h3 {
+    cursor: pointer
+}
+
+.markdown__self_menu_aside h4 {
+    cursor: pointer
+}
+
+.markdown__self_menu_aside h5 {
+    cursor: pointer
+}
+
+.markdown__self_menu_aside h6 {
+    cursor: pointer
+}
+
+.markdown__self_menu_aside_left {
+    height: 70vh;
+    overflow-y: scroll;
+    overflow-x: hidden
+}
+
+.markdown__self_menu_aside_left::-webkit-scrollbar {
+    width: 0
+}
+
+.markdown__self_menu_aside_right {
+    text-align: right;
+    box-sizing: border-box;
+    padding-right: 0.99vw;
+    height: 70vh;
+    overflow-y: scroll;
+    overflow-x: hidden
+}
+
+.markdown__self_menu_aside_right::-webkit-scrollbar {
+    width: 0
+}
+
+.markdown__self_menu_aside {
+    height: inherit
+}
+
+.markdown__self_menu_html {
+    display: block;
+    flex-grow: 1;
+    flex-direction: column
+}
+
+.markdown__self_menu_views {
+    flex-grow: 1;
+    height: auto;
+    box-sizing: border-box;
+    padding: 0.42vw
+}
+
+.markdown__self_menu_views h1 {
+    margin: 0.42vw;
+    cursor: pointer;
+    border-radius: 0.21vw
+}
+
+.markdown__string {
+    padding: 0;
+    border-width: 0.21vw;
+    border-style: solid;
+    border-color: threedface;
+    margin: 0;
+    white-space: initial;
+    flex-direction: column;
+}
+
+.markdown__string_menu {
+    /*white-space: initial;*/
+    /*align-items: center;*/
+    /*padding: 0.4vw 1vw;*/
+    gap: 0.99vw;
+    margin: 0.52vw 0 0 0;
+    height: 4.01vw;
+    min-height: 4.01vw;
+    max-height: 4.01vw;
+    padding: 0 0.68vw;
+    box-sizing: border-box;
+}
+
+.markdown__string_html {
+    white-space: initial
+}
+
+.markdown__string_html_json {
+    border-bottom: 0.21vw solid threedface;
+    height: auto
+}
+
+.markdown__string_html_json > .CodeMirror {
+    width: 46.51vw
+}
+
+.markdown__string_html_json_output {
+    resize: none;
+    border-bottom: none;
+    border-top: none;
+    border-right: none;
+    height: auto;
+    width: 50%
+}
+
+.markdown__string_views_json {
+    border-bottom: 0.21vw solid threedface;
+    height: auto
+}
+
+.markdown__string_views_json > .CodeMirror {
+    width: 46.51vw
+}
+
+.markdown__string_views_json_output {
+    resize: none;
+    border-bottom: none;
+    border-top: none;
+    border-right: none;
+    height: auto;
+    width: 50%
+}
+
+.markdown__string_json {
+    white-space: initial
+}
+
+.markdown__jasonelle {
+    padding: 0;
+    border-width: 0.1vw;
+    border-style: solid;
+    border-color: threedface;
+    white-space: initial;
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+}
+
+.markdown__jasonelle_android {
+    border-bottom: 0.21vw solid threedface;
+    padding: 0;
+    margin: 0;
+    white-space: initial;
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+}
+
+.markdown__jasonelle_android > .CodeMirror {
+    width: 50%;
+}
+
+.markdown__jasonelle_android_output {
+    resize: none;
+    border-bottom: none;
+    border-top: none;
+    border-right: none;
+    height: auto;
+    width: 50%
+}
+
+/*codeMirror css*/
+
+/*switcher*/
+.switcher {
+    display: flex;
+    align-items: center;
+}
+
+.switcher p {
+    margin: 0;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 1.09vw;
+    height: 1.09vw;
+    margin: 0 2.4vw 0.21vw 1.2vw;
+    align-self: center;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    min-width: 2.19vw;
+    max-width: 2.19vw;
+
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--blue-50per);
+    transition: .4s;
+    width: 2.24vw;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 0.89vw;
+    width: 0.89vw;
+    left: 0.16vw;
+    bottom: 0.1vw;
+    background-color: var(--white-100per);
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: var(--blue-50per);
+}
+
+input:focus + .slider {
+    background-color: var(--blue-50per);
+}
+
+input:checked + .slider:before {
+    transform: translateX(1.04vw);
+}
+
+/* Rounded sliders */
+.slider.round {
+    border-radius: 1.82vw;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+
+.main-body {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    height: 100%;
+}

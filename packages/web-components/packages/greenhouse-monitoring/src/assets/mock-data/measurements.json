@@ -1,0 +1,74 @@
+{
+  "measurements": [
+    {
+      "id": 1,
+      "greenhouseId": 1,
+      "type": "temperature",
+      "value": 24.5,
+      "unit": "°C",
+      "timestamp": "2024-01-20T14:30:00Z",
+      "normalRange": {"min": 18, "max": 28},
+      "isNormal": true
+    },
+    {
+      "id": 2,
+      "greenhouseId": 1,
+      "type": "humidity",
+      "value": 65.2,
+      "unit": "%",
+      "timestamp": "2024-01-20T14:30:00Z",
+      "normalRange": {"min": 50, "max": 80},
+      "isNormal": true
+    },
+    {
+      "id": 3,
+      "greenhouseId": 1,
+      "type": "acidity",
+      "value": 6.5,
+      "unit": "pH",
+      "timestamp": "2024-01-20T14:30:00Z",
+      "normalRange": {"min": 5.5, "max": 7.0},
+      "isNormal": true
+    },
+    {
+      "id": 4,
+      "greenhouseId": 2,
+      "type": "temperature",
+      "value": 31.2,
+      "unit": "°C",
+      "timestamp": "2024-01-20T13:45:00Z",
+      "normalRange": {"min": 18, "max": 28},
+      "isNormal": false
+    },
+    {
+      "id": 5,
+      "greenhouseId": 2,
+      "type": "humidity",
+      "value": 45.8,
+      "unit": "%",
+      "timestamp": "2024-01-20T13:45:00Z",
+      "normalRange": {"min": 50, "max": 80},
+      "isNormal": false
+    },
+    {
+      "id": 6,
+      "greenhouseId": 4,
+      "type": "temperature",
+      "value": 15.3,
+      "unit": "°C",
+      "timestamp": "2024-01-20T10:15:00Z",
+      "normalRange": {"min": 18, "max": 28},
+      "isNormal": false
+    },
+    {
+      "id": 7,
+      "greenhouseId": 11,
+      "type": "acidity",
+      "value": 4.2,
+      "unit": "pH",
+      "timestamp": "2024-01-20T18:15:00Z",
+      "normalRange": {"min": 5.5, "max": 7.0},
+      "isNormal": false
+    }
+  ]
+}

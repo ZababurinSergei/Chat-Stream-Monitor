@@ -1,0 +1,18 @@
+.wrapper {
+	font-family: 'Golos 14pt DemiBold 14x20';
+	font-weight: 600;
+	font-size: 14px;
+	line-height: 20px;
+	letter-spacing: -0.005em;
+	display: flex;
+}
+
+.codeTitle {
+	color: var(--orange-100per);
+	margin-right: 6px;
+	font-style: normal;
+}
+
+.codeText {
+
+}

@@ -1,0 +1,125 @@
+{
+  "greenhouses": [
+    {
+      "id": 1,
+      "name": "Теплица №1 'Северная'",
+      "regionId": 1,
+      "status": "normal",
+      "coordinates": {"lat": 55.7558, "lng": 37.6173},
+      "area": 1500,
+      "cropType": "томаты",
+      "lastUpdated": "2024-01-20T14:30:00Z",
+      "createdAt": "2023-05-10T08:00:00Z"
+    },
+    {
+      "id": 2,
+      "name": "Теплица №2 'Южная'",
+      "regionId": 1,
+      "status": "warning",
+      "coordinates": {"lat": 55.7358, "lng": 37.6273},
+      "area": 2000,
+      "cropType": "огурцы",
+      "lastUpdated": "2024-01-20T13:45:00Z",
+      "createdAt": "2023-06-15T10:00:00Z"
+    },
+    {
+      "id": 3,
+      "name": "Теплица №3 'Экспериментальная'",
+      "regionId": 1,
+      "status": "normal",
+      "coordinates": {"lat": 55.7458, "lng": 37.6073},
+      "area": 800,
+      "cropType": "перец",
+      "lastUpdated": "2024-01-20T15:20:00Z",
+      "createdAt": "2023-07-20T09:00:00Z"
+    },
+    {
+      "id": 4,
+      "name": "Ленинградская Теплица №1",
+      "regionId": 2,
+      "status": "emergency",
+      "coordinates": {"lat": 59.9343, "lng": 30.3351},
+      "area": 1200,
+      "cropType": "зелень",
+      "lastUpdated": "2024-01-20T10:15:00Z",
+      "createdAt": "2023-04-05T11:00:00Z"
+    },
+    {
+      "id": 5,
+      "name": "Ленинградская Теплица №2",
+      "regionId": 2,
+      "status": "warning",
+      "coordinates": {"lat": 59.9243, "lng": 30.3451},
+      "area": 1800,
+      "cropType": "томаты",
+      "lastUpdated": "2024-01-20T11:30:00Z",
+      "createdAt": "2023-05-25T12:00:00Z"
+    },
+    {
+      "id": 6,
+      "name": "Теплица 'Нева'",
+      "regionId": 2,
+      "status": "normal",
+      "coordinates": {"lat": 59.9143, "lng": 30.3251},
+      "area": 2200,
+      "cropType": "огурцы",
+      "lastUpdated": "2024-01-20T09:45:00Z",
+      "createdAt": "2023-08-10T14:00:00Z"
+    },
+    {
+      "id": 7,
+      "name": "Краснодарская Теплица №1",
+      "regionId": 3,
+      "status": "normal",
+      "coordinates": {"lat": 45.0355, "lng": 38.9753},
+      "area": 3000,
+      "cropType": "томаты",
+      "lastUpdated": "2024-01-20T16:10:00Z",
+      "createdAt": "2023-03-15T07:00:00Z"
+    },
+    {
+      "id": 8,
+      "name": "Теплица 'Кубань'",
+      "regionId": 3,
+      "status": "normal",
+      "coordinates": {"lat": 45.0255, "lng": 38.9653},
+      "area": 2500,
+      "cropType": "огурцы",
+      "lastUpdated": "2024-01-20T17:25:00Z",
+      "createdAt": "2023-04-22T08:30:00Z"
+    },
+    {
+      "id": 9,
+      "name": "Теплица 'Южная Экспресс'",
+      "regionId": 3,
+      "status": "warning",
+      "coordinates": {"lat": 45.0155, "lng": 38.9553},
+      "area": 1800,
+      "cropType": "перец",
+      "lastUpdated": "2024-01-20T14:50:00Z",
+      "createdAt": "2023-06-30T10:15:00Z"
+    },
+    {
+      "id": 10,
+      "name": "Алтайская Теплица №1",
+      "regionId": 4,
+      "status": "normal",
+      "coordinates": {"lat": 53.3606, "lng": 83.7636},
+      "area": 1000,
+      "cropType": "огурцы",
+      "lastUpdated": "2024-01-20T19:30:00Z",
+      "createdAt": "2023-05-05T06:45:00Z"
+    },
+    {
+      "id": 11,
+      "name": "Теплица 'Горная'",
+      "regionId": 4,
+      "status": "emergency",
+      "coordinates": {"lat": 53.3506, "lng": 83.7536},
+      "area": 900,
+      "cropType": "томаты",
+      "lastUpdated": "2024-01-20T18:15:00Z",
+      "createdAt": "2023-07-12T11:30:00Z"
+    }
+  ]
+}

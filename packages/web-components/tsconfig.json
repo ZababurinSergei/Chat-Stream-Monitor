@@ -1,0 +1,164 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": [
+      "ES2022"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": false,
+    "resolveJsonModule": true,
+    "allowJs": false,
+    "checkJs": false,
+    "strict": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noImplicitOverride": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedSideEffectImports": true,
+    "useUnknownInCatchVariables": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "allowSyntheticDefaultImports": false,
+    "esModuleInterop": false,
+    "verbatimModuleSyntax": true,
+    "declaration": false,
+    "declarationMap": false,
+    "sourceMap": false,
+    "removeComments": false,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "composite": true,
+    "incremental": true,
+    "baseUrl": ".",
+    "paths": {
+      "the-last-of-guss-backend": [
+        "./packages/backend/src"
+      ],
+      "the-last-of-guss-backend/*": [
+        "./packages/backend/src/*"
+      ],
+      "@backend": [
+        "./packages/backend/src"
+      ],
+      "@backend/*": [
+        "./packages/backend/src/*"
+      ],
+      "the-last-of-guss-database": [
+        "./packages/database/src"
+      ],
+      "the-last-of-guss-database/*": [
+        "./packages/database/src/*"
+      ],
+      "@database": [
+        "./packages/database/src"
+      ],
+      "@database/*": [
+        "./packages/database/src/*"
+      ],
+      "@newkind/frontend": [
+        "./packages/frontend/src"
+      ],
+      "@newkind/frontend/*": [
+        "./packages/frontend/src/*"
+      ],
+      "@frontend": [
+        "./packages/frontend/src"
+      ],
+      "@frontend/*": [
+        "./packages/frontend/src/*"
+      ],
+      "@newkind/react-vite": [
+        "./packages/frontend-react/src"
+      ],
+      "@newkind/react-vite/*": [
+        "./packages/frontend-react/src/*"
+      ],
+      "@frontend-react": [
+        "./packages/frontend-react/src"
+      ],
+      "@frontend-react/*": [
+        "./packages/frontend-react/src/*"
+      ],
+      "@newkind/tsgen-core": [
+        "./packages/tsgen/src"
+      ],
+      "@newkind/tsgen-core/*": [
+        "./packages/tsgen/src/*"
+      ],
+      "@tsgen": [
+        "./packages/tsgen/src"
+      ],
+      "@tsgen/*": [
+        "./packages/tsgen/src/*"
+      ],
+      "@newkind/vendor-scripts": [
+        "./packages/vendor/src"
+      ],
+      "@newkind/vendor-scripts/*": [
+        "./packages/vendor/src/*"
+      ],
+      "@vendor": [
+        "./packages/vendor/src"
+      ],
+      "@vendor/*": [
+        "./packages/vendor/src/*"
+      ],
+      "@/*": [
+        "./src/*"
+      ],
+      "@builders/*": [
+        "./src/builders/*"
+      ],
+      "@core/*": [
+        "./src/core/*"
+      ],
+      "@types/*": [
+        "./src/types/*"
+      ],
+      "@utils/*": [
+        "./src/utils/*"
+      ]
+    },
+    "skipLibCheck": true,
+    "preserveWatchOutput": true
+  },
+  "files": [],
+  "references": [
+    {
+      "path": "./packages/backend"
+    },
+    {
+      "path": "./packages/database"
+    },
+    {
+      "path": "./packages/frontend"
+    },
+    {
+      "path": "./packages/frontend-react"
+    },
+    {
+      "path": "./packages/tsgen"
+    },
+    {
+      "path": "./packages/vendor"
+    }
+  ],
+  "include": [],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "coverage",
+    "**/*.test.*",
+    "**/*.spec.*",
+    "packages/*/dist/**/*",
+    "packages/*/node_modules/**/*"
+  ]
+}

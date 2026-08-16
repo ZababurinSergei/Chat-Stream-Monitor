@@ -1,0 +1,14 @@
+.profile-menu-item__wrapper {
+  width: 171px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  padding-left: 16px;
+  cursor: pointer;
+}
+
+.profile-menu-item__title {
+  font-family: 'Golos 14pt Medium 14x20';
+  padding-left: 15px;
+  margin: 0;
+}

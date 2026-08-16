@@ -1,0 +1,36 @@
+:host {
+	width: 100%;
+	box-sizing: border-box;
+	display: flex;
+	justify-content: space-between;
+	position: absolute;
+	z-index: 10;
+	padding: 0;
+	top: 0;
+	transition: opacity 1s ease 0s;
+}
+
+.welcome__logo {
+	width: 16.04167%;
+	height: 3.02083rem;
+	padding: 3.02083rem;
+}
+
+.welcome__wrapper {
+	display: flex;
+	align-self: center;
+}
+
+.welcome__link {
+	/*padding: 3.02083vw;*/
+	/*width: 7.34375vw;*/
+	/*height: 1.71875vw;*/
+	/*text-transform: uppercase;*/
+	/*text-align: center;*/
+	/*box-sizing: border-box;*/
+}
+
+.welcome__link {
+	padding: 3.02vw;
+	box-sizing: border-box;
+}

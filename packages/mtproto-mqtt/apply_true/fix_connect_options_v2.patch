@@ -1,0 +1,42 @@
+--- a/src/mesh-mqtt.c
++++ b/src/mesh-mqtt.c
+@@ -390,16 +390,18 @@
+         return -1;
+     }
+
+-    // 🔥 ПОЛНАЯ ИНИЦИАЛИЗАЦИЯ структуры
+-    MQTTClient_connectOptions conn_opts;
+-    memset(&conn_opts, 0, sizeof(conn_opts));
+-    strcpy(conn_opts.struct_id, "MQTC");
+-    conn_opts.struct_version = 0;
+-    // MQTTClient_SSLOptions ssl_opts = MQTTClient_SSLOptions_initializer;
++    // 🔥 ИСПОЛЬЗУЕМ ПРАВИЛЬНУЮ ИНИЦИАЛИЗАЦИЮ ДЛЯ ВЕРСИИ 8
++    MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
++
++    // Для версии 8 нужно также инициализировать SSL опции
++    MQTTClient_SSLOptions ssl_opts = MQTTClient_SSLOptions_initializer;
++    conn_opts.ssl = &ssl_opts;
+
+     // 🔥 Проверяем структуру
+     log_message("DEBUG", "conn_opts struct_id: %.4s, version: %d",
+                 conn_opts.struct_id, conn_opts.struct_version);
++    log_message("DEBUG", "conn_opts size: %zu", sizeof(conn_opts));
++    log_message("DEBUG", "struct_version should be: %d", MQTTCLIENT_CONNECTOPTIONS_VERSION);
+
+     // 🔥 Устанавливаем параметры
+     conn_opts.keepAliveInterval = g_config.keepalive;
+@@ -412,6 +414,15 @@
+     log_message("INFO", "Connecting to %s as %s...",
+                 g_config.broker, g_config.username);
+
++    // Если используется TLS
++    if (g_config.use_tls) {
++        conn_opts.ssl = &ssl_opts;
++        conn_opts.ssl->enableServerCertAuth = 1;
++        conn_opts.ssl->sslVersion = MQTT_SSL_VERSION_TLS_1_2;
++        log_message("INFO", "TLS enabled");
++    }
++
+     // 🔥 Проверяем broker
+     if (g_config.broker[0] == '\0') {
+         log_message("ERROR", "Broker address is empty");

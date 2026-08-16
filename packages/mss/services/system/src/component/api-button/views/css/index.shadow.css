@@ -1,0 +1,121 @@
+/* :host { */
+/* border-radius: 0.2vw; */
+/* width: 3vw; */
+/* background: transparent; */
+/* user-select: none; */
+/* border: 0.1vw solid rgba(118, 148, 244, 0.45); */
+/* cursor: pointer; */
+/* } */
+
+:root {
+    --brassica: #758a7a;
+    --fir: #859d85;
+    --Lime: #00ff00;
+    --Coral: #d31919;
+    --Thunderbird: #d31a1a;
+    --Apricot: #efb769;
+    --red-sand: #efb76a;
+    --gap: 0.1vw;
+    --images: 11.98vw;
+    --card-width: 18.02vw;
+    --border: 0.1vw;
+    --margin: 1.98vw;
+    --border-radius: 0.21vw;
+    --margin-gap: 0.42vw;
+    --padding-preview: 0.99vw;
+    --margin-bottom: 0.99vw;
+    --size1: 0.21vw;
+    --size2: 0.63vw;
+    --size3: 0.99vw;
+    --size4: 1.41vw;
+    --size5: 1.98vw;
+    --size6: 2.4vw
+}
+
+.skeleton-box::after {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    transform: translateX(-100%);
+    background-image: linear-gradient(90deg, rgba(255, 255, 255, 0) 0, rgba(255, 255, 255, 0.2) 20%, rgba(255, 255, 255, 0.5) 60%, rgba(255, 255, 255, 0));
+    animation: shimmer 2s infinite;
+    content: ""
+}
+
+.skeleton-box::before {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(192, 197, 204, .66);
+    content: ""
+}
+
+@keyframes shimmer {
+    100% {
+        transform: translateX(100%)
+    }
+}
+
+p {
+    margin: 0;
+    padding: 0
+}
+
+p.undefined {
+    font-size: 1.09vw;
+    color: #000;
+    cursor: pointer;
+    box-sizing: border-box;
+    padding: 0.21vw;
+    cursor: pointer;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none
+}
+
+p.auction-data__header_button {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+    background: #758a7a;
+    border-radius: 0.21vw;
+    color: #fff;
+    box-sizing: border-box;
+    padding: 0.42vw;
+    font-size: 1.09vw;
+    cursor: pointer;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none
+}
+
+.auction-link__active {
+    text-shadow: rgb(0, 0, 0, 0.3) 0 0 1.51vw;
+    background: rgb(59 149 241 / 45%);
+}
+
+.substrat__relation_button, .substrat__property_button {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin: auto;
+    text-align: center;
+    height: 1.72vw;
+    border-radius: 0.1vw;
+    width: 100%;
+    font-size: 0.99vw;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    user-select: none;
+    border: 0.1vw solid rgba(118, 148, 244, 0.45);
+    cursor: pointer;
+    box-sizing: border-box;
+}

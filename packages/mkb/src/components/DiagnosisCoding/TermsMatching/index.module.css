@@ -1,0 +1,24 @@
+.termsMatching {
+	display: flex;
+	justify-content: space-between;
+}
+
+.textList {
+	font-family: 'Golos 14pt Regular 14x20';
+	font-style: normal;
+	font-weight: 400;
+	font-size: 14px;
+	line-height: 20px;
+	letter-spacing: -0.01em;
+	padding: 1px 0;
+	margin: 0;
+}
+
+.textList span {
+	color: var(--red-100per);
+	font-weight: bold;
+}
+
+.icon_wrapper {
+	cursor: pointer;
+}

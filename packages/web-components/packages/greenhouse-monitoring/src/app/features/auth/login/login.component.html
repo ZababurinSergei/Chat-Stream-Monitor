@@ -1,0 +1,87 @@
+<div class="login-container">
+    <div class="login-card">
+        <h2>Система мониторинга теплиц</h2>
+
+        <div class="login-form">
+            <div class="form-group">
+                <label for="username">Имя пользователя</label>
+                <input
+                        type="text"
+                        id="username"
+                        [(ngModel)]="username"
+                        placeholder="Введите имя пользователя"
+                        class="form-control"
+                />
+            </div>
+
+            <div class="form-group">
+                <label for="password">Пароль</label>
+                <input
+                        type="password"
+                        id="password"
+                        [(ngModel)]="password"
+                        placeholder="Введите пароль"
+                        class="form-control"
+                />
+            </div>
+
+            <div class="form-group">
+                <label>Выберите роль</label>
+                <div class="role-selector">
+                    <div
+                            class="role-option"
+                            [class.selected]="selectedRole() === 'specialist'"
+                            (click)="selectedRole.set('specialist')"
+                    >
+                        <div class="role-icon">👨‍🔬</div>
+                        <div class="role-info">
+                            <h4>Специалист</h4>
+                            <p>Просмотр данных, запуск опросов</p>
+                        </div>
+                    </div>
+
+                    <div
+                            class="role-option"
+                            [class.selected]="selectedRole() === 'senior-specialist'"
+                            (click)="selectedRole.set('senior-specialist')"
+                    >
+                        <div class="role-icon">👨‍💼</div>
+                        <div class="role-info">
+                            <h4>Старший специалист</h4>
+                            <p>Редактирование данных, комментирование истории</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="role-permissions">
+                <h4>Доступные функции для {{ getRoleName() }}:</h4>
+                <ul>
+                    @for (permission of permissions(); track permission) {
+                    <li>{{ permission }}</li>
+                    }
+                </ul>
+            </div>
+
+            <button
+                    class="login-btn"
+                    (click)="login()"
+                    [disabled]="!canLogin()"
+            >
+                Войти в систему
+            </button>
+
+            <div class="demo-credentials">
+                <p><strong>Демо-доступ:</strong></p>
+                <p>Любые имя пользователя и пароль</p>
+                <p>Роль выбирается при входе</p>
+            </div>
+
+            @if (errorMessage()) {
+            <div class="error-message">
+            {{ errorMessage() }}
+            </div>
+            }
+        </div>
+    </div>
+</div>

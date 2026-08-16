@@ -1,0 +1,26 @@
+/*https://codepen.io/sarazond/pen/LYGbwj*/
+body {
+    box-sizing: border-box;
+    background: #FAFCFF;
+    padding: 0;
+}
+
+.service, .rules {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.service > pre {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    font-size: 1.41vw;
+    color: #f7eded;
+    line-height: 1.3vw;
+    letter-spacing: 0.21vw;
+}

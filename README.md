@@ -385,3 +385,7 @@ pnpm license:verify
 □ /Directory/monorepo/tooling/eslint-config/package.json □
 /Directory/monorepo/tooling/prettier-config/index.js □
 /Directory/monorepo/tooling/prettier-config/package.json
+
+
+
+gnome-extensions disable clipboard-indicator@tudmotu.com && sleep 1 && gnome-extensions enable clipboard-indicator@tudmotu.com

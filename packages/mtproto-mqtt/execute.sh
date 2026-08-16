@@ -5,8 +5,8 @@
 # ============================================================================
 
 PROJECT_DIR="/home/sergei/Desktop/system/packages/mtproto-mqtt"
-PATCH_SOURCE="./tmp/full_init_connect.patch"
-PATCH_TARGET="./apply/full_init_connect.patch"
+PATCH_SOURCE="./apply/fix_connect_options_v2.patch"
+PATCH_TARGET="./apply/true/full_init_connect.patch"
 TARGET_FILE="./src/mesh-mqtt.c"
 
 # ============================================================================
