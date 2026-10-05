@@ -1,144 +1,24 @@
 {
   "directories": [
     {
-      "id": "10",
-      "name": "packages/devextreme-migration",
-      "description": "Пользовательская документация: проектные описания, инструкции, чек-листы",
-      "description_en": "User documentation: project descriptions, instructions, checklists",
-      "required": false,
-      "excluded": true
-    },
-    {
-      "id": "11",
-      "name": "Directory/monorepo",
-      "description": "Пользовательские функции: скрипты, расширения, пользовательские утилиты",
-      "description_en": "User functions: scripts, extensions, user utilities",
-      "required": false,
-      "excluded": true
-    },
-    {
-      "id": "12",
-      "name": "Directory/extensions",
-      "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
-      "description_en": "User files: sources, templates, projects, user data",
-      "required": false,
-      "excluded": true
-    },
-    {
-      "id": "13",
-      "name": "Directory/typescript-sdk",
-      "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
-      "description_en": "User files: sources, templates, projects, user data",
-      "required": false,
-      "excluded": true
-    },
-    {
-      "id": "14",
-      "name": "packages/ast-analyzer",
+      "id": "1",
+      "name": "packages/ast-graph-viewer",
       "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
       "description_en": "User files: sources, templates, projects, user data",
       "required": false,
       "excluded": false
     },
     {
-      "id": "15",
-      "name": "packages/mqtt",
+      "id": "2",
+      "name": "src/reporters/codec",
       "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
       "description_en": "User files: sources, templates, projects, user data",
       "required": false,
       "excluded": true
     },
     {
-      "id": "16",
-      "name": "packages/mtproto-mqtt",
-      "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
-      "description_en": "User files: sources, templates, projects, user data",
-      "required": false,
-      "excluded": true
-    },
-    {
-      "id": "17",
-      "name": "packages/mtproto-mqtt/metaflow/00-default",
-      "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
-      "description_en": "User files: sources, templates, projects, user data",
-      "required": false,
-      "excluded": true
-    },
-    {
-      "id": "18",
-      "name": "packages/mtproto-mqtt-gateway",
-      "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
-      "description_en": "User files: sources, templates, projects, user data",
-      "required": false,
-      "excluded": true
-    },
-    {
-      "id": "19",
-      "name": "packages/explorer",
-      "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
-      "description_en": "User files: sources, templates, projects, user data",
-      "required": false,
-      "excluded": true
-    },
-    {
-      "id": "20",
-      "name": "packages/bookmarks/03-template-store",
-      "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
-      "description_en": "User files: sources, templates, projects, user data",
-      "required": false,
-      "excluded": true
-    },
-    {
-      "id": "21",
-      "name": "packages/bookmarks/02-config-generator/web",
-      "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
-      "description_en": "User files: sources, templates, projects, user data",
-      "required": false,
-      "excluded": true
-    },
-    {
-      "id": "22",
-      "name": "packages/bookmarks/a0_5238_store",
-      "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
-      "description_en": "User files: sources, templates, projects, user data",
-      "required": false,
-      "excluded": true
-    },
-    {
-      "id": "23",
-      "name": "packages/bookmarks/grid/src/infoenergo-ui",
-      "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
-      "description_en": "User files: sources, templates, projects, user data",
-      "required": false,
-      "excluded": true
-    },
-    {
-      "id": "24",
-      "name": "packages/bookmarks/a2_5231_build_vite",
-      "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
-      "description_en": "User files: sources, templates, projects, user data",
-      "required": false,
-      "excluded": true
-    },
-    {
-      "id": "24",
-      "name": "packages/bookmarks/a0_5238_store",
-      "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
-      "description_en": "User files: sources, templates, projects, user data",
-      "required": false,
-      "excluded": true
-    },
-    {
-      "id": "25",
-      "name": "packages/bookmarks/a4_6532_infoenergo_ui",
-      "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
-      "description_en": "User files: sources, templates, projects, user data",
-      "required": false,
-      "excluded": true
-    },
-    {
-      "id": "26",
-      "name": "packages/bookmarks/a4_6532_infoenergo_ui",
+      "id": "3",
+      "name": "packages/ast-analyzer/scripts",
       "description": "Пользовательские файлы: исходники, шаблоны, проекты, пользовательские данные",
       "description_en": "User files: sources, templates, projects, user data",
       "required": false,
@@ -147,6 +27,24 @@
   ],
   "excludePatterns": {
     "directories": [
+      "schemas",
+      "lk",
+      "pipeline",
+      "reporters/modules",
+      "reporters/json",
+      "__tests__",
+      "analyzers",
+      "ci-cd",
+      "cli",
+      "utils",
+      "grammars",
+      "formal",
+      "templates",
+      "refactor",
+      "styles",
+      "docs",
+      "examples",
+      "reports",
       "formal/__tests__",
       "refactor/__tests__",
       "test-temp-stress",
@@ -172,6 +70,24 @@
       "logs"
     ],
     "files": [
+      "index.full.json",
+      "index.json",
+      "packages/ast-analyzer/setup-aliases.sh",
+      "packages/ast-analyzer/commands.md",
+      "packages/ast-analyzer/README.refactoring.md",
+      "packages/ast-analyzer/report_е.html",
+      "__node_globals.d.ts",
+      "analize.file.md",
+      "packages/ast-analyzer/globals.d.ts",
+      "packages/ast-analyzer/index.html",
+      "packages/ast-analyzer/tsconfig.analyzer.json",
+      "esbuild.bundle.config.js",
+      "esbuild.cli.config.js",
+      "commands.md",
+      "interactive-report.template.html",
+      "interactive-report.js",
+      "interactive-report.css",
+      "data-converter.js",
       "analysis-result.json",
       "README.md",
       "LICENSE.md",

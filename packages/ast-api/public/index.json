@@ -1,0 +1,207 @@
+{
+  "v": "5.1.0-optimized",
+  "ts": "2026-09-06T22:48:46.161Z",
+  "r": "m1",
+  "mi": {
+    "m1": "public",
+    "m2": "components"
+  },
+  "fl": {
+    "f1": "public/app.js",
+    "f2": "public/components/api-client.js",
+    "f3": "public/components/app-state.js",
+    "f4": "public/components/quest-definitions.js",
+    "f5": "public/components/app-shell.js",
+    "f6": "public/components/app-header.js",
+    "f7": "public/components/quest-log.js",
+    "f8": "public/components/stats-dashboard.js",
+    "f9": "public/components/quest-panel.js",
+    "f10": "public/components/search-panel.js",
+    "f11": "public/components/graph-visualization.js",
+    "f12": "public/components/drop-zone.js",
+    "f13": "public/components/app-footer.js"
+  },
+  "fns": [],
+  "cn": [
+    [
+      "c1",
+      "QUEST_DEFINITIONS",
+      [
+        {
+          "id": "q1",
+          "title": "🏰 Исследование замка",
+          "desc": "Найди все функции и их зависимости",
+          "status": "pending"
+        },
+        {
+          "id": "q2",
+          "title": "🗺️ Карта сокровищ",
+          "desc": "Найди путь между двумя функциями",
+          "status": "pending"
+        },
+        {
+          "id": "q3",
+          "title": "💀 Охота на мертвый код",
+          "desc": "Найди неиспользуемые функции",
+          "status": "pending"
+        },
+        {
+          "id": "q4",
+          "title": "🏝️ Изолированные функции",
+          "desc": "Найди функции, которые никто не вызывает",
+          "status": "pending"
+        },
+        {
+          "id": "q5",
+          "title": "📚 Книга библиотек",
+          "desc": "Найди все внешние библиотеки",
+          "status": "pending"
+        },
+        {
+          "id": "q6",
+          "title": "📊 Мастер статистики",
+          "desc": "Получи полный отчет о проекте",
+          "status": "pending"
+        },
+        {
+          "id": "q7",
+          "title": "🔀 Достижимость",
+          "desc": "Проверь достижимость между функциями",
+          "status": "pending"
+        },
+        {
+          "id": "q8",
+          "title": "🏆 Чемпионы вызовов",
+          "desc": "Найди функции с наибольшим количеством вызовов",
+          "status": "pending"
+        },
+        {
+          "id": "q9",
+          "title": "📁 Древо файлов",
+          "desc": "Изучи структуру файлов проекта",
+          "status": "pending"
+        },
+        {
+          "id": "q10",
+          "title": "🔮 Пророчество констант",
+          "desc": "Найди все константы в проекте",
+          "status": "pending"
+        }
+      ],
+      "m2",
+      "f4",
+      3,
+      "e"
+    ]
+  ],
+  "gr": {
+    "c": [],
+    "i": [],
+    "e": [],
+    "h": [],
+    "td": [],
+    "re": [],
+    "uc": [],
+    "cd": [],
+    "ce": [],
+    "di": [],
+    "cfg": [],
+    "ext": [],
+    "vt": [],
+    "async": [],
+    "closures": [],
+    "reflection": [],
+    "types": []
+  },
+  "st": {
+    "tf": 0,
+    "tc": 0,
+    "tm": 2,
+    "tfils": 13,
+    "te": 0,
+    "tun": 0,
+    "async": 0,
+    "cy": false,
+    "avgCalls": 0,
+    "maxCalls": 0,
+    "tcn": 1,
+    "tce": 0,
+    "tuc": 0,
+    "tcd": 0,
+    "tr": 0,
+    "ttd": 0,
+    "tre": 0,
+    "ti": 0,
+    "tsf": 0,
+    "funcsWithCalls": 0,
+    "calledFuncs": 0,
+    "modulesWithFunctions": 0,
+    "filesWithFunctions": 0,
+    "exportedWithCalls": 0,
+    "defaultExports": 0,
+    "typeExports": 0,
+    "typeImports": 0,
+    "di": 0,
+    "cfg": 0,
+    "ext": 0,
+    "vt": 0,
+    "asyncChains": 0,
+    "closures": 0,
+    "reflections": 0,
+    "typeDeps": 0
+  },
+  "legend": {
+    "callTypes": {
+      "d": "direct",
+      "a": "async",
+      "m": "method",
+      "c": "callback",
+      "di": "dynamic-import"
+    },
+    "importTypes": {
+      "n": "named",
+      "df": "default",
+      "ns": "namespace",
+      "ri": "re-export",
+      "to": "type-only",
+      "se": "side-effect"
+    },
+    "exportTypes": {
+      "ne": "named-export",
+      "de": "default-export",
+      "re": "re-export",
+      "te": "type-export"
+    },
+    "inheritanceTypes": {
+      "ex": "extends",
+      "im": "implements",
+      "ab": "abstract"
+    },
+    "typeDependencyTypes": {
+      "p": "parameter",
+      "r": "return",
+      "an": "annotation",
+      "g": "generic",
+      "tr": "type-reference"
+    },
+    "constantTypes": {
+      "val": "value",
+      "enum": "enum",
+      "config": "config"
+    },
+    "dynamicImportTypes": {
+      "literal": "literal",
+      "template": "template-literal",
+      "concat": "concatenation"
+    },
+    "configTypes": {
+      "env": "environment-variable",
+      "file": "config-file",
+      "variable": "config-variable"
+    },
+    "vueTemplateTypes": {
+      "component": "component",
+      "directive": "directive"
+    }
+  }
+}
