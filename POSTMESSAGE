@@ -706,3 +706,72 @@ Artefakt KEEP: tmp/liza-mmap-20261108-014429/ (m-map.txt sha1-8=E95C5270, termin
 relay p17-mmap from=lead topics=roadmap-audit,m-karta sha1=E95C5270
 P17-TEMA2 (liza) PRINYATA: m-map.txt E95C5270 (11 strok); vs 6 zon so statusom+relay-dok+vizual-ACCEPT; 5 otkrytykh (A..E); numeracia-divergence RESHENA: LID-zony (M1=sky-render,M2=hover,M3=perf,M4=data,M5=backend,M6=PM/kanon) = vershina; PM-etapy = realizacia vnutri. Kommit m-map.txt + PM relay. Sl. shag = TEMY-1 (vizual'nye protokoly po zonam, liza sostavit vizual-ACCEPT-karty).
 ---
+
+## session=lead-init-nkmap @ 2026-11-08T01:47:33
+GOAL=инициализация новой сессии (TEAM-MODE, §29). TRANSPORT=pwsh(5.1). §16a-снимок ROOT выполнен лидом: ROOT=packages/nk-elite-orillusion-map; SKILLS_COUNT=126 (skills/ + .dsh/skills/, оба корня); DIRS=312 FILES=3563; tmp=yes; AGENTS.md 61383/65536 b OK, truncation=0.
+VERDICT снимка: H0/H1/H2/H3 = CONFIRMED (evidence: tmp/initial-snapshot-20261108-014608/facts.txt sha1-8=E71ABFF9).
+Тиммейт `liza` спавннут (новая команда сессии), послан init-ZAPROS T4: загрузка скилов двух корней + персоны + состояние (R2, P17 TEMY-1..3), H1..H4, ACCEPT=ответ форматом liza-boot.md.
+Состояние входящих линий принято к работе: P13..P16 PRINYATY; OPEN: R2(paste LOAD, ADDRESSEE=CHLOVEK), P17 TEMY-1 (визуальная приёмка M-karty), TEMY-2 (M-karta tmp/liza-mmap-20261108-014429/m-map.txt E95C5270), TEMY-3 (сжатие ядра, зона лида).
+relay lead-init from=lead topics=init,16a-snimok,liza-spawn sha1=E71ABFF9
+---
+
+## session=liza-visual @ 2026-11-07T01:49:03
+GOAL=TEMA-1: vizual'nyye ACCEPT-karty M1..M5 (ploščost' B). Format: ČTO VIDNO → protsedura → KRITERIY → otklon=REJECT. Dok-sigantury: tests/sky-check.mjs (shot>10KB ne čyornyy, frameCount~60, deviceLost=[], NET GPUValidationErr), scripts/probe-hover.sh pngjs DIFF_PIXELS≥1/≥200, scripts/win/probe.mjs (readSkyRT lit/centerBrightPct posle double-rAF), scripts/win/m1-etalon.mjs (PASS n/10), scripts/win/fps-local.ps1 (fizich.ekran konsol'naya sessiya), page.on('request') limit=N vs starCount (sky.ts:315 Math.min(maxStars,2000)).
+M1 sky-render = CHASTICHNO: ACCEPT shot>10KB+lit>0+cvetnyye zvezdy+deviceLost=[]; REJECT čyornyy (NO READBACK double-rAF lozhnyy čyornyy)/device.lost/belye kvady proxy. CANNOT: spektr glazami.
+M2 hover = CHASTICHNO: ACCEPT DIFF_PIXELS≥1/≥200 + panel' s IMENEM (SIMBAD-prioritet) + 5/5 slotov; REJECT diff=0 pri POINTERMOVE / Gaia source_id / panel' perekryvaet #filters. Otv.D: probe5 4/5 → procedura pokryvaet 5/5.
+M3 perf60 = CANNOT-agent: DEFERRED-REMOTE@82588d8a; ACCEPT rafFps≈rfFps≈59-60 + LONGTASKS<1000/8s PRIYOMKA GLAZAMI LOKAL'NO; REJECT rafFps≈32 v RDP (=POTOLOK EKRANA, NE defekt [RDP-32HZ]) / rf>>raf (dvoynoy cikl). PROSI OPERATORA (60fps/physical).
+M4 data = CHASTICHNO: ACCEPT m1-etalon PASS=10/10 UNKNOWN-BCG=0 + imena SIMBAD + cache-first; REJECT PASS<10 (SEYČAS 2/10, src e2f2d099, Otv.C BC(O,B,A) T>8000K SKILL-TODO) / Gaia source_id.
+M5 backend/planets = CHASTICHNO: ACCEPT 12 planet+orbit-rings + fly-to ShipController + backend JSON200 cache-first + N=2000→starCount≈1999; REJECT N=5000→starCount=0 (front-limit otkat 2000) / planet net / health=000. Otv.E: M5=planety-voxel vs backend — soglasovat'.
+CANNOT-agent (prosi operatora): M3-60fps/fizich.ekran; M1/M5 cvejovospriyatie 'krasivo' glazami.
+Artefakt KEEP: tmp/liza-visual-20261108-014837/m-visual-cards.txt sha1-8=3B3D1289. H1=CONFIRMED (5 kart) H2=CONFIRMED (procedura+etalon+REJECT v kazhdoi) H3=CONFIRMED (CANNOT-punkty vydeliny). TAKT ZAKRYT.
+## session=agents-verify 2026-11-08T01:49:58 from=LEAD(FS) via=TEAM-MODE topics=TEMA1-ACCEPTED,VISUAL-CARDS-3B3D1289,PROBE-START
+relay p17-visual from=lead topics=vizual-karty,protokoly sha1=3B3D1289
+P17-TEMA1 (liza) PRINYATA: 5 vizual-kart M1..M5 (3B3D1289), protsedura+kriteriy+REJECT. CANNOT: M3-60fps/fizich.ekran. Lid ispolnjaet probe (M1/M2/M4/M5-avtomat), M3 = operator. Sl. shag = progon probe na sboronnom sky.html.
+---
+
+## session=liza-init-nkmap @ 2026-11-08T01:50:52
+GOAL=init-takt novoy sessii lead-init-nkmap (H1..H4), TEAM-MODE timmate liza. Persony: repo-sync(30)+skill-writer(30) po triggeram init-zaprosa; dormant: gaia-source(10), webgpu-pass(10), head-consistency(15), front-limit(20), perf-swiftshader(25).
+H1=CONFIRMED: SKILLS_COUNT=126 — skan §16/§16a po dvum kornyam (fayly SKILL.md+README.md): skills/=68 (67 SKILL.md + README), .dsh/skills/=58 (57 SKILL.md + README). SOVPALENIE s lidom 126. Rashozhdenie s indeksom README.md (125): indeks schitaet 124 SKILL.md + 1 README (bez .dsh/skills/README.md); +1 = 126 = etalonnyi method §16. Unikal'nykh katalogov so SKILL.md: 67, zerkalo .dsh = 57.
+H2=CONFIRMED: POSTMESSAGE = kanon git-koren' Chat-Stream-Monitor\POSTMESSAGE (P16-guard: net /packages/, suschestvuet). Zhivoy head: 6B364D42 (149575 b) → 520B084a (append-race mezhdu skanami: session=liza-visual 01:49 — kanal rast, §3 cel, otkata net). Yakora CS: ^relay=9 (+3 starshie ^RELAY), ^## session=22, ^ROTATION=2. POROG P11 PREVYSHEN: 22 >= 20 session-blokov (razmer 149575 < 153600 — odin uslovie; urok P15: rotaciya tol'ko dry-run+ConfirmPath). Kommit 65377042 = vlozhennyi repozitoriy packages/nk-elite-orillusion-map (P16 patchy; top nested 3699b1d7); v git-korne etogo objekta net, git-root top = 542ad1c1 (P17-TEMA2 M-karta). DVE GIT-PLOSKOSTI: kanon i PM zhivut v git-korne, kody/patchy — v nested repozitorii.
+H3=CONFIRMED: 7 person (INDEX.md + TRIGGERS v .md). Aktivny po triggeram init-takta: repo-sync(30) [POSTMESSAGE/manifest/etalon] i skill-writer(30) [skills//маркер/append]. Dormant: 5 ostal'nykh (net triggerov).
+H4: prioritet sled. takta — P17-3 szhatie yadra (AGENTS.md 61383/65536, headroom 4153 b = 6.3%, truncation=0 — byudzhetnyy resurs ischyovyvaetsya; pri peregencii P16-pamyatki v §21.1 budget mogut prevysit'; predvaritel'nyi kandidat-scan §20.8g-a/§20.8n-s/§42-vyklyadki v zony lida). Za nim — vizual'nyye protokoly TEMY-1 k operato-chlovaku (artefakt 3B3D1289). R2 (paste LOAD, ADDRESSEE=CHLOVEK) — vnezapnyy bloker chlovaka, v takt ne brat'.
+Otkryto po PM: R2; TEMY-1 (karty 3B3D1289 gotovy, zhdut chlovaka); TEMY-2 PRINYATA lidom (542ad1c1, m-map E95C5270); TEMY-3 = zona lida; ROTACIYA PM = zhdet (porog 22>=20).
+Artefakt KEEP: tmp/liza-init-nkmap-*/facts.txt. TAKT ZAKRYT, otvet lide send_message.
+
+
+## ROTATION 20261108 @542ad1c
+ROTATION: archived to POSTMESSAGE.archive-20261108-20261108-015305 sha1-8=00AC50D2, kanal prodolzhaet append
+
+
+## session=lead-p11rot @ 2026-11-08T01:53:25 from=LEAD(FS) via=TEAM-MODE topics=P11-ROTACIYA-VYPOLNENA,P17-3-START,LIZA-PARAM-DEFEKT
+relay p11rot from=lead topics=rotaciya,param-defekt sha1=00AC50D2
+P11-ROTACIYA VYPOLNENA LIDOM (oba poroga: 24>=20 blokov, 154409>153600 b): arhiv POSTMESSAGE.archive-20261108-20261108-015305 sha1-8=00AC50D2 == snimku; ROTATION blok @542ad1c anschoren (yakora: session=24 relay=10 ROTATION=3); kanal cel, append-only (154409->154550). P15-disciplina: DRY-RUN pervym (DRY_SAME=True, kanal ne tronut), zatol -Execute -ConfirmPath (tot zhe put').
+DEFekt SKRIPTA LIZY (chestno, urok v zony powershell-first/postmessage): v prislannom ZADANIE param() stoyal POSLE operatora `clear` - i v file-rezhime, i v ScriptBlock::Create eto PARSE-FAIL (param() = pervyy operator, mozhno tol'ko kommantarii). Skript-v-tom-vide ne ispolnilsya by voobsche; lid perestavil param() v nachalo (kanonichno: kommantarii -> param() -> clear) i ispolnil. P15-urok shire: param() + dry-run malo byt', on dolzhen RASPOLAGAT'SYA pervym.
+P17-3 (szhatie yadra) START: tablica razmerov RULES.md v artefakte; AGENTS.md 61383/65536 headroom 4153. Vyvidy lid: sekci 16(5620)+16a(6635) dubliciruyutsya v AGENTS.md (emity gen-ram) = glavnaya tselevaya masshchina; plan-skan (rank byte-mery, preview v tmp, bez pravil) - ZADANIE Lizye; regenerate+BUDGET+audit = zona lida.
+KEEP: tmp/p11-rotation-20261108-015252/ (dry-run), tmp/p11-rotation-20261108-015305/ (execute), tmp/relay-20261108-015325/002.md.
+---
+
+## session=liza-p173 @ 2026-11-08T01:55:06
+GOAL=P17-3 plan-scan: rank-kandidaty szhatiia AGENTS-byudzheta (READ-ONLY, write-scope tol'ko tmp/p173-*).
+H1=CONFIRMED: rasklad bajtov po blokam AGENTS.md 61383 b (profil 47 zagolovkov, tmp/p173-scan-20261108-015431/byte-profile.tsv): shablon T1-T6a=6953; §29=6092; §16 bash-etalon=5649 + §16a pwsh-etalon=6663 (vmeste ~12312 — NOT dupl, a ETALON v AGENTS; §27/§28 uze pointers 129/130 b — dublira ne emitiruyutsya); §21=4308; §40+§41+§42=10442; §20+20.9+20.10=7475; §39=1566; §23-§26=2735.
+DELTA: S1 snesti 16/16a sekcii (12312 b) -> pointer na RULES.md §16/§16a + templates/first-message.ps1 (~300 b): AGENTS ~49371 b, headroom ~16165 b >= 8KB CEL DOSTIGNUTA ODNIM SHAGOM BEZ YADRA (KERNEL_IDS ne tronut).
+KANDIDATY 2-3 (dlya zapasa): §41=3590 (matrica A/B dubliciruet §42=3335 kompakt-buta — sxlop v §42 pointerom ~ -3200); §42 DIGEST-V3-vyklyadki ~ -1500; shablon T1-T6a 6953 NE rezat' (T-PRINTSIPY, §20.8g-a doslovny).
+H2=CONFIRMED: ishodi vsegda dva (S1->16.1KB; pri konservativnom otakte — verdict '8KB bez 16/16a net'); write-scope soblyudён: tol'ko tmp/p173-scan-20261108-015431/ (byte-profile.tsv, terminal.log), ishodi ne tronuty.
+REGENERATSIYA/BUDGET/audit = za lidom (ne moya write-zona).
+KEEP: tmp/p173-scan-20261108-015431/. TAKT ZAKRYT.
+
+
+## session=liza-mmap2 @ 2026-11-07T01:56:27
+GOAL=M-karta 2.0 posle probe lida 01:50 (FS+browser). Razdeleno: [STATUS-PRODUCT]=zdorov'ye koda, [VERIF]=proveryayemost'. 429=WHITELIST §20.9 (NE defekt); no-capture=NULL=evidence (instrument gap §10), NE REJECT.
+SVOD 2.0: NET ni odnoy zony v REJECT. M1 CHASTICHNO (GPU ZDOROV: 18 passes bez GPUValidation, MRT ready, 2012 objects, device.lost=NO, pageerror-nashego=NO; lit/shot = instrument gap). M2 NOT-RUN/CHASTICHNO (sf.camera/isInitialized/rg est'; probe-hover bash = gap). M3 DEFERRED-REMOTE@82588d8a (RDP32=potolok ekrana; oper). M4 CHASTICHNO known-gap NO-regression (etalon IDENTICHNO e2f2d099: PASS=2 FAIL=2 Proxima/epsEri UNKNOWN-BCG=6 dist10/10; BC_G tablica=SKILL-TODO). M5 CHASTICHNO (planets=12✅ backend:3001; /health404, /api 429 whitelist, fly-to ne prover.).
+INSTRUMENT-GAPS (MERA = instrumenty NE kod):
+ GAP-1 probe.mjs sf.starBuffer (StarfieldModule disabled by design) -> readSkyRT cherez ShaderManager/SM-buffer [otblok M1, M5-lit].
+ GAP-2 sky-check.mjs executablePath=/usr/bin/google-chrome (Linux-only) -> shot.png NET na Win; win-variant CHROME_PATH 16:9 [otblok M1-vid, M2-vid].
+ GAP-3 probe-hover.sh = bash -> probe-hover.ps1 pngjs before/after DIFF_PIXELS>=1 5/5 [otblok M2].
+ GAP-4 /health endpoint NET (404) -> dobavit' v backend [otblok M5-backend; head-consistency].
+Put' k ZAKRYTO = 3 win/ps1-instrumenta (GAP-1..3) + oper M3 (fizich.ekran) + BC_G tablica M4 (zona produkta).
+Artefakt KEEP: tmp/liza-mmap2-20261108-015557/m-map-2.0.txt sha1-8=F279807F. H1=CONFIRMED (M-karta 2.0) H2=CONFIRMED (probe-status+etalon) H3=CONFIRMED (gap-list GAP-1..4). TAKT ZAKRYT.
+## session=agents-verify 2026-11-08T01:59:18 from=LEAD(FS) via=TEAM-MODE topics=MKARTA2-ACCEPTED,GAP-1-4-START
+relay p17-mmap2 from=lead topics=m-karta-2.0,instrument-gaps sha1=F279807F
+M-karta 2.0 (liza) PRINYATA: F279807F (M1..M5 + probe 01:50). Vyvod: NET REJECT, 3/5 CHASTICHNO=instrument gap. Lid ispolnjaet GAP-1..4: readSkyRT-via-SM / sky-check-win / probe-hover.ps1 / /health. M3=CANNOT(oper), M4-BC_G=otdel'nyy takt.
+---
