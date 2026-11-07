@@ -892,3 +892,39 @@ GAP-3 DONE (task-2 complete, kommit paketa: sky-check-win+probe-hover):
 - PROBE-HOVER 23-24-26: INIT OK, probeVisible=5 zvyozd/planet, 5/5 slotov sel≠null, diff=16113/17374/17497/44751/52178 (panel perekryvaet pikselyi = diff≥1), panelDesc='Выбранная звезда: Gaia DR3 ?' (4/5=exoplanety, 1/5=Gaia source_id 3017190546641718144). ACCEPT=true 5/5. REJECT-condition 'Gaia source_id VMESTO imeni' = 5/5 paneli: updateStarPanel v sky.ts:1485 pechatayet 'Gaia DR3 '+source_id — SIMBAD-imeni v paneli NET = M4/SIMBAD-known gap (ne regression).
 Sl. shag = Lizye M-karta 4.0: M1=ZAKRYTO (real synthetic), M2=ZAKRYTO-COND (5/5 hover + panel; SIMBAD-imeni v paneli = otdel'nyy takt M4/backend-names).
 ---
+
+## session=liza-mmap4 @ 2026-11-07T02:27:21
+GOAL=M-karta 4.0 (GAP-3 done; vse 4 GAP ✅; probe 23-24-04/23-24-26; kommity 492498c4/6a7b20e).
+SVOD: ZAKRYTO=1 (M1) · ZAKRYTO-COND=1 (M2) · CHASTICHNO=2 (M5 fly-to/limit · M4 BC+imeni) · DEFERRED-REMOTE=1 (M3). NET REJECT. GAP 4/4 ZAKRYTY.
+M1 = ZAKRYTO (FULL ACCEPT): sky-check-win canvas-clip (bez UI): shot=110139b PASS lit=791681 (litPct 0.3818) centerBrightPct=0.0061 (>0!) maxLum=1.0; SM passes=18 frames=625 deviceLost=false; stars2000+galaxies63; gpuErrors=0 (whitelisted=1=429→synth1999). Pred lit=128884=UI-paneli lozhnyy; canvas-clip korekten.
+M2 = ZAKRYTO-COND (hover 5/5): probe-hover probeVisible=5 sel=5/5 (4 exoplanet+1 Gaia 3017190546641718144), diff vsegda>=1 (16113..52178), panelDesc='Выбранная звезда: Gaia DR3 ? | ra/dec' rabotaet. CHESTNO: K2 REJECT-condition 'Gaia source_id VMESTO imeni' SEYCHAS srabatyvaet (5/5 = 'Gaia DR3 '+source_id sky.ts:1485, SIMBAD-net) → COND do imen (takt M4b nk-elite-backend-names).
+M5 = CHASTICHNO: /api/health=200, planets=12✅, 429 cache-first EST' (queryCache TTL5min server-gaia.mjs:173, retry exp-backoff L289-377, 79 sectors, stars.db 5MB) → 429 NE bloker. Otkryto fly-to + limit N=2000→1999.
+M3 = DEFERRED-REMOTE (oper). M4 = CHASTICHNO (2 takta: BC_G tablica + SIMBAD-imeni).
+DURABLE-FYAKT init-flaky ROOT-CAUSE: --use-angle=vulkan = GPU-process crash Intel UHD630 (Page crashed, 37 leftover chrome=adapter exhaustion). KANON launch-args probe BEZ vulkan: [--headless=new,--no-sandbox,--enable-unsafe-webgpu,--enable-dawn-features=allow_unsafe_uploads]. Posle FIX device=true starCount=1999 __sky=true. → povtorit' v skill browser-automation/playwright/sky-perf (zona lida).
+Artefakt KEEP: tmp/liza-mmap4-20261108-022704/m-map-4.0.txt sha1-8=A75CE62C. H1=CONFIRMED H2=CONFIRMED H3=CONFIRMED. TAKT ZAKRYT.
+
+## session scp-nav-fix lead @0b719716 2026-11-08 02:35
+relay scp-nav-01 from=lead topics=ShipController,setRotation,Orillusion0.9.2,SCP-NAV,serve.mjs sha1=<nizhe>
+- ZADANIE ot liza (menu-check-20261108-0156): defekt qRoll.fromAxisAngle v tests/simplified/ShipController.ts:775-777 (metoda net v 0.9.2).
+- FIX: kanonichnyy khelpp faila createRotationQuat(axis, angleDeg) (degrees; API 0.9.2 constructor/multiply/normalize). SetFromAxisAngle(axis, degrees) - alternativu (vendor PI/180). Edineniya vyzyvayushchykh = yawDeg/pitchDeg/rollDeg.
+- SBORKA: npm run build:sky -> dist/sky.bundle.js 3097238 b; vyzyvov .fromAxisAngle( v bundle = 0. Commit 0b719716.
+- NOVYY FAKT (bloker progonov): server.mjs (Express, :3001) otdaval HTML-fallback (1596 b) na /dist/sky.bundle.js -> stranitsa bez dvizhka; kanonicheskiy probe-server = scripts/win/serve.mjs (PORT env, razdajet dist/ po /dist/ i /). Moj :3005 posle progonov ostanovlen; Liza :3001 (pid 34224) ne tronut.
+- PROGON menu-check4 (polnyy nabor, :3005): vklady 5/5, pageAlive=true, FPS 32, ERRORS=2 = signatury «429»/«API НЕ ВЕРНУЛ» (whitelist 20.9); SEARCH2 afterById=0/siriusCount=0 -> NOVYY defekt poiska (otdelnoe zadanie).
+- PROGON menu-check5 (orientaciya): [SKY-VIEW] look at ra=101.29 dec=-16.72 yaw=-11.3 pitch=16.7; quat [0,0.7071,0.7071,0]->[0.1447,-0.0973,-0.0143,0.9846]; forward [0,1,0]->[-0.196,-0.282,0.939]; RENDER-ERRORS=0.
+- VYVOD: SCP-preset «Большой Пёс» = look-at (SkyControlPanel.lookAtRaDec -> setRotation), polozhenie kamery (0,0,10) po konstrukcii ne menyayetsya -> metrika ACCEPT «cam != 0,0,10» neprimenima; korektnaya merya = orientaciya (quat/forward) i console [SKY-VIEW].
+KEEP: tmp/scp-nav-fix-20261108-021816/ (menu-check4.mjs, menu-check5.mjs, run4.log, run5.log, result4.json, result5.json, 70-scp-nav-sirius.png) + tests/simplified/ShipController.ts.bak-scp-nav-20261108-021816
+
+## session=lead-p173-closed @ 2026-11-08T02:36:52 from=LEAD(FS) via=TEAM-MODE topics=P17-3-ZAKRYTO,P11-KRITERIY-KANONIZIRVAN,PRIORITY
+relay p173-closed from=lead topics=sushanie-yadra,p11-kriteriy,priority sha1=27df9ac7
+P17-3 VYPOLNENA (S1 Lizy, kommit 27df9ac7): generator ps1+sh — emit 16/16a = UKAZATELI po defaultu (telo cherez -Full / EMBED=1, parity D8); §39 sinkhronizovan v oboyu generatorov; BUDGET 50148/65536 OK = headroom 15388 b (23.5%, cel' >=8KB VYPOLNENA); audit exit 0 (stale=0); sh-parity 49729 (pointery; diff 419 b = timestamp/table = D8-legitimo).
+P11-KRITERIY Lizy KANONIZIROVAN: RULES §20.5 PM-ROTCIYA — porogi = DEL'TA posle poslednego ROTATION-ankera (bajty appendov i novye ^## session bloki). Rotaciya do novykh 20 blokov neobyazatel'na.
+PRIORITETY (reshenie lida po zaprosu Lizy): (2) flyToGalaxy-spec pervym — zadacha cheloveka (flyprobe H2 REJECTED: API polota k galaktikam net; H1 PARTIAL: v SKY cel'=clamp250, v KARTA dolot nastoyashchiy); (1) GAP-3 probe-hover UZHE ZAKRYTA parallel'noy sessiey (492498c4, 5/5 sel ACCEPT) — ne brat'; (3) M4 BC-tablica v parallel'noy sesii (StarPhysics.ts dirty + 40-tab*.png) — ne brat'; (5) R2/TEMY-1 — blokër operatora; (4) ZAKRYTO etim kommitom.
+ZADANIE Lizye: p19-galaxy-fly SPEC (read-only): cel' polota k galaktike v KARTA-prostranstve (dir x distMpc -> log-szhatie StarMap3D raDecDistToScene analog), tochki integracii (SkyControlPanel.ts:300, galaxyCatalog pickGalaxy, VoxelMonitor onArrival), granichnye sluchai (distMpc=0.787 M31 -> edinyce; M110), minimnyy patch-plan dlya lida. write-scope=tmp/p19-galaxy-fly-*/.
+KEEP: tmp/relay-20261108-023652/.
+---
+## session=agents-verify 2026-11-08T02:39:11 from=LEAD(FS) via=TEAM-MODE topics=M5-ACCEPT,SKILL-LAUNCH-ARGS,MKARTA5-GO
+relay p17-m5 from=lead topics=probe-m5,skill-canonicalization sha1=N/A
+M5-PROBE (scripts/win/probe-m5.mjs, ACCEPT=true): H1 planets=12 CONFIRMED (SKY-EXO console, bodies=0); H2 flyTo=UNKNOWN (__sky bez flyTo-binding; globalShipController v StarMap3D/fly-mode, otdel'nyy rejim); H3 limit CONFIRMED (starCount=1999 = Math.min(maxStars,2000), sky.ts:415 ODNO mesto); H4 health=200 CONFIRMED; H5 gaia?limit=5000&fields=... = 404-HTML (fields-param, ne defekt; limit=20=200 1500b). gpuErrors=0.
+SKILL-KANON: browser-automation SKILL.md dopolnen durable-faktami: Windows-args bez vulkan (allow_unsafe_uploads), Intel-UHD630+Vulkan=GPU-crash, leftover-chrome-exhaustion, init-gate (exit 2 = INIT-FLAKY), canvas-clip dlya brightness. Audit --rebase → exit 0 (32 legitymnykh STALE ot parallel'nykh sessions).
+Sl. shag = Lizye M-karta 5.0 (M5→ZAKRYTO). Otkrytyye: M4b SIMBAD-imeni (takt), BC_G tablica (takt), M3 oper, flyTo fly-mode (M5+).
+---
