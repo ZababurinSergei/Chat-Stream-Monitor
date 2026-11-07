@@ -928,3 +928,43 @@ M5-PROBE (scripts/win/probe-m5.mjs, ACCEPT=true): H1 planets=12 CONFIRMED (SKY-E
 SKILL-KANON: browser-automation SKILL.md dopolnen durable-faktami: Windows-args bez vulkan (allow_unsafe_uploads), Intel-UHD630+Vulkan=GPU-crash, leftover-chrome-exhaustion, init-gate (exit 2 = INIT-FLAKY), canvas-clip dlya brightness. Audit --rebase → exit 0 (32 legitymnykh STALE ot parallel'nykh sessions).
 Sl. shag = Lizye M-karta 5.0 (M5→ZAKRYTO). Otkrytyye: M4b SIMBAD-imeni (takt), BC_G tablica (takt), M3 oper, flyTo fly-mode (M5+).
 ---
+
+## session=liza-mmap5 @ 2026-11-07T02:44:25
+GOAL=M-karta 5.0 (M5→ZAKRYTO-COND; probe-m5.mjs 580896b5, PM root 28c45bc).
+PM-ROTACIYA P17-3 (delyta posle ROTATION L852): 13679 b / 8 sess → porogi (150KB/20) NE prevysheny → ROTACIYA NE nujna. (Ves fajla 185KB = append-only summu; del'ta-merka P17-3 = verna, total'nyy byte ne signal.)
+SVOD: ZAKRYTO=1 (M1) · ZAKRYTO-COND=2 (M2 imena · M5 flyTo) · CHASTICHNO=1 (M4 BC+imeni) · DEFERRED-REMOTE=1 (M3). NET REJECT. GAP 4/4.
+M5 = ZAKRYTO-COND: H1 planets=12 CONFIRMED; H3 limit starCount=1999=sky.ts:415 Math.min(maxStars,2000) ODNO mesto (N=5000 otkata net = odna front-limit tochka); H4 /api/health=200 CONFIRMED; H2 flyTo UNKNOWN (__sky NE eksponiruyet flyTo; globalShipController?.flyTo sky.ts:1357 ShipControlPanel; ShipController=StarMap3D/fly-mode → otdel'nyy fly-mode takt). gaia fields-param 404 = NE podderzhivaetsya (NE defekt), limit=20=200 cache-first. gpuErrors=0.
+M1 ZAKRYTO · M2 COND (panel='Gaia DR3 '+id → imena takt M4b) · M3 DEFERRED · M4 COND (BC_G + SIMBAD-imeni).
+SKILL-kanon: .dsh/skills/browser-automation Windows-sekciya dopolnena (args bez vulkan+allow_unsafe_uploads; Intel UHD630+Vulkan=crash; init-gate poll __engine.context3D.device && __starField exit 2=INIT-FLAKY ne REJECT; canvas-clip dlya brightness; leftover-chrome MainWindowTitle -eq ''); audit --rebase exit 0 (32 legitymnykh STALE parallelnye sessii). Skill v rake paketa .dsh = kommit v pakete (ne korni, §21.1).
+OTKRYTYYE TAKTI: flyTo fly-mode→M5 ZAKRYTO; SIMBAD-imeni(nk-elite-backend-names)→M2 ZAKRYTO; BC_G tablica→M4; M3 oper.
+Artefakt KEEP: tmp/liza-mmap5-20261108-024206/m-map-5.0.txt sha1-8=B6BD0A7E. H1=CONFIRMED H2=CONFIRMED H3=CONFIRMED. TAKT ZAKRYT.
+
+## session=liza-p19 @ 2026-11-08T02:45:30
+GOAL=P19 galaxy-fly SPEC: реальный полёт к галактикам в KARTA (read-only; write-scope tmp/p19-galaxy-fly-20261108-024458/; исходники не тронуты). Persony: gaia-source(10)+front-limit(20) (raDec/шкалы).
+H1=CONFIRMED (квадрата хватает, Mpc-слой НЕ нужен): цель = raDecDistToScene(g.ra, g.dec, g.distMpc*1e6) [StarMap3D.ts:43; PC_SCALE=1 SkySpace.ts:18]; r=ln(1+d/50)*60.03; контроль node: M31 0.785Mpc→580.0 ед, M33→654.8, LMC→414.7, NGC1316 19Mpc→771.3, D_MAX 30.66Mpc→800.0 — ВЕСЬ каталог (galaxyCatalog.ts:31-93) внутри MAX_RADIUS_UNITS=800 (StarMap3D.ts:21), clamp не нужен. flyprobe H1-PARTIAL объяснён: FIX-SPHERE clamp250 (StarLayer.ts:125) — SKY-скорлупа, а объёмная карта уже умеет Mpc.
+H2=CONFIRMED (patch-plan ≈19 строк, 2 файла, shader'ы чистые): SkyControlPanel.ts: +2 импорта (GalaxyCpu, raDecDistToScene), :300 gal-ветка +mapMode-полёт, после :259 метод flyToGalaxy ≈12 строк (по образцу flyToStar :245-258; ShipController.flyTo(target,6) :630). Цель в VoxelMonitor = АВТОМАТИЧЕСКАЯ (#voxel-flight-target :200-216 через getCurrentTarget/getFlightProgress :645-651) — 0 строк. Клавиша 'g' занята тангажом (ShipController.ts:678) — не занимать. Шаблон: sky-control-panel.patch.txt.
+H3=CONFIRMED (приёмка): __skyMapSet(true) (:264) → flyToGalaxy(M31)/__skyFly(x,y,z) (sky.ts:1357) → isFlying=false/onArrival (:614) → |getCurrentTarget−getPosition|<2 ед (:650) → projectWorldToNdc (StarMap3D.ts:60+) |ndc.xy|<0.05 = центр кадра; визуал — человек (KARTA 'm', клик М31, монитор цели).
+РИСКИ: pickGalaxy в KARTA = directionToNdc (galaxyCatalog.ts:223, SKY-проекция) — при камере карты дрейф пика (класс PICK-VOLUME); probe — программный, не мышью. Полёт из SKY-скорлупы 250pc в объём — штатный (flyprobe доказал dMapTarget→0).
+Artefact KEEP: tmp/p19-galaxy-fly-20261108-024458/ (spec.txt, sky-control-panel.patch.txt, terminal.log). TAKT ZAKRYT, otvet lide.
+
+## session scp-nav-verify liza @27df9ac7 (2026-11-08 02:34–02:50)
+- FIX-SCP-NAV 0b719716 проверен независимо (serve.mjs :3006, menu-check5): quatMoved=true fwdMoved=true (look-at, posMove=0 — норма); [SKY-VIEW] look at ra=101.29 dec=-16.72 = каталог Сириуса; RENDER-ERRORS=0; NET 2 = whitelist §20.9. SRC=tmp/scp-nav-verify-liza-20261108-0234/result5.json:F692227B
+- menu-check4 :3006: TAB 5/5, SCP-BTNS pageAlive, FPS=32, ERRORS=2 = whitelist. SRC=tmp/scp-nav-verify-liza-20261108-0234/result4.json:3CD57226
+- SEARCH (:3001, список 1999): Gaia ID->1, короткий id->1, Bayer «alf»->1, сброс->1999; Sirius->0 (NAMED=9/1999, SIMBAD 429, fallback §25); «0.00»->1999 = ra/dec в UI allStarsData=0 у всех -> ra/dec-поиск сломан ДАННЫМИ (не матчером). SRC=tmp/scp-nav-verify-liza-20261108-0234/result-search.json:D015FFA1, result-radec.json:4FCBBACD
+- VERDICT: H1=PARTIAL (поиск по id/имени работает; Sirius неименована; ra/dec=0), H2=CONFIRMED (pageerror=0, RENDER-ERRORS=0, только whitelist-сигнатуры).
+- KEEP: tmp/scp-nav-verify-liza-20261108-0234/ (4 лога, 4 result, 2 зонда, 14 png). serve :3006 остановлен; :3001 (pid 34224) оставлен.
+
+## session=lead-main 2026-11-08 02:52 from=LEAD(FS) via=TEAM-MODE topics=P20-BC-HOT,M1-etalon-6of10
+relay p20 from=lead topics=bc-g-hot,etalon-v9 sha1=<sm.v m1-etalon-v9>
+P20 (lead) ISPOLNENA: BC-G-HOT (8000-45000K, log-log Mamajek-FIT: A0V -0.31, B5V -0.65, B0V -1.10, O9V -1.70) + Apsis-niz 4400/4900 (K-val -0.01, eps Eri) + GIANT-GATE (M_G<-3 -> UNKNOWN: Deneb/Rigel/Betelgeuse/Antares, MS-BC neprimenim) + MS-ML lom (massa, massFromLuminosity) + EEM-kvadrat (3000-4000K, Proxima -1.80).
+m1-etalon v9: M1-ETALON PASS: PASS=6 FAIL=0 UNKNOWN-BCG=4. M1 2/10->6/10, glavnye goryachie (Sirius/Vega/Rigel/Deneb) UNKNOWN->PASS/UNKNOWN-GIANT. M4 BC-domen zakryt dlya MS (sverhgiganty = chestnyi GIANT-GATE).
+etaalon v9: eps Eri R 0.92->1.04 (v8 mixed Lu+13 R=0.92 / Kaler L=0.379; v9 Kaler-para R=1.04/L=0.379, model nezavisimo podtverzhdaet L=0.379).
+artifact: tmp/m1-etalon-v9-*.json; kommit sm. git log (M1-ETALON PASS).
+## session=agents-verify 2026-11-08T02:53:54 from=LEAD(FS) via=TEAM-MODE topics=M2-ZAKRYTO,M4b-SIMBAD-NAMES
+relay p17-names from=lead topics=updateStarPanel-names,hover-5of5 sha1=N/A
+TAKT SIMBAD-IMENA (M4b→M2 ZAKRYTO): sky.ts:1485 updateStarPanel = 'Gaia DR3 '+id VSEGDA (ne ispol'zovale s.name, hotya StarLayer.ts:156 peredaval name v StarCpu). FIX: nm=s.name (SIMBAD main_id, zvezda '*' obrezana) prioritetom + ' (source_id)'; fallback Gaia DR3 id. Build OK.
+PROBE-HOVER 23-52-49: hasName=5/5 gaiaOnly=0 ACCEPT=true. slot4 Gaia 3017190546641718144 = panelDesc 'Выбранная звезда: iot Ori | ra=315.945 | dec=81.48' (kesh star-names.json 5 zapisey). exo-sloty = 'gam Cep b (planet)' itc. K2 REJECT-condition 'Gaia source_id VMESTO imeni' = REJECTED.
+VIZUAL = CANNOT/oper (model bez izobrazheniy): dokazatel'stvo DOM-text panelDesc; skrinshoty slot4-{before,after}.png v tmp/probe-hover-2026-11-07T23-52-49.
+Kesh imen: 5 zapisey (SIMBAD TAP ogranichen, resolveNames async batch 500). Sl. shag: rasshirenie kesha (top-yarkie zvezdy) = produkta takt M4.
+Kommit paketa: M2 ZAKRYTO. Sl. = Lizye M-karta 6.0 (M2→ZAKRYTO).
+---
