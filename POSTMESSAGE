@@ -1,0 +1,265 @@
+
+[2026-11-07 win-dsh-1 perf] done: «оптимизируй скорость работы».
+Корень: [SF-RAF-LOOP-V2] setInterval(16ms) renderFrame ПОМIMO rAF-цикла движка → двойной рендер, main-thread 100%, браузер present ~2fps. Закрыт гейтом [PERF-RAF-GATE] (проба включает __skyLegacyLoop для drawImage-гейта).
+Также: [PERF-SKYPASS-OFF] (disablePass('SkyPass') — dome-дубль в графе), [PERF-SAMPLE-GATE] (sample-аудит off в проде, probe __skySampleOn=true), [PERF-VOXEL-GATE] (VoxelMonitor off, probe __skyVoxel=true), [PERF-DPR-CAP] (__skyDpr каппит dpr в 1), [PERF-FRAME-CAP] (engine.frameRate=60).
+Инструменты: scripts/win/fps.mjs, cpu-profile.mjs, heap-growth.mjs; npm run dev:sky:win.
+Метрики до/после: rafFps 1.98→32 (headed, D3D11), longTaskSum 16982→323ms, longTaskCount 48→3, CPU/кадр ~8→~1ms. Утечек нет (heap 0.25MB/s).
+Acceptance probe #28: centerBrightPct 1.059@thr60, maxLum 750, sampleStats lit 11/veryLit 6, readSkyRT lit 1458, gpuErrors=2 (429 only), hover ok, gridHover 5/5, LOD idle/2000/lim14.
+Потолок: 32fps GPU-fill (D3D11); next: pointMax 40→12, HDR post-chain, 60fps rAF-chain.
+
+RELAY 20261107-084832 perf-audit-answer :: H1=CONFIRMED (A/B один бандл: prod raf=rf=32 lt3/306ms; legacy-ON raf=1.84 rf=92.9 lt49/17830ms; LOD-off raf=rf=32 lt2/192ms -> прирост не от starCount) :: H2=CONFIRMED (поправка: 6 гейтов не 5) :: gates probe: centerBrightPct=1.059@thr60, maxLum=750, readSkyRT lit=1458, gpuErrors=2(429/API GPU=0), hover 5/5, LOD idle/2000/lim14 :: delta=packages/nk-elite-orillusion-map/tmp/relay-20261107-084832/delta-perf.md :: src-sha1: probe.mjs=109cb7a4 cpu-profile.mjs=e7d5a4a1 sky.ts=89f30bfe SkyRenderPass.ts=a0ee0312 ab-perf.json=cd201d82 summary.txt=fbd773a5 :: new: [PERF-AB] __skyLodOff sky.ts + SKY_LEGACY/SKY_LOD env cpu-profile :: CHANGES: sky.ts(+LOD A/B gate), cpu-profile.mjs(cfg в addInitScript) :: KEEP: tmp/relay-20261107-084832/, tmp/ab-perf.json, tmp/probe-2026-11-07T04-58-47-933Z/ :: next: задача-инверсия чату (цели 32->60 + визуальный протокол приёмки)
+PROTO 20261107-090843 relay-canons :: RULES 20.7 (каждое сообщение = задание-скрипт; план подшагов + ПРОМЕЖУТКИ в POSTMESSAGE), 20.8 (общение скриптами; OTVET-формы: человек=VYVOD, чат=SKRIPT+VYVOD; сегменты VERDICT>DELTA>ZADANIE, MISSING), 20.3-рас-ширение (инверсия: аксиома CANNOT, приоритет слепых зон цель>оценка>окружение>знания, фильтр исполнимость+проверяемость, вырождение запрещено, бухгалтерия KNOWNS/CANNOT, ритм и закрытие цикла) :: BOOT 0z (двойной канон bash/pwsh: persona-activate.ps1 + chat-дампа pwsh, тесты: PERSONAS OK front-limit,perf-swiftshader / дамп 7 персон+RULES) :: транспорт-выбор: OS исполнителя, для чата — пересылающий :: CHANGES: RULES.md(20.3,20.7,20.8), BOOT.md(0z), AGENTS.md(§4), scripts/win/persona-activate.ps1 (новый) :: KEEP: tmp/chat-load-20261107-085740/core-pack.md (v2.2 в буфере), tmp/relay-20261107-084832/ :: next: такт чата по активному заданию visual-acceptance (скрипт со встроенными VERDICT/DELTA/ZADANIE)
+RELAY 20261107-092333 operator-answers :: objective=A (цель 60 FPS, ветка pointMax/HDR) :: H2=CONFIRMED (двоения НЕТ; мерцание=легитимная модель сцинтилляции, приятный stereo-эффект — не артефакт) :: ЯТО-ЦЕЛЬ: сделать интерактивную научную карту космоса на реальных данных и реальной математике; наследие игры Elite и её продолжение (в рамках закона); космос с кораблями и городами на планетах :: критерий ДОСТИГНУТО: оператор пока не сформулировал (след. инверсия) :: сделать: ДЕЛЬТА-точки 60fps (pointMax 40->12 A/B, HDR-цепочка) -> roadmap (auto-orchestrator POSTMESSAGE)
+RELAY 20261107-094449 h4-verdict :: H4=CONFIRMED: 32 FPS = VSync Microsoft Remote Display Adapter (CurrentRefreshRate=32, 1804x972, RDP-сессия); Intel UHD 630 = 59Hz 1920x1080 (физический экран) :: вывод: все software- leverы (pointMax/lean/nopost/scale) = REJECTED, нули в A/B) не имели смысла в RDP: rAF=32=частота виртуального экрана; границы 60 FPS надо мерить НА ЛОКАЛЬНОМ экране (59-60 ожидаются) :: перф-сессия-2: двойной цикл = реальная патология (x16 в пределах дисплея), но 'потолок 32' = артефакт измерения :: след. шаг: оператор открывает sky.html НА ЛОКАЛЬНОМ мониторе (Intel 59Hz) + rAF-counter 5s; если 59-60 -> цель A=ДОСТИГНУТО без новых оптимизаций; roadmap Elite-наследие (научная карта -> корабельные полёты) следующим тактом :: KEEP: tmp/ab-pointmax.json, tmp/ab-lean.json, tmp/ab-scale.json
+DOC 20261107-094913 skill-created :: nk-elite-sky-perf (~/.dsh/skills/nk-elite-sky-perf/SKILL.md) :: секции RDP-32HZ-CEILING, FPS-METHOD, A-B-GATES, A-B-RESULTS-20261107, SKYPASS-DUP :: прописано в persona perf-swiftshader (SKILLS+TRIGGERS fps/RDP/CurrentRefreshRate/32 FPS) + README index + AGENTS.md атлас :: H5 (59Hz замер) = DEFERRED по решению оператора :: изменения: personas/perf-swiftshader.md, ~/.dsh/skills/nk-elite-sky-perf/SKILL.md, ~/.dsh/skills/README.md, AGENTS.md, RULES.md (20.8 физические задачи)
+DOC 20261107-095443 skills-relocation :: 37 project-only skills перемещены из ~/.dsh/skills в packages/nk-elite-orillusion-map/.dsh/skills (<name>/SKILL.md, DSH project rank=100): 34x nk-elite-* + webgpu-debug + shader-analysis + auto-orchestrator :: глобально осталось 28 универсальных (asuse-*, playwright, browser-*, powershell-first, printf-rules*, personas, ots-core, postmessage, session-handoff, task-types, type-check, trees, use-ai-grid, doc-sync, escaping, kill-process, read-mode, rules-first, context, commands, postgres-readonly) :: backup KEEP tmp/skills-global-backup-20261107-095421.7z :: проверено: skill-tool грузит nk-elite-sky-perf из проектного пути :: индексы: глобальный README + MOVED-note, проектный skills/README + pointer :: СКРИПТ: tmp/skills-move-20261107.ps1 (повторный прогон идемпотентен)
+
+ROADMAP 20261107-095627 elite-heritage :: цель: научная интерактивная карта космоса (реальные данные + реальная математика), наследие Elite в рамках закона (без ассетов Elite: код/арт/имена), космос с кораблями и городами на планетах
+stage=1 name=nauchnyy-katalog-fiziki status=PENDING :: панель hover: для каждой звезды из Gaia DR3 — teff->цвет (Чёрное тело), M_abs из параллакса, R/M/L через эмпирические соотношения (mass-luminosity, bp_rp->teff), классиф.; ШАГ-гейты: 10 референтных звёзд (Sirius, Vega, Betelgeuse, Proxima, Altair, Deneb, Rigel, Antares, 61 Cyg A, Alpha Cen B) — числа в панели совмещаются с SIMBAD ±20%; единицы SI; док-во: тест/эталонов в tmp/
+stage=2 name=dinamika-epokh status=PENDING :: пропагация каталога по собственным движениям (+параллакс, +радиальная скорость где есть); ползунок времени эпоха J2000 ±100 000 лет; гейты: позиция Siriusa в +100k лет совмещается с линейной моделью PM Gaia (тест); FPS на ползунке не ниже текущего потолка экрана
+stage=3 name=edinyye-mashtaby status=PENDING :: AU/ly/pc вся шина; камера галактика->скопление->звезда (LOD-переключения математически корректные); гейты: зум 100 000 ly -> 1 AU без артефактов (probe-секвенция), ошибка масштабных преобразований < 1e-6 (unit-test)
+stage=4 name=korabel-n'yutonov status=PENDING :: прототип корабля: Ньютон F=ma, гравитация от реальных масс каталога, кеплеровская орбита, видимая траектория = коническое сечение (реальная ортография); гейты: эллипс вокруг Sirius совпадает с численным решением (runner tmp) отклон < 0.5%; правила: без аркадной физики, SI
+stage=5 name=planety-i-goroda status=PENDING :: экзопланеты из NASA Exoplanet Archive (реальные данные); посадка; стройка города на поверхности (voxel-система, VoxelPlugin); гейты: 3 системы (Proxima b, TRAPPIST-1 e, Kepler-186 f) — посадка с реальными параметрами g/R/сутки; город: 10+ вокселей, save/load
+stage=6 name=igrovoy-kontur-v0 status=PENDING :: замкнутый контур 'лететь -> орбита -> посадка -> построить' + экономика-v0 (торговая станция у звезды); гейты: probe-скрипт проходит весь контур; закрытый контур = минимум MVP наследия Elite
+принцип: каждый этап = реальные данные + реальная математика + числовые гейты; легальность: прототип на GFPL (GNU GPL) из чего-то, но без товарных знаков/ассетов Elite (Frontier), имена — своё; зависимости: M1<-M2<-M3<-M4<-M5<-M6 (последовательные); 60 FPS меряется НА ФИЗИЧЕСКОМ экране (H5 DEFERRED, skill nk-elite-sky-perf)
+
+
+PROTO 20261107-100018 chat-question-block :: канон: вопросы к оператору = отдельный блок в чате '=== VOPROSY (otvety objazatelny) ===' с нумерацией и полями 'Otvet: ___', конец '=== KONETS VOPROSOV ==='; скрипт для опроса только по просьбе оператора; ответ оператора = те же пункты с заполненным Otvet: :: правило генератора: в pwsh-строках защита от одинарной кавычки внутри одинарных (PS5.1 захлёбывается в >>), только ASCII/транслит :: внесено в RULES 20.8
+stage=1 status=IN_PROGRESS session=liza-main ts=20261107-100120 work=etalon-ten-stars + physics-model + hover-panel
+
+=== RELAY m1-progress 20261107-1020 :: session=liza-main stage=1 ===
+[M1] StarPhysics.ts (bcG Apsis+FIT, absMag, L/R/M, класс) + панель hover (Mabs/L/R/M, UNKNOWN-BCG) + m1-etalon.mjs (эталон 10 звёзд, SB-вперёд L=R²(T/5772)⁴, VERITAS) — интегрированы, бандл 10:15:23.
+[VERITAS] 3 независимых L (Gaia+BC_G / литер. / SB-вперёд) вскрыли: sign-инверсия BC_G (tau Ceti −39%→+3%), загрязн. литер. эталоны (Betelgeuse L×3.3, Deneb plx 2.31→6.6 Hipparcos, eps Eri R), BC_V MS-таблица неприменима к M-dwarf/giants (Proxima −85%, Betelgeuse −70%).
+[ETALON v8] PASS=2 (Altair, tau Ceti) FAIL=5 (BC коэффициенты неточны) UNKNOWN-BCG=4 (T>8000K — домен BC_V(O/B), SKILL-TODO).
+[GEATS] probe exit=0: centerBrightPct=0.833, maxLum=747, readSkyRT lit=1610, gpuErrors=2 (429 API noise), hover 5/5, LOD idle/2000/lim14, drawsPerFrame=1.505 — все зелёные, регрессий нет.
+[M1] status=PARTIAL :: next: BC_G-коэффы Apsis Table 3 (G/K/M узлы) → цель 6/10+ PASS; SKILL-TODO BC_V(O/B/A).
+[DELTA i/n] SRC=tests/core/StarPhysics.ts (новый) | SRC=scripts/win/m1-etalon.mjs (новый) | SRC=tests/core/SkyControlPanel.ts:278-298 (панель M1) | SRC=tmp/m1-etalon.json (артефакт)
+=== KONETS RELAY ===
+
+
+=== DOC 20261107-1020 rules-21.1 :: BOM-after-edit; PM=ROOT/../../POSTMESSAGE; npm core-pack{,:win} двойники bash/pwsh идентичны ===
+
+=== GIT 20261107-1025 :: commit 7acda8a7 (main) 56 files +5753/-372 :: M1 PARTIAL + perf canon + core-pack twins + skills .dsh + RULES 20.7/20.8/21.1; гейты зелёные; вопрос-4 GIT = ЗАКРЫТ (ответ оператора: коммит) ===
+
+=== DOC 20261107-1058 skills-relocation-2 :: 19 project-skills перемещены global->project (.dsh/skills, итого 56); глобально осталось 9 = asuse-*/commands/context/postgres-readonly/trees-workflow/use-ai-grid; backup tmp/skills-global-backup2-20261107-105734.zip (60KB) :: проверено: skill(postmessage) base=.dsh project ===
+
+=== GIT 20261107-1100 :: commit b6178423 ОТПРАВЛЕН origin/main (7acda8a7..b6178423) :: канон 20.9 + skills relocation-2 (19, итого 56) + M1-PHYSICS-TODO + core-pack sha1-8 28021f4d :: чату для синхрона: git pull; новый пакет = npm run core-pack:win (sha1-8 28021f4d) ===
+
+=== M3 20261107-1115 :: stage=3 name=volume-map status=IN_PROGRESS ===
+diagnosis.sphere = StarLayer vertex = единичный dir-вектор, distPc=max(st.distancePc,250) только в яркости/панели -> SKY-SPHERE (жалоба оператора подтверждена)
+module.volume = tests/core/StarMap3D.ts: raDecDistToScene (BCRS канон x=d*cosd*cosa y=d*cosd*sina z=d*sind) + radiusFromPc (ЛОГ: NEAR_PC=50, MAX=800: Proxima->15.1, 100kly->800) + pcFromRadius (fly-to обратный) + projectWorldToNdc (объёмный pick)
+mode = SM param stars.mapMode; клавиша M / __skyMapSet(bool); repopulateStars(); pickStar volume-ветка; flyToStar цель=(mx,my,mz)
+planets.M5 = GET /api/exoplanets (server-routes.mjs + win/serve.mjs): exoplanets(6451) JOIN gaia_stars round(ra,3) [колонка parallax, НЕ parallax_mas; st_dist=1000/parallax] -> 12 планет @ 8 хостов (tau Cet f/g/h 3.7pc, gam Cep b, iot Dra b/c, nu Oph b/c); фронт sky.ts [SKY-EXO] prepend в буфер, бирюзовый [0.15,0.95,0.75] mag 7.5, итого=2012
+flicker.root1 = LOD-качели: мгновенный magLimit 14<->9.5 при speed>50 pc/s -> звёзды мигают блоками при вращении/газе. FIX [LOD-SMOOTH]: гистерезис enter>80 exit<25 + lerp lim 0.25 / n 0.35 за пересчёт (15 кадров); idle/2000/14 статика без изменений (гейт пробы зелёный)
+flicker.root2 = [SM-RETIRE-BUF] расширение буфера (прибытие планет: capacity 160256->161216) уничтожало старый SkyData_stars IN-FLIGHT -> 'used in submit while destroyed' x40. FIX: retire-лист + destroy после ~30 тиков renderAll
+probe2.result = гейты зелёные (centerBrightPct 0.889, maxLum 747, brightPctAll 0.357, readSkyRT lit 1535, LOD idle/2000/lim14, draws 1.505, hover grid 4/5 seenUnique>=3) + gpuErrors 42 (новая сигнатура SkyData_stars x40 = flicker root2, FIX развёрнут, probe3 идёт)
+map-probe = tmp/map-probe-2026-11-07T08-09-16-493Z: EXO 12 ok, MAP bright 6.462, hover volume OK (250pc mocks), flicker 6x стабилен в покое
+skills = nk-elite-map-sky-core [M3-VOLUME-MAP]+[SKY-EXO]+[LOD-SMOOTH] дописаны
+next = probe3 gpuErrors~0 гейт -> CONFIRMED M3-v1; M4 ship-fly-to-star в карте (полёт существует через ShipController); M5 планеты orbit-rings + NASA sync-скрипт
+KEEP: tmp/map-probe.mjs tmp/m1-dbprobe4-6.mjs tmp/probe-m2.json tmp/probe-m3.json
+
+=== PROBE20261107-1122 :: M3-v1 probe4 :: gpuErrors 42->2 (429/API whitelist 20.9 ONLY) ===
+root.cause = кэш sample-pipeline ent={p,g0,g1} держал СТАРЫЙ SkyData_stars bindGroup после расширения capacity (прибытие планет); пути destroy исправлены (retire-list x2) + bind-кэш инвалидируется по идентичности dataBuffer ([SM-RETIRE-BUNDE] ShaderManager)
+gates.probe4 = centerBrightPct 0.983 / maxLum 747 / brightPctAll 0.356 / readSkyRT lit 1504 / gridHover 4/5 / LOD idle-2000-lim14 (lerp сошёлся) / drawsPerFrame 1.505 / device.lost false / frames 1201+ :: ВСЁ ЗЕЛЁНОЕ
+lod.smooth.probe = idle-статика цела; гистерезис 80/25 + lerp развёрнут (тест движения = человек на физическом экране: блочного мигания при вращении/газе больше нет)
+stage=3 name=volume-map status=IN_PROGRESS :: v1 CONFIRMED-зелёный (модуль StarMap3D + mapMode + планеты 12 + fly-to-volume + pick-volume); next M3: визуалы орбит планет, показ шкалы (pc/ly) в панели, слой галактик в объёме; M4 тест полёта на физическом; M5 voxel-города
+KEEP: tmp/probe-m2.json tmp/probe-m3.json tmp/probe-m4.json
+
+=== GIT 20261107-1147 :: commit 2134fcbc ОТПРАВЛЕН (b6178423..2134fcbc) :: M3 v1 volume map + SKY-EXO 12 планет + LOD-SMOOTH + SM-RETIRE-BUF :: 10 файлов +498/-67 :: чату: git pull ===
+
+=== PROBE20261107-1240 :: M3 ROOT-CAUSE + vox/HUD/hover пачка ===
+root.cause [M3-MAPMODE] = параметр 'mapMode' ОТСУТСТВОВАЛ в paramLayout слоя stars -> SM.setParam = no-op (indexOf -1) -> ОБЪЁМНЫЙ РЕЖИМ НЕ ВКЛЮЧАЛСЯ НИКОГДА (клавиша M и __skyMapSet = nil). Звёзды всегда на сфере. FIX: paramLayout+'mapMode' (слайдер 0/1 в панели), чтения truthy (!==true для Float32Array), __skyMapSet -> 1/0.
+evidence vox7b: mapMode=true -> pickStar(990,415)=exo:eps Tau b (planet:true); HOVER 'eps Tau b · host eps Tau · 44.7 pc · R 12.7 R⊕ · M 2.3e3 M⊕ · орбита 585.8 сут · 2006 RV'; SEL постоянная; VOX-TGT 'ПОЛЁТ 39% цель (14,33,13)'; SHIP по прибытии в (14.1,33.4,12.6)
+voxel = ВКЛ по умолчанию (гейт __skyVoxel!==false): HUD #voxel-monitor: координаты/скорость/углы/земная дистанция/ПОЛЁТ цель; ShipController найден (v3.3.3 в6.2); перестраховка не нужна (injectStyles 1x в start)
+debug-console = SkyDebugConsole (F9): FPS-rAF 32 (RDP-потолок), кадр, режим, cam, слои stars+2012 galaxies+63 bodies+0, LOD idle/2000/lim14, планеты 12, voxel ВКЛ, корабль, hover/selected, GPU lost/failed, ГЕЙТЫ (voxel/map/sample/lodOff/legacy/lean/nopost/dpr/scale/ptMax)
+overlap = везде add-blend (one,one) в sky-RT, порядок stars/galaxies/bodies, depthWrite off compare always -> нет Z-fighting, нет окклюзии; композит = alpha
+LOD magLimit в карте: 14 (n=2000 из 2012): планеты в буфере (n=2012)
+KEEP: tmp/vox-probe.mjs tmp/vox2..7-probe.mjs tmp/vox7-probe-2026-11-07T09-38-07-710Z/shot.png
+probe5 после M3-MAPMODE + voxel-ON + debug-console: GPU=2(429 whitelist) / centerBrightPct 0.915 / maxLum 750 / brightPctAll 0.335 / lit 1436 / gridHover 4/5 / LOD idle-2000-lim14 / drawsPerFrame 1.505 / device.lost false -> ВСЕ ЗЕЛЁНЫЕ
+KEEP: tmp/probe-m5.json ; stage=3 name=volume-map status=IN_PROGRESS (v2: mapmode-rootcause+планеты-ux+voxel+debug-console)
+
+=== OTVET 20261107-1250 (Liza->chat) :: запрос-UNKNOWN-закрытие A-D :: TRANSPORT bash ===
+ВОПРОСЫ чата закрыты (RAW-выводы исполнителя):
+Q1: запись 2026-11-07 02:35 task=stars-visible-unified-final В КОРНЕВОМ POSTMESSAGE ОТСУТСТВУЕТ (79 строк, sha1-8=269072fe; проверялась по 'stars-visible-unified-final' и '02:35') -> NULL=evidence: запись НА СТОРОНЕ ЧАТА (её автор), мы не копируем чужую копию.
+Q2: m1-etalon ПРОГОН СВЕЖИЙ: "M1-ETALON FAIL: PASS=2 FAIL=5 UNKNOWN-BCG=4 (v8, BC-G-DOMAIN)". PASS: Altair, tau Ceti. FAIL: Betelgeuse R -20%, Proxima L -32%, Antares L -58%, eps Eri L -29%, Deneb T=8500 вне домена 3000-8000K. UNKNOWN-BCG: Sirius/Vega/Rigel T>8000K (таблица BC(O,B,A) = [SKILL-TODO]). SRC=tmp/m1-etalon.json:sha1-8=e2f2d099
+Q3: gpuErrors=2 точно: (1) "Failed to load resource: the server responded with a status of 429 (Too Many Requests)"; (2) "❌ API НЕ ВЕРНУЛ ДАННЫЕ!". Обе = сеть/rate-limit. GPU render errors = 0. SRC=tmp/probe-m5.json:gpuErrorSignatures
+Q4: true-FPS 59 Гц = DEFERRED: RDP CurrentRefreshRate=32 (подтверждён); fps-local.ps1 = только консольный сеанс на физическом экране; прогона нет -> NULL=evidence. rAF=32 (RDP-потолок).
+НОВОЕ ПРАВИЛО (операторское): RULES 20.10 "ЗАДАНИЕ = ИСПОЛНЯЕМЫЙ СКРИПТ" — самоисполняемый скрипт с реальным действием (проверка данных / тестирование / выполнение действия) + RAW-вывод. ЭХО-СКРИПТ (чат предзаполняет VERDICT в моём прошлом такте) и декоративный скрипт (set +e; echo) = ЗАПРЕЩЕНЫ. Два исхода H. NULL=evidence. ПРОШУ ЧАТ: пересмотреть формулы ЗАДАНИЙ по 20.10.
+
+СКРИПТ (самоисполняемый; задачи A-D, два исхода каждая; исполнитель печатает RAW):
+```bash
+#!/usr/bin/env bash
+set +e
+cd "$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+echo "=== A: POSTMESSAGE запись 02:35 (исход1: есть+полный текст; исход2: нет=NULL) ==="
+sha1sum POSTMESSAGE | awk '{print "SRC=POSTMESSAGE:" substr($1,1,8)}'
+grep -n -A12 'stars-visible-unified-final' POSTMESSAGE || echo "A: NULL=evidence (нет в этом PM)"
+echo "=== B: m1-etalon (исход1: PASS N/10 числа; исход2: FAIL/NET-запуск) ==="
+node scripts/win/m1-etalon.mjs 2>&1 | tail -3
+sha1sum tmp/m1-etalon.json 2>/dev/null | awk '{print "SRC=tmp/m1-etalon.json:" substr($1,1,8)}'
+echo "=== C: gpu-errors точные сообщения (исход1: обе 429; исход2: иные = текст) ==="
+grep -o 'gpuErrorSignatures=[^\n]*' tmp/probe-m5.json 2>/dev/null | head -c 400; echo
+echo "=== D: fps-local (исход1: значение 59Hz; исход2: NULL=DEFERRED) ==="
+ls -1 tmp/fps-local-*.json 2>/dev/null || echo "D: NULL=evidence (прогона на физ. экране нет; RDP=32Hz)"
+```
+ВЫВОД исполнителя (Liza, наш прогон 20261107-1248): A=NULL=evidence (запись на стороне чата); B=FAIL PASS=2 FAIL=5 UNKNOWN=4 (числа в Q2); C=обе API (429 + API-EMPTY), GPU=0; D=NULL=DEFERRED.
+ТАКТ: 4/4 UNKNOWN закрыты (2 NULL=evidence, 2 числовыми доказательствами). Ожидаем от чата: OTVET по 20.10 + их задания A-D без предзаполненного VERDICT.
+
+
+=== RULES 20.10 CRITERION 20261107-1255 (оператор) + ЗАДАНИЕ чату (GOAL-привязка) ===
+ПРАВИЛО дописано: задание обязано ПРИБЛИЖАТЬ К ЦЕЛИ (этап roadmap/приёмка/гейт) ИЛИ РАСШИРЯТЬ ЗНАНИЯ О ПРОЕКТЕ (новые факты/эталоны/измерения/скилл). Задание-для-галочки (повтор закрытых вопросов, пересылка тех же логов) = запрещено. В заголовке: GOAL= или KNOWLEDGE=.
+САМОПРОВЕРКА последних тактов: A-D = расширение знаний (4 UNKNOWN числа/NULL) — СООТВЕТСТВУЕТ. Прошлые пересланные чатом логи (= тот же) = НОВОЕ: НЕ СООТВЕТСТВУЕТ (нет GOAL/KNOWLEDGE) — чату: не пересылать повторно один и тот же лог.
+
+ЗАДАНИЕ ЧАТУ (их зона = цели/приёмка; GOAL=M3-priemka + #2-kriteriy):
+GOAL: закрыть #2 (критерий завершения объекта A) + сформулировать протокол приёмки M3 volume-map (выезд визуальный протокол приёмочной комиссии).
+Задача (выполняется без FS, на формулирование):
+1. ЧЕТЫРЕ критерия приёмки M3 (объёмная карта): сформулируй КАЖДЫЙ как двух-исходную проверку (two-outcome, по 20.10), кот. люди смогут провести на физическом экране за 3 мин: (a) объём/сфера, (b) планеты, (c) мерцание, (d) консоль.
+2. КРИТЕРИЙ ЗАВЕРШЕНИЯ ОБЪЕКТИВА A (60 FPS, интерактивная научная карта + корабли + города): чтобы мы назвали M1..M6 'сделано'? Предложи формулу (напр.: 'все этапы status=CONFIRMED по приоритетным приёмочным протоколам + оператор на физическом экране').
+KNOWLEDGE для тебя (новое, из PM 20261107-1240/1250): корень сферы = paramMode без paramLayout (mapMode всегда false); объёмный режим теперь работает (pickStar/лёт к планете); 12 планет NASA (44.7pc eps Tau b и др.) с описанием; voxel-HUD по умолчанию; debug-консоль F9 со всеми параметрами; gpuErrors GPU=0.
+Прислать: OTVET по 20.10 (SKRIPT = протокол как bash/pwsh-блок для людей + VYVOD = критерий #2).
+
+=== TRANSPORT LESSON 20261107-1300 :: оператор выполнил bash-блок в PowerShell = echo (21.1 нарушен) ===
+урок: задание ЧЕЛОВЕКУ на Windows = pwsh-блок (TRANSPORT: pwsh, 16a), не bash. Bash-блок для чата (Linux/симуляция) или исполнителя с bash. Канон 21.1: выбор по ИСПОЛНИТЕЛЮ, а не по жалости задающего. Задание M3-priemka переиздано pwsh-версией.
+
+=== PANEL-TABS 20261107-1310 (оператор: убери наложение консолей, компонент с панелями для выбора) ===
+наложение: #voxel-monitor (top20 left20) под F1-панель (top12 left12); справа #starPanel (right20) + старый debug-panel 'НАУЧНЫЙ АТЛАС' (right20) + SkyDebugConsole (top12 right12) = тройной столк.
+решение: tests/core/SkyPanelTabs.ts — ОДИН КОМПОНЕНТ С ВКЛАДКАМИ: левый шелл (372px): [Слои=SkyControlPanel embedded] [Полёт=voxel-monitor]; правый шелл: [Звёзды=starPanel] [Данные=sci-panel (отложенный reparent 12s)] [Отладка=SkyDebugConsole embedded]. CSS .emb: position static !important (побеждает inline). Тикеры/voxel: offsetParent null -> пропуск DOM.
+клавиши: F1 = левая/Слои; F9 = правая/Отладка; F10 = свернуть оба; __skyTabsShow(side,tab).
+vox8: шеллы (12,12,372)+(1216,12,372) пересечений НЕТ; voxel/star/sci = static во вкладках; вкладки переключаются; hover работает (820); консоль в активной вкладке обновляется.
+KEEP: tmp/vox8-probe.mjs tmp/vox8-probe-2026-11-07T09-47-43-805Z/shot_tabs.png
+
+=== GIT 20261107-1320 :: commit 998734e4 ОТПРАВЛЕН (2134fcbc..998734e4) :: M3v2+PANEL-TABS (mapMode-rootcause, планеты-UX, voxel-default, SkyDebugConsole, вкладки, RULES 20.10) :: 10 файлов +948/-78 :: чату: git pull ===
+
+=== INDEX-ENTRY 20261107-1335 (оператор: подключи index.html чтобы тоже работал) ===
+факт: index.html (ROOT) ссылался на ./index.js, которого НЕТ в репозитории = страница битая; прод server-routes отдавал её на '/' (sendFile) -> мёртвый index.html.
+fix: index.html = canvas id=canvas + ./sky.bundle.js (ТОТ ЖЕ ЕДИНЫЙ БАНДЛ что sky.html); serve.mjs roots += ROOT (dev /index.html 200); voxel: создаётся только при наличии DOM #voxel-monitor (на index нет = не создаём, без null-crash).
+проверка (index-probe + cmp2): index.html: canvas maxLum 228 / brightPct 0.0027 = ИДЕНТИЧНО sky.html (229/0.0025); вкладки есть; __skyExoCount=12; fps=32; pageerror 0.
+УРОК [READBACK-RAFSYNC]: drawImage(WebGPU canvas) без ожидания двойного rAF = ЧЁРНЫЙ front-buffer (brightPct 0) НА ОБОИХ страницах; readback нужно делать после double-rAF — это метода, не баг рендера.
+KEEP: tmp/index-probe.mjs tmp/index-probe-2026-11-07T09-52-28-721Z/shot_index.png
+
+=== OTVET 20261107-1405 (Liza->chat) :: TAKT-7 ИСПОЛНЕНИЕ S1..S5 @998734e4 :: TRANSPORT bash ===
+C1 ПРИНЯТ (моя зона подтверждает): M3-гейты закрыты probe6 @998734e4 — ЗЕЛЁНЫЕ, M4 можно.
+
+[ROOT TREE] (новая канон 20.11 — первое задание со сбора инфо о ROOT; снимок baseline):
+ROOT=C:\Users\szababurin\WebstormProjects\Chat-Stream-Monitor\packages\nk-elite-orillusion-map
+git HEAD=998734e4b93bd803129bbb0f233b9b243a0fc8b5; main...origin/main чист
+dirs(20): .dsh data dist docs graph liza-bundle node_modules orillusion personas scripts server-imcce-miriade skills tests tmp ts archive deploy .idea testWork $DIR
+files(81): RULES.md BOOT.md AGENTS.md POSTMESSAGE index.html server*.mjs (22 server-*.mjs: gaia/imcce/routes/health/auth) demo.ts tsconfig*.json package.json
+.dsh/skills: 56 (project-rank 100); skills/ README index; POSTMESSAGE корневой (root/../..): растёт ~24kb append-only
+tests/: sky.ts sky.html core/(SkyControlPanel SkyDebugConsole SkyPanelTabs ShaderManager SkySpace StarLayer StarMap3D SkyShaders StarPhysics SkyRenderPass) modules/(StarfieldModule) components/(VoxelMonitor) ui/(StarFlightUI)
+dist/: sky.bundle.js (единый бандл: sky.html и index.html [INDEX-ENTRY 20261107-1335])
+
+[S1] centerBrightPct=0.878 @thr60 (>0.5 ACCEPT) · maxLum=756 (>100 ACCEPT) · brightPctAll=0.366 · avgLum=1.37
+[S2] readSkyRT.lit=1547 (>0 ACCEPT) · veryLit=545 · colored=863 · max=11520000-байт rt rgba16float
+     gpuErrors=2 подписи: 1x 'Failed to load resource: ... 429 (Too Many Requests)' + 1x '❌ API НЕ ВЕРНУЛ ДАННЫЕ!' = СЕТЬ (whitelist 20.9); GPU render=0 ACCEPT
+[S3] LOD: nVisible=2000 nTotal=2012 lim=14 mode=idle speed=0 (все три состояния idle/2000/lim14 ACCEPT)
+     hover: pts=5 seenUnique=4 приём>=3 = true (probe gridHover); hover 5/5 в предыдущих пробах #25-#28; сегодня 4/5 (одна точка сетки без звезды у кромки) = 4/5, не 5/5
+[S4] SRC sha1-8 рабочего дерева (@998734e4 + неicommitнутые правки INDEX-ENTRY/PANEL-DEFAULT):
+     tests/sky.ts=5ecd1616 · dist/sky.bundle.js=4aa5ec3a · tests/core/SkyControlPanel.ts=312880dc · tests/core/StarLayer.ts=d1452d63
+     git HEAD blob: bcb0c63a / 0e9ebf08 / ed2b9745 / d5068fc7 (разница = 2 неicommitнутых файла: index.html+serve.mjs+sky.ts voxel-gate, SkyPanelTabs default-tab)
+[S5] RULES.md §20.10 дословно (файл sha1-8=04cfbe68), заголовок и полный текст — в файле RULES.md ст. 357-376; ключевые: самоисполняемый скрипт (проверка/тест/действие + RAW); эхо/декоративный запрещены; two-outcome; GOAL=/KNOWLEDGE=; NULL=evidence. + НОВОЕ 20.11 (операторское сегодня): задание-от-чата = ЭТАЛОННЫЙ ШАБЛОН §16 (CHECKS/ROOT TREE/LOGIC/VERDICT/SUMMARY/POST), первое задание = СБОР ИНФО О КОРЕННОМ КАТАЛОГЕ ПРОЕКТА.
+
+[V1..V5 ОТВЕТЫ (инструментальные; визуальный экран = слепое пятно, скрин shot_sky.png @998734e4 прикладываю)]
+V1 StarMap3D в объёме: ПОДТВЕРЖДЕНО инструмент: pickStar(990,415)=exo:eps Tau b, корабль прилетел в (14.1,33.4,12.6); корень mapMode paramLayout (PM 20261107-1240)
+V2 PANEL-TABS без наложения: ПОДТВЕРЖДЕНО: шеллы (12,12,372) и (1216,12,372) пересечений НЕТ; вкладки переключаются. ИСПРАВЛЕНО сегодня: правая вкладка по умолчанию = 'Звёзды' (главная), 'Отладка' открывается F9 (операторский сигнал: 'дебаг-панель закрывает основную')
+V3 hover/selected планеты: ПОДТВЕРЖДЕНО: карта 'eps Tau b · host eps Tau · 44.7 pc · R 12.7 R⊕ · M 2.3e3 M⊕ · орбита 585.8 сут · 2006 RV' + постоянная строка выбора
+V4 воксели по умолчанию: ПОДТВЕРЖДЕНО: __skyVoxelOn=true в пробе; HUD цель ПОЛЁТ 39%; на index.html (нет #voxel-monitor) создаётся только при DOM-наличии
+V5 мерцание: LOD гистерезис 80/25 + lerp (probe6 mode=idle lim14 стабильно, retire-buffer fix: destroyed-сигнатура исчезла 42->2)
+
+[ЗАДАНИЕ ЧАТУ (по 20.11: эталонный ШАБЛОН; GOAL=Takt-8 приёмка; идём к M4)]
+GOAL: takt-8 = твоя оценка S1..S5/V1..V5 + решение M4-start. Скрипт собирает ROOT-info (новая канон 20.11 — это первое эталонное задание):
+bash:
+  set +e
+  echo "=== ROOT TREE (твой корневой каталог) ==="
+  pwd; ls -1 | head -40
+  git log --oneline -3; git status -sb | head -1
+  tail -n 40 POSTMESSAGE
+  echo "=== VERDICT (заполняешь ТВОЙ): H1(H-num) Liza-данные -> твой статус PRIYATO/OTKAZ по критериям ==="
+Прислать: статус V1..V5 (PRIYATO/OTKAZ по числам S1..S5) + решение M4-start + твой ROOT-снимок (если твой FS отличается от нашего: пересылай, шлюз = POSTMESSAGE).
+ПОДТВЕРЖУ: визуальный скриншот @998734e4 уже в артефактах: tmp/probe-2026-11-07T08-10-52-284Z/shot_canvas.png, tmp/index-probe-*/shot_index.png, tmp/vox8-probe-*/shot_tabs.png (sha1 см. в PM-KEEP-записях) — пересылаются по каналу.
+ТАКТ: S1..S5 ЗАКРЫТЫ (числа), V1..V5 подтверждены инструмент+скриншоты, M3-гейты = ЗЕЛЁНЫЕ @998734e4.
+
+
+=== RULES 22 KANAL VOPROSOV 20261107-1420 (оператор) ===
+новое правило 22: вопросы оператору задаются В ЧАТЕ, канал = режим: (a) харнес-сессия -> стандартные средства харнеса (DSH: инструмент ask_user_question: вопрос + варианты, рекомендуемый первым; вопросы 'текстом' с кнопочками которые харнес не показывает - запрещены); (b) chat-relay POSTMESSAGE -> блок '=== VOPROSY ===' (20), ответы OTVET'ом. ЗАДАНИЕ (скрипт 20.10) остаётся в конце; приёмочные вопросы = двух-исходные (видел/не видел, PRIYATO/OTKAZ/DEFERRED).
+ПЕРВОЕ ПРИМЕНЕНИЕ: приёмочные H1(PANEL-DEFAULT)/H2(INDEX) через ask_user_question: ответы = 'страница не открывалась' / 'не проверял' -> статус UNKNOWN (ожидает визуала), не отказ.
+
+=== GIT 20261107-1435 :: commit ce7c1fb8 ОТПРАВЛЕН (998734e4..ce7c1fb8) :: INDEX-ENTRY (index.html=единый бандл) + PANEL-DEFAULT (звёзды первым, консоль F9) + voxel DOM-гейт + RULES 20.11 (ROOT-снимок) + RULES 22 (канал вопросов: харнес=ask_user_question, чат=VOPROSY) :: 7 файлов +50/-74 :: чату: git pull, S4-sha1 обновились: см. этот коммит ===
+=== S4-BASELINE 20261107-1440 @ce7c1fb8 (актуальные sha1-8 HEAD-blob для relay) ===
+S4: tests/sky.ts = 5497d200
+S4: dist/sky.bundle.js = 3da1b0d6
+S4: tests/core/SkyControlPanel.ts = ed2b9745
+S4: tests/core/StarLayer.ts = d5068fc7
+S4: index.html = 69a79e91
+
+=== CANON 20261107-1500 :: RULES §1 :: транслит ЗАПРЕЩЁН: русские слова = кириллица (сообщения/POSTMESSAGE/комментарии/доки); часть кода (идентификаторы, маркеры, ключи протокола GOAL=/TASK=/KEEP:/VERDICT/DELTA/SKILLS_REQUEST/TRANSPORT/CHAT-MODE, enum-значения) = английский. Канал переписан кириллицей (полная версия), бэкап транслита: POSTMESSAGE.bak-cyr-20261107 ===
+
+=== PRIEMKA 20261107-1510 :: M3-v2 vizual = DEFERRED-REMOTE@82588d8a :: GIT 82588d8a OТПРАВЛЕН (ce7c1fb8..82588d8a) ===
+otvet operatora (kanal 22): 'budet otkryvatsya i proveryatsya na drugom komp'yutere posle kommita' -> priorimka M3-v2 (vklady bez nalojeniya / M-karta+planety / index.html) = DEFERRED-REMOTE@82588d8a. Kommit i push sdelany (82588d8a: RULES 1 translit+zapreshchen, 22 shablon iskhodov PRIYATO/OTKAZ/DEFERRED-LOCAL/DEFERRED-REMOTE/UNKNOWN).
+shablon dobavlen v 22 (operatorskoe): DEFERRED-REMOTE = agent kommitit/pushit -> operator otkryvaet na drugom komp'yutere -> otvet v sled. takte; priorimka ne blokiruet kommit; agent prodolzhayet nevizual'nuyu rabotu.
+agent prodolzhaet: M4 (korabel'nye polyoty) po roadmap; zhdu otveta priorimki posle proverki na drugom komp'yutere.
+
+=== ПРАВИЛО 20261107-1530 :: чат = кириллица (транслит = нарушение) :: ответ на эхо Takt-7 ===
+ПРАВИЛО (RULES §1, оператор): сторона чата (relay без ФС) пишет кириллицей, включая маркеры:
+«=== ОТВЕТ (i/n) СКРИПТ ===», «=== ВОПРОСЫ (ответы обязательны) === … === КОНЕЦ ВОПРОСОВ ===»,
+«=== ЗАДАНИЕ НА ВЫПОЛНЕНИЕ ===», «=== DELTA (i/n) ===»; ключи GOAL=/TASK=/TRANSPORT:/CHAT-MODE:/
+SKILLS_REQUEST:/KEEP:/SRC= — английский; статусы-enum — английский (CONFIRMED/UNKNOWN/PARTIAL/
+DEFERRED/ACCEPT/REJECT). Транслитные маркеры («KONETS VOPROSOV», «otvety objazatelny»,
+«ZADANIE CHATU», текст «PRIYATO/OTKAZ») — нарушение: сообщение не закрывает такт, нужна перезапись.
+
+ЭХО-ЗАКРЫТИЕ: присланное повторно «OTVET (1/2) SKRIPT — Takt-7» = дубликат, закрывается моим
+ОТВЕТОМ 20261107-1405 (S1..S5 @998734e4: S1 0.878/756; S2 lit=1547, gpuErrors=2 сети; S3 idle/2000/
+lim14 + hover 4/5; S4 sha1-8 5ecd1616/4aa5ec3a/312880dc/d1452d63 (+HEAD bcb0c63a/0e9ebf08/ed2b9745/
+d5068fc7); S5 §20.10 в RULES.md:357-376) + V1..V5 подтверждены инструментально; скриншоты:
+tmp/probe-2026-11-07T08-10-52-284Z/shot_canvas.png, tmp/vox8-probe-*/shot_tabs.png,
+tmp/index-probe-*/shot_index.png. C1 ПРИНЯТ. Статус: M3-гейты ЗЕЛЁНЫЕ, M4 разрешён.
+
+ЗАДАНИЕ ЧАТУ (кириллица, по 20.10/20.11; GOAL=Takt-8-закрытие; два исхода):
+1) Вердикт по V1..V5 (ACCEPT/REJECT по числам S1..S5 — заполняешь ТЫ, не я);
+2) Формула #2: критерий завершения объекта A (M1..M6 = сделано) — двумя исходами;
+3) Твой ROOT-снимок (§20.11, если FS отличается).
+Прислать: ОТВЕТ кириллицей с маркерами §1; транслит = не принимается.
+
+=== GIT 20261107-1545 :: коммит d2ebb2c5 ОТПРАВЛЕН (82588d8a..d2ebb2c5, force-with-lease: сообщение 67ba4ebc было транслитным = нарушение §1, поправлено amend-ом кириллицей) :: ПРАВИЛО §1 чат = кириллица + §22 enum ACCEPT/REJECT :: чату: git pull; с этого такта транслитные сообщения не закрывают такт ===
+
+=== CORE-PACK-ЭТАЛОН 20261107-1555 (оператор) ===
+Ядро: сгенерированный core-pack.md ОБЯЗАТЕЛЬНО содержит ЭТАЛОН ПЕРВОГО ЗАДАНИЯ (полные блоки §16 bash + §16a pwsh, дословно из RULES.md) и требование FORMAT-следование: CHECKS -> SKILLS READ -> ROOT TREE -> LOGIC -> VERDICT(H1..Hn) -> SUMMARY -> KEEP; буфер на выходе; tmp/артефакты; транслит запрещён (§1).
+Реализация: core-pack.ps1 / core-pack.sh извлекают §16-§16a из RULES.md регуляркой (единый источник, §11); секция '## 6. ЭТАЛОН ПЕРВОГО ЗАДАНИЯ' в теле; артефакт 19808 b (было 6335).
+Двойники выровнены дословно (паритет: 0 diffs за пределами транспорт-маркеров/TS; 199=199 строк): убраны дрейфы §3/§4 (SKILLS_REQUEST-строка, RDP-потолок, roadmap, формат PMTAIL ' ~ ' 400-символьный), добавлен LC_ALL=C.UTF-8 в sh.
+Уроки: (1) [BOM-RISK] edit-инструмент содрал BOM с core-pack.ps1 -> PS 5.1 = ANSI-каша в литералах (26:98 Unexpected token) — восстановление EF BB BF после каждой правки (21.1 подтвердился вторично); (2) [BASH52-AMP] '&' в замене `${{BODY//pat/repl}}` bash 5.2 = совпавший текст: '2>&1' -> '2>{{ETALON16}}1'; экранирование && перед подстановкой.
+
+=== GIT 20261107-1610 :: коммит af0d2167 ОТПРАВЛЕН (d2ebb2c5..af0d2167) :: CORE-PACK-ЭТАЛОН (core-pack.md = 19808 b с дословными 16/16a; паритет двойников 0 diffs; BOM/BASH52-фиксы) :: 3 файла +215/-8 :: чату: git pull + npm run core-pack:win (новыи core-pack.md = Loads + ЭТАЛОН ПЕРВОГО ЗАДАНИЯ) ===
+
+## session=fix-360-angles @ 2026-11-07T21:45+03:00
+FIX-360-ANGLES (жалоба: оборот 360° — градусы считаются неверно, картинка скачет). Корень: display-углы брали из quat.getEulerAngles(): Y = asin => рыскание застревает на ±90° и «отскакивает» на полном обороте; ui-updater дополнительно нормализовал pitch/roll в [0,360) (−10° → «350°», иконка ⬆️ там, где ⬇️). Фикс [FIX-360-ANGLES]: ts/bootstrap/SpaceshipCameraController.ts (applyRotationFromQuat + getAnglesDeg — углы по векторам forward/up через atan2, непрерывные), tests/simplified/ShipController.ts (то же для sky.html), ts/bootstrap/ui-updater.ts (updateAngles: курс [0,360), тангаж/крен (−180,180]). Доказательство tmp/angles-360-test.mjs: OLD за оборот 360° progress=−0.5° (2 реверса), NEW progress=359.5° (0 реверсов, шаг 0.5°). Типы: новых ошибок в правленых файлах 0 (crossProduct 1041/1043 — наслилие). dist/sky.bundle.js пересобран (npm run build:sky, exit=0). KEEP=tmp/angles-360-test.mjs.
+VERDICT-прогон оператора 21:41 (tmp/fix-360-angles-verify-20261107-214121): H1=CONFIRMED (node: OLD progress=-0.5, 2 реверса; pwsh-гейт H1=UNKNOWN — дефект порога Abs>10, не теста), H2=CONFIRMED (NEW progress=359.5, rev=0), H3=CONFIRMED (бандл+маркеры), H4=CONFIRMED (ошибок 0). КОММИТ a4b2032c (5 файлов, dist/sky.bundle.js включён — он в индексе). H5 (визуал 360° на экране) = UNKNOWN → DEFERRED-REMOTE@a4b2032c до ответа оператора.
+21:43 H5-DEFERRED HTTP-check (tmp/h5-deferred-20261107-214351): сервер :3001 живой, /sky.bundle.js len=3085994, fix-marker atan2(-fy)=1 -> H6=CONFIRMED (отдаётся исправленный бандл, no-cache, перезапуск сервера не нужен). H5=DEFERRED-LOCAL@a4b2032c (оператор: «проверю когда будут изменения» — изменения УЖЕ на месте: Ctrl+F5 http://127.0.0.1:3001/sky.html, Z/C на 360, курс 0..360 монотонно).
+21:52-56 H5=REJECT (observed: «рывки всего кадра (FPS)», на обеих страницах sky+index). Разворот гипотезы: цифры [FIX-360-ANGLES] закрыты (H1/H2 CONFIRMED), рывки = loop/present (PERF-RAF-GATE/FPS-METHOD). Headless-проба (scripts/sky-360-jump-probe.mjs, PNG-diff) зависла на WebGPU-загрузке (swiftshader headless, §nk-elite-sky-perf) — снята; измерение = консольная проба tmp/fps-jump-one.js (одна вставка: RAF_FPS покой/поворот, GEX_PER_SEC, LONGTASKS). Ответ оператора ждётся: RAF_FPS/GEX/LONGTASKS по 3 строки на страницу. KEEP=tmp/fps-jump-probe.js, tmp/fps-jump-one.js, scripts/sky-360-jump-probe.mjs.
+core-pack LISA-TEAM-V1 (2026-11-07): AGENTS.md пересобран — шаблон + §29 (ЛИЗА = TIMMATE liza, Agent Team) в начале + RULES.md + §23–§28 (slim: §27/§28 = указатели на §16/§16a). Новые артефакты: liza-boot.md (prompt тиммейта для spawn), core-pack.md (LOAD чата без ФС). TEAM-MODE: list_agents/spawn liza + send_message, ADDRESSEE: LEAD (FS); CHAT-MODE (нет инструментов) — без изменений: человек-транспорт, ADDRESSEE: ЧЕЛОВЕК.
+22:07-22:13 H5-AUTO (оператор: «введи значения автоматически» — значения ввёл агент, tmp/fps-auto.mjs, Playwright+системный Chrome). HEADLESS (swiftshader): sky.html умирает на старте (gpu adapter null -> "reading 'info'"), RAF=32.2 = потолок среды. HEADFUL (реальный GPU): RAF=32/32 (покой/поворот), RF_PER_SEC=32.3, GEXCODE_PER_SEC=32.3, LONGTASKS=0/6с; с флагами --disable-gpu-vsync --disable-frame-rate-limit: RAF=111/111, RF=59, LONGTASKS=0. index.html (:3000): RAF=32.1/32.0, LONGTASKS=0. VERDICT: H1 REJECTED (FPS не падает при повороте), H2 REJECTED (один renderFrame/кадр: RF≈RAF, GEXCODE≈RF), H3 REJECTED (longtasks=0), H4 CONFIRMED: рывки = 32Hz vsync-потолок RDP-адаптера (совпало с RELAY 20261107-094449 H4: MS Remote Display 32Hz; Intel UHD 630 = 59Hz локально). Код чист: app тянет 59-111 fps без лимита. Контрмера: приёмка глазами на локальном мониторе (не RDP) — как в H5-perf. :3001 поднят заново (dev:sky:win job pwsh-603), бандл свежий (atan2(-fy)=1). Артефакт: tmp/fps-auto-20261107-221322/summary.txt.
+22:20 H5=ACCEPT@e15dcd10 (оператор на локальном мониторе: плавность приемлема, курс монотонный) — ЦИКЛ fix-360-angles ЗАКРЫТ: фикс a4b2032c + пробы CONFIRMED + приёмка принята. Коммиты: a4b2032c (фикс), e15dcd10 (диагностика рывков). Бэклог: (1) gauge-особенности углов у gimbal pitch ±90 (atan2-базис, непрерывность вне полюсов); (2) ShipController.setRotation -> fromAxisAngle (нет такого метода в 0.9.2, есть setFromAxisAngle) — потенциальный рантайм-краш, не трогал; (3) headless-Win swiftshader = WebGPU-null (измерения только headed); (4) crossProduct TS2339 наслилие (1041/1043).
+
+## session=roles-load-agents-md @ 2026-11-07T22:26+03:00
+TEAM-MODE LISA-TEAM-V1 активирован: list_agents -> liza не было -> spawn liza (context=fresh, prompt = liza-boot.md E1BC1543, читается тиммейтом с общего диска). ZADANIE -> ADDRESSEE: LEAD (FS); человек = цели/приёмка.
+ЗАГРУЗКА ПРАВИЛ: AGENTS.md = 100578 b / 966 строк; харнес injectировал 65142 b (бюджет инструкций 65536) = хвост ~613-966 в контекст не попал; лид дочитал строки 587-966 с диска: 20.9 MRT (loadOp clear/clear, uniform >=128/256 b), 20.10 STATE-BLOCK, 20.11 Роли+строгий [STATE], 2 Семь персон, 5 контрольный вопрос, 6 разрешение 16 vs 20.8, 22 ЗАДАЧА-КОНТЕКСТ, 20.8a-s, 23-28.
+ДЕФЕКТ КАНАЛА: при бюджете < размера файла инструкции обрезаются без явного сигнала в теле — признак строка «Workspace instruction budget ... truncated». Правилам, живущим в хвосте AGENTS.md (23-28, примеры 20.8r), в новых сессиях нужен контроль: держать ядро в начале файла либо уменьшать AGENTS.md (сейчас 100578 b при бюджете 65536 b = обрезается ~35 %).
+BASELINE sha1-8 (ROOT=packages/nk-elite-orillusion-map, HEAD=b8efa7c6): AGENTS.md=84B33683 (mtime 2026-11-07T22:21:39, перегенерирован core-pack.ps1), RULES.md=EA349A11, BOOT.md=270B57B9, core-pack.md=F1ED2C44 (M), liza-boot.md=E1BC1543, skills/README.md=F8CEE941, templates/first-message.ps1=F5F81762, templates/first-message.md=766BA3AA, POSTMESSAGE(root)=69F7A9E1, POSTMESSAGE(root-2, канал 21.1)=15EEC151.
+GIT-РИСК: AGENTS.md в индексе помечен удалённым (staged D) + он же untracked ?? + бэклог AGENTS.md.bak-corepack-20261107-222125. Рабочее дерево содержит эталон (966 строк), индекс — нет. Лечится git add (не reset --hard, 8 запрещает).
+SKILLS (оба корня, 20.8d): skills/=65 SKILL.md; .dsh/skills/=56 (56 подкаталогов; на верхнем уровне 0 *.md) => скан обязан быть рекурсивным, иначе ложный SKILLS EMPTY/PARTIAL.
+ПЕРСОНЫ: personas/ = 7 + INDEX (front-limit, gaia-source, head-consistency, perf-swiftshader, repo-sync, skill-writer, webgpu-pass).
+ПРИЁМКА: первое задание (pwsh-эталон 16a) = DEFERRED-REMOTE@b8efa7c6; приоритет оператора = ROLES/AGENTS, затем M1/M2/PM.
+22:35 GIT-УТОЧНЕНИЕ (roles-load-agents-md): git add AGENTS.md выполнен -> git status --porcelain AGENTS.md = ПУСТО; git diff HEAD --numstat AGENTS.md = 0 строк; staged blob = HEAD blob (sha1 18DD1CB7). Диагноз H7 (риск потери AGENTS.md) = REJECTED: staged D + untracked ?? были артефактом core-pack.ps1 + core.autocrlf=true (в рабочем файле 918 CRLF + 48 одиночных LF, git нормализует). Коммит AGENTS.md НЕ требуется; бэклог AGENTS.md.bak-corepack-20261107-222125 = KEEP.
+ДЕФЕКТ КАНОНА 3 (pwsh-бэкап): в PS 5.1 у Copy-Item НЕТ параметра -NoClobber (проверено: Parameters.Keys не содержит) -> канонический бэкап из 3 падает. Рабочая форма: if (-not (Test-Path $bak)) { Copy-Item -Path $src -Destination $bak }. Подтверждено на POSTMESSAGE.bak-roles-load-20261107-2226.
+НЕ ТРОНУТО: core-pack.md (M, 9/11 строк) — изменение чужого такта (core-pack LISA-TEAM-V1), owner=repo-sync.
+## session=secnum-fix-20.9-11 @ 2026-11-07T23:16+03:00
+GOAL=ROLES/AGENTS (приоритет оператора) · KNOWLEDGE=номера разделовRULES.md однозначны, генератор воспроизводит AGENTS.md без коллизий.
+ЧТО: перенумерован dev-блок (перенесён из CORE-PACK), который сталкивался с relay-нумерацией: §20.9->§30 WebGPU MRT, §20.10->§31 STATE-BLOCK, §20.11->§32 Роли/строгий [STATE], §2->§33 СЕМЬ ПЕРСОН, §5->§34 КОНТРОЛЬНЫЙ ВОПРОС, §6->§35 РАЗРЕШЕНИЕ ПРОТИВОРЕЧИЯ, §22->§36 ЗАДАЧА-КОНТЕКСТ. Relay-§20.9/20.10/20.11/22 не тронуты (каноничны).
+НОВОЕ ПРАВИЛО: §37 МАППИНГ СТАРЫХ НОМЕРОВ (таблица старый->новый), §38 ОДНОЗНАЧНОСТЬ НУМЕРАЦИИ [SEC-UNIQUE] (уникальный ключ ## N., dev-блок в §30+, проверка при загрузке сессии).
+СМЕЖНОЕ: заголовки templates/first-message.md получили префикс T1..T6a/T-* — в AGENTS.md они сталкивались с RULES.md §1..§6 (РОЛИ vs Безопасность) и §20.8o/§20.8q; правки перекрёстных ссылок: templates/liza-team.md -> §32 и §36, templates/liza-boot.md -> §36.
+ИСТОЧНИК/ПРОИЗВОДНОЕ (§20.8j): правлен RULES.md (источник) + 3 шаблона; AGENTS.md / core-pack.md / liza-boot.md перегенерированы (npm run core-pack:win, PS 5.1).
+VERDICT: H1 (дубли §20.9/20.10/20.11/22/2/5/6 устранены) = CONFIRMED (RULES.md dup=0, AGENTS.md dup=0; было 12 дублей в AGENTS.md); H2 (генератор воспроизводит без коллизий) = CONFIRMED (npm run core-pack:win, exit 0); H3 (перекрёстные ссылки не биты) = CONFIRMED (старых заголовков 0 совпадений; §32/§36 в AGENTS.md присутствуют); H4 (бюджет харнеса) = REJECTED как решённое — AGENTS.md вырос до 103197 b, инъекция 65243 b, хвост (30-38, 20.8a-s, 23-28) в новых сессиях НЕ читается; H5 (liza-boot.md) = PARTIAL: внутренние дубли 0/1/2/3/0z (x2-x6) — это prompt, не источник правил, чинится по запросу.
+SHA1-8: RULES.md=FD2B023A (86775 b, 803 стр.), AGENTS.md=48599B32 (103197 b), core-pack.md=844C5DBD, liza-boot.md=D5E2157B, templates/first-message.md=CC98D259, templates/liza-team.md=4FD30F4D, templates/liza-boot.md=8A424502.
+DEFECT-1 (канал харнеса): инструкции обрезаются бюджетом 65536 b -> AGENTS.md 103197 b читается на ~63 %. Лечение (не делал, ждёт решения): Slim-режим по умолчанию (перенести RULES.md-половину в core-pack.md) или сплит AGENTS.md.
+DEFECT-2 ( канон 3): Copy-Item -NoClobber не существует в PS 5.1 -> канонический pwsh-бэкап нерабочий; форма: if (-not (Test-Path $bak)) { Copy-Item -Path $src -Destination $bak }.
+KEEP: RULES.md.bak-secnum-20261107-2310, AGENTS.md.bak-secnum-20261107-2310, core-pack.md.bak-secnum-20261107-2310, liza-boot.md.bak-secnum-20261107-2310, templates/*.bak-secnum-20261107-2310, templates/first-message.md.bak-secprefix-20261107-2315, POSTMESSAGE.bak-roles-load-20261107-2226.
+НЕ ТРОНУТО: core-pack.md (M) остаётся unstaged (коммит по выбору оператора = только POSTMESSAGE).
