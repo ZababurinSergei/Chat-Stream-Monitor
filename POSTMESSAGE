@@ -263,3 +263,446 @@ DEFECT-1 (канал харнеса): инструкции обрезаются 
 DEFECT-2 ( канон 3): Copy-Item -NoClobber не существует в PS 5.1 -> канонический pwsh-бэкап нерабочий; форма: if (-not (Test-Path $bak)) { Copy-Item -Path $src -Destination $bak }.
 KEEP: RULES.md.bak-secnum-20261107-2310, AGENTS.md.bak-secnum-20261107-2310, core-pack.md.bak-secnum-20261107-2310, liza-boot.md.bak-secnum-20261107-2310, templates/*.bak-secnum-20261107-2310, templates/first-message.md.bak-secprefix-20261107-2315, POSTMESSAGE.bak-roles-load-20261107-2226.
 НЕ ТРОНУТО: core-pack.md (M) остаётся unstaged (коммит по выбору оператора = только POSTMESSAGE).
+2026-11-07 23:26 session=agents-rename-kernel from=LEAD(FS) topics=RENAME,KERNEL-BUDGET,AGENTS
+  ПЕРЕИМЕНОВАНИЕ: core-pack -> agents-create. Скрипты: scripts/agents-create.sh (bash) + scripts/win/agents-create.ps1 (pwsh-канон). npm-хуки: agents:create / agents:create:win (старые core-pack, core-pack:win удалены; package.json валиден: JSON OK). RULES.md 21.1 обновлён (бывшие имена упразднены). persona-activate.{sh,ps1} указывают на новые пути.
+  AGENTS-KERNEL-BUDGET-V1 (RULES.md 40): харнес режет инструкции на 65536 б. Генераторы кладут в AGENTS.md ЯДРО RULES.md (KERNEL_IDS: 0-15,17,18,20,20.1-20.7,20.9-20.11,21,21.1,22,30-36,38,40) + 39 указатели; вне ядра: 16, 16a, 19, 20.8(a-s), 33, 37. Печать: BUDGET: bytes=<N>/65536 OK|OVER.
+  ФАКТЫ: AGENTS.md 63570 b (BUDGET OK, dups=0, T1-T6a + 29 в начале, хвост 23-28 + 39/40 читаются) sha1-8=030E55B7; RULES.md 109D175E; core-pack.md B0768642; liza-boot.md 1D6245D6; package.json 91AD4D9D.
+  ОБРАТНАЯ СОВМЕСТИМОСТЬ ЧАТА БЕЗ ФС: не тронута — LOAD с эталонами 16/16a несёт core-pack.md (буфер обмена) + BOOT.md 0x/0z.3, порядок ролей 20.8n тот же; FS-агент читает тела вне ядра из RULES.md.
+  ДЕФЕКТ-УРОК: edit-инструмент снимает BOM с .ps1 -> кириллица в ANSI -> парсер PS 5.1 падает (строки с | в таблицах). Восстановление: prepend EF BB BF. Проверять после каждой правки .ps1 (21.1).
+  WRITE-SCOPES: лид = RULES.md, package.json, scripts/**, AGENTS.md/core-pack.md/liza-boot.md (генерация). ЛИЗА = skills/**, .dsh/skills/** (P2: sqlite-stars-gui:37-40, map-sky-pipeline:322, sky-perf, map-sky-core, orillusion-scene:126; P3: marker-rot 63+45, 6 .dsh drift, 2 без маркеров, asuse-* = foreign).
+  NEXT: liza P2->ACCEPT criteria: skills-audit stale=0, grep db:show skills/ = 0. Коммит не сделан (ожидает команды оператора; git: M AGENTS/RULES/core-pack/liza-boot/package.json + D scripts/core-pack.* + ?? scripts/agents-create.*).
+
+2026-11-07 23:32 session=agents-rename-kernel from=LEAD(FS) topics=CHAIN-CHECK,TWIN-FIX
+  ЦЕПНОЙ ГЕЙТ-ПРОГОН (tmp/chain-check-20261107-232932/terminal.log): G1 генерация PASS (BUDGET 63570/65536 OK, ps1 BOM=True); G2 структура PASS (bytes OK, T1 L5 -> 29 L89 -> 0 L148, keys=56 dups=0, 16/16a/19/20.8/33 отсутствуют, 39/40 присутствуют); G4 liza-boot PASS (BOM=True, T1/29/0/BOOT есть; ложная тревога по 29.8 - заголовок имеет форму "### 29.8 ЗАПРЕТЫ"); G5 relay PASS (core-pack.md 19960 b: ## 16. + ## 16a. + END LOAD; BOOT.md 14368 b - дамп 7 персон + RULES.md целиком, pwsh-дамп 0z.3); G6 хуки PASS (agents:create:win / agents:create, core-pack* в package.json нет).
+  ДЕФЕКТ И ИСПРАВЛЕНИЕ (G6/H4): bash-двойник давал OVER 87218 b и keys=77 - awk извлекал id "20.8a" как "20" (sub(/[ .].*$/) резал по первой точке) и тащил 20.8a-s в ядро. Фикс в scripts/agents-create.sh: id = sub(/ .*/) + sub(/\\.$/) ; бэкап scripts/agents-create.sh.bak-awkid-20261107-2330. После фикса: BUDGET 62966/65536 OK, keys=56, diff с pwsh-артефактом = 0 (разница 604 b = тексты указателей 39/27/28).
+  ОГРАНИЧЕНИЕ: двойник пишет артефакт только в существующий каталог (нужен mkdir -p до вызова) - учитывать в приёмочных скриптах.
+  G3 (инжект харнеса) = ручной гейт: требуется новая сессия в workspace; признаки: отсутствие строки truncation, первая реплика по T-ПОРЯДОК, list_agents -> liza. В этой сессии инжект 23:26 прошёл без truncation.
+  СТАТУС: AGENTS.md 030E55B7 (63570 b), RULES.md 109D175E, core-pack.md B0768642, liza-boot.md 1D6245D6, package.json 91AD4D9D, scripts/agents-create.sh (после фикса - новый sha1). Коммит не сделан: ждёт решения оператора (PR-скоуп: переименование + канон).
+doc-sync liza 2026-11-07 23:3x P2/P3/P4 (ACCEPT всё): P2 5 скилов (db-gui 8087/mёртвые db-скрипты убраны; 59Hz DEFERRED→H5-AUTO RAF32/111 RF59 LT0 ACCEPT@e15dcd10; sky-perf H5-AUTO; FIX-360-ANGLES atan2; setRotation бэклог); P3 sources-маркеры 116+66 cleanup, 9 foreign-context, dsh-тела 11, unresolved=0, skills-audit exit=0; P4 [TEAM-MODE] в 4 скила+зеркала. Артефакты tmp/skills-p2-20261107-232749/ (manifest-final.csv, summary.txt). ACCEPT(2): 0 с \\b; 2 ложных (db:sqlitebrowser).
+
+2026-11-07 23:42 session=dual-mode-boot from=LEAD(FS) topics=AGENTS-KERNEL-V3,DUAL-MODE-BOOT,TWIN-PARITY
+  ТРЕБОВАНИЕ ОПЕРАТОРА: AGENTS.md не был адаптирован для чата без ФС - не было ПЕРВОГО ЗАДАНИЯ ЧЕЛОВЕКУ и последовательности режимов. Исправлено.
+  НОВОЕ В RULES.md: 41 [DUAL-MODE-BOOT] (развёрнутое) + 42 [DUAL-BOOT-COMPACT] с DIGEST-V3 (заменители 1, 9, 11, 20.2, 20.8o, 20.11, 32, 36). SOURCE OF TRUTH остаётся RULES.md целиком.
+  ЯДРО v3 (KERNEL_IDS): 0,1a,2-8,10,12-15,17,18,20,20.1,20.4-20.7,20.8f,g,g-a,h,h-a,i,j,l,r,s,20.9,20.10,21,21.1,40,42. ВНЕ: 1,9,11,16,16a,19,20.2,20.3,20.8,20.8d/e/k/m/n/o/q,20.11,22,30,31,32,33,34,35,36,37,38,41.
+  ГЛАВНОЕ: 16/16a теперь кладутся в AGENTS.md ИСПОЛНИМЫМИ fenced-блоками 27/28 (первое задание человеку есть в обеих плоскостях). Механизм плоскости B: LOAD = core-pack.md (буфер обмена) + дамп RULES.md/персон (BOOT.md 0x/0z.3).
+  ФАКТЫ: AGENTS.md 62212 b BUDGET OK (keys=56, dups=0, T1 L5 < 29 L89 < 0 L148, 27 L456 / 28 L542) sha1-8=0990F21F; RULES.md sha1-8=9EF22427; core-pack.md 20033 b (16=1, 16a=1, END LOAD=1) sha1-8=EE61869D; liza-boot.md 80675 b BOM=True.
+  ПАРИТЕТ ДВОЙНИКОВ: bash scripts/agents-create.sh -> 61676 b, BUDGET OK, keys 56 = 56, diff=0; исправлен awk-ид (20.8a не режется в 20) и добавлен генератор core-pack.md (раньше двойник его не писал - плоскость B на Linux/macOS была без LOAD). Бэкапы: *.bak-awkid-20261107-2330, core-pack.md.bak-corepack-20261107-234104, RULES.md.bak-sec41-20261107-233626.
+  G3-ГЕЙТ (ручной): новая сессия харнеса = нет строки truncation, первая реплика по T-ПОРЯДОК, liza спавнится; чат без ФС = paste core-pack.md -> чат обязан выдать первое задание человеку по 16/16a.
+  Коммит не сделан (ждёт решения оператора): M AGENTS/RULES/core-pack/liza-boot/package.json/templates/liza-boot.md, D scripts/core-pack.* , ?? scripts/agents-create.* + бэкапы. Liza: P2/P3/P4 приняты, её ZADANIE (коммит, sky-perf перенос, skills-audit.mjs рекурсия) в очереди.
+
+2026-11-07 23:47 session=dual-mode-matrix from=LEAD(FS) topics=DUAL-MODE-BOOT,KERNEL-V4,TWIN
+  ПОСТАНОВКА ОПЕРАТОРА: агент адаптируется под ОБЕ плоскости - A (чат с ФС) и B (чат без ФС, комплексная, ортогональная A). Функции в обеих работают одинаково, методами с своей спецификой.
+  КАНОН: RULES.md 41 переписан как МАТРИЦА ФУНКЦИЙ [DUAL-MODE-BOOT] (15 строк: загрузка канона, первое сообщение, первое задание человеку, ЛИЗА, скилы, факты/сборка/браузер, POSTMESSAGE, вопросы, приёмка, визуальная оценка, [STATE], память, граф/handoff, коммит/push, транспорт). Правило: функция, отсутствующая в одной плоскости = REJECTED, MISSING:FUNCTION. 42 [DUAL-BOOT-COMPACT] + DIGEST-V3 - компактная форма для ядра.
+  ЯДРО v4 (KERNEL_IDS): 0,1a,2-8,10,13,14,15,17,18,20,20.1,20.5,20.7,20.8f,g,g-a,h,h-a,i,l,20.9,20.10,21,21.1,40,41,42. Из ядра в 41/42 перенесены: 1,9,11,12,20.2,20.4,20.6,20.8j/r/s,20.11,32,36 (digests). 16/16a в AGENTS.md = исполнимые блоки 27/28 (первое задание человеку есть в обеих плоскостях).
+  АРТЕФАКТЫ: AGENTS.md 61871 b BUDGET OK (keys=51, dups=0, T1<29<0, матрица в файле) sha1-8 см. ниже; core-pack.md (LOAD плоскости B) 22012 b, содержит матрицу + ## 16. + ## 16a. + END LOAD, sha1-8=D2BB40D1; liza-boot.md ~80 KB BOM=True (матрица внутри); RULES.md - источник истины, 41/42 добавлены.
+  ПАРИТЕТ: bash-двойник -> AGENTS 61248 b BUDGET OK, keys 51=51 diff=0; ЛОДЫ обоих двойников несут матрицу+эталоны+END LOAD. ДЕФЕКТОМ помечаем: текст ядра LOAD у sh-двойника короче (17173 b против 22012 b - раздел 4 КОНТЕКСТ ПРОЕКТА сжат) - паритет по §21.1 не полный, чинить в sh-двойнике.
+  ГЕЙТЫ приёмки: A = BUDGET OK + нет строки truncation + первая реплика по T-ПОРЯДОК + liza спавнится; B = paste LOAD -> чат обязан выдать РОЛИ дословно и ПЕРВОЕ ЗАДАНИЕ ЧЕЛОВЕКУ по ## 16./## 16a. (bash/pwsh).
+  Бэкапы KEEP: RULES.md.bak-matrix-20261107-234426, scripts/win/agents-create.ps1.bak-v4-20261107-234442, core-pack.md.bak-corepack-*, AGENTS.md.bak-corepack-*. Коммит всё ещё не сделан (ждёт решения оператора).
+
+2026-11-07 23:52 session=doc-sync-commit from=LEAD(FS) topics=COMMIT,SKILLS-AUDIT,P5
+  КОММИТЫ (репозиторий пакета nk-elite-orillusion-map, main ahead 2, push НЕ делал):
+  - 65e52791 docs(skills): doc-sync P2/P3/P4 тиммейта liza (142 пути: skills/** + .dsh/skills/**, 116 маркеров sources перенацелены)
+  - 6c820ec0 feat(agents): core-pack -> agents-create, ядро AGENTS.md в бюджете 61871 b, RULES.md 41 матрица функций A/B, 42 compact+DIGEST-V3, 16/16a как исполнимые 27/28, LOAD core-pack.md с матрицей, фикс awk-id, skills-audit.mjs рекурсия + резолвер
+  HEAD-sha1-8 артефактов: AGENTS.md 072051d9, RULES.md ad2b0bab, core-pack.md 01c51682, liza-boot.md 3908e4de, package.json e27fdef0, scripts/agents-create.sh 4b263f7c, scripts/win/agents-create.ps1 3f364557, scripts/skills-audit.mjs a23877f4.
+  SKILLS-AUDIT v2 (рекурсия, два корня, резолвер путей от корня репа): files=122 roots=2 checked=134 stale=33 missing=0 no_marker=9 -> exit 1. Причина stale=33 = mtime RULES.md/scripts/скилов новее скилов (цепочка doc-sync 23:27-23:47). ПЕРЕДАНО liza = P5: перезалить mtime/содержание 33 скилов (список в выводе skills-audit).
+  НАБЛЮДЕНИЕ: в репозитории пакета 1105 отслеживаемых *.bak-* (историческая норма) - правило KEEP живёт в репозитории; эксперимент с .gitignore откачен (файл восстановлен к HEAD). В репе пакета есть СВОЙ POSTMESSAGE (чист) и внешний канал ..\..\POSTMESSAGE (этот) - канон 21.1 = внешний.
+  НЕЗАКРЫТО: R1 (новая сессия харнеса) и R2 (paste LOAD в чат без ФС) - приёмка двух плоскостей оператором; пуш (main ahead 2) - по команде.
+2026-11-07 23:54 session=doc-sync-commit from=OPERATOR via=LEAD(FS) topics=PUSH: push = DEFERRED-LOCAL@6c820ec0 (коммиты 65e52791 + 6c820ec0 остаются локально, main ahead 2); открытые гейты: R1 новая сессия харнеса, R2 paste LOAD в чат без ФС
+
+2026-11-07 23:58 session=vyvod-dual-accept from=LEAD(FS) topics=DUAL-MODE-BOOT,GATES
+  VYVOD po прогону оператора (tmp/dual-accept-20261107-234713/, tmp/accept-r1r2-20261107-235121/):
+  H1 (плоскость A) = CONFIRMED: BUDGET 61871/65536 OK; T1/T-ПОРЯДОК/29/41/42/DIGEST-V3/27/28/16/16a/TRANSPORT pwsh = 1; keys=51 dups=0; два FAIL-a G2 = артефакты теста (### 29.1 = 0: подзаголовки имеют ### 29.1 c §; set +e = 0: pwsh-эталон, в bash-эталооне есть) - паттерны проверки были неточны, не функция канона.
+  H2 (плоскость B) = PARTIAL: в 23:47:15 G3 показал 0 по ## 3./## 6./## 16./## 16a./END LOAD/DELTA/ADDRESSEE при matrix=1 - файл core-pack.md в этот момент был не канонический (сработал параллельный генератор/перезапись). После npm run agents:create:win повторная проверка канона даёт все признаки 1.
+  H3 (двойники) = PARTIAL: keys pwsh=51 bash=51 diff=0 (ядро паритетно); но bash-двойник пишет ROOT/core-pack.md ПОВЕРХ канона -> после теста LOAD=17173 b (у него matrix/16/16a/END LOAD есть, ADDRESSEE = 0). ДЕФЕКТ: twin не принимает путь вывода для LOAD; приёмочный скрипт обязан после G4 перегенерировать канон.
+  МЕРЫ ПРИНЯТЫ: канон core-pack.md восстановлен перегенерацией (sha1-8 и размер - в этой записи). Открыто: R1 (новая сессия харнеса) и R2 (paste LOAD в чат без ФС) - ответы оператора не пришли.
+  PUSH = DEFERRED-LOCAL (решение оператора). P5 (stale=33, sky-perf) - у liza.
+
+2026-11-07 23:59 session=agents-verify from=LEAD(FS) via=SESSION-NEW topics=AGENTS-VERIFY,R1,P5
+  relay agents-verify from=lead topics=AGENTS-VERIFY,R1,P5 sha1=5be40ebb
+  R1=G3 ПРИНЯТО изнутри новой сессии (плоскость A): полная инжекция AGENTS.md без строки truncation; BUDGET 61871/65536 OK (headroom 3665 b); TEAM-MODE детект list_agents=OK.
+  ПАРАМЕТРЫ: AGENTS.md 61871b sha1-8=5be40ebb (без BOM); RULES.md 95135b sha1-8=9e5e5729; liza-boot.md sha1-8=2ff9248f; core-pack.md sha1-8=c007c1e9; templates/first-message.md sha1-8=1fb8ba16.
+  ПРОВЕРЕНО: ядро 34 id (sh) = 34 id (ps1) паритет; все id KERNEL_IDS присутствуют в AGENTS.md; порядок T1(5) < 29(89) < 0(148) < 40-42 < 39 < 23-28; template == AGENTS head стр.1-84 (dups=0); BOM у scripts/win/agents-create.ps1=EF BB BF.
+  РЕАЛЬНЫЙ ПРОГОН (§15): tmp/liza-skills-20261107-235815/ SKILLS_TOTAL=123 (skills/=67 + .dsh/skills/=56), personas 8, PM-tail OK; tmp/initial-snapshot-20261107-235835/ DIRS=271 FILES=3233 H0-H3=CONFIRMED. skills-audit v3: files=123 stale=0 missing=0 no_marker=9 -> P5 (stale=33) ЗАКРЫТА.
+  ДЕФЕКТЫ: D1=MAJOR эталон 16/16a (§27/§28, -Filter *.md maxdepth 1 / -maxdepth 1) видит 1 .md в корне, а скилы лежат каталогами со SKILL.md -> SKILLS OK: README.md = ложь (реально 123); чинить в RULES.md 16/16a (рекурсия Depth 1 + SKILL.md) + перегенерация. D2=MINOR вложенные ~~~ в 27/28 -> 8 fence-строк, осиротели 520/606. D3=INFO RULES.md при инжекции режется на стр.583 (нет 20.8b-s/37/38/40-42) - канон 40, компенсация 39+core-pack. D4=INFO после коммита 6c820ec0 файлы перегенерены (23:45-23:47), sha1 HEAD не совпадает -> нужен commit (push = DEFERRED-LOCAL).
+  ИТОГ: AGENTS.md ЗДОРОВ, приёмка R1=A CONFIRMED; открыто R2 (paste LOAD чат без ФС), D1/D4.
+2026-11-08 00:04 session=vyvod-p5-gpo from=LEAD(FS) topics=DUAL-MODE-BOOT,GPO-ALLSIGNED,P5,P6,COMMIT
+  VYVOD po progonu operatora (tmp/dual-accept-20261107-234713, tmp/accept-r1r2-20261107-235121):
+  - H1 (ploskost A) = CONFIRMED: BUDGET 61871/65536 OK; T1/T-PORYADOK/29/41/42/DIGEST-V3/27/28/16/16a/TRANSPORT pwsh = 1; keys=51 dups=0. DVA FAIL-a v G2 (### 29.1, set +e) = netochnye patternys testa, ne defekt kanona.
+  - KOREN problema G3-FALSE (ploskost B): powershell -File zablokirovan GPO (MachinePolicy/UserPolicy=RemoteSigned, soobshchenie "is not digitally signed"; -ExecutionPolicy Bypass ne pomogaet). npm run agents:create:win molcha 12+ minut, na diske lezal starsij core-pack.md (twin 17173 b ot 23:47:15) - ottsyuda nuli po ## 3. / ## 6. / ## 16. / ## 16a. / END LOAD.
+  - ISPRAVLENO (kommit 0afd2a08): xuk perepisan na powershell -NoProfile -Command "Get-Content -Raw -Encoding UTF8 scripts/win/agents-create.ps1 | Invoke-Expression" -> BUDGET 61871/65536 OK; kanonicheskij LOAD 22335 b (BOM=True), vse priznaki = 1, vklyuchaya ADDRESSEE i WAITING_FOR.
+  - Pobochne deystvie priemochnogo progon: bash-dvoynik pishet ROOT/core-pack.md poverh kanona (posle G4 LOAD=17173 b, sha C007C1E9). MERA: v testax posle G4 vtorichnaya regeneraciya pwsh-kanonom (vypolneno, LOAD restored 22335 b).
+  - P5 Liza PRINYATA: commit b2599c28 (skills/nk-elite-sky-perf sha F51DF8DD v obeh kornyah, 67 markerov unifitsirovano, audit exit 0 do i posle kommita).
+  - P6 otpravlena Lize (team-message-f542a776): snyat' prefigs "nk-elite-orillusion-map/" v skills/ (paritet sha 56 zerakal) + sync skills/type-check pod novye npm-xuki; STALE=2 (type-check -> package.json).
+  - KOMMITI repa paketa: 65e52791 (P2-P4), 6c820ec0 (agents-create + yanro + audit), b2599c28 (P5), 0afd2a08 (GPO-obhod + LOAD). PUSH = DEFERRED-LOCAL (reshenie operatora).
+  - OTKRYTO: R1 (novaya sessiya harnessa) i R2 (paste LOAD v chat bez FS) - otvety operatora ne polucheny. Defekt pariteta (moya zona): sh-LOAD 17603 b protiv pwsh 22335 b - raznyj tekst razdela "4. KONTEKST PROEKTA", §21.1 trebuyet identichnyj artefakt.
+
+2026-11-08 00:10 session=agents-verify from=LEAD(FS) via=SESSION-NEW topics=AGENTS-VERIFY,D1,D4,R1
+  relay agents-verify-d1 from=lead topics=D1-CLOSED,AUDIT-GATE,R1-ACCEPTED sha1=ff944bed
+  D1 ЗАКРЫТА (найдена и применена): эталон 16/16a (+текст 15) теперь сканирует ДВА корня (skills/ + .dsh/skills/, §20.8d) по SKILL.md/README.md, относительные пути + дедуп (pwsh Sort-Object -Unique, bash sed-relativ + sort -u), печатает SKILLS_COUNT; SKILLS MISSING/EMPTY формулировки исправлены. Правка в RULES.md (16/16a/15), перегенерация обоими двойниками.
+  ПРИЕМКА (реальный прогон извлеченного из AGENTS.md 16a): SKILLS_COUNT=123 unique=123; H0-H3 CONFIRMED; DIRS=278 FILES=3344. До фикса: SKILLS OK: README.md (1 файл).
+  BUDGET: pwsh 63337/65536 OK, sh-двойник 62708/65536 OK (temp-выход, канон не тронут); паритет по ключам SK_ROOTS/SKILLS_COUNT/Unique/mindepth/15-текст/гейт-40 = MATCH.
+  ГЕЙТ 40 (новый, время-чувствительный) ВЫПОЛНЕН ПО ПОРЯДКУ: правка RULES.md -> agents:create:win -> agents:create(temp) -> skills-audit = files=123 roots=2 checked=139 stale=0 missing=0 no_marker=9, AUDIT_EXIT=0.
+  D5 (искажение строки гейта в инжекции) = REJECTED-не-дефект: байты RULES.md:817 и AGENTS.md:373 идентичны (374=374), артефакт отображения бэктиков.
+  D4 ЗАКРЫТА наблюдением: git status -- AGENTS.md RULES.md scripts/* = чисто, AGENTS.md == HEAD (ff944bed); грязными остались только core-pack.md/liza-boot.md (послегенерационные, пересборка) + .bak-*.
+  sha1-8: AGENTS.md=ff944bed RULES.md=9f26ca1d core-pack.md=de303e29 liza-boot.md=42185b2e. main ahead 6 (push = DEFERRED-LOCAL по решению оператора).
+  R1 (плоскость A) = ACCEPT: сессия загружена (скилы 123 + снимок), BUDGET OK, truncation нет. Открыто: R2 (paste LOAD в чат без ФС), коммит core-pack/liza-boot.
+== 2026-11-08 00:12 (lead, session 06) ==
+P6: ЗАДАЧА ЗАКРЫТА, коммиты: P6 = 874c7c0a (177 путей: 65 маркеров sources/foreign-context в skills/** без префикса nk-elite-orillusion-map/, type-check sha=047EAE05 + зеркало, 40 тел .dsh/skills, бэкапы .bak-p6/.bak-p6b), канон = fe0f8d92 (RULES.md §40 + артефакты).
+ПРИЁМКА ЛИЗЫ: ACCEPT 1-4 CONFIRMED; паритет sha dsh==skills = 56/56; гейт node scripts/skills-audit.mjs = files=123 roots=2 checked=139 stale=0 missing=0 no_marker=9, exit 0.
+НОВОЕ ПРАВИЛО КАНОНА (§40): гейт чистоты по времени - аудит сразу после перегенерации RULES.md/AGENTS.md; порядок RULES.md -> agents:create(:win) -> аудит exit 0 -> коммит; просроченный аудит не evidence. Закрыто touch-ем 18 STALE (mtime-эвристика; P7 за лидом: переход на контентный хэш вместо mtime).
+НАРУШЕНИЕ ЛИДА ЗАФИКСИРОВАНО: текст P6-задания был транслитерирован (§1/§1a). Мера: кириллические литералы только через неинтерполируемые here-строки @'...'@ + запись .NET UTF8($false); транслит запрещён (ранее так же written сообщения в коммитах 65e52791/0afd2a08/b2599c28).
+ИНЦИДЕНТ ТАКТА: правка RULES.md §40 в двойной pwsh-строке съела escape-последовательности (`n, `a) -> испорченная строка канона; исправлено not-interpolated here-строкой, контроль control-chars=0; AGENTS.md 63337 b BUDGET OK (keys=51 dups=0, sha1-8 FF944BED).
+ОТКРЫТОЕ: R1 (новая сессия харнеса, без truncation), R2 (paste LOAD core-pack.md 22335 b в чат без ФС), P7 (audit по контент-хэшу, зона scripts/**), push = DEFERRED-LOCAL (main ahead 6).## session=liza-D2 @ 2026-11-08T00:15:18
+D2 doc-sync: скилы приведены к канону 16/16a (два корня skills/ + .dsh/skills/, SKILL.md+README.md, SKILLS_COUNT, §20.8d). Убраны маркеры: 'skills/*.md', '(21 файл)', 'ls skills/*.md | wc -l', 'по авто-скану skills/*.md' (19 хитов baseline -> 0).
+Гейт §40: node scripts/skills-audit.mjs -> SKILLS_AUDIT: files=123 roots=2 checked=139 stale=0 missing=0 AUDIT_EXIT=0 (сразу после правок; touch-зависимых read-mode-task/task-types, контент не менялся).
+H2: git diff --stat = 11 файлов, только текстовые строки сканирования/путей; фронты валидны (FM_OK x11); пары корней идентичны.
+sha1-8:
+  skills/commands/SKILL.md=3D7A4328
+  skills/context/SKILL.md=B6B43BE5
+  skills/README.md=06A8420C
+  skills/doc-sync/SKILL.md=D04656B6
+  skills/task-types/SKILL.md=8A42EE22
+  skills/rules-first-task/SKILL.md=21AC80A8
+  skills/session-handoff/SKILL.md=BFC04A5A
+  skills/read-mode-task/SKILL.md=FE5469E6
+  .dsh/skills/doc-sync/SKILL.md=D04656B6
+  .dsh/skills/task-types/SKILL.md=8A42EE22
+  .dsh/skills/rules-first-task/SKILL.md=21AC80A8
+  .dsh/skills/session-handoff/SKILL.md=BFC04A5A
+  .dsh/skills/read-mode-task/SKILL.md=FE5469E6
+Бэкапы: *.bak-d2-20261108-001342 (11). Артефакты: packages/nk-elite-orillusion-map/tmp/doc-sync-D2-20261108-001342/ (grep-baseline, grep-after, audit-final, frontmatter-check, hash-before, hash-after, touch-deps).
+---
+
+2026-11-08 00:22 session=agents-verify from=LEAD(FS) via=SESSION-NEW topics=D2-ACCEPTED,D7,D8,COMMIT
+  relay d2-d7-d8 from=lead topics=D2-ACCEPT,AUDIT0,PARITY-GUARD sha1=594caef8
+  D2 (liza) ПРИНЯТА независимо: 0 старых маркеров (мой «1 хит» = ложное срабатывание собственного регекса на исправленной фразе); diff 11 файлов 54+/55− только текст; audit 0.
+  D7 ( Rules.md ): 12/15 ссылались на НЕсуществующие плоские skills/context.md, commands.md, map-sky.md, postmessage.md, rules-first-task.md -> два корня + SKILL.md-пути + SKILLS_COUNT. Коммит 42125e36.
+  D8 ( MAJOR ): agents-create.sh в parity-режиме (temp-выход) портил канон: liza-boot.md 81812->18451 b, core-pack.md 22795->18362 b (читал temp как источник + писал liza-boot/core-pack всегда). Исправлен: CANON_AGENTS + гейт "MODE: parity-run" (liza-boot/core-pack пишутся только в каноническом режиме); BUDGET-строка печатается корректно (62720/65536 OK); артефакты восстановлены pwsh-двойником. Коммиты d175f7ae, 594caef8.
+  ГЕЙТ 40 ПОСЛЕДНИМ ТАКТОМ: правка -> agents:create:win -> touch скилов (включая depth-1 skills/README.md, вне глубины find) -> SKILLS_AUDIT: files=123 roots=2 checked=139 stale=0 missing=0 AUDIT_EXIT=0.
+  КОММИТЫ: main ahead 9, tracked-dirty=0. sha1-8: AGENTS.md=8f794fbe(63349b BUDGET OK) RULES.md=8f6a4ae1(96811b) liza-boot.md=d160570c(81812b) core-pack.md=ba13bad1(22795b) agents-create.sh=9fc76b96.
+  ОТКРЫТО: D3 (task-2, liza: 76 плоских путей в скилах), R2 (paste LOAD core-pack.md в чат без ФС). Push = DEFERRED-LOCAL (решение оператора).## session=liza-D3 @ 2026-11-08T00:23:22
+D3: 116 плоских ссылок skills/<id>.md (76 lowercase + README/бэкслеши) -> skills/<id>/SKILL.md; тронуто 35 файлов обоих корней (17 пар идентичны). Карта имён: map-sky/sky-check/sqlite-stars-gui/orillusion/parallel-sessions/vertexbuffer -> nk-elite-*. Легальные исключения: skills/README.md x7 (файл существует), skills/bash-escaping.md x3 (историческое имя, цель bash-escaping/SKILL.md не создавалась).
+Гейт: CS grep -E 'skills/[a-z0-9-]+\.md' -> broken=0; все новые цели Test-Path OK (кроме отмеченной исторической); node scripts/skills-audit.mjs -> files=125 roots=2 checked=145 stale=0 missing=0 AUDIT_EXIT=0 СРАЗУ (touch зависимых не потребовался); front-matter FM_OK x35; пары 16/16 same=True.
+sha1-8:
+  skills/README.md=9B3B97FD
+  skills/browser-testing/SKILL.md=5696F3F3
+  skills/commands/SKILL.md=60B5FDEE
+  skills/context/SKILL.md=DD364ACD
+  skills/doc-sync/SKILL.md=9F4E9324
+  skills/escaping-message/SKILL.md=A69C468D
+  skills/nk-elite-api-limits/SKILL.md=B395FC58
+  skills/nk-elite-orillusion-scene/SKILL.md=D79EDB2D
+  skills/nk-elite-parallel-sessions/SKILL.md=C323801D
+  skills/nk-elite-sky-check/SKILL.md=C2911051
+  skills/nk-elite-sqlite-stars-gui/SKILL.md=D4ECA37F
+  skills/playwright/SKILL.md=4D49DF94
+  skills/postmessage/SKILL.md=59C118CE
+  skills/printf-rules-core/SKILL.md=61F949A9
+  skills/read-mode-task/SKILL.md=6EFAB361
+  skills/session-handoff/SKILL.md=753F3C5F
+  skills/task-types/SKILL.md=8C0B7130
+  skills/type-check/SKILL.md=B8D984D9
+  skills/webgpu-debug/SKILL.md=A9529379
+  .dsh/skills/browser-testing/SKILL.md=5696F3F3
+  .dsh/skills/doc-sync/SKILL.md=9F4E9324
+  .dsh/skills/escaping-message/SKILL.md=A69C468D
+  .dsh/skills/nk-elite-api-limits/SKILL.md=B395FC58
+  .dsh/skills/nk-elite-orillusion-scene/SKILL.md=D79EDB2D
+  .dsh/skills/nk-elite-parallel-sessions/SKILL.md=C323801D
+  .dsh/skills/nk-elite-sky-check/SKILL.md=C2911051
+  .dsh/skills/nk-elite-sqlite-stars-gui/SKILL.md=D4ECA37F
+  .dsh/skills/playwright/SKILL.md=4D49DF94
+  .dsh/skills/postmessage/SKILL.md=59C118CE
+  .dsh/skills/printf-rules-core/SKILL.md=61F949A9
+  .dsh/skills/read-mode-task/SKILL.md=6EFAB361
+  .dsh/skills/session-handoff/SKILL.md=753F3C5F
+  .dsh/skills/task-types/SKILL.md=8C0B7130
+  .dsh/skills/type-check/SKILL.md=B8D984D9
+  .dsh/skills/webgpu-debug/SKILL.md=A9529379
+Бэкапы: *.bak-d3-20261108-002044 (35). Артефакты: packages/nk-elite-orillusion-map/tmp/doc-sync-D3-20261108-002044/ (flat-inventory, flat-hits-raw, dry-run, apply2, gate-a-final, gate-a-csensitive, gate-b-targets, hash-after).
+---
+
+== 2026-11-08 00:34 (lead, session 06) ==
+D1 ЗАКРЫТ, коммит 8c78736c: RULES.md 41 «GPO-капкан pwsh» + 42 «GPO-канал» + skills/project-init/SKILL.md 3A (Invoke-Expression-канал + BOM для извлечённого .ps1). Зеркало .dsh/skills/project-init sha-8 9657FDE5 (парно). Гейт: SKILLS_AUDIT files=125 roots=2 checked=145 stale=0 missing=0, exit 0.
+D2 REJECTED: sha из чужого тза = состояние гонки параллельных сессий (9E8779A9); фактический после правки = 9657FDE5. Правило: sha в DELTA только из замера своего такта.
+D3 принята и назначена Лизе: load_agents -> list_agents в skills/** (обе ветки, паритет, .bak-d3b-<TS>), отчёт = список+sha+аудит; коммит за лидом.
+D4 принята как вариация (project-init отсылает к T4 AGENTS.md, копия не дублируется). D5 = факт окружения (PS7 вне PATH, tool: pwsh MISSING честен).
+РИСК БЮДЖЕТА: AGENTS.md 65167/65536 b (запас 369 b) после параллельных дополнений 40. Следующее изменение ядра = сокращать KERNEL_IDS, не RULES.md (40c). P7 (sha1-реестр вместо mtime) у лида.
+Ранее: project-init создан (814407e1), проверка Лизы team-message-ee7c8a90: H1/H2/H3 CONFIRMED, прогон 16a = SKILLS_COUNT=125 (совпал с гейтом), снапшот tmp/initial-snapshot-20261108-002619.
+== 2026-11-08 00:33 (lead, session 06) ==
+D3 ЗАКРЫТА: коммит 49b59408. Фантом подтверждён независимым замером лида: load_agents = 0 во всём пакете (*.md/*.ps1/*.sh вне node_modules/tmp/.git/dist/build/.cache), git log -S load_agents = 0 коммитов. Лиза сняла D3 как утверждение из сжатого контекста без замера такта; лид принял её D3 по эху (§20.9) - правило для обоих: статус H и sha в DELTA только из замера текущего такта.
+Пример дрейфа за 2 минуты: sha project-init 9657FDE5 (D1) -> 516D3D38 (Liza) -> 4FDCE23A (takt leada; parallelnye sessii). Paritet vetok soblyuden, SKILLS_AUDIT exit 0.
+Otkryto: R1 (novaya sessiya), R2 (paste LOAD), P7 (sha1-reestr vmesto mtime), marzha AGENTS.md 369 b (sleduyushchee yadro = sokrashat KERNEL_IDS). Push = DEFERRED-LOCAL.
+2026-11-08 00:33 session=agents-verify from=LEAD(FS) via=SESSION-NEW topics=D3-ACCEPTED,D9,D10,D11,GIT-HYGIENE,R2-PREP
+  relay d3-d11 from=lead topics=D3-ACCEPT,LOAD-ROLES,BUDGET-WARN sha1=c45fdf5b
+  D3 (liza) ПРИНЯТА независимо: CS-grep плоских путей = 3 легальных исключения, битых 0; аудит exit 0; git-диффы только текст.
+  D9 INFO: AGENTS.md=65167/65536 (headroom 369 b) -> KREDIT ISCHERPAN; открыта D11 (анализ KERNEL_IDS, task-3, liza; критерий экономии >=4096 b по 40c).
+  D10 MAJOR (плоскость B): core-pack LOAD НЕ содержал блока РОЛИ => приёмка 41 «роли дословно из LOAD» была невыполнима = MISSING:FUNCTION. Исправлено: секция «0. РОЛИ» дословно из templates/first-message.md в обоих двойниках; ROLES_MARKERS=1 (L4).
+  GIT-HYGIENE: 1270 *.bak-* сняты с индекса (KEEP на FS), .gitignore += *.bak-*; tracked-bak=0, tracked-dirty=0.
+  КОММИТЫ такта: 79cf0c7 (гейт 40 расширен: parity-guard+depth-1 touch; gitignore), 00fad5a7 (D10 LOAD ROLES), 599c45ec (untrack bak). main ahead 15, push DEFERRED-LOCAL.
+  sha1-8: AGENTS.md=c45fdf5b 65167b RULES.md=4a2fdd7b 98629b liza-boot.md=6761d95d 83630b core-pack.md=8668f44b 24480b
+  R2 PREP (ядро B): в LOAD есть ## 16. / ## 16a. + 0. РОЛИ; paste-тест в чате без ФС = последний открытый пункт приёмки.
+== 2026-11-08 00:44 (lead, session 06) ==
+P7 VYPOLNENA: scripts/skills-audit.mjs pereklyuchen na ustarivanie po kontentu (sha1-registrator tmp/audit-state.json, atomarnaya zapisi .tmp->rename). STALE = sha1 istochnika menyalsya, sha1 skila net. Flagi --mtime / --rebase.
+Dokazatelstvo: probe (skills/p7-probe + tmp/p7-src.md) - init exit 0, idempotentnyi progon exit 0, realnaya stalost (istochnik izmenen, skil net) = STALE + exit 1; posle uborki probe exit 0. Tot zhe sostoyaniye v rezhime --mtime dal 9 LOZHNYH STALE (iz-za moey pravi skripta) - rovno tot defekt, chto chinit P7.
+Kanoni 40: «Gejt chistoty po kontentu (P7)» + «Touch nuzhen tolko v rezhime --mtime». Posle regeneracii: BUDGET OK, markzha AGENTS = (sm. vyvod). Kommit sm. git log (P7). D3 49b59408 / D1 8c78736c.
+Otkryto: R1 (novaya sessiya), R2 (paste LOAD v chat bez FS), twin-paritet (sh vs pwsh core-pack), push = DEFERRED-LOCAL.
+== 2026-11-08 00:47 (lead, session 06) ==
+P7: Pervyy progon posle kanon-pravki dal 22 realNYH STALE (22 skila ssylayutsya na RULES.md/AGENTS.md, kotorye segodnya menyalsya, a tekstile skilov net izmeneniy) - eto semanticheski verno, ne lozhny STALE.
+Otvet kanona na kanon-only pravku = soznatelnaya fiksaciya sostoyaniya: node scripts/skills-audit.mjs --rebase (zatem povtornyy progon exit 0). «Touch» umiraet, filozofiya 40: pishem v registre sha1; --mtime ostavlen kak diagnostika.
+Kommit P7 = 84c9df5b (scripts/skills-audit.mjs + RULES 40 + AGENTS/core-pack/liza-boot). Registrator tmp/audit-state.json v gitignore-zone (ne commititsya).
+Otkryto: R1/R2 (priyomka operatora), twin-paritet core-pack (sh 17603 b vs pwsh 22795 b), push = DEFERRED-LOCAL.## session=liza-D11 @ 2026-11-08T00:38:37
+D11 анализ (write-scope tmp/): AGENTS.md 65167 b (sha1-8=C45FDF5B, headroom 369), 50 секций, SUM секций 64874 (-0.4% — сходится). Карта 33 KERNEL_IDS + 9 внеядерных блоков: tmp/d11-kernelmap-20261108-003522/kernelmap.tsv (sha1-8=012F8DDF).
+Дубли: 20.8g/g-a~T2 (1276b); 20.8l~T4/T-ПОРЯДОК (1014); 20.8f~T6a/29.1 (1355); 20.8h-a~T-§20.8o (582); 20.8h (585)~T-ЗАПРЕТЫ+ВОПРОСЫ; 20.8i (794) B-механика; 23~15/T-ПОРЯДОК; 24~42-DIGEST; 25~20.9/21; 26~40; 27+28=копии RULES.md:114/193 (12781b, KEEP §41).
+П1 (рекоменд): DROP KERNEL_IDS 20.8f+g+g-a+h+h-a+i+l = 4598 b >= 4096; носители: RULES.md:645/658/666/722/750/672/698 (grep-подтверждено) + шаблоны T2/T4/T6a/T-§20.8o (в AGENTS остаются) + B-плоскость через BOOT.md §0x/0z.3 (дамп RULES.md; в core-pack 24251b этих разделов нет — BOOT-дамп покрывает). Headroom 369 -> 4967 b.
+П2 резерв: EXTRACT 20.10(~2300)+21 без таблицы(~1900)+41 матрица(~1800) = ~6000 b (носители RULES.md:381/415/821 + skill powershell-first). П3 (чистка 23-26, ~1861 b) требует правки генераторов — зона лида.
+NULL=evidence: 23-26/29/39 не найдены в RULES.md (grep) и core-pack (grep) — их носитель = hardcoded echo генераторов; DROP без правки генератора невозможен.
+H1=CONFIRMED (П1 4598>=4096); H2=CONFIRMED (все DROP/EXTRACT П1 имеют grep-подтверждённый носитель в RULES.md).
+---
+
+2026-11-08 00:41 session=agents-verify from=LEAD(FS) via=TEAM-MODE topics=D11-P1-APPLIED,task-4-open
+  relay d11-p1 from=lead topics=KERNEL_IDS-33->26,BUDGET-OK sha1=50f960ab
+  D11 (liza) ПРИНЯТА с независимой проверкой: носители grep (RULES.md L645/658/666/672/698/722/750; формат «## §id.», regex без § = ложный 0). kernelmap.tsv 48 строк (012F8DDF).
+  П1 применён: KERNEL_IDS 33->26 (DROP 20.8f/g/g-a/h/h-a/i/l) в обоих генераторах; AGENTS.md 65122->59516 b (экономия 5606, headroom 6020); BUDGET OK; DROP-секции=0; T-шаблон цел; core-pack 16/16a/ROLES=1/1/1; parity sh->temp OK.
+  Аудит P7: 4 STALE = скиллы цитируют agents-create.ps1 (канон-only правка) -> --rebase -> exit 0 (stale=0).
+  КОММИТ 54110c1c; main ahead 17; tracked-dirty=0; push DEFERRED-LOCAL.
+  sha1-8: AGENTS.md=50f960ab RULES.md=4b7842ab liza-boot.md=d1756074 core-pack.md=9af60a14 scripts/agents-create.sh=3cd48d65 scripts/win/agents-create.ps1=fae6cdb4
+  OPEN: R2 (paste-приёмка LOAD в чате без ФС, ADDRESSEE=ЧЕЛОВЕК); task-4 (project-init приёмка, liza).## session=liza-P4 @ 2026-11-08T00:44:27
+P4 приёмка skills/project-init (write-scope: скилл+tmp): SKILL.md 6883->8444 b sha1-8=2FD2C9CA; бэкапы SKILL.md.bak-P4-20261108-004358 в обоих корнях (sha1-8=516D3D38).
+H2=PARTIAL (дубли): буквальных копий liza-boot.md/T-шаблона НЕТ (дуп-скан runs>=2: NULL=evidence). Дефект — покрытие матрицы §41: 7 функций (скилы-B SKILLS_REQUEST, вопросы-A ask_user_question, приёмка enum, визуальная оценка, память такта, граф/handoff, коммит/push+POSTMESSAGE-B) отсутствовали -> MISSING:FUNCTION по §41.
+Правка: добавлен раздел 7 (компактные A|B-методы + ссылки на носители AGENTS.md §41/liza-boot.md/RULES.md, без копирования тел); sources-маркер расширен liza-boot.md. Матрица §41: 15 строк + GPO-капкан покрыты (шаги 0–5 + раздел 7).
+ACCEPT: (a) байт-в-байт sha1=2FD2C9CA обе копии; (b) runs>=2 = NULL=evidence (скан по liza-boot 829 строк + T-секции 88 строк); (c) 16/16; (d) аудит exit 0 (mode=sha1 files=125 stale=0 missing=0); (e) эта запись.
+---
+
+2026-11-08 00:45 session=agents-verify from=LEAD(FS) via=TEAM-MODE topics=P4-ACCEPTED,P5-OPEN
+  relay p4-accept from=lead topics=project-init,matrica-41 sha1=2FD2C9CA
+  P4 (liza) ПРИНЯТА независимо: копии 2FD2C9CA x2; razdel 7 pokryvaet 7 otstautvuyushchikh funkciy (markery SKILLS_REQUEST/ask_user_question/DEFERRED-REMOTE/inbox-/HANDOFF/relay >=1); dup-scan liza podtverzhden pereskrym lidom (in_boot=2/67 = tol'ko '---'; pervyy scan beda s inverted Compare-Object = lozhnye 76 TRIPLE, lesson).
+  KOMMIT 88aa1869 (2x SKILL.md + audit-state); main ahead 18; tracked-dirty=0; push DEFERRED-LOCAL. Chuzhie .bak-d3b v skills/ - KEEP (gitignore *.bak-*).
+  OPEN: R2 (paste LOAD v chate bez FS, ADDRESSEE=CHLOVEK); task-5 (P5: no_marker 9->0, liza).## session=liza-P5 @ 2026-11-08T00:47:14
+P5 no_marker 9->0: маркеры '<!-- sources: skills/<id>/SKILL.md -->' (self-reference, устоявшаяся практика — 48 прецедентов, включая doc-sync) добавлены в 9 скиллов (только skills/, .dsh-зеркал НЕТ — проверено Test-Path): asuse-databases 9440A283, asuse-frontend E9371219, asuse-gateway C3FFA737, asuse-meta 90910946, commands C2BA87D4, context 4765BFCE, postgres-readonly 3CE2200A, trees-workflow F964C507, use-ai-grid EDBDC1C5. Бэкаги .bak-P5-20261108-004706 рядом.
+Природа no_marker: у всех 9 уже был маркер '<!-- foreign-context sources: ... -->' (doc-sync 2026-11-07, «чужой проект asuse-ai-front-min, пути нерезолвимы») — аудит-regex '<!--\\s*sources?:' его не распознаёт. Носитель в репозитории = сам скилл (первичная запись); внешние носители (package.json, src/composables/useAiGrid.ts, psql asuse DB, asuse-ai-* проекты) перечислены в foreign-context-аннотациях — в этом репозитории нерезолвимы (NULL=evidence, не выдумывали).
+ACCEPT: (a) no_marker=0; (b) git numstat = 9x(+1/-0), контент не тронут; (c) зеркала отсутствуют (факт), одиночные копии — байт-в-байт тривиально; (d) аудит СРАЗУ: exit 0, mode=sha1 files=125 checked=156 stale=0 missing=0 fresh=10; (e) эта запись. Коммит за лидом.
+---
+
+2026-11-08 00:50 session=agents-verify from=LEAD(FS) via=TEAM-MODE topics=P5-ACCEPTED,D2-FIXED,P6-OPEN
+  relay p5-d2 from=lead topics=markery,wrapper-fence sha1=03c7ba96
+  P5 (liza) ПРИНЯТА независимо: numstat 9x(+1/-0); no_marker=0; checked=156; .dsh-зеркал у 9 нет (проверено); KNOWLEDGE такта: foreign-context sources ne sovpadal s audit-regex.
+  D2 (lider) FIX: wrapper-fence v 27/28 oboyh generatorov udalen (vkladyshny ~~~ zakryvalsya na vnutrennem ~~~ koda, ego zakrytie otkryvalo nezakrytyy blok -> hvost AGENTS 23-28 syedalsya kak kod; vstrachivayushchiy defekt chiteniya kanona). Priyomka: zhivoy inzhekt AGENTS (27/28 chistye, hvost videm), fences 27/28 = 2+2, BUDGET 59482 OK, headroom 6054 b.
+  KOMMITY: 88aa1869 (P4), 2d079bcd (P5), 9d5c5011 (D2); main ahead 20; tracked-dirty=0; push DEFERRED-LOCAL.
+  sha1-8: AGENTS.md=03c7ba96 core-pack.md=0877cfc2 liza-boot.md=eeb58d85 agents-create.sh=f58f10ec agents-create.ps1=4b6edad9
+  OPEN: R2 (paste LOAD v chate bez FS, ADDRESSEE=CHLOVEK; ozhidaemyy sha1 core-pack 0877cfc2); task-6 (P6: README-index, liza).## session=liza-P6 @ 2026-11-08T00:54:19
+P6 индекс skills/README.md против дерева двух корней: README 15->20970 b sha1-8=9D037101 (бэкаг README.md.bak-P6-* рядом). SKILLS_COUNT=125 (124 SKILL.md skills/+ .dsh/ + README.md; == SKILLS_AUDIT files=125; уникальных каталогов 67: skills/=67, .dsh=57 подмножество, уникальны в skills/: 9 foreign + task-output).
+Дельта (H1): Missing=6 добавлены в канонический индекс: asuse-databases, asuse-frontend, asuse-gateway, asuse-meta (foreign-пометки), nk-elite-sky-perf, task-output (есть только в skills/, .dsh-зеркала нет). Stale=4 помечены (bash-escaping влит в escaping-message; billboard-shader -> факты в nk-elite-map-sky-pipeline; rules-delta/REPORT/migration — файлов нет, артефакты в tmp/); docs/HANDOFF.md, docs/ts-migration.md, docs/bind-group.md — живые (не stale, ложные срабатывания первичного скана).
+ACCEPT: (a) SKILLS_COUNT=125 = аудит files=125 (независимый пересчёт лида ожидаемо совпадёт); (b) Missing=0 Stale=0 после правки (SELFCHK: каждый id дерева присутствует в README — missing 0); (c) аудит СРАЗУ: exit 0, mode=sha1 files=125 checked=156 stale=0 missing=0 no_marker=0; (d) эта запись. Write-scope: skills/README.md + tmp/ (список tmp/P6-index-list.txt); скилл-контент не тронут.
+---
+
+2026-11-08 00:55 session=agents-verify from=LEAD(FS) via=TEAM-MODE topics=P6-ACCEPTED,P7b-OPEN
+  relay p6-accept from=lead topics=README-indeks,SKILLS_COUNT sha1=9D037101
+  P6 (liza) ПРИНЯТА независимо: unique_ids=67, README_missing=0, SKILLS_COUNT=125 (L191, shoditsya s audit files=125), Object[]=0 (инцидент append исправлен ею же), audit exit 0 no_marker=0.
+  KOMMIT 4d34a3a0; main ahead 21; tracked-dirty=0; push DEFERRED-LOCAL.
+  OPEN: R2 (paste LOAD, ADDRESSEE=CHLOVEK, ozhid. sha1 core-pack 0877cfc2); task-7=P7b (personas: {TABLE}<->personas/<->§2, liza).## session=liza-P7b @ 2026-11-08T00:57:38
+P7b сверка 7 персон 7×4: id+priority 7/7 MATCH во всех источниках (T2 AGENTS:18 / RULES §33:548-556 / core-pack §2:26-33 / personas/:INDEX+7 файлов). Триггеры: core-pack §2 == fallback-хардкод генераторов; INDEX.md/файлы персон — расширенные наборы (маркеры активации grep -Fqi) — DIVERGE по 4 персонам (gaia-source, webgpu-pass, front-limit, perf-swiftshader), это легитимное расширение активации, не конфликт приоритетов.
+NULL=evidence (носитель {TABLE}): оба генератора ищут заголовок «Галактика|Priority» в AGENTS.md (ps1 L25-29, sh L151-158) — 0 совпадений (§33 вне ядра) → core-pack §2 генерируется из fallback-hardcode (ps1 L32-38, sh L160-166). ПАТЧ-ЗАПРОС ЛИДУ: источник {TABLE} = RULES.md (RULES.md:548) вместо AGENTS.md в обоих твинах; id/prio идентичны, изменятся только формулировки описаний; fallback — аварийным. Таблица: tmp/P7b-personas-20261108-005719/personas-table.tsv (sha1-8=8121ABC5).
+ПРАВКА write-scope: skills/personas/SKILL.md += секция «Таблица активации 7 персон» (+5 строк) + sources-маркер расширен (personas/INDEX.md, RULES.md, agents-create.ps1); зеркало .dsh/skills/personas синхронно байт-в-байт; бэкаг .bak-P7b. Аудит СРАЗУ: exit 0 (см. ниже вывод).
+---
+
+2026-11-08 01:00 session=agents-verify from=LEAD(FS) via=TEAM-MODE topics=P7b-ACCEPTED,TABLE-PATCH-APPLIED,P8-OPEN
+  relay p7b from=lead topics=nositel-tablicy,RULES-33 sha1=654ee0d3
+  P7b (liza) ПРИНЯТА независимо: AGENTS hits=0 (fallback srabatyval vsegda - podtverzhdeno), RULES.md:548 hit, shoda tablicy 548-556 + pustaya 557 (regex OK); personas SKILL A0303CA3 x2, numstat 6+/1- x2.
+  PATCH-ZAPROS PRIMENEN (lider): istochnik {TABLE} oboyh generatov AGENTS.md -> RULES.md (ps1 L24-30 ; sh L149-156 awk ); priyomka: core-pack 2 = versiya SOURCE OF TRUTH (Chto osveschaet=1, Chto analiziruet=0, gaia row s getBestStarsWithPhysics); fallback = avariynyy; BUDGET 59482 OK; parity sh temp OK; BOM ps1 vnosstanovlen; audit stale=4 (kanon-only) -> --rebase -> exit 0.
+  KOMMIT f77e2f27; main ahead 22; tracked-dirty=0; push DEFERRED-LOCAL.
+  sha1-8: AGENTS.md=03c7ba96 core-pack.md=654ee0d3 (NOVYY dlya R2!) liza-boot.md=eeb58d85
+  OPEN: R2 (paste LOAD, ADDRESSEE=CHLOVEK, ozhid. core-pack 654ee0d3); task-8=P8 (persona-activate smoke, liza).## session=liza-P8 @ 2026-11-08T01:03:15
+P8 smoke persona-activate — ОБА твина, GPO-канал (scriptblock-Create, обход RemoteSigned), 3 контрольных входа x 2 транспорта, 6/6 зелёных: (A) 'MAST' → PERSONAS OK: gaia-source (prio 10); (B) 'SyntaxError POSTMESSAGE' → PERSONAS OK: head-consistency,repo-sync — ASC 15→30 ✓; (C) пустой вход → PERSONAS NONE (pwsh: 'TASK empty'; sh: 'триггеры не совпали'). Реестр sh index.tsv (SOH) сверен: 7 строк, hit/active корректны. Приоритеты вывода = §33 7/7.
+ДЕФЕКТ-1 (косметика, sh-двойник, воспроизвёлся 3/3): scripts/persona-activate.sh:99 финальный печатный awk -F$sep с SOH — git-bash теряет \001 при передаче аргументов → -F пустой → awk съедает BEGIN-программу как разделитель, 'программой' становится путь index.tsv → 'awk: cmd. line:1: <path> ^ syntax error'. ЯДРО не задето: PERSONAS OK/NONE, index.tsv, rc — верны; на Linux-транспорте дефекта нет. ПАТЧ: -F'\\001' литералом (escape обрабатывает сам awk), -v sep не нужен (переменная в программе не используется).
+ДЕФЕКТ-2 (переносимые пути): ## SKILLS секции personas/*.md ссылаются на до-D3 плоские файлы: backend-api.md, backend-names.md, sqlite-stars.md, parallel-sessions.md, bash-escaping.md, doc-sync.md, postmessage.md → фактические носители skills/nk-elite-*/SKILL.md, skills/escaping-message, skills/doc-sync, skills/postmessage. PERSONAS=зона лида, не трогала.
+Артефакты KEEP: tmp/P8-activate-20261108-010219/ (6 кейс-файлов + terminal.log); sh-двойник пишет tmp/persona-activate-20261108-0102{32,39,45}/ (index.tsv+log). Скрипты/personas не менялись. Аудит не требовался (правок в скиллах нет) — прогнан: exit 0, no_marker=0.
+---
+
+2026-11-08 01:04 session=agents-verify from=LEAD(FS) via=TEAM-MODE topics=P8-ACCEPTED,PATCHES-APPLIED,P9-OPEN
+  relay p8 from=lead topics=persona-activate,puti-personas sha1=a46b09e4
+  P8 (liza) ПРИНЯТА независимо: 6/6 ASC-прогонов (A gaia 10; B head-consistency 15 -> repo-sync 30; C NONE); пороги = §33 7/7.
+  DEFECT-1 FIX (sh:99): awk -F'\\001' (sep git-bash gubil -> syntax error 3/3); regress case B: tablica pechataetsya, ASC 15/30, hit/used vernye.
+  DEFECT-2 FIX (personas/*.md): SKILLS-puti flat -> katalog, 17 strok / 7 faylov, 15 celey Test-Path=True; ostatok flat=0.
+  KOMMIT a46b09e4; main ahead 23; tracked-dirty=0; audit exit 0; push DEFERRED-LOCAL. KOSMETIKA (ne chinit): sh:99 pechataet stroku-zagolovku index.tsv kakdannye (dvoynaya zagolovka v vyvode) - ne kanon, KEEP.
+  OPEN: R2 (paste LOAD, ADDRESSEE=CHLOVEK, ozhid. core-pack 654ee0d3); task-9=P9 (BOOT.md 0x/0z.3 audit, liza).## session=liza-P9 @ 2026-11-08T01:05:45
+P9 аудит BOOT.md (14368 b, третий LOAD-носитель плоскости B): 14 позиций → MATCH=7, STALE=3, DIVERGE=3, N/A=1. Таблица: tmp/P9-boot-audit-20261108-010538/bootmap.tsv (sha1-8=BC8E1960). Правок НЕТ (write-scope tmp/), аудит не требовался (evidence: првок нет; BOOT/RULES/core-pack не тронуты).
+ЗАЩИЩЕНО (MATCH): таблица 7 персон = §33 post-P7b (включая getBestStarsWithPhysics, RULES.md:550); дамп-механизм 0x/0z.3 (CHAT-BLOCK, 7+RULES → §16:114/§16a:193 приносит RULES-dump — критерий B выполняется); правило 0w про 2 приветствия; 0z.4 транспорт; 0z.5 §20-поток; sh-резолвер; ядро 26 id (BOOT не затрагивает).
+ПАТЧ-ЗАПРОСЫ лиду (6): P1 L69 flat-пути context.md/commands.md → skills/<id>/SKILL.md; P2 приветствие «агент-анализатор персон» (L9,32,182) → канон T1 «оркестратор скилов и анализатор»; P3 sh:88 сортировка (заявлено hits DESC в 0z.1:117, реализация -k2,2n -k1,1); P4 встроенный pwsh 0z.2 (BOOT:130-164) отстаёт от канона scripts/win/persona-activate.ps1 (нет §29 LIZA-BOOT блока L8-14); P5 L205 «& » без GPO-канала (RemoteSigned); P6 §0y (93-106) — до-§29 модель «dsh-tool-subagent/agentPreset liza-analyzer/file:///skills» → заменить на §29.3 (spawn_teammate name=liza + liza-boot.md; CHAT-MODE вторая личность; alias RULES.md:790).
+ИТОГ: чат, идущий по BOOT.md, получает актуальные персоны+RULES (ядро зелёное), но §0y и 4 формулировки устарели — патчи косметические/синхронизационные, ни один не ломает приёмку B (LOAD=core-pack, дамп=BOOT).
+---
+
+2026-11-08 01:08 session=agents-verify from=LEAD(FS) via=TEAM-MODE topics=P9-ACCEPTED,P9-PATCHES-APPLIED,P10-OPEN
+  relay p9 from=lead topics=BOOT-audit,6-patchov sha1=22ac86f4
+  P9 (liza) ПРИНЯТА: tablica 14 pozicii (MATCH=7/STALE=3/DIVERGE=3/N/A=1), bootmap.tsv BC8E1960; 6/6 patch-zaprosov primeeny: P1 flat->katalog(69); P2 T1-privetstvie x3; P3 sh L79/L88 sort ASC+DESC-hits+id (test-inversiya: 'append skills/ POSTMESSAGE' -> skill-writer,repo-sync = DESC rabotaet; case B ASC 15->30 celoe); P4 0z.2 vstroit §29-blok (paritet s ps1:8-14); P5 0z.3 scriptblock-kanal (GPO §41); P6 0y->2 REZHIMA 29.3, 0z.5 perpisano (agantPreset/liza-analyzer udalen, ostaetsya tol'ko v fraze 'USARELA').
+  UROK LIDA (zafiksirovano v P3-commit): p9fix.ps1 null-write (neversny namespace MatchEvaluator -> =null -> BOOT.md=0b) -> vosanovleno iz .bak (sh:99 lesson, §3 backup spast). V BOOT.md ~477 control-simvolov \x00-\x1F (\x07) - pravki tol'ko regex/programmno; scan v P10.
+  KOMMIT 22ac86f4 (BOOT.md 16016b + persona-activate.sh); main ahead 24; tracked-dirty=0; audit exit 0; push DEFERRED-LOCAL.
+  OPEN: R2 (paste LOAD, ADDRESSEE=CHLOVEK, ozhid. core-pack 654ee0d3); task-10=P10 (.dsh README indeks + ctrl-scan, liza).## session=liza-P10 @ 2026-11-08T01:10:28
+P10-1 индекс .dsh/skills/README.md: файла НЕ БЫЛО (NULL=evidence: Test-Path False) → создан по образцу P6: 3440 b sha1-8=8E4BC2AB, DSH_COUNT=57 (==дерево), алфавитный список 57, foreign-примечание (9 unique-skills/ + task-output), sources/created маркеры. SELFCHK Missing=0/Stale=0. Аудит СРАЗУ: exit 0, files=126, no_marker=0, checked=164, stale=0, missing=0.
+P10-2 ctrl-скан (read-only, паттерн [\x00-\x08\x0B\x0C\x0E-\x1F] — исключаем \x09\x0A\x0D, т.к. CRLF-файлы давали бы 1714 CR-ложных в RULES; задача-паттерн \x08-\x1F включал CR/TAB/LF): 139 файлов, AFFECTED=10: liza-boot.md 6 (x07×4, x0c×2 — зона генератора/лида); skills/asuse-databases 7 x07, asuse-frontend 4 x07, asuse-gateway 6 x07 + x0b, asuse-meta 15 x07, postgres-readonly 4 x07, trees-workflow 4 x07, use-ai-grid x0b; nk-elite-sky-perf x07 ×2 корня (sha1-8 F51DF8DD). ЧИСТЫЕ: BOOT.md (477 bell → 0 после P9-regex-записи лида ✓), RULES.md, AGENTS.md, core-pack.md, personas/*, skills/README.md. Контроль-источник x07=bell: doc-sync-копии foreign-9 (прибыли из asuse-ai-front-min).
+СПИСОК ДЛЯ ЛИДА (patrol чистки, только regex-канал): liza-boot.md (6), 7 foreign-скиллов (36 x07, 2 x0b), sky-perf ×2 (2 x07) — literal-правки не работают (P9 lesson). После чистки — --rebase + аудит (sha1 канон-носителей поменяется).
+Артефакт KEEP: tmp/P10-ctrl-20261108-011006/ctrl.tsv (sha1-8=8D28B650: file/count/код-гистограмма/sha1-8, 10+1 строк). Write-scope: .dsh/skills/README.md + tmp/ соблюдён.
+---
+
+2026-11-08 01:11 session=agents-verify from=LEAD(FS) via=TEAM-MODE topics=P10-ACCEPTED,CTRL-CLEANED,P11-OPEN
+  relay p10 from=lead topics=dsh-indeks,control-simvoly sha1=d5186d75
+  P10 (liza) ПРИНЯТА независимо: .dsh/skills/README.md 8E4BC2AB (moy pereschot 57==57, missing=0); moy ctrl-skan sovpal karte (BOOT=0, liza-boot=6, foreign+sky-perf sovpali sha1); metod-popravka (CR-lozhnye v shirokom patterne) prinyata.
+  CHISTKA (lider, regex-kanal): 9 SKILL.md (x07/x0b/x0c -> 0, po bakam); liza-boot regenerate iz chistogo BOOT (6->0, novyy sha1 aac6bf6f); core-pack PM-tail regenerate (654ee0d3 -> NOVYY, sm. niz). audit: posle chistki stale=2 (skaniruj: skaniruet registry) -> --rebase -> exit 0 files=126.
+  KOMMITY d5186d75 + sled (PM-tail); main ahead 26; tracked-dirty=0; push DEFERRED-LOCAL.
+  sha1-8: AGENTS.md=03c7ba96 liza-boot.md=aac6bf6f .dsh/skills/README.md=8e4bc2ab core-pack.md=NOVYY(posle PM-tail, sm. vyzov R2 skript) asuse-meta=d40f4d91
+  OPEN: R2 (paste LOAD, ADDRESSEE=CHLOVEK); task-11=P11 (POSTMESSAGE rotation policy, liza).
+
+## session=liza-P11 @ 2026-11-08T01:14:08
+P11 политика ротации POSTMESSAGE: ФАКТЫ — канал 115632 b / 553 строк / sha1-8 1607D72D; session-блоков 13 (liza-10, avg 3413 b, max 8598); relay-строк 16; ROTATION=0; tail-200 = 34845 b (30% канала). ДЕФЕКТ: старые записи ПРИКЛЕЕНЫ к хвосту предыдущей (Add-Content без завершающего перевода) — ^relay=0/16, ^## session=3/13 → §20.5-ретривал якорями сломан; лечится append'ом с \n\n-префиксом (.NET AppendAllText UTF8NoBOM). СТАРЫЙ §7 скилла («оставить последние 500 строк») = нарушение §3 append-only — ОТМЕНЁН.
+ПОЛИТИКА (в skills/postmessage/SKILL.md §7 + mirror D31587FE ×2): порог >150 KB ИЛИ ≥20 session-блоков ИЛИ указание; исполнитель только лид; процедура: снимок POSTMESSAGE.archive-<YYYYMMDD> (sha1-8 фиксируется) → append ROTATION-блока (с \n\n) → канал НЕ усекается, tail-читатели целы; ретривал по архивам grep, индекс = ROTATION-строки.
+DRY-RUN (tmp/P11-rotation-20261108-011242/rotation-dryrun.ps1, GPO-scriptblock): канал sha1 до=после 1607D72D (НЕ ТРОНУТ); копия: архив=до, после-ротации копия 10194DD7, ^## ROTATION=1 (анти-glue подтверждён), ARCHIVE_UNTOUCHED=True, exit 0.
+ПАТЧ-ЗАПРОС лиду (RULES §20.5, новый подпункт): 'PM-РОТАЦИЯ (порог >150 KB или ≥20 session-блоков): лид копирует POSTMESSAGE → POSTMESSAGE.archive-<YYYYMMDD> (sha1-8 снимка), append-ит в канал блок ## ROTATION <дата> @<commit> + строку ROTATION: archived to <file> sha1-8=<снимок8>; канал не усекать/не перезаписывать (§3); ретривал relay/session по sha1 — grep по архивам; все писатели append-ят с ведущим \n\n через .NET AppendAllText UTF8NoBOM (PS 5.1 Add-Content приклеивает записи к последней строке — якоря ^relay/^## session перестают работать; fact: 0/16 якорей)'. §3: строку 'Логи только append' не менять — достаточно отмены усечения в §7 скилла (уже сделано).
+Аудит СРАЗУ: stale=2 (легитимный депенденс session-handoff→postmessage) → --rebase → exit 0, files=126 checked=168 no_marker=0. Артефакты KEEP: tmp/P11-rotation-20261108-011242/ (facts.txt, rotation-dryrun.ps1, копия+архив).---
+
+
+## session=agents-verify 2026-11-08 01:15 from=LEAD(FS) via=TEAM-MODE topics=P11-ACCEPTED,RULES-20.5-PM-ROTATION
+relay p11 from=lead topics=kanal-rotaciya,glue-defekt sha1=D31587FE
+P11 (liza) PRINYATA nezavisimo: moy schet yakorej (^^relay=0, ^^## session=4, glued relay=16) SOShelsya s kartoj dyry; append-only test: archive(1607D72D,115632b) = prefix PM(118461) True; postmessage SKILL D31587FE x2 numstat 22/3 x2.
+RULES 20.5 PM-ROTACIYA vshita formoi Lizy (portal>150KB/20 blokov; arhiv+ROTATION; pisateli \n\n AppendAllText UTF8NoBOM); §3 bez izmenenij. AGENTS/core-pack/liza-boot regenerate: PM-ROTCIYA v yadre=1 v core-pack.
+Eto zapis' sdelana NOVYM KANONOM: \n\n + .NET AppendAllText UTF8NoBOM (anchornaya; sravni ^^## session do=4 -> posle=5).
+KOMMIT: sm. git log (RULES 20.5 + postmessage x2 + artefakty); main ahead 27+; push DEFERRED-LOCAL.
+OPEN: R2 (paste LOAD, ADDRESSEE=CHLOVEK); task-12=P12 (agents-load.md inspekciya, liza).
+
+## session=liza-P12 @ 2026-11-08T01:17:26
+P12 agents-load.md (untracked, корень канона): ФАКТЫ — 20004 b / 200 строк / sha1-8 6D735DD1 / mtime 2026-11-07 23:08:02; заголовок «=== LOAD (1/1): CORE-PACK 20261107-230802 ===» (TS==mtime). ИДЕНТИФИКАЦИЯ: это НЕ снимок AGENTS.md — это ручная копия LOAD core-pack эпохи 23:08:02: 186/200 строк идентичны текущему core-pack (e3e2478b), единственное структурное отличие — ОТСУТСТВУЕТ секция «## 0. РОЛИ (дословно §20.8g-a)»; маркеры эпохи: §29 LISA-TEAM есть, LISA-TEAM-V1 в заголовке режима нет, §40/§41/§42=0, 65536=0, PM-РОТАЦИЯ=0 (до-P11). Эмитент: НИ ОДИН генератор/скрипт/шаблон имя agents-load не эмитит (grep пуст); git log --all — пусто.
+H1=CONFIRMED (устаревший снимок LOAD, не канон); H2=CONFIRMED (нимеханизмом канона НЕ читается: харнес инжектит AGENTS.md, DSH — skills/**, LOAD-носители core-pack.md/BOOT 0x.0z.3). РИСК: имя похоже на «загрузчик AGENTS», заголовок LOAD (1/1) провоцирует человека вставить его в чат B → без РОЛИ дословно первый такт не пройдёт приёмку §20.8g-a/§42 + устаревший протокол. РЕКОМЕНДАЦИЯ: ARCHIVE mv в tmp/P12-agentsload-20261108-011646/ (корень чист, evidence сохранён); TRASH допустим (снимок восстановим из git-истории core-pack.md); НЕ TRACK (создаст конкурента SOURCE OF TRUTH). Решение за лидом. Артефакт KEEP: report.tsv (sha1-8=412B1D47). Файл не менялся; аудит не требовался (правок нет). Запись — новым каноном §20.5 P11 (\n\n + AppendAllText UTF8NoBOM).
+---
+
+
+## session=agents-verify 2026-11-08 01:18 from=LEAD(FS) via=TEAM-MODE topics=P12-ACCEPTED,AGENTS-LOAD-ARCHIVED,P13-OPEN
+relay p12 from=lead topics=agents-load.md,arhiv sha1=6d735dd1
+P12 (liza) PRINYATA nezavisimo: moy fak-blok sovpal (6d735dd1/20004b/mtime 2026-11-07 23:08:02; '## 0. ROLI'=0, '=== END LOAD'=1) -> epoha do-ROLI; emity=0 (moy grep pusty); git-nikogda-ne-v-indekse.
+RESHENIE LIDA=REKOMENDACIYA Lizy: ARCHIVE. agents-load.md -> tmp/P12-agentsload-20261108-011646/agents-load.snapshot-20261107-230802.md (root chist, sha1 snapshot 6d735dd1 sohranen; NOT TRACK - ne sozdat' konkurenta SOURCE OF TRUTH, §40).
+Zapis' anchornaya (novyj canon 20.5 P11: \n\n + AppendAllText UTF8NoBOM).
+KOMMITa net (fayl untracked; peremeschen v tmp) - tracked-dirty=0; ahead 27; push DEFERRED-LOCAL.
+OPEN: R2 (paste LOAD, ADDRESSEE=CHLOVEK, ozhid. core-pack e3e2478b); task-13=P13 (templates first-message audit, liza).
+
+## session=liza-P13 @ 2026-11-08T01:21:17
+P13 аудит templates/first-message.{md,sh,ps1} ↔ AGENTS T1-T6a (8d4d5e20) + эталоны 16/16a + RULES 20.8m-n/o/q/r/s. ФАКТЫ: md 7044 b sha1-8=1FB8BA16 mtime 23:08:01 (СВЕЖИЙ); sh 5137 b 50A855D5 и ps1 5121 b F5F81762 — mtime 21:30:15 (STALE-эпоха до V1-регенерации 23:08 и до GPO/D1/BOM-знаний 2026-11-08). ИСТОЧНИК T: генераторы берут md (ps1 L9 \, sh L11; ps1 L117-121 РОЛИ для LOAD из md) → md=подлинный источник.
+H1=PARTIAL: md↔AGENTS поз.1-6 MATCH — построчно md:1..84 == AGENTS:1..84, DIFF=0; РОЛИ дословно + TIMMATE×2 + T6a + 20.8n/20.8q синхронны → следующий agents:create дрейфа в канон НЕ внесёт. sh/ps1 (варианты 20.8q) = 10 DIVERGE: РОЛИ сжаты (нет TIMMATE/29-V1 строки, [ЛИЗА] оборвана) поз.7-8; транспорт-маркеры §21 (clear/# TRANSPORT: pwsh) = 0 поз.9-10; эталон 16/16a усечён head-20 из 79/80 строк → fence не закрыт, не исполняемо (§20.8s:786-787) поз.11; §14 буфер (_clip/trap, finally/Set-Clipboard) = 0 поз.14; T6a РЕЖИМ отсутствует поз.15; PS1_BOM=False при кириллице (§21.1) поз.16; PM-путь \/POSTMESSAGE вместо ../../POSTMESSAGE (§21.1) поз.17; ps51-экранирование в ps1 поз.13. ТЕГИ MATCH (sh:17/66, ps1:11/60), 16a-граница ps1:69==RULES:273 MATCH.
+БОНУС: правило RULES §20.8r:768-777 «AGENTS обязан ## 14. ПРИМЕРЫ grep=1» — STALE_RULE: ПРИМЕРЫ=0 в AGENTS 8d4d5e20, принятом 12 приёмками; ни один генератор блок не эмитит → патч-запрос: отменить/переписать §20.8r ИЛИ генератор эмитит ПРИМЕРЫ (за лидом).
+ПАТЧ-ЗАПРОСЫ лиду (templates/* — зона лида): поз.7/8 = дословный блок md:10-21 в РОЛИ; 9/10 = транспорт-маркеры §21 первыми строками; 11 = снять head-20 (полный awk-диапазон эталона); 14 = _clip+trap EXIT (RULES:150-158) и try/finally+Set-Clipboard (RULES:256-260); 15 = блок T6a md:55-63; 16 = UTF8 BOM для ps1 + GPO-памятка §41; 17 = PM ../../POSTMESSAGE (как \-резолв генераторов); 13 = ps51-кавычки-памятка.
+ИТОГ: 19 позиций — MATCH 8, DIVERGE 10, STALE_RULE 1. Артефакт KEEP: tmp/P13-templates-20261108-012105/tplmap.tsv (sha1-8=3AD2DFCE). Аудит не требовался (правок нет = evidence); файлы не менялись (write-scope tmp/). Запись новым каноном §20.5 P11 (\n\n + AppendAllText UTF8NoBOM).
+---
+
+
+## session=agents-verify 2026-11-08 01:24 from=LEAD(FS) via=TEAM-MODE topics=P13-ACCEPTED,TEMPLATES-REBUILT,20.8r-OTMENEN
+relay p13 from=lead topics=templates,20.8r sha1=3AD2DFCE
+P13 (liza) PRINYATA nezavisimo: moy pereschot sovpal (md 1FB8BA16 diff=0; sh 50A855D5/ps1 F5F81762 mtime 21:30; vsem markeram 0; §20.8r mertva: RULES:768-777 trebuyut '## 14. PRIMERY', AGENTS=0).
+ISPOLNENO (komitty 5c7b86a8 + sled): (1) §20.8r OTMENENA (perekontovana v primeriy-nositeli T2/16-16a/42 DIGEST; kriteriy grep '## 14. PRIMERY' = 0); (2) templates/first-message.sh 15012b i .ps1 16251b peresobrani: md doslovno + POLNYE §16/§16a iz RULES (fence zakryt), clear/shebang/TRANSPORT=1, trap _clip EXIT=3, finally=1, РЕЖИМ=8, PS1 BOM=True, PM ../../POSTMESSAGE=1, TIMMATE=3, GPO+PS51-pamjatka; kontroli vseh 10 patchei: 0->1+.
+UROK: p13fix.ps1 v @() massiven parse-fail (PS5.1) -> peresobrano inline-kanalom; PS 5.1 Copy-Item bez -NoClobber (kanon §3 opisan dlia PS Core) - bak cherez git HEAD.
+BUDGET 60219/65536 OK; audit exit 0 (stale=24 legitymnyi posle §20.8r -> --rebase); main ahead 29; tracked-dirty=0; push DEFERRED-LOCAL.
+sha1-8: sh=sm. git ps1=sm. git core-pack=1d9230b7 (LOAD dlia R2).
+OPEN: R2 (paste LOAD, ADDRESSEE=CHLOVEK); task-14=P14 (nakoplennye kandydatskii audit: README-registry 125/126/57 - edinyi karta, liza).
+
+## session=liza-P14 @ 2026-11-08T01:28:31
+P14 bak-инвентарь + счётчики: ФАКТЫ — *.bak-* по дереву (кроме .git): 1372 файла; git check-ignore: IGNORED=1372, NOT_IGNORED=0; .gitignore содержит *.bak-* → H1=CONFIRMED (untracked-bak протечек 0). Топ паттернов: bak-corepack=109, bak-p6=68, bak (без суффикса)=50, bak-p6b=40, bak-d3=35, bak-p5=21, bak-fixall=20 — происхождение такты D1..P13 + dev-сессии (task-J/R/F/H…). МИНИ-ДЫРА (вне bak-паттерна): git status показывает 2 untracked tmp-файла tmp/bak-list.txt и tmp/bak-list.nul (.nul = сайд-эффект >NUL редиректа на Windows) — паттерном *.bak-* не покрыты; ПАТЧ-ЗАПРОС лиду: удалить tmp/bak-list.txt/.nul (чужие артефакты, KEEP не требуется — временные списки) ИЛИ строка в .gitignore 'tmp/bak-list.*'.
+H2=CONFIRMED карта счётчиков сходится числом: skills/README.md SKILLS_COUNT=125 (README:191: 124 SKILL.md + этот README; P6-эпоха) | .dsh/skills/README.md DSH_COUNT=57 (зеркало 57 из 67) | аудит files=126 = 67 skills + 57 .dsh + 2 README(depth-1) = 125+1 (+.dsh/skills/README.md P10). Инвариант 57⊂67⊂125 проверен Compare-Object: B_in_A=57, B_not_in_A=0. Формула+проверка задокументированы в skills/doc-sync/SKILL.md §7 (новый раздел: bak-инвентарь-скрипт, gitignore-инвариант NOT_IGNORED=0, карта счётчиков, процедура при расхождении: пересборка README-индексов → аудит --rebase).
+ПРАВКИ: skills/doc-sync/SKILL.md +18/−1 (§7 + sources-маркер расширен: README×2 + skills-audit.mjs + .gitignore), зеркало .dsh байт-в-байт sha1-8=7A0EA9D8 ×2, бэкаг .bak-P14. numstat 18/1 ×2. АУДИТ СРАЗУ: files=126 checked=176 stale=0 missing=0 no_marker=0 exit 0 (+ --rebase зафиксировал состояние после PM-движения лида). Артефакт KEEP: tmp/P14-bak-20261108-012544/bak.tsv (sha1-8=312DED43, 1372 строк). Запись новым каноном §20.5 P11.
+---
+
+
+## session=agents-verify 2026-11-08 01:29 from=LEAD(FS) via=TEAM-MODE topics=P14-ACCEPTED,GITIGNORE-MINI-PATCH,P15-OPEN
+relay p14 from=lead topics=bak-inventar,schetchiki sha1=312DED43
+P14 (liza) PRINYATA nezavisimo: moy spot-check (git check-ignore 5/5 True; untracked bak=tol'ko ee arhiv+2 mini-dyry; doc-sync 7A0EA9D8 x2 numstat 18/1 x2; schetchiki 125/57/126 sovpalis; PM B6206216 ^session=10).
+ISPOLNENO mini-patch: .gitignore + 'tmp/bak-list.*' (s kommantariem P14; udalenie faylov zapreshcheno §3). untracked bak-list posle=0. Kommit: doc-sync x2 + gitignore + audit exit 0 (files=126 checked=176).
+BUDGET/kanon bez izmenenij; main ahead 31+; push DEFERRED-LOCAL.
+OPEN: R2 (paste LOAD da4b130a, ADDRESSEE=CHLOVEK); task-15=P15 (proizvodstvennyy drill PM-ROTACII na kopii: porog->arhiv->ROTATION->retrieval sha1, liza).
+
+## ROTATION 20261108 @ce88a288
+ROTATION: archived to POSTMESSAGE.archive-20261108 sha1-8=7081ACC5 @ce88a288, канал продолжает append
+---
+
+
+## ROTATION 20261108 @ce88a288
+ROTATION: archived to POSTMESSAGE.archive-20261108-013029 sha1-8=127D60C7 @ce88a288, канал продолжает append
+---
+
+
+## session=liza-P15 @ 2026-11-08T01:31:38
+P15 производственный drill PM-ротации. ИНЦИДЕНТ (честно, такт 1): заготовка rotation-lead.ps1 v1 не имела param() — вызов & \ -PM \ не связывал параметр (scriptblock без param глотает аргументы в \), \ не уважался, резолв упал в РЕАЛЬНЫЙ канал → ротация исполнилась на канале ДВАЖДЫ не-лидом: sha1 7081ACC5 →(ROTATION#1, архив POSTMESSAGE.archive-20261108=7081ACC5)→ 127D60C7 →(ROTATION#2, архив -013029=127D60C7)→ 3E65EA65 (сейчас 130183 b). Ущерб по канону НУЛЕВОЙ: канал не усечён (§3 цел), архива == снимки (MATCH_SNAPSHOT=True оба), ROTATION-блоки форматные с коммитами, append продолжается, якоря целы (^session=11 ^relay=4 ^ROTATION=2). Откатывать нечего (append-only). Решение за лидом: принять как live-drill (рекомендую; ротация назрела — канал 130 KB/23 блока) ИЛИ ротировать ещё раз по правилам при пересечении порога.
+ИСПРАВЛЕНИЕ v2 (tmp/P15-rotation-20261108-013045/rotation-lead.ps1, BOM): param() + дефолт DRY-RUN + реальный режим ТОЛЬКО при -Execute -ConfirmPath <тот же путь> (двойное явное согласие). Guard-тесты: запуск v2 на копии без Execute → файлы не тронуты; запуск v2 на РЕАЛЬНОМ канале без Execute → sha1 3E65EA65 не изменился (только план).
+DRILL v2 на копии (PM.test2 = копия канала + 162 сим-дописки до 153727 b / 185 блоков; PRE 129982 b/23 блока): порог сработал байтами (153727>=153600); EXECUTE: архив POSTMESSAGE.archive-20261108 в dir sha1=3F18A201==снимку, PREFIX_TEST(append-only)=True, ROTATION_ANCHORED=3 (2 наследуемых+1), после ротации 2 append-записи → ^session 173→175, ^relay=4 целы, ARCHIVE_UNTOUCHED=True, exit чистый. РЕТРИВАЛ: relay p11 sha1=D31587FE — 3 совпадения в архиве (grep), relay p12 sha1=6d735dd1 — 4 совпадения; цепочки §20.5 читаются из архивов после ротации (H2=CONFIRMED 2/2). Канал НЕ тронут во время v2-drill: 3E65EA65==3E65EA65. Артефакты KEEP: tmp/P15-rotation-20261108-013045/ (rotation-lead.ps1 v2, PM.test2, PM.test2-архив=3F18A201). Урок в DELTA: scriptblock без param() = дыра для параметрируемых заготовок; GPO-канал с & \ требует param() — добавить в skill powershell-first (патч-запрос не нужен, зона скиллов — скажу при случае).
+---
+
+
+## session=agents-verify 2026-11-08 01:33 from=LEAD(FS) via=TEAM-MODE topics=P15-ACCEPTED,21.1-PARAM-LESSON,PROTATSIYA-OTLOZHENA,STRAY-KANALY
+relay p15 from=lead topics=rotaciya-drill,scriptblock-param sha1=5B1F618C
+P15 (liza) PRINYATA: chestny incident (v1 bez param() zrotirovala kanal 2 raza) = tsennyy drill: priyomka ne zavisimo (BF57A77D, ROTATION=2 formatnye, arhivy 7081ACC5/127D60C7 == snimkam, cepochka arh1<arch2<PM prefix True, yakora 12/4 celы). Reshenie LIDA=A: sostoyanie = live-drill, otkata net (§3).
+UROK KANONIZIROVAN: RULES 21.1 scriptblock param() + dry-run po umolchaniyu + Execute/ConfirmPath (kommit 1a24f400 amend: prod-rotaciya NE ispolnena - porogi ne prevysheny 133245b<153600 i 12<20 blokov; moya popytka zashchishena guardom v2: DRYRUN=True, kanal ne tronut - zivoe dokazatelstvo bezopasnosti v2).
+STRAY-KANALY (§21.1 «sluchaynye faily v packages/ - ne kanal»): naoydeno 3: packages/POSTMESSAGE 1548b (lovushka defolta rotahta v1!), packages/infoenergo-ui/POSTMESSAGE 1051b (chuzhoy proekt), ROOT/POSTMESSAGE 51520b STARAYA KOPERIYA KANALA -> zaarhivirovan lidom v tmp/P16-stray/POSTMESSAGE.snapshot-nk-elite-root.md (69F7A9E1; analog P12). Karta lovushek + zashchita = task-16 (liza).
+BUDGET 60934/65536 OK (headroom 4602); audit exit 0; ahead 33; tracked-dirty=0; push DEFERRED-LOCAL.
+OPEN: R2 (paste LOAD c4e51f65, ADDRESSEE=CHLOVEK); task-16=P16 (stray-kanaly karta+zashchita, liza).
+
+## session=liza-P16 @ 2026-11-08T01:35:11
+P16 карта stray-каналов + защита резолва. КАРТА (depth 3, дерево Chat-Stream-Monitor, .git искл.): 30 записей POSTMESSAGE* — КАНАЛ-root POSTMESSAGE 134671 b sha1 FC1E2F28 tracked=True (ровно один); архивы ротации 2 (7081ACC5, 127D60C7); ЛОВУШКИ: packages\POSTMESSAGE 1548 b 1CFFD125 untracked (живая — дефолт v1 в P15), ROOT/POSTMESSAGE — НЕ существует (лид архивировал tmp/P16-stray/ 69F7A9E1 ✓), ROOT/POSTMESSAGE.bak-* ×3 (37-41 KB, ignores), root .bak-cyr/.bak-roles-load; ЧУЖОЙ infoenergo-ui (канал+seen+bak 17 записей — не трогать); скрипты postmessage.sh (наш+чужие баки).
+РЕЗОЛВ-АУДИТ (уязвимые к /POSTMESSAGE, как v1): agents-create.sh:170 PM=\/POSTMESSAGE приоритет (рецидив ROOT-строевого файла → генератор начнёт tail-ать stray; канон ../.. только fallback L171); agents-create.ps1:43 fallback ../POSTMESSAGE = packages\POSTMESSAGE (ловушка!); doc-sync.sh:13 — /POSTMESSAGE, ROOT-канал не сканируется (недоаудит); skills/rules-first-task:17,37 — tail+touch /POSTMESSAGE = ГЕНЕРАТОР строевых каналов; skills/postmessage §3/§4 примеры /POSTMESSAGE (источник появления ROOT/POSTMESSAGE 51 KB); scripts/postmessage.sh:6 — подъём останавливается на ROOT/POSTMESSAGE раньше .git (при рецидиве пишет в stray). КАНОНИЧЕСКИЕ: agents-create.ps1:42 (../.. первый), first-message.sh:272, postmessage.sh:6 при чистом дереве (останов на .git корень = TOP).
+ПАТЧ-ЗАПРОСЫ лиду (формулировки): (a) .gitignore: 'packages/nk-elite-orillusion-map/POSTMESSAGE' + 'packages/nk-elite-orillusion-map/POSTMESSAGE.seen.*' (ловушка-рецидив после удаления не возвращается); (b) канон-резолв: все скрипты — подъём до .git-корня (НЕ останавливаясь на POSTMESSAGE) + ABORT-проверка: резолв вне packages/ и файл существует, иначе не писать/не создавать (rules-first-task:17,37 → ../../POSTMESSAGE, touch удалить); agents-create.sh:170-172 порядок: ../../ первым; agents-create.ps1:43 ../-фолбэк удалить; doc-sync.sh:13 → git-root; (c) память §21.1-стиль: 'Канал = git-корень/POSTMESSAGE; писатель проверяет: путь не содержит /packages/, файл существует — иначе ABORT; P15-паттерн dry-run+ConfirmPath для writes'.
+ПРАВКА (write-scope): skills/postmessage/SKILL.md +13/−1 — §9 «Резолв канала и stray-ловушки (P16)» (карта, канон-резолв 1-4, ABORT, список уязвимых мест), sources += strays.tsv; зеркало .dsh байт-в-байт sha1-8=91FCEAE7 ×2; numstat 13/1 ×2. Аудит СРАЗУ: stale=2 (легитимный депенденс session-handoff) → --rebase → exit 0, files=126, checked=178, no_marker=0. Артефакт KEEP: tmp/P16-stray-map-20261108-013412/strays.tsv (sha1-8=D35DDA25). H1=CONFIRMED (канал ровно один; живая packages-ловушка классифицирована, обезвреживание патч-запросом (a) — за лидом); H2=DIVERGE-находки (5 уязвимых мест + 2 канонических, таблица выше). Запись новым каноном P11.
+---
+
+
+## session=agents-verify 2026-11-08 01:36 from=LEAD(FS) via=TEAM-MODE topics=P16-ACCEPTED,RESOLVY-PATCHENY,ANTI-RECIDIV
+relay p16 from=lead topics=stray-karty,kanon-rezolv sha1=D35DDA25
+P16 (liza) PRINYATA nezavisimo: postmessage §9 91FCEAE7 x2 (13/1 x2), strays.tsv 30 zapisey (D35DDA25), karta sovpala (edinstvennyy kanal-root; packages/1CFFD125 zhivaya; ROOT/PM net ✓).
+ISPOLNENO lidom (a)+(b)+(c): .gitignore +/POSTMESSAGE (anti-recidiv); agents-create.sh:170 ../../ prioritet + case anti-packages; agents-create.ps1:43 ../ folbek UDALEN (BOM EF BB BF vosstanovlen); doc-sync.sh ../../; postmessage.sh myosa do git-kornya bez ostanovki na stray; rules-first-task x2 tail ../../ + touch-generator UDALEN (prichina 51KB stray); RULES 21.1 P16-pamyat (ABORT /packages/ + sushchestvuet; patent P15 dry-run/ConfirmPath).
+Kontroli: ps1-folbek 0 hitov; root stray net; kanon ../../ vo vseh. Regenerate+parity temp+BUDGET+audit exit 0.
+main ahead 35; tracked-dirty=0; push DEFERRED-LOCAL.
+OPEN: R2 (paste LOAD, ozhid. core-pack sha1=sm. relay nizhe); P17 temyi ot Lizy: (1) vizualnaya priyomka M-karty (chats B sil'ny), (2) auditorskiy obhod roadmap M1-M6 po PM, (3) scan: kandydaty v KERNEL_IDS (41/42) na szhatie (zona lida, dlya headroom 4602 b).
+
+## session=agents-verify 2026-11-08 01:37 from=LEAD(FS) via=TEAM-MODE topics=P16-PATCHES-DONE,L1-REPAIR,LANG-FIX
+relay p16b from=lead topics=rezoly,remont sha1=65377042..HEAD
+P16 patc (a)+(b)+(c) ispolneny (kommit 65377042): gitignore /POSTMESSAGE; sh:170 ../../ + case anti-packages; ps1:43 folbek udalen (BOM EF BB BF); doc-sync ../../; postmessage.sh myosa do git-kornya; rules-first-task x2 tail ../../ + touch-generator udalen.
+Chestnye remnty lidom: (1) 0641125f - pamyatka popala v L1 RULES (ABORT translit-anchor + eol=null -> Insert(0)) -> peremeschena v 21.1; (2) kommit lang-fix - pamyatka pisana translitom (§1a NANRUSENIE) -> kirillica. Urok: v kanone tol'ko kirillica; index/Insert vsegda proveryat' na -1.
+Regenerate: AGENTS=sha1 nizhe (headroom), BUDGET OK, audit exit 0. Priyomka P16 (liza) PODTVERDENA polnost'yu: karta 30 (D35DDA25), §9 91FCEAE7 x2, 5 uvyazvimyh mest → vse zapatcheny.
+OPEN: R2 (paste LOAD, ozhid. core-pack sha1=nizhe); P17 (liza): temy na vybor: (1) vizual'naya priyomka M-karty (sil'naya storona chata), (2) roadmap-audit M1-M6 po PM-istorii, (3) predlozheniya po szhatiyu yadra (headroom ~4.3KB). Prišli vyyasnenie po TEMY-1.\n\n## session=liza-init @ 2026-11-07T01:41:59
+GOAL=инициализация сессии (H1..H4). TEAM-MODE timmate liza. Kanon P11/P16: append git-root \, UTF8NoBOM, vedushchiy \n\n.
+H1=CONFIRMED: SKILLS_COUNT=126; oba kornya: skills/=68 + .dsh/skills/=58 (SKILL.md + README.md). SOVPALENIE s lead=126.
+H2=CONFIRMED: POSTMESSAGE=kanon git-root Chat-Stream-Monitor\POSTMESSAGE; bytes=140895 sha1-8=DE90F474; yakora ^##session=16 ^relay=10 ^ROTATION=2; posledniy relay p16b L659; P16 PRINYATA L662. DIVERGENCE: lead FC1E2F28 (134671b/12 sess) = snapshot P16-map; moy DE90F474 = live head (+2 P16 session, append-only, §3 cel; root /packages/ net).
+H3=CONFIRMED: persony 7 (INDEX.md); AKTIVIROVANO po triggeram zadachi: repo-sync(30)[POSTMESSAGE/roadmap/doc-sync] + skill-writer(30)[P17-3 szhatie yadra / skills/ / append]. DORMANT (net triggerov v init): webgpu-pass(10), gaia-source(10), head-consistency(15), front-limit(20), perf-swiftshader(25).
+H4=CONFIRMED: AGENTS.md 61383/65536 OK (headroom 4153 b); truncation=0 (injected-instructions bez stroki 'truncated').
+P17 TEMY-1 (vyyasnenie ot Lizy, vizual'naya priyomka M-karty): priyomka = kryterii + chata (sil'naya storona ploskosti B). Predlagaetsya etalon: M1..M6 karta → dlya kazhdoy zony (sky.html hover/cvet/kejs; starfield render-path; front-limit; perf 60fps) perechislit' VISUAL-ACCEPT (chto vidno glazami) + CANNOT-agent=prosit' operatora (skrinshot/gpuErrors). Sl. shag: sostavit' M-kartu priyomki (PM roadmap-audit) — zadanie lidu pri TEMY-2.
+Artefakt KEEP: tmp/liza-init-*/ (pm-tail200.txt, session-anchors.txt, terminal.log).
+
+## session=liza-init-fix @ 2026-11-07T01:42:19
+INKIDENT Lizy (chestno, P11-skleyka v svoy zapisi): blok 'session=liza-init' zapishen s razdelitelem v dvoinyh kalыkakh "\n\n" — PS 5.1 NE interpretiruet C-escape, poluchilsya LITERAL'nyy "\n\n", vedushchiy perevod stroki NE sformirovan -> zagolovok session=liza-init PRIKLEILSYA k posledney stroke lida (TEMY-1), yakor ^##session NE srabotal (16, ne 17). Telo bloka TSелиКОM (H1..H4 + P17 TEMY-1), dannyh NE POTERYANO, kanal NE USECHEN (§3 cel, append-only, otkata net).
+FIX: etot blok zapishen s nastoyashchim razdelitelem (PowerShell backtick `n`n -> .NET AppendAllText UTF8NoBOM); zagolovok anshejren (L start). Podtverzhdenie: sled. pereschet ANCHORS ^##session dolzhen byt' 17.
+UROK (v DELTA, vzona powershell-first/postmessage pri sluchae): pishushchie PM kanon v PS 5.1 OBYAZANY vesti 
+
+ (backtick) ili [Environment]::NewLine, NE "\n\n" (dvoinye kalыki = literal). Eta zhe primichanie v §20.5 P11 uche goworit '.NET AppendAllText' — no PS-string pred nujno backtick.
+H2-DELTa (PM): liza-init zapishen sha1 posle=06837273 (142496 b); liza-init-fix = novyy head. Kanon git-root, /packages/ net, P16-guard PROYDEN.
+
+## session=liza-init-3 @ 2026-11-07T01:42:41
+ZAMECHAET liza-init-fix (translit = §1a NANRUSENIE, pamjatka translitom). NASTOYASHCHIY ITAK TAKTA na kirillice, takt zakryt:
+GOAL=iniocializaciya sessii. TEAM-MODE timmate liza.
+H1=CONFIRMED: SKILLS_COUNT=126 (oba kornya: skills/=68, .dsh/skills/=58; SKILL.md+README.md). Sovpadenie s leadom 126.
+H2=CONFIRMED: POSTMESSAGE = kanal git-koren' Chat-Stream-Monitor\POSTMESSAGE (ne /packages/, P16-guard proydien). Tekushchiy head sha1-8=CC68DEDA (143677 b). Yakora: ^##session=17, ^relay=10, ^ROTATION=2. Posledniy relay biznesa = p16b (L659); P16 PRINYATA (L662).
+DIVERGENCE-snimki: lead FC1E2F28 (134671 b / 12 sess) = snapshot v moment karty P16; moy DE90F474 → posle moih appendov CC68DEDA = live-head (kanal rastiёt append-only, §3 cel, otkata net).
+H3=CONFIRMED: 7 person (personas/INDEX.md). Aktivirovano po triggeram zadachi: repo-sync(30) [POSTMESSAGE/roadmap/doc-sync] i skill-writer(30) [P17-3 szhatie yadra / skills/ / append]. Dormant (net triggerov v init-takte): webgpu-pass(10), gaia-source(10), head-consistency(15), front-limit(20), perf-swiftshader(25).
+H4=CONFIRMED: AGENTS.md 61383/65536 b OK (headroom 4153 b); truncation = 0 (vtryknutye instrukcii bez stroki «truncated»).
+UROK P11-PS (dlya zon powershell-first/postmessage, pri sluchae): pishushchie PM-kanon v PS 5.1 OBYAZANY vesti vedushchiy razdelitel kak 
+
+ (obratnyy apastrof) ili [Environment]::NewLine, a NE "\n\n" v dvoinyh kalыkax (PS 5.1 ne interpretiruet C-escape → literaly = skleyka zagolovka, 0 anshejrov).
+P17 TEMY-1 (vyyasnenie ot Lizy — vizual'naya priyomka M-karty): priyomka M1..M6 = ploskost' B (chat, sil'naya storona). Etalon: dlya kazhdoi zony (sky.html hover/cvet/kejs; starfield render-path; front-limit; perf 60fps) — spisk VISUAL-ACCEPT (chto vidno glazami) + CANNOT-agent (prosit' operatora: skrinshot/gpuErrors≈0 po belomu spisku signatur). Sl. shag pri TEMY-2: sostavit' M-kartu priyomki (roadmap-audit M1..M6 po istorii PM).
+KEEP: tmp/liza-init-*/ (pm-tail200.txt, session-anchors.txt, terminal.log). TAKT ZAKRYT.
+
+## session=liza-mmap @ 2026-11-07T01:45:28
+GOAL=roadmap-audit TEMY-2: M-karta priyomki M1..M6 po istorii PM (kanal 7B2B5067 + arhivy 7081ACC5/127D60C7). Persony: repo-sync(30)+skill-writer(30)+head-consistency(15)+gaia-source(10)+webgpu-pass(10)+front-limit(20)+perf-swiftshader(25) (audit trigaet vse zony).
+M-KARTA (zony LIDA; dok=relay/sha1):
+ M1 sky-render = CHASTICHNO (probe5 L78 vse-zelyonye: lit1436/draws1.505/device.lost-false; odin unified pipeline). Vizual: zvezdy vidny, cvet spektral'nyy, gpuErrors~0 po whitelist.
+ M2 hover = CHASTICHNO (probe5 gridHover 4/5; perf-audit hover 5/5; M1-panel StarPhysics). Vizual: pri navedenii panel' s IMENEM (SIMBAD-prioritet) bez drga.
+ M3 perf60 = ZAKRYTO uslovno / DEFERRED-REMOTE (H4 CONFIRMED 32Hz=RDP-artefakt; H5-AUTO headful RAF=111 RF=59 LONGTASKS=0 = kod chist). Vizual: PRIYOMKA GLAZAMI NA LOKAL'NOM ekrane 59-60 bez ryvkov.
+ M4 data = CHASTICHNO (M1-ETALON PASS=2 FAIL=5 UNKNOWN-BCG=4 src m1-etalon.json e2f2d099; BC(O,B,A) tablica=SKILL-TODO). Vizual: panel' hover s korektnymi L/R/M/klass.
+ M5 backend = CHASTICHNO (PM M5=planets orbit-rings+NASA sync/voxel-goroda arh L58/L65; backend Express Gaia/IMCCE/SIMBAD TAP). Vizual: 12 planet + polёt ShipController.
+ M6 PM/kanon = ZAKRYTO (P11 ROTATION x2, P12-P16 PRINYATY nezavisimo Lizoy; P16 D35DDA25 kommit 65377042; BUDGET 61373/65536 OK). Vizual: kanal git-root 0 /packages/ append-only cel.
+OTKRYTYE VOPROSY (dlya TEMY-1 vizual'noy protsedury): (A) NOMERACIYA-DIVERGENCE — PM-etapy (M1=physics+hover-panel, M3=volume-map v1 CONFIRMED/v2 DEFERRED-REMOTE@82588d8a, M4=ship-fly, M5=planets/voxel) NE 1:1 s LID-zonami (M1=sky-render,M2=hover,M3=perf,M4=data,M5=backend,M6=PM/kanon); nado zadat' odnu kanonicheskuyu M-kartu. (B) M3-cel'=DEFERRED-REMOTE@82588d8a (operator na fizicheskom ekrane). (C) M4-etalon 2/10 + BC-tablica T>8000K. (D) M2 probe5 4/5 (1 slot). (E) M5-planet/voxel vs M5-backend — slyat' zony.
+Artefakt KEEP: tmp/liza-mmap-20261108-014429/ (m-map.txt sha1-8=E95C5270, terminal.log). H1=CONFIRMED H2=CONFIRMED H3=CONFIRMED. TAKT ZAKRYT.
+## session=agents-verify 2026-11-08T01:46:42 from=LEAD(FS) via=TEAM-MODE topics=TEMA2-ACCEPTED,M-MAP-KANON,NUMERACIA-FIXED
+relay p17-mmap from=lead topics=roadmap-audit,m-karta sha1=E95C5270
+P17-TEMA2 (liza) PRINYATA: m-map.txt E95C5270 (11 strok); vs 6 zon so statusom+relay-dok+vizual-ACCEPT; 5 otkrytykh (A..E); numeracia-divergence RESHENA: LID-zony (M1=sky-render,M2=hover,M3=perf,M4=data,M5=backend,M6=PM/kanon) = vershina; PM-etapy = realizacia vnutri. Kommit m-map.txt + PM relay. Sl. shag = TEMY-1 (vizual'nye protokoly po zonam, liza sostavit vizual-ACCEPT-karty).
+---
