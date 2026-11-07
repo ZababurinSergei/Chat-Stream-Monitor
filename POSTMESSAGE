@@ -968,3 +968,26 @@ VIZUAL = CANNOT/oper (model bez izobrazheniy): dokazatel'stvo DOM-text panelDesc
 Kesh imen: 5 zapisey (SIMBAD TAP ogranichen, resolveNames async batch 500). Sl. shag: rasshirenie kesha (top-yarkie zvezdy) = produkta takt M4.
 Kommit paketa: M2 ZAKRYTO. Sl. = Lizye M-karta 6.0 (M2→ZAKRYTO).
 ---
+
+## session=liza-mmap6 @ 2026-11-07T02:56:07
+GOAL=M-karta 6.0 (M2→ZAKRYTO; takta SIMBAD-imen; sky.ts fix 9f05f357, PM root e626e54). DVE ZAKRYTO (M1,M2).
+PM-ROTACIYA P17-3 (delyta posle ROT L852): 21134 b / 12 sess < 150KB/20 → ROTACIYA NE nujna (trening: sessii rastut 9→12; lidu sledit', rotaciyu koleda ≥20 sessiy il ≥150KB posle ROT).
+SVOD: ZAKRYTO=2 (M1,M2) · ZAKRYTO-COND=1 (M5 flyTo) · CHASTICHNO=1 (M4) · DEFERRED-REMOTE=1 (M3). NET REJECT. GAP 4/4.
+M2 = ZAKRYTO: K2 REJECT 'Gaia source_id VMESTO imeni' REJECTED (gaiaOnly=0). Picking5/5+diff5/5+IMENA5/5. FIX sky.ts:1485 updateStarPanel: ran'she vsegda 'Gaia DR3 '+id, hotya StarLayer.ts:156 peredaval name v StarCpu (dannye uze byli, panel' ignoriROVALA). FIX nm=s.name (SIMBAD main_id, prefiks '*' obrezan) prioritetom + ' (source_id)', fallback 'Gaia DR3 '+id. esbuild OK. probe-hover 23-52-49 hasName=5/5 gaiaOnly=0: slot4 Gaia→'iot Ori | ra315.945 dec81.48' (kesh data/star-names.json 5 SIMBAD main_id); exo 'gam Cep b (planet)' i 'iot Dra b (planet)' i 'omi UMa b (planet)'; diff 10506..52024. GRANICA: glaznaya priyomka paneli = CANNOT/oper (DOM-text panelDesc = dokazatel'stvo; skrinshoty slot4-{before,after}.png dlya operatora).
+M5 COND (flyTo fly-mode sky.ts:1357 __sky NE eksponiruyet) · M3 DEFERRED (oper) · M4 CHASTICHNO (BC_G tablica + kesha imen 5→batch-500 SIMBAD TAP = produkta, NE bloker M2).
+Artefakt KEEP: tmp/liza-mmap6-20261108-025531/m-map-6.0.txt sha1-8=A67A6C4C. H1=CONFIRMED H2=CONFIRMED H3=CONFIRMED. TAKT ZAKRYT.
+
+## session=liza-P20-docsync @ 2026-11-08T02:57:06
+DOC-SYNC P20 (v9): roadmap.tsv обновлён — M1: ZAKRYTO-COND→**ZAKRYTO** (P20 e9c3917a: BC-G-HOT 8000–45000K + Apsis-низ 4400/4900 + GIANT-GATE M_G<−3→UNKNOWN + EEM; m1-etalon v9 PASS=6/10 FAIL=0 UNKNOWN-BCG=4 — сверхгиганты = осознанная boundary не дыра; distLy все PASS; DF14B9FE/E484F9A8/AD5552F2); M4: CHASTICHNO с пометкой BC-домен-ЗАКРЫТ-P20 (остаток: корабль×массы каталога + кеплер-probe); сводка: ZAKRYTO=2 (M1,M6) · DEFERRED-REMOTE=1 (M3=P21 глаза) · CHASTICHNO=2 (M4,M5) · OPEN=1 (M2). Skills: grep PASS=2/e2f2d099/SKILL-TODO/BC_V по двум корням = 0 — устаревших v8-счётчиков НЕТ (проверено шире: etalon-маркеры в skills = легитимные ссылки §16/16a/doc-manifest, не счётчики) → правок в skills НЕТ, аудит не требовался (files не тронуты). H1=CONFIRMED. tmp/roadmap-audit-20261108-022124/roadmap.tsv обновлён (коммит за лидом по приёмке). SRV4 ack 2/4 — мониторинг.
+---
+
+
+## session=lead-main 2026-11-08 02:58 from=LEAD(FS) via=TEAM-MODE topics=P20-DOCSYNC-ACCEPTED
+relay p20-docsync from=lead topics=roadmap-M1-ZAKRYTO sha1=<sm.v roadmap.tsv>
+P20-docsync (liza) PRINYATA nezavisimo: roadmap.tsv M1=ZAKRYTO, M4 BC-domen zakryt, svodka ZAKRYTO=2/DEFERRED=1/CHASTICHNO=2/OPEN=1(M2); grep v8-counters=0 (skills chisty); PM 9757C749. Kommit sm.git. SLEDUYUSHCHY PRIORITET: M2-start (edinstvennaya OPEN-dyra; spetsifikatsiya ot liza po zaprosu lid) + P21 glaza (human). SRV4 2/4.
+## session=agents-verify 2026-11-08T02:58:30 from=LEAD(FS) via=TEAM-MODE topics=M5-ZAKRYTO,FLYTO-CONFIRMED
+relay p17-flyto from=lead topics=scientificAtlas,ship-flyTo sha1=N/A
+TAKT FLYTO (M5→ZAKRYTO): korennoy grekh probe-m5 v1 = iskal flyTo v __sky; on zhivyot v window.__scientificAtlas.ship.flyTo (sky.ts:1342-1361, globalShipController + Vector3, 3s). PROBE 23-57-51: atlas=true shipReady=true hasFlyTo=true, pos [0,0,10]→[800,0,10] moved=true (celestial=mirrored, no). M5 = 4/4 sub CONFIRMED (planets12, flyTo, limit1999, health200) → **M5 ZAKRYTO**. gpuErrors=0.
+Karta posle takta: M1 ZAKRYTO · M2 ZAKRYTO · M5 ZAKRYTO · M4 CHASTICHNO (BC_G + kesha-imena batch-500) · M3 DEFERRED-REMOTE (oper).
+Sl. = Lizye M-karta 7.0 (M5→ZAKRYTO, 3 ZAKRYTO).
+---
