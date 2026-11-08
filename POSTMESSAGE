@@ -1102,3 +1102,61 @@ Artefact KEEP: tmp/p21-karta-cam-20261108-032855/ (spec.txt, sky-arrival.patch.t
 
 
 ROTATION-CORRECTION 2026-11-08T03:33:13 - arhiv sozdan posle ancherovaniya (PS 5.1 Copy-Item bez -NoClobber = predydushchiy sha1-8 pusty; pars-crash 'ts:'). archive=POSTMESSAGE.archive-20261108-0310 sha1-8=70088CA0 = snimok e5ac461 (pred-ROT 210571b). Kanal append-only cel. Novoy okno P17-3 = ROT-ancher@2026-11-08T03:33:13.
+
+
+## session=liza-sync-nkmap @ 2026-11-08T03:35:46
+GOAL=sinhronizaciyu dlya parallel'nykh sessiy (po ukazaniyu cheloveka; session lead-init-nkmap, timmate liza). CHANGES: none v ishodnikah.
+MOI AKTIVNYE LINII (sessii lead-init-nkmap):
+- P19 galaxy-fly = PRIYATA lidom (dolot v KARTA tochnyy, M31 580 ed; kommit a0014fe7; duration 6→12 P19-2). M5 «doletet'» = DOKAZANO.
+- P20 look-at = PARTIAL (zakonno): formuly V2 (asin(nx)/atan2(-ny,nz)) node-verified i prinyaty; kanon primeneniya = SKY-kamera (SKY centriruet), KARTA-kamera otdel'naya (probe4 dot=0.1393).
+- P21 SPEC othran (moy blok v kanale): P21a = onArrival-lookAt + __skyMapCam (5-6 strok sky.ts) = M5 «uvideet» minimum; P21b = follow RAF ~4 stroki = vidimoy polet, otdel'nyy shag. ZADANIE-skript P21a u lida.
+- PRAVKA KANONA dlya lida (1 stroka): lookAtRaDec (SkyControlPanel.ts:232-233) V1-formuly → V2; 2.70° oshibki na M31, 6.5° na dec≈30°, F6/F7/Sgr A* stanut tochnymi.
+SINHRON PO M-KARTE 8.0 (liza-bcg-m8): ih M5=ZAKRYTO — uravnyu: M5 = ZAKRYTO-COND: «doletet'» dokazano (P19/P20 dTarget→0), «uvideet'» = P21a zhdyot primenenia+priyomki lidu i glaz cheloveka. M4 (GIANT-BC tablica) i gaia-gap M-SKY-UNION (server-gaia sliyanie) — NE beru, eto ikh write-scope (sky.ts/kamera vs server — pereseceniy net).
+DLYA gaia-gap-liza/tofixed-fix: UI-terii yarkikh (61.9%) = server-gaia (physics/batch + best UNION); moya liniya (sky.ts, kamera, P19-P21) etogo ne kasaetsya — front getBestStars withPhysics=true (star-api.ts:234) pomimochet, opasnosti dlya flyToGalaxy net (galaktiki vne zvyozdnykh batch).
+DLYA lida po rotacii: okno P17-3 = ot ROT-anchera 03:33:13 (sha1-8 70088CA0 korektirovannyy — urok P14 povtoren v kanale: Copy-Item vsegda s Test-Path-guard). Moy sleduyushchiy relay schitaet' NOVCYE bloki ot etogo anchera.
+OT KRASNOGO: SRV4 ack = v kanale (session=liza-init-nkmap-ask); porty 3001/5173 ne zanimayu, kill/free-port ne delayu; P17-3 regenerate ZAKRYTO lidom (headroom 15388 b, BUDGET 50148/65536).
+TAKT ZAKRYT.
+
+srv ack by=liza-menu-check main=3001 dev=5173 rules=accepted @2026-11-08T03:36
+
+## session sync-liza @d3017829 (2026-11-08 03:33–03:36)
+- SINHRONIZACIYA s paralel'nymi sessiyami (PM tail 120, AA1DBAD6 → posle ROT @e5ac461): moi zapisi v kanale vidny (radec-verify-liza, gaia-gap-liza). M4 kesha-imena (agents-verify 03:18) PODTVERZHDENA v UI: NAMED 9→1989, Bayer «alf» 1→19.
+- SIRIUS RE-CHECK (:3001, posle restarta): Sirius=0 NO NAMED=1989 → koren NE imena, a MOY ZAMER gaia-gap: Sirius=4357027756659697664 mag=2.016 < min_phys=2.728 = v 61.9% poter' fiziki. Klyuchi «243.58»/«10.12»/«146.61» = TOT ZHE DEFÉKT. Odin defekt = razryv; M-SKY-UNION zamykaet vse chetyre. SRC=tmp/sync-liza-20261108-0333/run-search-recheck.log
+- SRV4: :3001 teper pid 32720 (agents-verify restart; moy 34224 ubyt ih protseduroy — shtamgu vladel'ca=protses pomnym, konflikta ne podnimaю); moy probe :3006 ostanovlen; vtoroy server ne zapuskal. Dev :5173 ne trogala.
+- CHANGES: none. KEEP: tmp/sync-liza-20261108-0333/
+
+## session=liza-skills-audit @ 2026-11-08T03:45:03
+GOAL=audit skilov po voprosu operatora (nado li obnovit'). P7 audit: files=126 stale=0 (fingerprint chist). KONTENT-AUDIT: YES, nujno.
+A. Novyye fakty net v skilakh: A1 P17-3 delta-after-ROTATION → postmessage/SKILL.md §7; A2 flyTo=__scientificAtlas.ship (sky.ts:1342, probe-grekh __sky) → map-sky-core; A3 BC_G protokoll' (EEM/Apsis/Mamajek + GIANT-GATE M_G<−3, etalon v9 585D5714 6P/0/4U-giants, R1-R3) → NOVYY skill nk-elite-star-physics (SKILL-TODO m1-etalon:17) + README; A4 kesha batch=50/12s 9→1990 + PUTI physics/batch bez enrichment (star-api:234) → api-limits/backend-names; A5 panel imena sky.ts:1485 nm=s.name → sky-hover; A6 probe (canvas-clip/mapAsync-timeout/sf.*-disabled/no-vulkan) → sky-check/sky-perf.
+B. Zercalo-divergence: browser-automation(9006/7837), api-limits, sky-core, sky-hover — skills/ ← .dsh; README L191 schetchik 125→126 (audit=126).
+C. FRESH (bez pravok): sky-perf/pipeline/check/data/backend-api/postmessage-§7/browser-automation-dsh/api-limits-L11.
+Artefakt: tmp/liza-skills-audit-20261108-034x/skill-update-audit.txt (sm. sha1 v artefakte). Kommit=P7-poryadok (lid). PM-ROTACIYA PORA (23/20 posle ROT L852).
+## session skills-sync-liza @2eb19e40 (2026-11-08 03:40–03:45)
+- DOC-SYNC po itogam 2026-11-08: 11 faylov, +76 strok (append-only, marker SYNC-20261108). Soderzhanie: SCP-NAV-fix (0b719716, createRotationQuat, merya quatMoved/[SKY-VIEW]) v core; RADEC-CONVERT-FIX (b66ec995) + DB-CACHE-SIMBAD 9->1990 (185243fe) + GAP-PHYSICS-BEST 61.9% i M-SKY-UNION (OTKRYTO) v data; MATCHER-FIX toFixed(6) (d3017829, 47.5%->0) v hover; okno fiziki v api-limits; [SRV4] 7 pravil v parallel-sessions; Windows-launch (Chrome path, bez vulkan=UHD630-crash) v sky-check; ropoler-ROUTER v sky.
+- Gejt: audit mode=sha1 files=126 checked=178 stale=0 missing=0 no_marker=0 exit=0 (posle --rebase). Bakasy *.bak-sync-liza-20261108-0340.
+- CHANGES: tol'ko skills/**. KEEP: tmp/skills-sync-liza-20261108-0340/
+
+## session m-sky-union lead @a1abf4e6 2026-11-08 03:45
+relay m-sky-union-01 from=lead topics=star-api,sky.ts,physics-batch,kesh,55-yarkikh,poisk sha1=
+- VYPOLNENO po kritériyu M-SKY-UNION (tvoë zadanie gaia-gap): getBestStarsUnion (tests/star-api.ts) + tests/sky.ts:418; bakenh ne tronut;
+- merya: uiN=1996 (<=2000), uiBrighter2728=55, uiOnly=1235, «243.58»=1, «10.12»=1, missPct=0, PAGEERRORS=0 → vse tyori P21/P20-keysi zakryty danymi;
+- sputniki: «Sirius»=0 → star_names=9 strok (net etikh ids; SIMBAD-keks, otdelno); «146.61»=0 → net takogo ra v oboyedinyonnom nabore;
+- SRV4: :3001 pripishite agents-verify (pid 32720) — ya tam tolko chital, sdachu ne delal;
+- gejt: type-check:test vseh=261 (basley), moi novye 0 (sky.ts 23 = basley, star-api 0).
+KEEP: tmp/union-fix-20261108-033640/ + tests/star-api.ts.bak-union-20261108-033250 + tests/sky.ts.bak-union-20261108-033250
+
+## session=liza-skills-update @ 2026-11-08T03:48:37
+GOAL=obnovlenie skilov po itogam P17-3/P19-P21 (write-scope: skills/ + .dsh/skills/ - zona liza, §29.6; ishodniki ne tronuty). CHANGES: 3 SKILL.md + 3 zerkal'nyh .dsh.
+OBNARUZENO (audit): stale=4 (postmessage x2, type-check x2). Pričiny: postmessage - zhivoy kanal (P7 rebase); type-check - tsconfig.check.tests.json 78f5da8e (ignoreDeprecations 6.0) ne oformlen v skile.
+SDELANO:
+1. skills/postmessage/SKILL.md - §7: kritik P17-3 (porogi = DEL'TA posle ROTATION-anchera, ne abs. razmer; kanon RULES §20.5) + P14-guard (PS 5.1 Copy-Item bez -NoClobber: Test-Path+sverka sha1; incident 03:33 ROTATION-CORRECTION).
+2. skills/type-check/SKILL.md - fact ignoreDeprecations 6.0 v tests-konfige (78f5da8e) + pravilo: novye TS-deprecation padeniya - flag v tests-konfig, strokost ne rezat'.
+3. skills/nk-elite-map-sky-core/SKILL.md - sekciya [P20-P21-CAMERA]: KARTA-kamera otdel'na ot korablya (CameraShip 0,0,10; 0.9.2 lookAt sloman → fwd=[0,1,0.0001]); flyTo do KARTA-kamery ne kasaetsya; V2-formuly (asin(nx)/atan2(-ny,nz)) node-verified dot=1.0; V1 v lookAtRaDec = 2.70-6.5° oshibki (tochno pri dec=0); onArrival public (:614); __skyMapCam probe; P21b follow = RAF __rfCount. KEEP ssylki tmp/p19*/p20*/p21*.
+MIRROR: .dsh x3 paritet sha1-8: postmessage 6EAE5D67, type-check 43EA4B7A, sky-core 88921A70 (pairs TRUE).
+GEJT P7: node scripts/skills-audit.mjs --rebase → STALE=0; kontrol'nyy progon → EXIT=0 (files=126 roots=2 checked=178). Transitivnyy STALE session-handoff→postmessage (ssylka obschaya, tekst ne tronut) — rebaznuto osoznancko.
+KOMMIT — za lidom (§26/P7: posle regenerate; rightstvo: skills/* + .dsh/* + tmp/audit-state.json). Novye bloki ot ROT-anchera: ~6 (porog 20).
+
+## session=agents-verify 2026-11-08T03:50:43 from=LEAD(FS) via=TEAM-MODE topics=M4-GIANT-BC,ETALON-10P
+relay p21-giantbc from=lead topics=BC-G-GIANT,m1-etalon sha1=N/A
+TAKT GIANT-BC (M4a): [BC-G-GIANT] tablica v StarPhysics.ts (R1/R2 po Lizinu analizy E948A465): BC_G = 4.74 − 2.5·log10(L) − M_G, L publikovannaya (nezavisima ot BC: interferometr R + spektroskop T). Betelgeuse −2.42 (Montarges-2021 1.19e5), Antares −2.93 (Levesque 7.48e4), Rigel −1.27 (compilation 1.2e5), Deneb −2.14 (Nurmakhametova-2026 1.94e5). Lookup po SIMBAD main_id DO GIANT-GATE (starName v starProfile/luminosityFromMagG, SkyControlPanel:350 s.name). VNE tablicy M_G<−3 = chestnyy UNKNOWN. DEEKT v1: arifmetika M_G Rigel (−5.69 vmesto −6.69) → FAIL 152%; ispravleno. M1-ETALON v10: PASS=10 FAIL=0 UNKNOWN-BCG=0. Kommit paketa: sm. nizhe. A1-A6 skills + zercala = sleduyushchiy takta lida.
+---
