@@ -1171,3 +1171,53 @@ relay p21-skills from=lead topics=nk-elite-star-physics,mirrors,README sha1=N/A
 SKILL-P21 KOMMIT (A1-A6+B): NOVYY nk-elite-star-physics (dva korya, BC_G protokoll' + GIANT-BC tablica + etalon v10 10P/0F/0U); A1 postmessage P17-3+P14-guard (Liza); A2 sky-core FLYTO-ATLAS (flyTo=__scientificAtlas.ship, NE __sky); A4 backend-names/api-limits kesh batch-50/TAP-12s + PUTI physics; A5 sky-hover panel-names; A6 sky-check/sky-perf canvas-clip/init-gate/mapAsync-FABRIK; B zercala .dsh→skills (8 id); README SKILLS_COUNT=128. AUDIT: files=128 stale=0 missing=0 exit 0.
 P21-GIANT-BC v10: M1-etalon 10P/0F/0U (4 giganta tablichnye: Betelgeuse−2.42/Antares−2.93/Rigel−1.27/Deneb−2.14). M4 → ZAKRYTO (GIANT-BC + kesha + panel + etalon v10).
 ---
+
+## session=liza-M2-ambig @ 2026-11-08T03:58:32
+ДИЗАМБИГ (хранитель канала): в сводках гуляют ДВЕ нумерации «M». (1) M-map (визуальные карты 3B3D1289/F279807F, своды mmap7/agents-verify): M2 = SIMBAD-panel — ZAKRYTO (gaiaOnly=0, imena 5/5, kesha 1990@185243fe). (2) ROADMAP-эталон 20261107-095627 (status-карта liza P19 tmp/roadmap-audit-20261108-022124/roadmap.tsv@97ce0603, принята лидом): M2 = DINAMIKA-EPOKH (пропагация pmra/pmdec/rv, ползунок J2000 ±100k) — статус НЕ ZAKRYTO: EpochPropagator.ts + epochYears-UI (:192 repopulateStars) + probe-m2.mjs ЕСТЬ в дереве (лид P23 in-flight), гейты (Sirius ±20% линейной PM Gaia, t=0 NO-regression, FPS-потолок) ЕЩЁ НЕ в канале. ПРАВИЛО: в сводках писать «M2-map=SIMBAD» / «M2-roadmap=epokhi», не просто M2. Прошу лида при закрытии P23 дать строку M2-roadmap со значениями гейтов.
+---
+
+
+srv claim by=lead port=3001 reason=M-SKY-UNION-NAMES backend-restart head=1eabdf1a ts=2026-11-08T04:00
+
+## session=liza-mmap9 @ 2026-11-08T04:00:31
+GOAL=M-karta 9.0 (M4→ZAKRYTO; GIANT-BC c23c9e23 + SKILL-P21 1eabdf1a; ETALON v10 463F84FC PASS=10 FAIL=0 UNKNOWN=0). 5/6 ZAKRYTO.
+KARTA 9.0: M1/M2/M4/M5/M6 = ZAKRYTO · M3 = DEFERRED-REMOTE (CANNOT-list OPERATORU) · REJECT=0. M4 TOCHKA: GIANT-BC (a) + kesha-imena (b) + panel (c) = ZAKRYTO.
+GIANT-BC [BC-G-GIANT] (StarPhysics c23c9e23): tablica Betelgeuse −2.42 (Montarges-2021) / Antares −2.93 (Levesque) / Rigel −1.27 / Deneb −2.14 (Nurmakhametova-2026); BC_G=4.74−2.5log10(L)−M_G, L publik. (interferometr R + spektrosk T = nezavisima ot BC); lookup po SIMBAD main_id DO GIANT-GATE; vne tablicy = chestnyy UNKNOWN. Urok lid: M_G=5·log10(1000/plx) (arifmetika Rigel −5.69 vs −6.69 → FAIL 152%, ispravlen).
+SKILL-P21: novyy nk-elite-star-physics (oba korya F487A1EF SAME) + A2 flyTo/A4 PUTI/A5 panel-names/A6 probe + zercala 8 + README SKILLS_COUNT=128. Audit files=128 stale=2 = ssylki postmessage→PM (zhivoy kanal, normal').
+PM-ROTACIYA ZAMKNULENA P17-3: signal 23/20 poveren lidom → NOVYY ROT L1084; delyta 14326b/6sess < porogi (150KB/20).
+M-SKY-UNIZ (NOVYY kanon lid): polnota UI-spiska — 56 yarchayshikh (mag≤1.5) otсутствуют v MAST live. Otkryt' kanon.
+CANNOT-LIST OPERATORU (ploskost' B): U3.1 fps-local.ps1 (PS5.1 v konsoli, NE node) rafFps≈59-60 (RDP 32Hz = potolok ekrana); U3.2 skrinshot 16:9 1920x1080 glazami: K1 pole yarkim, K2 imena SIMBAD v paneli, K3 planety, K4 galaktiki/M31, K5 giants L/R/M (BC_G-tablichnye), K6 tsvet; U3.3 M-SKY-UNIZ 56/N. PRIYOMKA: ACCEPT@commit lokal'no glazami / REJECT / DEFERRED.
+Artefakt KEEP: tmp/liza-mmap9-20261108-040001/m-map-9.0-cannotlist.txt sha1-8=836556B5. TAKT ZAKRYT.
+
+## session names-cache lead @c6e55639 2026-11-08 04:07
+relay names-cache-01 from=lead topics=/api/gaia/best,readCachedNames,resolveNames,pokrytie-imen,99.3,mag-floor sha1=
+- sdelano: imena dlya kesh-segmenta v POST /api/gaia/best (zerkalo fiziki) → UI named 755/1996 (37.8%) → 1982/1996 (99.3%), bayerish=1589; front/bundl ne tronut (0098BBFE).
+- KRITICHESKIY FAKT: «Sirius»=0 i «Vega»=0 = predel kataloga: u MAST-seti pol mag=1.9425 (mag<1.5: 0 shtuk, s imenami Sirius/Vega: 0). Sirius (mag -1.46) V etom nabore NET; 4357027756659697664 = «* del Oph» (mag 2.016, 49 pc), ne Sirius.
+- SIMBAD TAP iz sredy nedostupen: [resolveNames] done: +0 imen (pend=10..14, batch=50, tap=12000ms) → whitelist §20.9; istochnik imen = data/star-names.json (3220), tablica SQLite star_names=9 ne ispolzuetsya marshrutom.
+- gons: parallelnye resolveNames → «cache save failed: ENOENT rename star-names.json.tmp» (ne blokiruyushchiy, dannye sohraneny).
+srv release by=lead port=3001 head=c6e55639 pid=28944 (server.mjs, zamenil 32720; health 200)
+
+## session=lead-p21a-apply @ 2026-11-08T04:11:26 from=LEAD(FS) via=TEAM-MODE topics=P21A-PRIMENENO,KAMERA=SHIP-IDENTITE-NAIDEN,ЦЕНТИРОВАНИЕ-PARTIAL
+relay p21a-apply from=lead topics=skyMapCam-est,kamera-odna,lookAtRaDec-V2,dot-protivopozhna sha1=a8cf1fbd
+P21a PRIMENA (skript Lizy v3: vstavka perenesena v lidom — ee v1/2 vstavlyala IIFE vnutri literalnogo ob"ekta __scientificAtlas = slomalaby esbuild; ya vstavil posle [7/7]-log na urovne init; kommit a8cf1fbd nested). + lookAtRaDec V1→V2 (moj edit, legh v parallelnom c23c9e23 — v bundle asin-clamp ×3).
+IDENTITET (diag2): __shipController.cameraObject === __cameraObj === 'CameraShip' (same=true) — KAMERA ODNA; applyRotationFromQuat (ShipController.ts:462-464) pishet transform.localRotQuat = kvaternion: P20-razvorot DEJSTVITELO menyaet kameru (fwd [0,1,−0.0001]→[−0.73,−0.212,0.6497] posle pribytiya).
+NO: orientaciya PROTIVOPOLOZHNA celi (dot(fwd,dir)=−0.14): pri bytii kamera smotrit v storonu ot mark — predpolozhenie: konvenciya BCRS (SkySpace: y=sin dec) vs StarMap3D (y=cd·sin ra, z=sin dec) pri peredache target/rotation; P21b-follow (P13: odna pravka za raz) = chto vidit chelovek.
+PRIYOMKA-CHASTI: dolot tochnyy (dTarget 580→0), kamera dvigaetsya za korablyom (camPos==shipPos vsegda: 0,0,10→428,81,383), eksponirovanie __skyMapCam() rabotaet (pos+fwd), lookAtRaDec V2 (F6/F7/Sgr tochnye — Liza node).
+PROBE-API UROK: ss.projectWorldToNdc NE metod skySpace (eto export StarMap3D) — dlya centrov nuzhen exposure.
+KEEP: tmp/p21a-apply-20261108-033800/ tmp/p21-diag2/3-*.log tmp/p21a-probe-*.log + sky.ts.bak-p21a-20261108-033800.
+---
+
+## session=liza-P21-docsync @ 2026-11-08T04:12:49
+DOC-SYNC P21 (roadmap.tsv@tmp/roadmap-audit-20261108-022124): M1→**ZAKRYTO эталон-полный** (v10 10P/0F/0U, c23c9e23 GIANT-BC таблица, bcg-analysis E948A465, скилл nk-elite-star-physics 1eabdf1a); M4→CHASTICHNO, BC-домен ЗАКРЫТ ПОЛНОСТЬЮ (остаток: корабль×массы каталога, кеплер-probe <0.5%, KARTA-центрирование 7fba01b1); M5→**ZAKRYTO 4/4** (a672bbb4 flyTo moved=true); M2-roadmap→PARTIAL-IN-FLIGHT (P23: EpochPropagator.ts+epochYears:192+probe-m2.mjs в дереве, гейты Sirius±20%/t=0/FPS жду в канале); M3 DEFERRED (P21-глаза у человека); M6 ZAKRYTO (SKILLS_COUNT=128, аудит exit 0). СВОД: ZAKRYTO=3 · PARTIAL-IN-FLIGHT=1 · CHASTICHNO=1 · DEFERRED=1, REJECT нет. ДИЗАМБИГ закреплён: M2-map=SIMBAD ≠ M2-roadmap=эпохи. SRV4 ack 3/4 (nudge liza-M2-ambig-сессий помог: liza-menu-check @03:36).
+---
+
+## session bright15-liza @c6e55639 (2026-11-08 04:07-04:14)
+- ETALON OTSUTSTVIJA 15 JARCHAJSHIH: 15/15 (100%) zvezda-CAJA net v cone-otvete: cone = MAST LIVE (source "MAST Gaia DR3", source_id v otvete NET) i vozvraschaet TMANyh sosedey G=6.6-13.3 na smeshenii d=0.005-0.147° ot adresa; v UI (1996) net; name=null (cone bez obogaschenija). SRC=tmp/bright15-liza-20261108-0407/result-bright15.json
+- POCAZANIE LIDA o «pole 1.94» = castichno NEVERNO mehanizmu: pol = jasnyj predel Gaia DR3 (nasyshchenie, V<~1.7 net v gaia_source), ne filtr SELEKTA; tablica gaia_stars = 209 strok (posev tem zhe MAST-srezom), min 1.9425, dlya 6 proverennyh jarkih v ±0.02° = 0 strok. SRC=tmp/bright15-liza-20261108-0407/run-db-check-liza.log
+- VERDICT: H1=CONFIRMED (100% >= 50% → nuzhen otdel'nyy katalog jarkih); H2=CONFIRMED (prichina po kazhdoj = yarkii predel Gaia DR3, odin mehanizm na 15).
+- TREBOVANIE (M-SKY-UNION-BRIGHT): statichnyy katalog v data/ (Yale BSC V<4.5, ~341: ra/dec/V/B-V/spectral/NAME, bez seti) + tretniy union (physics ∪ best ∪ bright); imena = vysshiy prioritet §25; cvet B-V cherez [MAG-BG-DIFF]. PRIEMKA: bright15-liza.mjs inCone-sama(G<2)+inUI >=14/15, «Sirius»>=1.
+- CHANGES: none v istochnikah. KEEP: tmp/bright15-liza-20261108-0407/ (bright15-liza.mjs, result-bright15.json 15 strok, db-check, logi, summary)
+## session=agents-verify 2026-11-08T04:15:26 from=LEAD(FS) via=TEAM-MODE topics=M3-DEFERRED,OPERATOR-DECISION
+relay p22-m3deferred from=lead topics=priyomka-M3,deferred sha1=N/A
+RESHENIE OPERATORA (ask_user_question 04:13): M3 vizual'naya priyomka (U3.1 fps-local / U3.2 skrinshot 16:9 K1-K6 / U3.3 M-SKY-UNIZ 56/N) = **DEFERRED** (otlozhit'). M3 ostaetsya DEFERRED-REMOTE; CANNOT-list (836556B5) gotov k ispolneniyu v lyuboy moment: .\scripts\win\fps-local.ps1 v PS 5.1 konsoli na lokal'nom ekrane + vizual K1-K6 + schet 56/N. ROADMAP = 5/6 ZAKRYTO (M1,M2,M4,M5,M6) + M3 DEFERRED + REJECT 0. Karty: liza peresobiraet M-kartu 10.0 so statusem DEFERRED (ne FINAL 6/6).
+---
