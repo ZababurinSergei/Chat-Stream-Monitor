@@ -1354,3 +1354,74 @@ P2 VYPOLNEN (kommit 543dee25): DEFekt [DB-SCI-NOTATION] — gaia_stars.source_id
 P1 chastichno: moy p1-56n-probe.mjs etalon flux-G≤1.5 = TAP-zavisim (UNKNOWN segodnya); bright15 Lizy = 0/15 v UI = **56/N ≈ 0 TVERDO** (cherez local cone 200 OK). FAKT parallel'nyy: /api/gaia/cone otvechaet BEZ source_id (coneStar.id='undefined' v bright15) = [CONE-ID-UNDEFINED] — peredat' lead-sessii (sky.ts:418 M-SKY-UNION).
 DEKT liza-bright15: sravnenie UI po coneStar.id='undefined' = lozhnyy NEGATIV (poverennyy put' = moy join posle migracii).
 ---
+
+srv claim by=lead port=3001 reason=bright-catalog-expand restart-cache head=aef19d20 ts=2026-11-08T04:48
+
+## session=liza-p23-spec @ 2026-11-08T04:50:09
+GOAL=P23 spec: sloy PLANETY v sky.html (sprite BCRS s procedurnym relefom) ot TEMY-1. GOAL cheloveka «podklyuchi planety s relefom».
+SPEC+CHERNOVIK (write-scope: tmp/p23-spec-20261108-0440/ + ts/shaders/code/planet_bcrs.wgsl.ts):
+- H1: /api/exoplanets (server-routes:618-626) daet pl_name/hostname/ra/dec/st_rad/st_teff/pl_rade/pl_bmasse/pl_orbper/discoverymethod/disc_year/st_dist (join gaia parallax 1-500 mas; runtime=12). planetBuffer = 4×vec4 (16 float): v0 dir+angRad (istinnyy, (pl_rade·6371km)/(st_dist·pc_km)); v1 rgb+brightness (palette klass: rade>9 gigant/polosatyy, 4-9 neptun, <4 zemnoy); v2 seed+relSize(rade/11.209)+albedoBand+phase0; v3 flags+distPc+orbperDays+discYear. uploadPlanets()+cpuPlanets[] v module (SM.writeData/setCount — API kak u galaktik).
+- H2: «Solnce» = postoyannoy E3 +X, s Params lightX/Y/Z (12 float = paramBuffer, panel; bez rasshireniya SkyGlobal — ego layout fikcirovany d[0..63]). SkyPlanetParams: sizeScale/brightness/oceanFrac/terrainAmp/spec/gloss/minPx/maxPx/lightX/Y/Z/mapBoost.
+- H3: sizePx=clamp(minPx + relSize·(maxPx−minPx)·sizeScale) (3..24 px; istinnyy angRad mkrad → vsegda minPx); orbit offset = sizePx·1.8·mapBoost ot faz 2π·(time·86400/orbper+phase0) (time=sky.cameraPosition.w) — planeta «rdom» s hozhaynom; order 3 posle zvyozd/galaktik, blend normal (ne add); LOD ne rezhет (count=12).
+WGSL: skyPlanetVs/Fs (imena unikal'nye; pnoise3/pfbm4/phash11 — value-noise fbm, gradientnyy simpleks planetGeneration ne perenosen v raster); sferycheskaya normal + relief h + palette (okean/susha/gory/plyusy/polosa giganta) + diff (L=params)+amb 0.10+spec(gloss)+rim atm; alpha=kray+rim; MRT out0 [MRT_TAIL].
+ESBUILD: bundle OK (esbuild-check.js; import ESM: BALANCE vertex/fragment — viz).
+FRAGMENTY VSTAVOK v spetse (zona lidu): SkyShaders.ts (SOURCE_TABLE 2 stroki posle skyGalaxy.fs L67; import posle galaxy_bcrs L17; registerLayer 'planets' 12 params posle bodies L286); sky.ts [SKY-EXO] (zamen merged/uploadStars L871-876 → uploadStars(validStars) + uploadPlanets(exo); import uploadPlanets iz ts/shaders/code/planet_bcrs.wgsl).
+Priyomka: parse-failed=0; probe planets count=12 draws>0; panel 12 sliderov (terrainAmp=0 plokiy disk; lightX terminador); vizual 12 diskov u hozhayev; KARTA mapBoost.
+KEEP: tmp/p23-spec-20261108-0440/ (spec.md, esbuild-check.js, terminal.log) + ts/shaders/code/planet_bcrs.wgsl.ts (cher).
+
+
+## session=lead-P24a 2026-11-08 04:51 M4-KEPLER unit H1+H2 ZELENYE (9/0)
+m4-kepler.mjs: M4-KEPLER PASS=9 FAIL=0 (tmp/m4-kepler.json): period-earth=1.000000000000; Sirius-paradigma P=7.8665 yr (3-ey Kepler);
+RK4 vs analitika (dt=P/2000): Sirius 2.02M a=5 e=0.3 maxRel=0.0000% drift=4.79e-13; Zemlya maxRel=0.0000% drift=5.54e-14;
+conic p/(1+ecosθ) vs E-reshenie 4.68e-16; parabola e=1.0 duga 120 grad maxRel=0.0000% (390 tochek).
+H2 BD-zond: solar_system.mass_kg Sun=1.9885e30 → a=1 AU → P=365.257 sut (±0.5%); 3-ey Kepler 8 planet BD: khudshaya Venus 0.07% (<1%);
+edinicy: G=4π² (AU/Msun/yr) ↔ SI: Δ=0.011%. Fail-put': kolonka BD main_id (ne name) — ispravleno.
+Modul': tests/core/KeplerSolver.ts (G_AU=4π², solveKepler N'yuton 1e-12, keplerPoint, conicR, visViva, rk4Track s energyDrift, maxTrackVsAnalytic).
+Ogranichenie liza prinyato: fizika AU/Msun/yr, v scenu — konversiya tochka-za-tochkoy. Dal'she H3: ShipController grav-chlen + probe-m4 :8790 (task-27 in_progress).
+
+## session bright-expand lead @4f8432b8 2026-11-08 04:59
+relay bright-expand-01 from=lead topics=M-SKY-UNION-BRIGHT,440,ESA-TAP,bright-limit,lt2_5=65 sha1=
+- rasshireno: 40 → 440 (ESA TAP gaiadr3.gaia_source G<4.5, parallax>1, 400 strok HTTP 200; dedup 0.01 grad, propushcheno 2; imya=designation, B-V=bp_rp, spectral=teff_gspphot);
+- KLUCHEVOE: Gaia odayot G >= 1.94 (yarkiy predel) → metrika brightInUi(mag<1.94)=37 NE rashchaetsya principialno; rashchaetsya 1.94..4.5: UI lt2_5=65, lt3_5=293, lt4_5=1132;
+- merya: uiTotal=1996, named=1988, poisk 10 imen = 1 kazhdoe, ee bright15v2 = 15/15, tofixed 40/40 missPct=0, PAGEERRORS=0;
+- SRV4: srv release by=lead port=3001 head=4f8432b8 (server.mjs pid 29544, lokhi tmp/bright15-lead-20261108-0418/server4.out.log).
+KEEP: data/bright-stars.json.bak-expand-20261108-0447 + tmp/bright15-lead-20261108-0418/
+
+## session=lead-p23-apply @ 2026-11-08T04:58:08 from=LEAD(FS) via=TEAM-MODE topics=P23-PRIMENENO,PLANETS-SLOY-RISUET,LIZA-SCRIPT-UROK
+relay p23-apply from=lead topics=planets-12-draws408,blend-normal-ok,12-param-ok sha1=5301faf9
+P23 PRIMENA (skript Lizy + LEAD-FIX ×2: (a) PatchFile: odnostrachnyy ya KORR sovpadal LF-i-CRLF varianty → n1+n2=2 → vechnyy ABORT (dry-run pokazal ANCHOR LF=1 CRLF=1 bez vyvoda); (b) Log vozvraschal  → vnutri PatchFile stroki ANCHOR popadali v vazvratnyy kontent →  massiv → WriteAllText padal. Oba chineny v suresh)
+dry-run: 5/5 ya KORREĬ hits=1. -Execute: backup .bak-p23-20261108-045620 ×2, build exit=0. Kommit 5301faf9 (nested; + planet_bcrs.wgsl.ts Liza).
+RUNTIME: shaders=80; layers: **planets count=12 draws=408 = SLOY RISUET**; blend 'normal' PRINYAT SM; paramLayout 12 PRINYAT; validate 6 (sky*) parse-failed=0; stats.errors=[]; stars 1996 (12 exo-tochek ubrany iz zvyozd — [SKY-EXO] total 1996).
+VIZUAL otvet cheloveku (12 diskov: giganty polosatyye, zemnye s okeanom, terminator Solnce X, orbit-offset) + 12 sliderov paneli.
+KEEP: tmp/p23-apply-20261108-045620/ + tmp/p23-spec-20261108-0440/ + *.bak-p23-*.
+---
+## session name-quality-liza @4f8432b8 (2026-11-08 04:58-05:02)
+- KACHESTVO IMEN UI (1996): chitaemyh 99.6% (>=60%): bayer main_id 1189, human-sobstvennye 578 («Hadar/Deneb/Regulus/Adhara/Castor…» = designation iz MAST physics-otvetov + jadro kataloga), HD/TYC 221, Gaia-id fallback 8. OTDEL'NOE POLE «celovecheskoe imja» dlja Gaia-zapisey NE NUZHNO: imena idut potokom designation (physics/batch) + jadro 40; SIMBAD TAP mertv = zaфиксированное ogranichenie. SRC=tmp/name-quality-liza-20261108-0458/result-name-quality.json
+- KATALOG 440: jadro 40 = celovecheskie; Gaia-400 = name «Gaia DR3 …» (TAP designation pusty v jarkom rezah; kosmetika: v UI 8 Gaia-id).
+- METRIKA POLNOTY: lt2_5=65, lt3_5=293 (>=250), lt4_5=1132, bright15v2=15/15, pageerrs=0 → H2=CONFIRMED.
+- SKILL-ETALON: sekcii [BRIGHT-METRICS] (polosy, bright15v2-kriteriy NE-cone, kacheestvo imen, SIMBAD-ograchenie, gard V<0) → .dsh/skills/nk-elite-map-sky-data/SKILL.md sha1-8=B33CB278 (+router skills/nk-elite-map-sky, 4 zerakla). AUDIT mode=sha1 files=128 stale=0 exit=0. Kommit b2080e2d (docs(skills)).
+- VERDICT: H1=CONFIRMED(99.6%>=60%), H2=CONFIRMED(293>=250 i 15/15). CHANGES: tol'ko skills/**. KEEP: tmp/name-quality-liza-20261108-0458/
+
+## session=liza-p345-m11 @ 2026-11-08T05:03:36
+GOAL=M-karta 11.0 (P3/P4/P5 liza; P1/P2 lead relay p23). ROADMAP: 5/6 ZAKRYTO · M3 DEFERRED · REJECT=0.
+P3 GIANT-BC RASSHIRENIYE (ploskost' B): 4 BC_G tablichnye PEREDANY LIDU v [BC-G-GIANT]: Aldebaran −0.84 (Lane+2002 R=45.1, L=423, T=3900); Canopus +0.46 SPORNO (L/T/R literature protivorechie); Arcturus +0.86 SPORNO (L literature 50.8↔104); Mira −5.34 PEREMENNAYA (G pulsiruet 2-10, SRd). G/plx=[TEORIJA] DR3 (NET v stars.db: MAST-window min G=2.73 → 8 yarkikh gigantov vne MAST; imena v kesh NET, TAP-down). Validaciya TAP pri seti. Artefakt: tmp/liza-p3p5-20261108/result-p3.json.
+P4 = DONE: zercala .dsh→skills (sky-data 48799092 SAME-OK; sky-pipeline 5AB6BC6C SAME-OK; mtime-guard); README 67/57→68/58 (+star-physics); audit files=128 stale=2 (PM-ssylki norm). KANON-DEFECT: §21 'Copy-Item -NoClobber' net v PS 5.1 (PS7-only) → idiom Test-Path; predl. §21/powershell-first.
+P5 = NULL=evidence + pravilo: v stars.db net kolonok oshibki parallaksa (shema 23 kol.) → SNR/Lutz-Kelker NE vychislim (TAP-down). Pravilo: SNR<5 → LK-sistematika d=1/plx; panel-flag SNR<10. REKOM.: ru_parallax_over_error v MAST/TAP zapros G≤3.
+P1/P2 lead prinyaty: [DB-SCI-NOTATION] fix (2.7%→38%, kesh 6216); 56/N≈0 TVERDO; [CONE-ID-UNDEFINED] peredan M-SKY-UNION; P2-ostatok 69=G1.94-2.72 TAP-Set' (povtor tmp/p2-tap-names.mjs).
+PM-ROTACIYA P17-3: (sm. stroku) < 150KB/20.
+KEEP: tmp/liza-mmap11-*/m-map-11.0.txt + tmp/liza-p3p5-20261108/{result-p3.json,result-p3p5.json}. TAKT ZAKRYT.
+
+## session=liza-p23-uroki @ 2026-11-08T05:07:19
+GOAL=fiksatsiya urokov P23 apply-skripta (uroki lida a/b/c). KNOWLEDGE=tri PS5.1-antipatterna patch-scenariov.
+UROKI ZAFIKSIROVANY v skills/powershell-first/SKILL.md (+zerkalo .dsh, parity sha1 CCEB7182), blok <!-- ps51-patch-antipatterns: P23 apply-skript -->:
+(a) schetchik ykorей LF+CRLF dlya odnostrchnogo yakorya = n1+n2=2 → vechnyy ABORT; kanon: schitat odin variant (naydennyy), unikal'nost' = 1 vhozhdenie;
+(b) funkciya PS vozvrashaet VSya nezakrytyy vyvod: Log vnutri PatchFile prochivaet ANCHOR-stroki v vozvratnyy  → WriteAllText(Object[]) padayet; lechenie: Log|Out-Null vnutri obrabotchika, otchyot cherez Write-Host;
+(c) fil'tr 'parse-failed' lovnul shtatnyy 'parse-failed=0' → lozhnyy CONSOLE_BAD; fil'trovat' po znacheniyu 'parse-failed=[1-9]'/urovnyam ERROR.
+AUDIT: node scripts/skills-audit.mjs --rebase → STALE=0 exit=0 (128 failov, 184 proverok; rebase osoznannyy: PM/README smenili sha1 parallel'nymi appendami).
+P23 ITOR (lead ACCEPT, commit 5301faf9): sloy planets count=12 draws=408, blend normal prinyat, paramLayout 12 prinyat, 12 exo-tochek ubrany iz zvyozd — chistyy perenos. Vizual'naya priyomka — u cheloveka.
+TAKT ZAKRYT.
+
+## session=agents-verify 2026-11-08T05:08:45 from=LEAD(FS) via=TEAM-MODE topics=P3-GIANT-BC,ETALON-11P
+relay p24-p3integr from=lead topics=Aldebaran,BC-G-GIANT,etalon-v11 sha1=N/A
+P3 INTEGRACIYA: Aldebaran −0.91 (pair L=423/M_G=−0.912 DR3) v [BC-G-GIANT]. [P23] SEMANTIKA: lookup = prioritet pri LYUBOM M_G — GIANT-GATE (M<−3) Aldebarana ne lovilt (−0.91), EEM-MS davayet L=246 (−42%): tablichnye giganty s M_G>−3 (K/M-giganty) = otkrytaya gruppa. SPORNO NE vneseny (chestno do TAP): Canopus, Arcturus (literaturnye L 50.8↔104); Mira = peremennaya (SRd, G 2–10). TAP povtor P2-69: oba zerkała mertvye (istra CONNECT_TIMEOUT, cfa 400). M1-etalon v11: **11P/0F/0U** (Aldebaran L=421/423, R=44.96/45.1; 5 tablichnyh; MS no-regress).
+---
