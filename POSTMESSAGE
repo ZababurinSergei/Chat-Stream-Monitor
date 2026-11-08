@@ -1425,3 +1425,37 @@ TAKT ZAKRYT.
 relay p24-p3integr from=lead topics=Aldebaran,BC-G-GIANT,etalon-v11 sha1=N/A
 P3 INTEGRACIYA: Aldebaran −0.91 (pair L=423/M_G=−0.912 DR3) v [BC-G-GIANT]. [P23] SEMANTIKA: lookup = prioritet pri LYUBOM M_G — GIANT-GATE (M<−3) Aldebarana ne lovilt (−0.91), EEM-MS davayet L=246 (−42%): tablichnye giganty s M_G>−3 (K/M-giganty) = otkrytaya gruppa. SPORNO NE vneseny (chestno do TAP): Canopus, Arcturus (literaturnye L 50.8↔104); Mira = peremennaya (SRd, G 2–10). TAP povtor P2-69: oba zerkała mertvye (istra CONNECT_TIMEOUT, cfa 400). M1-etalon v11: **11P/0F/0U** (Aldebaran L=421/423, R=44.96/45.1; 5 tablichnyh; MS no-regress).
 ---
+
+## session viz-accept-lead @5c635265 2026-11-08 05:09
+relay viz-accept-01 from=lead topics=priyomka-operatora,M-KARTA-12,gaia-source,ZAKRYTO-COND,panel sha1=
+- viz-panel.mjs (:3001 pid 29544, SRV4 — tolko chital): poisk Sirius=1 «Sirius G | -1.46m», Vega=1 «Vega G | 0.03m», Canopus=1 «-0.74m», 243.58=1, 10.12=1, alf=N (bayery); schetchik paneli items=16, uiTotal=1996, named=1988, PAGEERRORS=0; skrinshoty 99-panel-sirius.png (95935 b) i 99-panel-all.png (101666 b);
+- CHESNOE OTRIЦATELNOE: kesh-srez /api/gaia/best (2000) uze soderzhit 1094 zvezd mag<4.5 → rascshirenie kataloga G<4.5 (400 TAP-strok) PERESEKAEITSya s nim (u ra 243.586 i 10.12 po 1 zapise v kazhdom) = dobrochka izmeryaet KACHESSTVO, a ne obem: unikalnaya cennost = 40 chelovecheskikh imen yadra (yarkiy predel Gaia = 1.94); dedsup 0.01 grad dedikov ne narushen (uiTotal=1996 bez udvoeniy);
+- status temy: ZAKRYTO-COND (vse metrikovye kanaly zakryty zondami; edinstvennyy otkrytyy kanal = vizualnaya priyomka operatora, §41 CANNOT visual); svodka shagov dlya cheloveka peredana v [ЧАТ]
+- M-KARTA: gaia-source (M4-liniya) → predlagaetsya 12.0: ZAKRYTO-COND → ZAKRYTO posle otveta cheloveka (write-scope M-karty = liza);
+- SRV4: port 3001 = moj protsess server.mjs pid 29544 (claim 04:48 → release 04:59 uzhe v kanale; eto takta server NE perezapuskalsya).
+KEEP: tmp/viz-accept-lead-20261108-0505/ (viz-panel.mjs, result-viz-panel.json, 99-panel-sirius.png, 99-panel-all.png, run-viz.log)
+
+## session=liza-mmap12 @ 2026-11-08T05:10:45
+GOAL=M-karta 12.0 (GIANT-BC 5 tablichnykh; etalon v11 11P/0F/0U sha1-8=(sm. vyshe); skill P23 4e5d9b20; relay p24 root 3ed3e2d). ROADMAP 5/6 ZAKRYTO · M3 DEFERRED · REJECT=0.
+[P23] SEMANTIKA (Aldebaran otkryl): lookup = prioritet pri LYUBOM M_G; GIANT-GATE (M_G<−3) ne lovilt Aldebarana (−0.91), EEM-MS davayet L=246=−42% → K/M-giganty M_G>−3 = otkrytaya gruppa (R3). Urok: gigant = NE tol'ko M_G<−3.
+VALIDATSIYA [TEORIJA]: moy G=0.57 vs DR3 0.64 → BC −0.84 vs −0.91 (Δ0.07); L +0.5% → metod rabochiy.
+SPORNO-queue (TAP): Canopus +0.46/+0.20 (L=10700), Arcturus +0.86/+0.00 (L 50.8↔104); Mira peremennaya ne etalon. TAP-set': zerkała mertvy; ochered' P2-69+SPORNO-3+P5-RU (tmp/p2-tap-names.mjs + m1-etalon RU).
+KEEP: tmp/liza-mmap12-*/m-map-12.0.txt (sha1 v artefakte). TAKT ZAKRYT.
+
+## session=lead-P24b 2026-11-08 05:11 M4 H3 ZELENYE — PROBE-M4 PASS 7/7: CYKL P24 POLNOSTYU ZAKRYT
+probe-m4 :3001 (tmp/probe-m4-2026-11-08T02-08-00/): conic-trace maxRel=0.0000% (<0.5%; 5380 tochek RK4 v ShipController, 2.02 Msun a=5 e=0.3, period 7.87 gona 168 s);
+FPS=32.0 (RDP-32); flyTo NO-REGRESSION (arrived posle m4Stop); map NO-REG (stars=1996 epochYears=0); bad-mass-guard (mSun=0 → BAD_MASS); init 1996.
+Integratsiya: ShipController.ts 50B9CDC1 — m4Start/m4Stop/m4Trajectory + stepM4 (RK4 AU/Msun/yr, liniarizatsiya log-masshtaba radiusFromPc/pcFromRadius, opt-in: po-defoltu NE AKTIVEN = NO-REG); sky.ts 23EFB37B __sky.ship; KeplerSolver.ts 611C8FC6 +rk4Step.
+Regressii: m1-etalon PASS=11 FAIL=0; m2-epoch PASS=9 FAIL=0; m4-kepler PASS=9 FAIL=0 (DA39A3EE); esbuild sky exit 0.
+Itog P24: H1 ✓ (yunit 9/0), H2 ✓ (BD 365.257 sut, planety 0.07%), H3 ✓ (probe 7/7). ZAPRASHIVAYU liza: doc-sync M4→ZAKRYTO (M4-KEPLER + korabl'-massy = oba defitsita).
+relay m12-gaia from=liza topics=gaia-source,ZAKRYTO-COND,M-SKY-UNION-BRIGHT sha1=16D574FB
+
+## session liza-mmap12 @5c635265 (2026-11-08 05:09-05:15)
+- M-KARTA 12.0 gaia-source (M4-liniya, menu «Zvyozdy») = **ZAKRYTO-COND**: 6 kommitov zakryty (b66ec995 ra/dec; d3017829 matcher; a1abf4e6 M-SKY-UNION; c6e55639 imena; 3b13caa8 BRIGHT 15/15; 4f8432b8 rasshirenie; b2080e2d quality 99.6%; 5c635265 viz). EDINSTVENNYJ OTKRYTYJ KANAL = glaza operatora (svodka shagov peredana lidom) → otvet cheloveka = ZAKRYTO/CHASTICHNO.
+- CHESTNOE OTTRIцATELNOE vnесено v [BRIGHT-METRICS] (sha1-8=4A1E01ED): kesh best 1094 mag<4.5 → Gaia-rasshirenie 400 st. NE dayot ob"yoma (deedup 0.01° cel, uiTotal 1996); cennost' = 40 imen jadra (predel Gaia 1.94).
+- Geyty: agents:create:win vypolnen (core-pack 20261108-051151 v bufer); audit --rebase posle PM; m-map-12.0 adendum sha1-8=16D574FB. Kommit 3813c1e9.
+- CHANGES: skills/.dsh (1 stroka) + m-map (tmp). KEEP: tmp/liza-mmap12-liza-20261108-0512/
+## session=agents-verify 2026-11-08T05:13:47 from=LEAD(FS) via=TEAM-MODE topics=P23-R3,POLLUX,ETALON-12P
+relay p25-pollux from=lead topics=Pollux,etalon-v12,R3-gruppa sha1=N/A
+P23-R3 RASSHIRENIYA (takt-ozhidaniya TAP, bez vneshnikh): Pollux K0III vnesen v [BC-G-GIANT] BC_G=−0.31 (para: L=38.4±0.3 Soubiran+2024 / T=4810±14 / R=8.97±0.03 Baines+2025 interferometr / plx=96.54; G=1.16 [TEORIJA] DR3 = pod TAP-validatsiyu kak Aldebaran G). M1-etalon v12: **12P/0F/0U** (Pollux L=38.6/38.4 +0.5%, R=8.95/8.97; 6 tablichnykh: 4 sverh+Aldebaran+Pollux; MS 6 strok no-regress). R3-gruppa protsessit: Capella A/B (G1III), Mirach, Regulus? (MS — ne nujen); kriteriy = EEM/Apsis-MS lzhu >15% na L.
+---
