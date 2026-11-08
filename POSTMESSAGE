@@ -1050,3 +1050,55 @@ M4 KESHA-IMENA RASSHIRENA (takt #2): ROOT-CAINA pustoy kesha = resolveNames odin
 PUTI API (durable): /api/gaia/best (L84, BEZ enrichment) ≠ /api/gaia/best/physics/batch (L175, S enrichment; front getBestStars withPhysics=true → eto, star-api.ts:234). Test named = physics-put'.
 Karta: M4 = (a) BC_G tablica (OSTALOS), (b) kesha-imena ZAKRYTO, (c) SIMBAD panel ZAKRYTO (M2).
 ---
+
+## session tofixed-fix lead @d3017829 2026-11-08 03:26
+relay tofixed-01 from=lead topics=StarFlightUI,matcher,toFixed,physics-batch,polnota-spiska sha1=
+- FIX: tests/ui/StarFlightUI.ts:520-521 matcher na toFixed(6)+String → missPct 47.5% -> 0.0% (40/40, ee zond tofixed-probe-liza.mjs), PAGEERRORS=0.
+- NOVYY FAKT (defekt polnoty, peredan v dorozhku): prilozhenie (withPhysics:true) gruzit POST /api/gaia/best/physics/batch = MAST live, items=2000, min_mag=2.7278, bez 56 yarkikh kataloga;
+  POST /api/gaia/best (kes) soderzhit ih (mag 1.943/2.016/2.083…); v brace rawCount=2000 no rawLt2728=1 → teryaetsya na FETCH, ne v konverte;
+  poetomu klyuchevye zaprosy «243.58»/«10.12» davayut 0 = net zvezd v seti prilozheniya (ne matcher). «146.61» = tochno tak zhe.
+- otkrytyy defekt: slitye/obogashchenie physics-batch yarkimi zvezdami kesa (server-gaia) → zadacha v dorozhke.
+KEEP: tmp/tofixed-fix-20261108-031245/ (result-tofixed, result-key-where, result-ui-vs-api, result-raw-vs-valid) + tests/ui/StarFlightUI.ts.bak-tofixed-20261108-031140
+
+## session=lead-p20-apply @ 2026-11-08T03:21:43 from=LEAD(FS) via=TEAM-MODE topics=P20-PRIMENENO,PARTIAL-RUNTIME,P21-KARTA-KAMERA
+relay p20-apply from=lead topics=look-at-primeneno,sky-kamera=korablev,karta-kamera-otdelna dot=0.139 sha1=7fba01b1
+P20-LOOKAT PRIMENA (skript Lizy v2 pereslan licom, param()-pervym, dry-run: flyTo-head=1 body=1, -Execute: backup .bak-p20-20261108-031442, build exit=0, formula asin(max(-1,min(-1 — v bundle 3x)): kommit 7fba01b1 (nested).
+RUNTIME (probe4 + diag, tmp/p20-probe-20261108-0316.log, tmp/p20-diag-20261108-0321.log): dolot M31 tochnyy (dTarget 384→1.1(t=9s)→0.0), NO dot(fwd,dir)=0.1393 (fwd=[0,1,0.0001] statichno do i posle; ndcSky=[0.6299,0.2114]). DIAG: __scientificAtlas.ship api=[getPosition,getSpeed,getAngles,getDistanceFromEarthLy,flyTo,reset] — setRotation net v API; sky.cam() v KARTA = statichnaya SKY-view kamera (ne svyazana s rotaciyey korablya v KARTA): P20-rotaciyu poluchae SKY-kamera (kamera=korablev sky.ts:471-486) — v SKY scentriruet, v KARTA kamera otdel'naya = P21 (look-at KARTA-kamery/SkyMap3D ili svyazka kamera=ship-perspektiva).
+PROBE-API UROK: __skyProbe v sbore net — zamenen na __sky.cam() (fwd=[v8,v9,v10]); zvorot proveryat' cherez dot, no dlya KARTA nuzhna kamera SkyMap3D (P21).
+GPU: sigs=73 boot-semejstvo whitelist; pageerrors=0.
+ROTACIYA: PM 203868+ ≈ 205 KB > 150 KB, no kriteriy P17-3 = DEL'TA ot ROTATION (anchor sha1=00AC50D2 @015305): ot togo bloka nablyudenno ~12 session (56 vsego) i ~90 KB delta — pod porogom, litu predvaritel'no; sleduyushchie 2-3 relay mogut crossingnut' 20 blokov — budit' rotaciyu.
+KEEP: tmp/p20-apply-20261108-031442/ + .bak-p20; kommit 7fba01b1.
+---
+
+## session=liza-bcg-m8 @ 2026-11-08T03:23:38
+GOAL=M-karta 8.0 + nauchnyy analiz BC_G (gaia-source, ploskost' B). Kommmity: paketa 185243fe (kesha-imena), root e5ac461.
+PM-ROTACIYA P17-3 (posle ROT L852): (sm. stroku vyshe) sessii ~18-19/20 → lidu GOTOVIT' rotaciyu (≥20 zakliochitsya sleduyushchim taktom).
+BC_G ANALIZ (etalon v9 P20 sha1-8=585D5714: PASS=6 FAIL=0 UNKNOWN-BCG=4; pred. e2f2d099 2/10 = SMESSHCHEN, NO-regression):
+ KOD StarPhysics.ts: bcG EEM 3000-4000 + bcGPolynomial Apsis 4000-8000 + bcGHot Mamajek 8000-200000 (teff O/B/A ne NaN); GIANT-GATE M_G<−3→UNKNOWN (MS-BC ne primenim k gigantaм).
+ 4 UNKNOWN = vse giganty/supergiganty: Betelgeuse(M_G−5.53,T3600 SRc-perem.), Deneb(−6.34,T8500 vetryan.), Rigel(−6.69,T12100 B-supergig.), Antares(−4.53,T3660 M-supergig TiO).
+ POCHEMU NAUCHNO: BC_G=zavisit ot(L,G); L SB-vperyod (R interferom., T spektrosk., nezavisim ot BC) → M_bol → BC_G=M_bol−M_G. MS-kalibrovki (Apsis/Mamajek/EEM) po MS (log g~4.5); giganty (log g~0-1) = gravitacionnoe razmyvie, TiO/VO, Gaia phot-Teff smeshchen, BC sil'nee otricatel'nyy → L SISTEMATICHESKI smeshchën. GIANT-GATE = chesnyy UNKNOWN, luchshiy vybor.
+ REKOMENDACII: R1 M-giganty publikovannyy M_bol (Bessel+2016/interferometriya) → BC_G=M_bol−M_G; R2 B/A-supergiganty BC_V (Mamajek); R3 vetv' GIANT-BC(G) tablica [BC-G-GIANT], GIANT-GATE ostavit' UNKNOWN dlya O/B-supergigantov; R4 konvenzii TSUN=5772/MBOL_SUN=4.74 (IAU2015) v kanoone. 4 UNKNOWN = NAUCHNO OBOSNOVANNY, NE defekt.
+M4 = ZAKRYTO-COND: (a) BC_G GIANT-BC tablica = GIANT-BC produkta-takt (R1-R3, chastichno lidu FS); (b) kesha-imena 9→1990 ZAKRYTO (+1981 hits; named 18/20; PUTI front cherez /api/gaia/best/physics/batch, BEZ enrichment star-api.ts:234 durable); (c) panel imena ZAKRYTO.
+SVOD 8.0: ZAKRYTO=4 (M1,M2,M5,M6) · ZAKRYTO-COND=1 (M4 GIANT-BC) · DEFERRED-REMOTE=1 (M3). NET REJECT. ETALON 6P/0F/4U(giants).
+Artefakt KEEP: tmp/liza-mmap8-bcg-20261108-032235/bcg-analysis-m8.txt sha1-8=E948A465. TAKT ZAKRYT.
+## ROTATION 2026-11-08T03:25:56 @e5ac461
+ROTATION: archived to POSTMESSAGE.archive-20261108-B sha1-8=
+P17-3: delta posle ROT L852 = 23 sessiy >= 20 (38993b) — porog perechenen, kanal append-only ne usekan. Novoy okno otscjety P17-3 = etot ROT-ancher.
+## session gaia-gap-liza @d3017829 (2026-11-08 03:21–03:30)
+- РАЗРЫМ ИЗМЕРЕН: кэш /api/gaia/best n=2000 mag 1.943–4.984; physics/batch n=2000 mag 2.728–5.657; пересечение 762/2000; потеряно из кэша 1238 = 61.9% (≥1% → СИСТЕМАТИЧЕСКИ, граница X=min_phys=2.728, все 55 ярче X — в потерях; ярчайшие: 418551… mag1.943, 435702… mag2.016 ra243.59). SRC=tmp/gaia-gap-liza-20261108-0321/result-gap.json (+resp-best.json/resp-phys.json raw)
+- H2: UI-список 1999/1999 = strict subset physics-ответа (uiOnly=0, uiMagMin=2.728, uiBrighter2728=1, pageerrs=0). SRC=tmp/gaia-gap-liza-20261108-0321/result-ui-vs-phys.json, ui-ids.json, скрин 90-ui-list.png
+- VERDICT: H1=CONFIRMED (61.9% ≥ 1%), H2=CONFIRMED (подмножество).
+- КРИТЕРИЙ СЛИЯНИЯ (M-SKY-UNION): база physics/batch + дополнить из best отсутствующими по mag ASC до 2000; гарантия: все кэш-звёзды mag<min_phys (55) в UI; physics-поля дополненных null → дефолтный цвет; лимит 2000 (FRONT-LIMIT).
+- CHANGES: none в исходниках. KEEP: tmp/gaia-gap-liza-20261108-0321/
+
+## session=liza-p21 @ 2026-11-08T03:29:40
+GOAL=P21 karta-camera SPEC: vidimyy polet v KARTA (read-only; write-scope tmp/p21-karta-cam-20261108-032855/). Persony: webgpu-pass(10), front-limit(20).
+KOREN: kamera=CameraShip (sky.ts:471-486), orientaciya 0.9.2-lookAt DAMAGED (sky.ts:476 forward≈+Y — ot syuda probe4 fwd=[0,1,0.0001]). V KARTA kamera NE upravlyaetsya voobsche (ni follow, ni look-at); P20 setRotation deystvitelen v SKY-putyah (lookAtRaDec/F-presety, mouse).
+H1=CONFIRMED: ishoda B — follow NET (probe: cam() statichna pri ship dTarget→0). Min: peredacha pozicii = SHAG P21b (~4 stroki v RAF __rfCount hook sky.ts:~921); signal = onArrival PUBLIC (ShipController.ts:614 — v syuda mozhno bez pravok).
+H2=CONFIRMED: look-at = __cameraObj.transform.lookAt(shipPos,up=(0,1,0)) 3 stroki v onArrival = PRI POZII (0,0,10) marka M31 v centre GARANTIROVANO (geometriya). Urok 0.9.2: proverit' dot(cam.fwd,dir) pri priyomke; fallback transform+quat P20-formuly ~6 strok.
+PRAVKA KANONA: lookAtRaDec (SkyControlPanel.ts:232-233) = V1-formuly NETOCHNYE dlya composition roll·pitch·yaw: node M31 V1 dot=0.998892 (2.70°), dir dec≈30° dot=0.9928 (6.5°), dec=0 tochno; V2 (asin(nx)/atan2(-ny,nz)) dot=1.000000000 vездe. Predlozhenie lidu: peresrat' lookAtRaDec na V2.
+H3=CONFIRMED: __skyMapCam() -> {pos,fwd} (struktura dlya lidu); priyomka: KARTA → flyToGalaxy(M31) → 13s → dTarget→0 (P19), __skyMapCam().fwd dot dirM31>0.9999, projectWorldToNdc(428.4,80.8,382.6) |ndc|<0.05, __skyMapCam() est'. P21a (lookAt+probe, 5-6 strok) = M5 minimum; P21b (follow ~4 stroki) = vidimoy dvizhenie, otdel'nyy shag.
+Artefact KEEP: tmp/p21-karta-cam-20261108-032855/ (spec.txt, sky-arrival.patch.txt, terminal.log). TAKT ZAKRYT, otvet lide.
+
+
+ROTATION-CORRECTION 2026-11-08T03:33:13 - arhiv sozdan posle ancherovaniya (PS 5.1 Copy-Item bez -NoClobber = predydushchiy sha1-8 pusty; pars-crash 'ts:'). archive=POSTMESSAGE.archive-20261108-0310 sha1-8=70088CA0 = snimok e5ac461 (pred-ROT 210571b). Kanal append-only cel. Novoy okno P17-3 = ROT-ancher@2026-11-08T03:33:13.
