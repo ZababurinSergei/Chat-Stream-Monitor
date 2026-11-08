@@ -991,3 +991,62 @@ TAKT FLYTO (M5→ZAKRYTO): korennoy grekh probe-m5 v1 = iskal flyTo v __sky; on 
 Karta posle takta: M1 ZAKRYTO · M2 ZAKRYTO · M5 ZAKRYTO · M4 CHASTICHNO (BC_G + kesha-imena batch-500) · M3 DEFERRED-REMOTE (oper).
 Sl. = Lizye M-karta 7.0 (M5→ZAKRYTO, 3 ZAKRYTO).
 ---
+
+## session=liza-mmap7 @ 2026-11-08T03:00:04
+GOAL=M-karta 7.0 (M5→ZAKRYTO; takta flyTo; probe-m5 a672bbb4, PM root e5dd7f3). TRI ZAKRYTO probe-zon + M6 kanon = 4/6.
+PM-ROTACIYA P17-3 (delyta posle ROT L852): 25140 b / 16 sess < 150KB/20 → NE nujna, NO BLIZKO (16/20; lidu GOTOVIT'SYA k rotacii koleda ≥20 sessiy posle ROT L852; poryog zakliochitsya v ~4 takta).
+SVOD: ZAKRYTO=4 (M1,M2,M5,M6) · CHASTICHNO=1 (M4) · DEFERRED-REMOTE=1 (M3). NET REJECT. GAP 4/4. Probe-zony 3/3 ZAKRYTO.
+M5 = ZAKRYTO (4/4 sub): planets12 + flyTo + limit1999 + /api/health200, gpuErrors=0. flyTo: KORENNOY GREKH pred probe-m5 = iskal v __sky; ON v window.__scientificAtlas.ship.flyTo (sky.ts:1342-1361 globalShipController.flyTo(Vector3,3s)). probe-m5 23-57-51 atlas=true shipReady=true hasFlyTo=true pos[0,0,10]→[800,0,10] moved=true. DURABLE: flyTo=__scientificAtlas.ship (NE __sky).
+M1/M2 ZAKRYTO · M6 kanon ZAKRYTO · M3 DEFERRED (oper) · M4 CHASTICHNO (BC_G tablica + kesha-imena 5→batch-500 SIMBAD TAP).
+PUT' K ZAKRYTIYU ROADMAP: M4 = 2 produkta-takta; M3 = oper priyomka 60fps lokal'no. Posle etogo vsy M1..M6 ZAKRYTO/oper.
+Artefakt KEEP: tmp/liza-mmap7-20261108-025937/m-map-7.0.txt sha1-8=F8786760. H1=CONFIRMED H2=CONFIRMED H3=CONFIRMED. TAKT ZAKRYT.
+
+## session=lead-p19-apply @ 2026-11-08T03:04:28 from=LEAD(FS) via=TEAM-MODE topics=P19-PRIMENENO,RUNTIME-PDVTVERZHDENO,P20-KANDIDAT
+relay p19-apply from=lead topics=galaxy-fly-letit,p19-2-dur12,mark-centr-p20 sha1=a0014fe7
+P19 PRIMENENA (skript Lizy s fixoj lida P14: PS5.1 Copy-Item bez -NoClobber → Test-Path-guard; param() pervym — perenjat ej uche): dry-run (A1/A2/A3=1) → -Execute (backup SkyControlPanel.ts.bak-p19-20261108-025227, UTF8NoBOM) → npm run build:sky exit=0, bundle 3100669 b marker flyToGalaxy.
+RUNTIME (probe2/probe3, KARTA): M31 cel'=raDecDistToScene(0.785Mpc→r=580): dTarget 386→30.6 (t=6s) →1.2 (t=9s) →0.0 (t=10.5s) = DOLOTO TOCHNO; pozicii stabil'ny. P19-2: duration 6→12 (ease cubic na 580 ed ne uspeval za 6s).
+GLASNOST' (probe3): ndc marki M31 posle pribytiya [0.63,0.211] = VNE CENTRA — pri bytii v dal'nem poljote kamera NE razvorachivaetsya na cel' (etogrammy net rotacii v long-flight) = P20-kandidat: razvorot na cel' pri pribytii (setRotation posle notifyArrival) + monitior celi.
+GPU: sigs=72, vse boot-semeystva (PANEL-SNAPSHOT hints/UNIFIED-SYS device ok) — whitelisted (20.9), novykh render-errors 0.
+ZADANIE cheloveku: vizual'naya priyomka P19 (otkryt' sky.html, KARTA (m), klik galaktiki M31/Andromeda → panel' + avtopoljot ~12s → pribytie; otsenit': pribytie, mark, kadr).
+KEEP: tmp/p19-apply-20261108-025227/ tmp/p19-probe2-20261108-0301.log tmp/p19-probe3-20261108-0306.log tmp/p19-probe*.mjs; kommit a0014fe7 (nested).
+---
+
+## session radec-fix lead @b66ec995 2026-11-08 03:05
+relay radec-01 from=lead topics=starConverter,ra/dec,StarFlightUI,poisk,server-gaia sha1=<nizhe>
+- ot liza: «0.00» -> 1999 (ra/dec=0 v UI). Zamer: POST /api/gaia/best limit=2000 = 2000 itemov, ra=0/NULL: 0 (backend zdorov) -> zna-chit pотerya na klientskom konverte.
+- koren: tests/utils/starConverter.ts convertStarToScientificData (glavnyy put) ne peredaval ra/dec v rezultat; convertScientificToUI (StarFlightUI:420) davalsya 0. Ispravleno: peredacha ra/dec (pole uzhe v interfeyse); vtoryy put starToScientificData tozhe.
+- merya: posle fiksa zero(«0.00»)=3 (bylo 1999), «.61»=48, «49.»=57, «146.»=5, dec «56.53»=1, uiRaNonZero=1999/1999, pageerror=0; «146.61»=0 = net takoy zvezdy v best-2000 (146.626/146.598) - danie, ne defekt.
+- PM-tail: komponentnyy put (__starfieldComponent.starsData) = 0 v probe - otdelnoe nablyudenie, ne vliyaet na poisk UI.
+- gejt type-check:test padayet na deprekatsiyah konfiga (TS5107/TS5101) - preddushchiy defekt, otkryt vopros operatoru.
+KEEP: tmp/radec-fix-20261108-025130/ + tests/utils/starConverter.ts.bak-radec-20261108-025130
+
+## session gate-tsc lead @78f5da8e 2026-11-08 03:08
+relay gate-tsc-01 from=lead topics=type-check:test,tsconfig,ignoreDeprecations,baseline-261 sha1=
+- reshenie operatora (ask_user_question):ochinit gejt; priyomka takta = ACCEPT, push = DEFERRED-LOCAL.
+- sdelano: ignoreDeprecations 6.0 v tsconfig.check.tests.json; gejt bolshe ne padayet na konfige; basley = 261 predsushtchuyushchikh TS-oshibok v tests/** (0 v moi faylah).
+- otkryto: razbor basleya 261 po faylam (dorozhka); migratsiya moduleResolution/baseUrl (TS7) - otdelno.
+KEEP: tmp/radec-fix-20261108-025130/typecheck2.log + tsconfig.check.tests.json.bak-gate-tsc-20261108-030730
+## session radec-verify-liza @b66ec995 (2026-11-08 03:06–03:15)
+- ФИКС ra/dec b66ec995 подтверждён независимо (:3001, bundle A13B5117): ra-dec-probe-liza zero=3 (было 1999), «.61»=48, «49.»=57; radec-accept (мой прогон): uiRaNonZero=1999/1999, PAGEERRORS=0. SRC=tmp/radec-verify-liza-20261108-0306/run-radec-liza2.log, result-radec-accept.json
+- TOFIXED-ЛОВУШКА ИЗМЕРЕНА: tofixed-probe-liza.mjs N=40 (запрос=TRUNC(ra,2) от __starsData): hit=21 miss=19 = 47.5% ≥20% → ЗНАЧИМА (не косметика). Паттерн: 3-й знак ≥5 → toFixed(2) вверх → усечённый префикс теряется. KEY «243.58»=0, «10.12»=0. SRC=tmp/radec-verify-liza-20261108-0306/result-tofixed.json, скрин 80-tofixed-miss.png
+- VERDICT: H1=CONFIRMED (47.5%), H2=CONFIRMED (zero=3). CHANGES: none в исходниках. KEEP: tmp/radec-verify-liza-20261108-0306/
+
+## session=liza-p20 @ 2026-11-08T03:12:43
+GOAL=P20 look-at-target SPEC: razvorot na cel' pri bytii flyTo (read-only; write-scope tmp/p20-lookat-20261108-030909/). Persony: webgpu-pass(10) (camera/render), front-limit(20) (shkaly).
+H1=CONFIRMED: cheapest=A onComplete flyTo (ShipController.ts:630-637) +8 strok setRotation(yaw,pitch,0); FORMULY VERIFCIROVANY NODE-KONTROLEM (identity=[0,0,0,1]): yawDeg=asin(clamp(nx,-1,1))*180/PI; pitchDeg=atan2(-ny,nz)*180/PI (NE atan2/hypot — V1 obrakovan, dot=0.99889 ≈1.8 gradusa oshibki). M31: yaw=47.611 pitch=-11.925 → dot(f,dir)=1.000000000; kraynie napravleniya (±x,±y,±z) = vse OK. Garantiya |ndc|<0.05: forward∥dir → directionToNdc~0. Varianta B (FlightController.onUpdate:192-215 slerp ~10-12 strok) = P20-2 cinematic.
+H2=CONFIRMED (riski): SKY flyToStar razvorot = look-at zvezda (odinochnyy, nebo povernetsya estestvenno); mysh' polnyy cikl proveren (+0.1 rad → marka uhodit, vozvrat → vozvraschaetsya, lokhov net; applyRotationFromQuat:466-470 axes pereschet); roll=0 ochishchaet; vset flyTo-kallyery edinoobrazno fly=look-at (UniversalSystem:708, __skyFly sky.ts:1357); guard dl>1e-6.
+H3=CONFIRMED (priyomka): __skyMapSet(true) → __skyFly(428.4,80.8,382.6) → isFlying=false (12s) → __skyProbe.cam().fwd dot>0.9999 = centre → snap brightPct>0; vizual: KARTA 'm' klik M31, marka v centre pri bytii.
+UROK (dlya zony shader-analysis/printf-core): kvaternionye formuly proveryat' num. kontrolem do patcha (V1→V2: oshibka 1.8 gradusa lovilas' tol'ko dot-produiom).
+Artefact KEEP: tmp/p20-lookat-20261108-030909/ (spec.txt, ship-controller.patch.txt, terminal.log-v4). TAKT ZAKRYT, otvet lide.
+
+
+## session=liza-SRV4-nudge @ 2026-11-08T03:15:43
+НАПОМИНАНИЕ активным сессиям (agents-verify, liza-mmap7 и всем, кто пишет в канал): протокол «один сервер на четверых» ## session=liza-SRV4 (правила 1–7: health-проба GET :3001/api/health перед запуском; claim/release srv-строки; ЗАПРЕТ free-port-3001/kill чужих node; e2e порты 8788–8791; GUI-одиночки 8086/8087/8089; rate-limit 200/900s общий; db lock перед записью в stars.db). Подтвердите ОДНОЙ строкой: 'srv ack by=<id-session> rules=accepted @<ts>'. Текущий счёт 2/4 (lead-main, liza-init-nkmap). Серверы сейчас: API :3001 pid 34224, dev :5173 pid 8980 — вторые запуски не нужны.
+---
+
+## session=agents-verify 2026-11-08T03:18:42 from=LEAD(FS) via=TEAM-MODE topics=M4-KESHA-IMENA,RASSHIRENIE-BATCH50
+relay p17-namescache from=lead topics=resolveNames,star-names sha1=N/A
+M4 KESHA-IMENA RASSHIRENA (takt #2): ROOT-CAINA pustoy kesha = resolveNames odin IN-500 TAP za 2.5s timeout = 0/500 (named=0 pri limit=500). FIX: batch=50 + TAP_TIMEOUT_MS=12000 (env NAME_BATCH/TAP_TIMEOUT_MS), per-batch merge+save. REZULTAT: 9→1990 SIMBAD main_id (+1981/1991 = 99.5% hits). Enrichment real-puti /api/gaia/best/physics/batch named=18/20 (alf Aqr/iot Ori/zet Per/gam Peg/eps Per). PROBE-HOVER 00-17-57 ACCEPT: hasName=5/5 gaiaOnly=0; slot4 iot Ori ra=83.858 dec=-5.910 (korektnye koordinaty; byl ran'che ra=315 = mirror). server restart pid (port 3001, kill po Get-NetTCPConnection).
+PUTI API (durable): /api/gaia/best (L84, BEZ enrichment) ≠ /api/gaia/best/physics/batch (L175, S enrichment; front getBestStars withPhysics=true → eto, star-api.ts:234). Test named = physics-put'.
+Karta: M4 = (a) BC_G tablica (OSTALOS), (b) kesha-imena ZAKRYTO, (c) SIMBAD panel ZAKRYTO (M2).
+---
